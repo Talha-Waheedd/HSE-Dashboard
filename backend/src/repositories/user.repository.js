@@ -43,7 +43,7 @@ class UserRepository extends BaseRepository {
    */
   async updateLastLogin(userId, transaction = null) {
     return User.update(
-      { lastLoginAt: new Date() },
+      { last_login_at: new Date() },
       { where: { id: userId }, transaction },
     );
   }

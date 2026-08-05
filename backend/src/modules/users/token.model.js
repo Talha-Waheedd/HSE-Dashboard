@@ -40,6 +40,8 @@ const Token = sequelize.define('Token', {
   },
 }, {
   tableName: 'tokens',
+  underscored: true,
+  paranoid: false,
   indexes: [
     { fields: ['user_id'] },
     { fields: ['type'] },

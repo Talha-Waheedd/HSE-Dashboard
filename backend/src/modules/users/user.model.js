@@ -35,8 +35,6 @@ const User = sequelize.define('User', {
   }
 });
 
-// Relationships
-User.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
-Role.hasMany(User, { foreignKey: 'role_id', as: 'users' });
+// Relationships defined centrally in models.js
 
 module.exports = User;

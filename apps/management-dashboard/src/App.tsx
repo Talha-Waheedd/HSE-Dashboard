@@ -30,11 +30,10 @@ const LoginPage = () => {
 
       <Card className="w-full max-w-md glass border-border shadow-xl z-10">
         <CardHeader className="space-y-2 text-center pb-6">
-          <div className="mx-auto bg-primary text-primary-foreground w-14 h-14 rounded-lg flex items-center justify-center font-bold text-2xl mb-3 shadow-lg shadow-primary/20">
-            LU
+          <div className="mx-auto mb-4 flex justify-center">
+            <img src="/logo.svg" alt="Continental Biscuits Limited" className="h-20 w-auto drop-shadow-md" />
           </div>
-          <CardTitle className="text-2xl text-foreground tracking-tight font-bold">CBL Sukkur Plant</CardTitle>
-          <p className="text-sm text-muted-foreground font-medium">Management Dashboard Portal</p>
+          <CardTitle className="text-2xl text-foreground tracking-tight font-bold">HSE Management System</CardTitle>
         </CardHeader>
         <CardContent>
           {error && (

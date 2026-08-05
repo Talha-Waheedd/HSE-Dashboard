@@ -137,6 +137,13 @@ class AuthService {
   }
 
   /**
+   * Verify if a user exists by email (for SSO flows)
+   */
+  async verifyEmailExists(email) {
+    return userRepository.findOne({ email });
+  }
+
+  /**
    * Send password reset email.
    */
   async forgotPassword(email) {
