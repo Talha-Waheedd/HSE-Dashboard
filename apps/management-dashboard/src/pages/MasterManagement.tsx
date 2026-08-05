@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
-import { Plus, Users, MapPin, Building2, Shield, Trash2, Check, X } from 'lucide-react';
+import { Plus, Users, Building2, Shield, Trash2, Check, X } from 'lucide-react';
 import { DEPARTMENTS } from '../config/constants';
 import { CenterModal } from '../components/CenterModal';
 
@@ -10,10 +10,6 @@ const FIELD_BASE = 'w-full h-9 px-3 text-[13px] border border-[#DEDEDE] rounded-
 
 // Mock Data for visual demonstration until backend is ready
 const INITIAL_DEPARTMENTS = [...DEPARTMENTS].map((name, i) => ({ id: String(i + 1), name, status: 'Active' }));
-const INITIAL_LOCATIONS = [
-  { id: '1', name: 'Plant 1 - Sukkur', type: 'Plant', status: 'Active' },
-  { id: '2', name: 'Plant 2 - Sukkur', type: 'Plant', status: 'Active' },
-];
 const INITIAL_USERS = [
   { id: '1', name: 'Super Admin', email: 'superadmin@cblapp.com', role: 'Administrator' },
   { id: '2', name: 'John Doe', email: 'john@cblapp.com', role: 'Plant Manager' },
@@ -21,10 +17,9 @@ const INITIAL_USERS = [
 ];
 
 export const MasterManagement = () => {
-  const [activeTab, setActiveTab] = useState<'Departments' | 'Locations' | 'Permissions'>('Departments');
+  const [activeTab, setActiveTab] = useState<'Departments' | 'Permissions'>('Departments');
   
   const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS);
-  const [locations, setLocations] = useState(INITIAL_LOCATIONS);
   const [users, setUsers] = useState(INITIAL_USERS);
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -33,8 +28,6 @@ export const MasterManagement = () => {
   const handleAdd = () => {
     if (activeTab === 'Departments') {
       setDepartments([...departments, { id: String(Date.now()), name: formData.name, status: 'Active' }]);
-    } else if (activeTab === 'Locations') {
-      setLocations([...locations, { id: String(Date.now()), name: formData.name, type: formData.type || 'Plant', status: 'Active' }]);
     } else {
       setUsers([...users, { id: String(Date.now()), name: formData.name, email: formData.email, role: formData.role || 'Employee' }]);
     }
@@ -53,7 +46,7 @@ export const MasterManagement = () => {
         ]}
       >
         <div className="inline-flex rounded-lg border border-[#DEDEDE] bg-white p-1">
-          {(['Departments', 'Locations', 'Permissions'] as const).map(item => (
+          {(['Departments', 'Permissions'] as const).map(item => (
             <button
               key={item}
               onClick={() => setActiveTab(item)}
@@ -63,7 +56,6 @@ export const MasterManagement = () => {
             >
               <div className="flex items-center gap-2">
                 {item === 'Departments' && <Building2 className="w-3.5 h-3.5" />}
-                {item === 'Locations' && <MapPin className="w-3.5 h-3.5" />}
                 {item === 'Permissions' && <Shield className="w-3.5 h-3.5" />}
                 {item}
               </div>
@@ -97,27 +89,6 @@ export const MasterManagement = () => {
             </table>
           )}
 
-          {activeTab === 'Locations' && (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#F0F0F0] bg-[#FAFAFA]">
-                  <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Location Name</th>
-                  <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Type</th>
-                  <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-[#6B7280] text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {locations.map(loc => (
-                  <tr key={loc.id} className="border-b border-[#F0F0F0] hover:bg-[#FAFAFA]">
-                    <td className="px-5 py-4 text-[13px] font-medium text-[#1C1C1E]">{loc.name}</td>
-                    <td className="px-5 py-4 text-[13px] text-[#6B7280]">{loc.type}</td>
-                    <td className="px-5 py-4 text-right">
-                      <button onClick={() => setLocations(locations.filter(l => l.id !== loc.id))} className="text-[#9CA3AF] hover:text-[#CB0017]"><Trash2 className="w-4 h-4" /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           )}
 
           {activeTab === 'Permissions' && (
@@ -189,31 +160,6 @@ export const MasterManagement = () => {
             </div>
           )}
 
-          {activeTab === 'Locations' && (
-            <>
-              <div>
-                <label className="block text-[12px] font-bold text-[#374151] mb-1">Location Name</label>
-                <input
-                  type="text"
-                  className={FIELD_BASE}
-                  placeholder="e.g. Plant 3 - Sukkur"
-                  value={formData.name || ''}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-[12px] font-bold text-[#374151] mb-1">Type</label>
-                <select
-                  className={FIELD_BASE}
-                  value={formData.type || 'Plant'}
-                  onChange={e => setFormData({ ...formData, type: e.target.value })}
-                >
-                  <option value="Plant">Plant</option>
-                  <option value="Warehouse">Warehouse</option>
-                  <option value="Office">Office</option>
-                </select>
-              </div>
-            </>
           )}
 
           {activeTab === 'Permissions' && (

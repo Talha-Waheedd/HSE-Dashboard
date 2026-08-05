@@ -1,44 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { useAuth, useAuthStore } from '@cbl/auth';
 import { useTheme } from '../context/ThemeContext';
 import { Settings as SettingsIcon, User, Bell, Moon, Sun, MonitorSmartphone, Database } from 'lucide-react';
 import { plantService, type Plant } from '../services/api/plantService';
-import { useEffect } from 'react';
 import { DEPARTMENTS } from '../config/constants';
 
 export const Settings = () => {
   const { user } = useAuth();
   const { hasRole } = useAuthStore();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [overdueAlerts, setOverdueAlerts] = useState(true);
   const [density, setDensity] = useState('comfortable');
-
-  // Master Data state
-  const [plants, setPlants] = useState<Plant[]>([]);
-  const [loadingPlants, setLoadingPlants] = useState(false);
-
-  useEffect(() => {
-    if (hasRole("System Administrator")) {
-      fetchPlants();
-    }
-  }, [hasRole]);
-
-  const fetchPlants = async () => {
-    try {
-      setLoadingPlants(true);
-      const res: any = await plantService.getAll();
-      if (res.success) {
-        setPlants(res.data.rows || res.data); // depending on pagination format
-      }
-    } catch (err) {
-      console.error("Failed to fetch plants", err);
-    } finally {
-      setLoadingPlants(false);
-    }
-  };
 
   return (
     <Layout>
@@ -91,24 +68,11 @@ export const Settings = () => {
               <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
                 {DEPARTMENTS.map(d => <li key={d}>{d}</li>)}
               </ul>
-              <button className="mt-2 bg-muted hover:bg-muted/80 text-foreground px-3 py-1.5 rounded-md text-xs font-medium transition-colors">
+              <button 
+                onClick={() => navigate('/master-management')}
+                className="mt-2 bg-muted hover:bg-muted/80 text-foreground px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+              >
                 + Add Department
-              </button>
-            </div>
-            <div className="space-y-4 border border-border rounded-md p-4 mt-4">
-              <h3 className="font-medium text-foreground flex items-center justify-between">
-                Plants
-                {loadingPlants && <span className="text-xs text-muted-foreground animate-pulse">Loading...</span>}
-              </h3>
-              <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                {plants.length > 0 ? (
-                  plants.map(p => <li key={p.id}>{p.name} ({p.code})</li>)
-                ) : (
-                  <li>No plants found from backend.</li>
-                )}
-              </ul>
-              <button className="mt-2 bg-muted hover:bg-muted/80 text-foreground px-3 py-1.5 rounded-md text-xs font-medium transition-colors">
-                + Add Plant
               </button>
             </div>
           </section>
