@@ -15,9 +15,10 @@ const Permission = sequelize.define('Permission', {
     unique: true,
     comment: 'e.g. user:create, role:delete',
   },
-  display_name: {
+  displayName: {
     type: DataTypes.STRING(150),
     allowNull: false,
+    field: 'display_name',
   },
   group: {
     type: DataTypes.STRING(50),

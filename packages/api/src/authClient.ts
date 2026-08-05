@@ -25,8 +25,8 @@ export interface BackendUser {
 const unwrap = <T>(payload: any): T => payload?.data ?? payload;
 
 export const authClient = {
-  async verifyEmail(email: string) {
-    const response = await apiClient.post("/auth/verify-email", { email });
+  async verifyEmail(email: string, msalToken?: string) {
+    const response = await apiClient.post("/auth/verify-email", { email, msalToken });
     return unwrap<{ authorized: boolean; email: string; user?: BackendUser; tokens?: AuthTokens }>(response.data);
   },
 

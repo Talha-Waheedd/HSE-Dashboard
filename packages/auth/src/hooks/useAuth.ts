@@ -43,12 +43,24 @@ export const useAuth = () => {
         setIsLoggingIn(true);
         // We do NOT clear error here unless we explicitly retry, to prevent loops
         try {
-          const email = accounts[0].username;
+          const account = accounts[0];
+          const email = account.username;
           if (!email) {
             throw new Error("Could not retrieve email from Microsoft account");
           }
+          
+          let msalToken: string | undefined = undefined;
+          try {
+            const tokenResponse = await instance.acquireTokenSilent({
+              scopes: ["user.read"],
+              account: account
+            });
+            msalToken = tokenResponse.idToken || tokenResponse.accessToken;
+          } catch (e) {
+            console.warn("Silent token acquisition failed, proceeding with email only.", e);
+          }
 
-          const verifyResponse = await authClient.verifyEmail(email);
+          const verifyResponse = await authClient.verifyEmail(email, msalToken);
 
           if (!verifyResponse.authorized || !verifyResponse.user || !verifyResponse.tokens) {
             throw new Error("User not authorized in CBL system or no token received");

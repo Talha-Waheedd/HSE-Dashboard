@@ -6,9 +6,9 @@ const { sequelize } = require('../../database/connection');
 const Role = sequelize.define('Role', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
   name: { type: DataTypes.STRING(100), allowNull: false, unique: true },
-  display_name: { type: DataTypes.STRING(150), allowNull: false },
+  displayName: { type: DataTypes.STRING(150), allowNull: false, field: 'display_name' },
   description: { type: DataTypes.TEXT, allowNull: true },
-  is_system: { type: DataTypes.BOOLEAN, defaultValue: false },
+  isSystem: { type: DataTypes.BOOLEAN, defaultValue: false, field: 'is_system' },
 }, {
   tableName: 'roles',
   timestamps: true,

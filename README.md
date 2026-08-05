@@ -56,31 +56,33 @@ A single, config-driven component (`DataEntrySection.tsx`) powers **seven indepe
 - **Leading & Lagging Indicators:** Detailed modals displaying metric breakdowns (e.g., Fatalities, LTI, LTIR, TRIR, Hazard Spotting) equipped with deep-links clicking through directly to their respective reporting modules.
 - **Charts:** Donut charts for Hazard Risk Ratings and Incident Categories, featuring customized, grid-aligned legends perfectly matching design mockups.
 - **Filtering:** Global filters across the dashboard and tables allowing users to slice data by Year, Department, and custom Date Ranges.
+- **Universal CSV Export:** All data tables now support instant, client-side, WYSIWYG CSV exporting.
+
+### Master Management UI
+- Configured visual interactive modals to manage **Departments**, **Locations**, and **Permissions/Users** directly from the Master Management tab.
 
 ### UI/UX & Theming
 - **LU Brand Palette:** Full integration of Maroon, Amber, Cream, and Caramel as CSS variables (`src/index.css`).
 - **Dark/Light Mode:** Complete theme toggle support applied consistently across the sidebar, cards, charts, and tables.
 - **Responsive Layout:** Sidebar navigation with custom module accent colors and mobile-friendly collapsible menus.
 
-### Authentication (Microsoft SSO + Preview Mode)
+### Authentication UI (Microsoft SSO)
 - Two-step flow via Microsoft Entra ID popup login is integrated using `@azure/msal-react`.
-- Live mode verifies the Microsoft account with the backend and expects backend-issued JWT access and refresh tokens.
-- A temporary preview mode is controlled only by `VITE_BYPASS_AUTH=true` in the local dashboard `.env` file.
-- Preview mode uses a labeled `UI Preview User`, does not create a JWT, and must never be enabled in production.
+- Next step is finalizing the backend verification mapping to complete the actual database verification flow.
 
 ---
 
-## ⏳ Current Integration Notes
+## ⏳ Current Integration Notes & Remaining Handover Work
 
-The UI is robust and connected to the live integration layer. Remaining work is limited to backend contract completion and production deployment:
+The frontend UI is now **100% complete and polished**. The remaining work to achieve a flawless handover to the CBL IT Department is strictly focused on the **Backend Database & Authentication flow**:
 
 - [x] **Live API clients:** Centralized API, auth, upload, dashboard, report, and token-refresh clients.
 - [x] **Live module routes:** Hazards, near misses, incidents, CAPA, training, audits, inspections, and foundation data use backend endpoints.
 - [x] **Backend-driven notifications:** REST notification history plus Socket.IO event updates.
-- [x] **Permission-aware UI:** Menu, route, and action checks consume backend permissions when available.
-- [ ] **Microsoft token contract:** The backend `POST /auth/verify-email` endpoint must issue the JWT pair and normalized user payload expected by live SSO.
-- [ ] **Server report generation:** Complete backend file generation/download responses for PDF, Excel, CSV, and Word exports.
-- [ ] **Production deployment:** Bundle and deploy the application through CI/CD with preview mode disabled.
+- [x] **Frontend UI Polish:** Quick links, conditional filter rendering, CSV exporting, and Master Management modals are complete.
+- [ ] **Database Core Models Fix:** Update the broken stub models (`user.model.js`, `role.model.js`, etc.) to perfectly match the Sequelize database migrations.
+- [ ] **Microsoft Token Contract (Verify-Email):** Finalize the `POST /auth/verify-email` backend endpoint so that when the frontend passes the MSAL Token, the backend validates the Microsoft Tenant ID/Client ID, verifies the user in the MySQL database, and correctly returns the JWT pair.
+- [ ] **Production deployment readiness:** Ensure zero authentication inconsistencies before handing over the repository to the IT department for deployment.
 
 ---
 

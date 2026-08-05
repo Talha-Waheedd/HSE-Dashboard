@@ -85,7 +85,9 @@ class AuthService {
 
       emitter.emit(EVENTS.USER_LOGGED_IN, { userId: user.id, ...meta });
 
-      return { user: user.toJSON(), tokens };
+      const userJson = user.toJSON();
+      delete userJson.password;
+      return { user: userJson, tokens };
     } catch (err) {
       await transaction.rollback();
       throw err;
