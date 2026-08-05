@@ -40,16 +40,16 @@ const Incident = sequelize.define('Incident', {
     comment: 'FK → departments.id',
   },
   incidentType: {
-    type: DataTypes.ENUM(...Object.values(IncidentType)),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   status: {
-    type: DataTypes.ENUM(...Object.values(IncidentStatus)),
+    type: DataTypes.STRING,
     defaultValue: IncidentStatus.DRAFT,
     allowNull: false,
   },
   severityLevel: {
-    type: DataTypes.ENUM(...Object.values(SeverityLevel)),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   title: {

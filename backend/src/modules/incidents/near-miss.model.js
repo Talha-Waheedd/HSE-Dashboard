@@ -50,11 +50,11 @@ const NearMiss = sequelize.define('NearMiss', {
     allowNull: true,
   },
   severityLevel: {
-    type: DataTypes.ENUM(...Object.values(SeverityLevel)),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   status: {
-    type: DataTypes.ENUM(...Object.values(NearMissStatus)),
+    type: DataTypes.STRING,
     defaultValue: NearMissStatus.DRAFT,
     allowNull: false,
   },
