@@ -387,12 +387,16 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     const err = validateFormData(dataToSave);
     if (err) {
       setValidationError(err);
+      document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     const result = await createRecord(dataToSave);
     if (result.success) {
       setFormData({});
       setIsAddModalOpen(false);
+    } else {
+      setValidationError(result.message || 'Failed to save record. Please check your data.');
+      document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -421,7 +425,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       ];
     }
     const result = await updateRecord(editingId, updatedData);
-    if (result.success) setEditingId(null);
+    if (result.success) {
+      setEditingId(null);
+    } else {
+      setValidationError(result.message || 'Failed to update record.');
+    }
   };
 
   const filteredEntries = useMemo(() => entries.filter(entry => {
@@ -610,7 +618,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-5">
+          <div id="modal-scroll-area" className="flex-1 overflow-y-auto p-6 space-y-5">
             {validationError && (
               <div className="flex items-start gap-3 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3">
                 <AlertTriangle className="h-4 w-4 mt-0.5 text-[#DC2626]" />
@@ -658,7 +666,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               </div>
             )}
 
-            <form id="module-form" onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <form id="module-form" onSubmit={handleSubmit} className="space-y-5">
               {sectionGroups.map(section => {
                 if (schema.id === 'near-miss' && section.title === 'Investigation' && (formSource.investigation_required ?? 'No') !== 'Yes') {
                   return null;
