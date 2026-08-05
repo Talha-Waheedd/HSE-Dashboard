@@ -39,9 +39,9 @@ export const useAuth = () => {
     const handleRedirect = async () => {
       if (PREVIEW_BYPASS) return;
 
-      if (inProgress === InteractionStatus.None && accounts.length > 0 && !isAuthenticated) {
+      if (inProgress === InteractionStatus.None && accounts.length > 0 && !isAuthenticated && !error) {
         setIsLoggingIn(true);
-        setError(null);
+        // We do NOT clear error here unless we explicitly retry, to prevent loops
         try {
           const email = accounts[0].username;
           if (!email) {
@@ -82,7 +82,7 @@ export const useAuth = () => {
     };
 
     handleRedirect();
-  }, [inProgress, accounts, isAuthenticated, instance, loginUser]);
+  }, [inProgress, accounts, isAuthenticated, instance, loginUser, error]);
 
   const login = async () => {
     setIsLoggingIn(true);

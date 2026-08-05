@@ -17,7 +17,7 @@ const {
   verifyEmailSchema,
 } = require('./auth.schema');
 
-// ─── Public Routes ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Public Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.post('/register',
   authRateLimiter,
   validate(registerSchema),
@@ -58,7 +58,7 @@ router.post('/reset-password',
   AuthController.resetPassword,
 );
 
-// ─── Protected Routes ──────────────────────────────────────────────────────
+// â”€â”€â”€ Protected Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.post('/logout',
   authenticate,
   auditLog('USER_LOGOUT', 'users'),
@@ -71,3 +71,4 @@ router.get('/me',
 );
 
 module.exports = router;
+// server restarted

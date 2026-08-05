@@ -9,6 +9,7 @@ import type { SectionConfig, ColumnSchema } from '../config/sectionSchemas';
 import { usePermissions, useAuth } from '@cbl/auth';
 import { useModuleData } from '../hooks/useModuleData';
 import { useFilters } from '../context/FilterContext';
+import { useNavigate } from 'react-router-dom';
 import {
   Plus, Save, Trash2, Download, Edit2, X, History,
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
@@ -282,6 +283,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
 
 
+  const navigate = useNavigate();
   const { data: entries, loading, fetchAll, createRecord, updateRecord, deleteRecord } = useModuleData(schema.id);
   const { user } = useAuth();
   const permissions = usePermissions();
@@ -407,19 +409,28 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const visibleColumns = schema.columns.filter(col => !col.hideFromForm && col.type !== 'file');
   const sectionGroups = moduleSections(schema);
   const exportCSV = async () => {
-    const blob = await moduleService.export(schema.id, {
-      search: searchQuery || undefined,
-      department: filters.department !== 'All' ? filters.department : undefined,
-      status: filters.status !== 'All' ? filters.status : undefined,
-      fromDate: filters.fromDate || undefined,
-      toDate: filters.toDate || undefined,
-      format: 'csv',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement('a'), { href: url, download: `${schema.id}_${new Date().toISOString().split('T')[0]}.csv`, style: { visibility: 'hidden' } });
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      if (!searchedEntries.length) return;
+      const cols = schema.columns.filter(c => !c.hideFromForm);
+      const headers = cols.map(c => `"${c.label.replace(/"/g, '""')}"`).join(',');
+      const rows = searchedEntries.map(entry => {
+        return cols.map(c => {
+          let val = entry[c.key] ?? '';
+          if (typeof val === 'object') val = JSON.stringify(val);
+          return `"${String(val).replace(/"/g, '""')}"`;
+        }).join(',');
+      });
+      const csvContent = [headers, ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement('a'), { href: url, download: `${schema.id}_${new Date().toISOString().split('T')[0]}.csv`, style: { display: 'none' } });
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Export Failed:', e);
+    }
   };
 
   const renderField = (col: ColumnSchema, value: any, isEdit = false) => {
@@ -1306,9 +1317,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           <div className={`${CARD} p-5`}>
             <h3 className="text-[12px] font-bold text-[#374151] uppercase tracking-wide mb-4">Quick Links</h3>
             <div className="flex flex-wrap gap-2">
-              <LinkedSourceBadge id="CAPA-Dashboard" type="AUD" onClick={() => undefined} />
-              <LinkedSourceBadge id="Hazards-Open" type="HAZ" onClick={() => undefined} />
-              <LinkedSourceBadge id="NearMiss-Log" type="NM" onClick={() => undefined} />
+              <LinkedSourceBadge id="CAPA-Dashboard" type="AUD" onClick={() => navigate('/action-tracker')} />
+              <LinkedSourceBadge id="Hazards-Open" type="HAZ" onClick={() => navigate('/hazard-reporting')} />
+              <LinkedSourceBadge id="NearMiss-Log" type="NM" onClick={() => navigate('/near-miss')} />
             </div>
           </div>
         </div>

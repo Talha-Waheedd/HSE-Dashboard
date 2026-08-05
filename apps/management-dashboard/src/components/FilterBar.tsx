@@ -1,7 +1,7 @@
 import React from 'react';
 import { Filter, RotateCcw } from 'lucide-react';
 import { useFilters } from '../context/FilterContext';
-import { usePermissions } from '@cbl/auth';
+import { usePermissions, useAuth } from '@cbl/auth';
 import { DEPARTMENTS } from '../config/constants';
 
 // ============================================================
@@ -34,17 +34,20 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const { isDepartmentRestricted } = usePermissions();
   const isRestricted = isDepartmentRestricted();
 
+  const { user } = useAuth();
+  const initialDept = user?.department_id?.toString() || user?.departmentId?.toString() || 'All';
+
   const hasActiveFilters =
-    (filters.department !== '' && filters.department !== 'All') ||
+    (filters.department !== '' && filters.department !== initialDept) ||
     (filters.status     !== '' && filters.status     !== 'All') ||
-    (filters.year       !== '' && filters.year       !== 'All') ||
+    (filters.year       !== '' && filters.year       !== '2026') ||
     filters.fromDate !== '' ||
     filters.toDate   !== '';
 
   const clearFilters = () => {
-    setFilter('department', 'All');
+    setFilter('department', initialDept);
     setFilter('status',     'All');
-    setFilter('year',       'All');
+    setFilter('year',       '2026');
     setFilter('fromDate',   '');
     setFilter('toDate',     '');
   };
