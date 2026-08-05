@@ -322,6 +322,18 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const validateFormData = (data: any): string | null => {
+    // Check required fields dynamically
+    for (const col of schema.columns) {
+      if (col.required && !col.hideFromForm) {
+        if (!shouldShowConditionalField(schema.id, col.key, data)) continue;
+        
+        const val = data[col.key];
+        if (val === undefined || val === null || String(val).trim() === '') {
+          return `${col.label} is required.`;
+        }
+      }
+    }
+
     const today = new Date().toISOString().split('T')[0];
     if (['incident-log', 'hazard-reporting', 'near-miss'].includes(schema.id) && data.date && data.date > today) {
       return 'Report date cannot be in the future.';
@@ -526,6 +538,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       return <input type="datetime-local" name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={FIELD_BASE} required={col.required} readOnly={col.readonly} />;
     }
 
+    if (col.type === 'time') {
+      return (
+        <div className="relative">
+          <input type="time" name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={`${FIELD_BASE} [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:w-6 [&::-webkit-calendar-picker-indicator]:h-6 [&::-webkit-calendar-picker-indicator]:mt-1`} required={col.required} readOnly={col.readonly} />
+        </div>
+      );
+    }
+
     return (
       <input
         type={col.type === 'number' ? 'number' : 'text'}
@@ -638,7 +658,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               </div>
             )}
 
-            <form id="module-form" onSubmit={handleSubmit} className="space-y-5">
+            <form id="module-form" onSubmit={handleSubmit} className="space-y-5" noValidate>
               {sectionGroups.map(section => {
                 if (schema.id === 'near-miss' && section.title === 'Investigation' && (formSource.investigation_required ?? 'No') !== 'Yes') {
                   return null;

@@ -105,6 +105,17 @@ export const StepWizard: React.FC<StepWizardProps> = ({
             className={commonClass}
           />
         );
+      case 'time':
+        return (
+          <div className="relative">
+            <input
+              type="time"
+              value={formData[col.key] || ''}
+              onChange={(e) => handleChange(col.key, e.target.value)}
+              className={`${commonClass} [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:w-6 [&::-webkit-calendar-picker-indicator]:h-6 [&::-webkit-calendar-picker-indicator]:mt-1`}
+            />
+          </div>
+        );
       case 'number':
         return (
           <input
