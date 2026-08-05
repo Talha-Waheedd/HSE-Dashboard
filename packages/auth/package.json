@@ -1,0 +1,28 @@
+{
+  "name": "@cbl/auth",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@cbl/api": "*",
+    "@azure/msal-browser": "^5.17.3",
+    "@azure/msal-react": "^5.5.4",
+    "zustand": "^4.5.2",
+    "jwt-decode": "^4.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@cbl/tsconfig": "*",
+    "@cbl/eslint-config": "*",
+    "typescript": "^5.5.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}

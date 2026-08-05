@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@cbl/auth": ["packages/auth/src/index.ts"],
+      "@cbl/api": ["packages/api/src/index.ts"],
+      "@cbl/ui": ["packages/ui/src/index.ts"],
+      "@cbl/ui/*": ["packages/ui/src/*"]
+    }
+  }
+}

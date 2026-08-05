@@ -1,0 +1,13 @@
+{
+  "extends": "@cbl/tsconfig/react.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@cbl/api": ["../api/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}

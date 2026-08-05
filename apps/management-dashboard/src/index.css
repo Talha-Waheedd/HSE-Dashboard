@@ -1,0 +1,284 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ============================================
+       CBL ENTERPRISE DESIGN SYSTEM
+       Inspired by SAP Fiori · Microsoft Dynamics 365
+       Brand Source: CBL LU Logo — Crimson #CB0017
+       ============================================ */
+
+    /* Shell Workspace Background */
+    --background: 42 20% 95%;      /* #F5F0DC Warm Linen */
+    --background-alt: 220 14% 96%; /* #F3F4F6 */
+
+    /* Card / Panel Surface (pure white) */
+    --card: 0 0% 100%;             /* #FFFFFF */
+    --card-foreground: 0 4% 10%;   /* #1A1818 */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 4% 10%;
+
+    /* CBL Primary Brand — Crimson Red */
+    --primary: 353 100% 40%;       /* #CB0017 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary — Charcoal (shell header) */
+    --secondary: 0 4% 10%;         /* #1A1818 */
+    --secondary-foreground: 0 0% 100%;
+
+    /* Neutral — Muted backgrounds */
+    --muted: 0 0% 94%;             /* #F0F0F0 */
+    --muted-foreground: 220 9% 46%;/* #6B7280 */
+
+    /* Accent — Very light primary tint for active/hover states */
+    --accent: 353 100% 97%;        /* #FFF7F7 */
+    --accent-foreground: 353 100% 35%;
+
+    /* Text — Charcoal */
+    --foreground: 0 4% 10%;        /* #1A1818 */
+
+    /* Borders — Thin, SAP-standard */
+    --border: 0 0% 87%;            /* #DEDEDE */
+    --input: 0 0% 87%;
+    --ring: 353 100% 40%;
+
+    /* Semantic Status — SAP / Microsoft standard palette */
+    --success: 122 51% 30%;        /* #1B7C1B Microsoft green */
+    --success-foreground: 0 0% 100%;
+    --success-light: 122 51% 96%; /* #F0FDF0 */
+
+    --warning: 40 92% 44%;         /* #DC8E00 SAP amber */
+    --warning-foreground: 0 0% 20%;
+    --warning-light: 40 92% 96%;  /* #FFFBEB */
+
+    --danger: 353 80% 38%;         /* #B3001B deeper crimson for danger */
+    --danger-foreground: 0 0% 100%;
+    --danger-light: 353 80% 96%;  /* #FFF0F0 */
+
+    --info: 214 84% 45%;           /* #0C71D1 SAP info blue */
+    --info-foreground: 0 0% 100%;
+    --info-light: 214 84% 96%;    /* #EFF6FF */
+
+    --destructive: 353 80% 38%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border radius — Enterprise 8px cards, 6px buttons */
+    --radius: 0.5rem;
+
+    /* ============================================
+       STITCH DESIGN TOKENS (Phase 16 Design Migration)
+       ============================================ */
+
+    /* Sidebar — Deep maroon from Stitch design */
+    --sidebar-bg: #7B1010;
+    --sidebar-active-bg: rgba(255,255,255,0.15);
+    --sidebar-hover-bg: rgba(255,255,255,0.08);
+    --sidebar-text: rgba(255,255,255,0.85);
+    --sidebar-text-muted: rgba(255,255,255,0.50);
+    --sidebar-border: rgba(255,255,255,0.10);
+    --sidebar-group-label: rgba(255,255,255,0.35);
+
+    /* Page workspace — warm linen from Stitch design */
+    --workspace-bg: #F5F0DC;
+
+    /* Brand maroon — primary buttons, active accents */
+    --brand-maroon: #7B1010;
+    --brand-maroon-hover: #5E0C0C;
+    --brand-maroon-light: rgba(123,16,16,0.08);
+  }
+
+  .dark {
+    --background: 0 0% 7%;
+    --background-alt: 0 0% 9%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 353 100% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 353 40% 18%;
+    --accent-foreground: 353 100% 72%;
+    --foreground: 0 0% 92%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 353 100% 52%;
+    --success: 122 40% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 122 40% 12%;
+    --warning: 40 75% 52%;
+    --warning-foreground: 0 0% 0%;
+    --warning-light: 40 75% 12%;
+    --danger: 353 80% 52%;
+    --danger-foreground: 0 0% 100%;
+    --danger-light: 353 80% 12%;
+    --info: 214 84% 55%;
+    --info-foreground: 0 0% 100%;
+    --info-light: 214 84% 12%;
+    --destructive: 353 80% 52%;
+    --destructive-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border box-border;
+  }
+
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', system-ui, sans-serif;
+    line-height: 1.5714;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Enterprise heading scale */
+  h1 { @apply text-xl font-bold tracking-tight; }
+  h2 { @apply text-lg font-semibold; }
+  h3 { @apply text-base font-semibold; }
+  h4 { @apply text-sm font-semibold; }
+  h5 { @apply text-xs font-semibold uppercase tracking-wider; }
+}
+
+/* ============ Enterprise Scrollbar ============ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CCCCCC; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #AAAAAA; }
+
+@layer utilities {
+
+  /* ============ Legacy Compatibility ============ */
+  /* These keep old class names working but now use solid enterprise styles */
+  .glass {
+    @apply bg-card border border-border;
+  }
+
+  .glass-panel {
+    @apply bg-card border border-border rounded-lg;
+  }
+
+  /* ============ Enterprise Shadow Scale ============ */
+  .card-shadow {
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.06);
+  }
+  .card-shadow-hover {
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.12);
+  }
+  .dark .card-shadow {
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  /* ============ Enterprise Card ============ */
+  /* White panel on grey shell — SAP pattern */
+  .enterprise-card {
+    @apply bg-card border border-border rounded-lg;
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  /* Hover: shadow only, NO translate */
+  .enterprise-card-hover:hover {
+    box-shadow: 0 3px 14px 0 rgba(0, 0, 0, 0.10);
+    transition: box-shadow 0.15s ease;
+  }
+
+  /* ============ SAP Fiori Focus Ring ============ */
+  .enterprise-focus:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  /* ============ Navigation ============ */
+  .nav-group-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+    padding: 16px 12px 5px 16px;
+  }
+
+  /* ============ Status Badges ============ */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-width: 1px;
+    border-style: solid;
+  }
+
+  /* ============ Enterprise Table ============ */
+  .enterprise-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: hsl(var(--card));
+    border-bottom: 2px solid hsl(var(--border));
+  }
+
+  .enterprise-table th {
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: hsl(var(--muted-foreground));
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .enterprise-table th:hover {
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--muted));
+  }
+
+  .enterprise-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: hsl(var(--foreground));
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .enterprise-table tr:nth-child(even) td {
+    background-color: #FAFAFA;
+  }
+
+  .enterprise-table tr:hover td {
+    background-color: hsl(var(--accent));
+  }
+
+  /* ============ Utility ============ */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ============ Print ============ */
+  @media print {
+    .print-hide { display: none !important; }
+    .print-show { display: block !important; }
+  }
+}
