@@ -38,6 +38,7 @@ export const hazardReportingSchema: SectionConfig = {
   icon: 'AlertTriangle',
   columns: [
     { key: 's_no', label: 'S#', type: 'text', hideFromForm: true, compute: d => d.s_no || '' },
+    { key: 'emp_id', label: 'Emp ID', type: 'text', required: true, section: 'Basic Information' },
     { key: 'date', label: 'Date', type: 'date', required: true, section: 'Basic Information' },
     {
       key: 'month',
@@ -81,6 +82,7 @@ export const nearMissSchema: SectionConfig = {
   icon: 'Target',
   columns: [
     { key: 's_no', label: 'S#', type: 'text', hideFromForm: true, compute: d => d.s_no || '' },
+    { key: 'emp_id', label: 'Emp ID', type: 'text', required: true, section: 'Basic Information' },
     { key: 'date', label: 'Date', type: 'date', required: true, section: 'Basic Information' },
     {
       key: 'month',
@@ -119,6 +121,7 @@ export const incidentLogSchema: SectionConfig = {
   icon: 'FileWarning',
   columns: [
     { key: 's_no', label: 'S.No', type: 'text', hideFromForm: true, compute: d => d.s_no || '' },
+    { key: 'emp_id', label: 'Emp ID', type: 'text', required: true, section: 'Basic Information' },
     { key: 'date', label: 'Date', type: 'date', required: true, section: 'Basic Information' },
     { key: 'description', label: 'Description', type: 'textarea', required: true, section: 'Basic Information' },
     { key: 'shift', label: 'Shift', type: 'select', options: ['A', 'B', 'C', 'General'], required: true, section: 'Basic Information' },

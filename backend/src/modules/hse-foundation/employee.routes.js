@@ -30,6 +30,12 @@ router.get(
   employeeController.getEmployeeById
 );
 
+router.get(
+  '/lookup/:empId',
+  requirePermissions([PERMISSIONS.USER_READ]),
+  employeeController.getEmployeeByEmpId
+);
+
 router.put(
   '/:id',
   requirePermissions([PERMISSIONS.USER_MANAGE]),

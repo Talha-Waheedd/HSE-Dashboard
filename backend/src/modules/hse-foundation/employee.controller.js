@@ -39,9 +39,18 @@ const updateEmployee = asyncHandler(async (req, res) => {
   res.status(200).json(ApiResponse.success({ updated: count }, 'Employee updated successfully'));
 });
 
+/**
+ * Get employee by human-readable Employee ID
+ */
+const getEmployeeByEmpId = asyncHandler(async (req, res) => {
+  const employee = await employeeService.getEmployeeByEmpId(req.params.empId);
+  res.status(200).json(ApiResponse.success(employee, 'Employee retrieved successfully'));
+});
+
 module.exports = {
   createEmployee,
   getAllEmployees,
   getEmployeeById,
+  getEmployeeByEmpId,
   updateEmployee,
 };

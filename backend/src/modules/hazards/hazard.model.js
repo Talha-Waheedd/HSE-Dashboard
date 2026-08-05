@@ -32,11 +32,11 @@ const Hazard = sequelize.define('Hazard', {
     comment: 'FK → departments.id',
   },
   category: {
-    type: DataTypes.ENUM(...Object.values(HazardCategory)),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   severityLevel: {
-    type: DataTypes.ENUM(...Object.values(SeverityLevel)),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   title: {

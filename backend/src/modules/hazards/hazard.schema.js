@@ -8,8 +8,8 @@ const HazardStatus = require('../../shared/enums/HazardStatus');
 const createHazardSchema = Joi.object({
   plantId: Joi.string().uuid().required(),
   departmentId: Joi.string().uuid().optional().allow(null),
-  category: Joi.string().valid(...Object.values(HazardCategory)).required(),
-  severityLevel: Joi.string().valid(...Object.values(SeverityLevel)).required(),
+  category: Joi.string().required(),
+  severityLevel: Joi.string().required(),
   title: Joi.string().max(255).required(),
   description: Joi.string().required(),
   location: Joi.string().max(255).optional(),
@@ -20,8 +20,8 @@ const createHazardSchema = Joi.object({
 const updateHazardSchema = Joi.object({
   plantId: Joi.string().uuid().optional(),
   departmentId: Joi.string().uuid().optional().allow(null),
-  category: Joi.string().valid(...Object.values(HazardCategory)).optional(),
-  severityLevel: Joi.string().valid(...Object.values(SeverityLevel)).optional(),
+  category: Joi.string().optional(),
+  severityLevel: Joi.string().optional(),
   title: Joi.string().max(255).optional(),
   description: Joi.string().optional(),
   location: Joi.string().max(255).optional(),

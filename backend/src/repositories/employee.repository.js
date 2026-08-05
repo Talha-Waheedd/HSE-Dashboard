@@ -40,6 +40,21 @@ class EmployeeRepository extends BaseRepository {
       ],
     });
   }
+
+  /**
+   * Get complete employee details by human-readable employeeId
+   * @param {string} employeeId
+   * @returns {Promise<Object|null>}
+   */
+  async getByEmployeeIdDetails(employeeId) {
+    return this.findOne({ employeeId }, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
+        { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
+      ],
+    });
+  }
 }
 
 module.exports = new EmployeeRepository();

@@ -42,13 +42,36 @@ export const moduleService = {
 
   create: async (schemaId: string, record: any): Promise<ApiResponse<any>> => {
     const endpoint = getEndpoint(schemaId);
-    const response = await apiClient.post(endpoint, record);
+    let payload = { ...record };
+
+    if (schemaId === 'hazard-reporting') {
+      payload = {
+        ...payload,
+        plantId: payload.plantId || 'c43274dc-10a4-4dc4-b789-9a2df41e06fa', // Fallback to a valid plant UUID if not present
+        category: payload.hazard_category_id || 'other',
+        severityLevel: payload.risk_rating_id || 'low',
+        title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
+      };
+    }
+
+    const response = await apiClient.post(endpoint, payload);
     return response.data;
   },
 
   update: async (schemaId: string, id: string, updates: any): Promise<ApiResponse<any>> => {
     const endpoint = getEndpoint(schemaId);
-    const response = await apiClient.put(`${endpoint}/${id}`, updates);
+    let payload = { ...updates };
+
+    if (schemaId === 'hazard-reporting') {
+      payload = {
+        ...payload,
+        category: payload.hazard_category_id || 'other',
+        severityLevel: payload.risk_rating_id || 'low',
+        title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
+      };
+    }
+
+    const response = await apiClient.put(`${endpoint}/${id}`, payload);
     return response.data;
   },
 

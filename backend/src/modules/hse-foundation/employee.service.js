@@ -63,6 +63,17 @@ class EmployeeService {
   }
 
   /**
+   * Get employee by human-readable Employee ID
+   */
+  async getEmployeeByEmpId(empId) {
+    const employee = await employeeRepository.getByEmployeeIdDetails(empId);
+    if (!employee) {
+      throw ApiError.notFound(MESSAGES.EMPLOYEE_NOT_FOUND);
+    }
+    return employee;
+  }
+
+  /**
    * Update employee profile
    */
   async updateEmployee(id, updateData) {

@@ -24,6 +24,7 @@ import { IncidentCard } from './IncidentCard';
 import { SafetyEventTimeline } from './SafetyEventTimeline';
 import { uploadClient } from '../../../../packages/api/src/uploadClient';
 import { moduleService } from '../services/api/moduleService';
+import { apiClient } from '@cbl/api';
 
 interface DataEntrySectionProps {
   schema: SectionConfig;
@@ -342,6 +343,31 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
   };
 
+  useEffect(() => {
+    const empId = formData.emp_id;
+    if (empId && empId.length >= 3) {
+      const timeoutId = setTimeout(async () => {
+        try {
+          const response = await apiClient.get(`/employees/lookup/${empId}`);
+          if (response.data && response.data.success && response.data.data) {
+            const emp = response.data.data;
+            setFormData((prev: any) => ({
+              ...prev,
+              originator: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.originator,
+              reported_by: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.reported_by,
+              person_name: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.person_name,
+              department_id: emp.department?.name || prev.department_id,
+              designation: emp.designation || prev.designation,
+            }));
+          }
+        } catch (error) {
+          // Ignore lookup errors silently (e.g., typing incomplete ID)
+        }
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [formData.emp_id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
@@ -410,7 +436,6 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const sectionGroups = moduleSections(schema);
   const exportCSV = async () => {
     try {
-      if (!searchedEntries.length) return;
       const cols = schema.columns.filter(c => !c.hideFromForm);
       const headers = cols.map(c => `"${c.label.replace(/"/g, '""')}"`).join(',');
       const rows = searchedEntries.map(entry => {
@@ -420,7 +445,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           return `"${String(val).replace(/"/g, '""')}"`;
         }).join(',');
       });
-      const csvContent = [headers, ...rows].join('\n');
+      const csvContent = '\uFEFF' + [headers, ...rows].join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = Object.assign(document.createElement('a'), { href: url, download: `${schema.id}_${new Date().toISOString().split('T')[0]}.csv`, style: { display: 'none' } });
