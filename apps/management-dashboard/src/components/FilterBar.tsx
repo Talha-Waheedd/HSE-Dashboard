@@ -35,17 +35,17 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const isRestricted = isDepartmentRestricted();
 
   const { user } = useAuth();
-  const initialDept = user?.department_id?.toString() || user?.departmentId?.toString() || 'All';
+  const initialDept = 'All';
 
   const hasActiveFilters =
-    (filters.department !== '' && filters.department !== initialDept) ||
+    (filters.department !== '' && filters.department !== 'All') ||
     (filters.status     !== '' && filters.status     !== 'All') ||
     (filters.year       !== '' && filters.year       !== '2026') ||
     filters.fromDate !== '' ||
     filters.toDate   !== '';
 
   const clearFilters = () => {
-    setFilter('department', initialDept);
+    setFilter('department', 'All');
     setFilter('status',     'All');
     setFilter('year',       '2026');
     setFilter('fromDate',   '');

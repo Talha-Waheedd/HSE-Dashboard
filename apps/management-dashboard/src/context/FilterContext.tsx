@@ -20,22 +20,14 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuthStore();
-  const initialDept = user?.department_id || 'All';
-
   const [filters, setFilters] = useState<Filters>({
     year: '2026',
     auditType: 'All',
-    department: initialDept,
+    department: 'All',
     status: 'All',
     fromDate: '',
     toDate: '',
   });
-
-  useEffect(() => {
-    if (user?.department_id) {
-      setFilters((current) => ({ ...current, department: user.department_id || 'All' }));
-    }
-  }, [user?.department_id]);
 
   const setFilter = (key: keyof Filters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
