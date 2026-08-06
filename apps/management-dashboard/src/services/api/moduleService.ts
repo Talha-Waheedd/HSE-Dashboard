@@ -75,7 +75,7 @@ export const moduleService = {
     if (schemaId === 'hazard-reporting') {
       payload = {
         ...payload,
-        plantId: payload.plantId || 'c43274dc-10a4-4dc4-b789-9a2df41e06fa', // Fallback to a valid plant UUID if not present
+        plantId: payload.plantId || '44bd548d-0e22-40ba-a8e6-c037931c2a63', // Fallback to a valid plant UUID if not present
         category: payload.hazard_category_id || 'other',
         severityLevel: payload.risk_rating_id || 'low',
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
@@ -83,7 +83,7 @@ export const moduleService = {
     } else if (schemaId === 'near-miss') {
       payload = {
         ...payload,
-        plantId: payload.plantId || 'c43274dc-10a4-4dc4-b789-9a2df41e06fa',
+        plantId: payload.plantId || '44bd548d-0e22-40ba-a8e6-c037931c2a63',
         title: payload.details ? payload.details.substring(0, 50) : 'Near Miss',
         description: payload.details || 'No details provided',
         severityLevel: payload.investigation_required === 'Yes' ? 'High' : 'Low',
@@ -94,7 +94,7 @@ export const moduleService = {
     } else if (schemaId === 'incident-log') {
       payload = {
         ...payload,
-        plantId: payload.plantId || 'c43274dc-10a4-4dc4-b789-9a2df41e06fa',
+        plantId: payload.plantId || '44bd548d-0e22-40ba-a8e6-c037931c2a63',
         title: payload.description ? payload.description.substring(0, 50) : 'Incident Log',
         description: payload.description || 'No description provided',
         incidentDate: payload.date || new Date().toISOString(),
