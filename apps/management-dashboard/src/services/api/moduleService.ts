@@ -41,30 +41,32 @@ export const moduleService = {
     if (schemaId === 'hazard-reporting') {
       rawData = rawData.map((item: any) => ({
         ...item,
-        hazard_category_id: item.metadata?.hazard_category_id || item.category,
-        risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel,
+        hazard_category_id: item.metadata?.hazard_category_id || item.category || item.hazard_category_id,
+        risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel || item.severity_level,
         description: item.metadata?.description || item.description || item.title,
-        date: item.metadata?.date || item.reportedAt || item.createdAt || new Date().toISOString(),
-        department_id: item.metadata?.department_id || item.departmentId,
+        date: item.metadata?.date || item.reportedAt || item.reported_at || item.createdAt || item.created_at || new Date().toISOString(),
+        department_id: item.metadata?.department_id || item.departmentId || item.department_id,
       }));
     } else if (schemaId === 'near-miss') {
       rawData = rawData.map((item: any) => ({
         ...item,
         details: item.metadata?.details || item.description,
-        investigation_required: item.metadata?.investigation_required || (item.severityLevel === 'High' ? 'Yes' : 'No'),
-        preventive_action: item.metadata?.preventive_action || item.immediateAction,
-        date: item.metadata?.date || item.reportedAt,
+        investigation_required: item.metadata?.investigation_required || (item.severityLevel === 'High' || item.severity_level === 'High' ? 'Yes' : 'No'),
+        preventive_action: item.metadata?.preventive_action || item.immediateAction || item.action_taken,
+        date: item.metadata?.date || item.reportedAt || item.reported_at || item.createdAt || item.created_at || new Date().toISOString(),
+        department_id: item.metadata?.department_id || item.departmentId || item.department_id,
       }));
     } else if (schemaId === 'incident-log') {
       rawData = rawData.map((item: any) => ({
         ...item,
         description: item.metadata?.description || item.description,
-        date: item.metadata?.date || item.incidentDate,
-        incident_category_id: item.metadata?.incident_category_id || item.incidentType,
-        risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel,
-        immediate_cause: item.metadata?.immediate_cause || item.immediateAction,
+        date: item.metadata?.date || item.incidentDate || item.incident_date || item.createdAt || item.created_at || new Date().toISOString(),
+        incident_category_id: item.metadata?.incident_category_id || item.incidentType || item.category,
+        risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel || item.severity_level,
+        immediate_cause: item.metadata?.immediate_cause || item.immediateAction || item.action_taken,
         root_cause: item.metadata?.root_cause || item.rootCause,
         status_id: item.metadata?.status_id || item.status,
+        department_id: item.metadata?.department_id || item.departmentId || item.department_id,
       }));
     }
 
