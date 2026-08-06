@@ -40,6 +40,10 @@ const Employee = sequelize.define('Employee', {
     allowNull: true,
     comment: 'e.g. Production Operator',
   },
+  gender: {
+    type: DataTypes.ENUM('Male', 'Female', 'Other'),
+    allowNull: true,
+  },
   jobTitle: {
     type: DataTypes.STRING(150),
     allowNull: true,

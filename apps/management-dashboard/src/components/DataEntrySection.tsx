@@ -421,6 +421,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                   person_name: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.person_name,
                   department_id: mappedDept,
                   designation: emp.designation || prev.designation,
+                  gender: emp.user?.gender || emp.gender || prev.gender,
                 };
               });
           }
@@ -1471,6 +1472,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         </div>
       </div>
       {isAddModalOpen && renderAddEditModal()}
+      {editingId && renderAddEditModal()}
     </Layout>
   );
 

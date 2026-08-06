@@ -21,7 +21,8 @@ async function seed() {
       departmentId: 'a6e1ca7f-9988-4757-b4b9-c35ef7e76956', // Production
       plantId: '44bd548d-0e22-40ba-a8e6-c037931c2a63', // Sukkur
       designation: 'intern',
-      employmentType: 'intern'
+      employmentType: 'intern',
+      gender: 'Male'
     });
 
     console.log('Successfully created employee:', emp.toJSON());
