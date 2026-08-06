@@ -94,6 +94,10 @@ const NearMiss = sequelize.define('NearMiss', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  metadata: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
 }, {
   tableName: 'near_misses',
   paranoid: true,

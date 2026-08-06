@@ -32,31 +32,37 @@ export const moduleService = {
     const payload = response.data;
     let rawData = Array.isArray(payload?.data) ? payload.data : payload?.data?.rows || [];
 
+    // Universally unpack metadata for all modules to restore UI fields
+    rawData = rawData.map((item: any) => ({
+      ...(item.metadata || {}),
+      ...item,
+    }));
+
     if (schemaId === 'hazard-reporting') {
       rawData = rawData.map((item: any) => ({
         ...item,
-        hazard_category_id: item.category,
-        risk_rating_id: item.severityLevel,
-        description: item.title,
+        hazard_category_id: item.metadata?.hazard_category_id || item.category,
+        risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel,
+        description: item.metadata?.description || item.description || item.title,
       }));
     } else if (schemaId === 'near-miss') {
       rawData = rawData.map((item: any) => ({
         ...item,
-        details: item.description,
-        investigation_required: item.severityLevel === 'High' ? 'Yes' : 'No',
-        preventive_action: item.immediateAction,
-        date: item.reportedAt,
+        details: item.metadata?.details || item.description,
+        investigation_required: item.metadata?.investigation_required || (item.severityLevel === 'High' ? 'Yes' : 'No'),
+        preventive_action: item.metadata?.preventive_action || item.immediateAction,
+        date: item.metadata?.date || item.reportedAt,
       }));
     } else if (schemaId === 'incident-log') {
       rawData = rawData.map((item: any) => ({
         ...item,
-        description: item.description,
-        date: item.incidentDate,
-        incident_category_id: item.incidentType,
-        risk_rating_id: item.severityLevel,
-        immediate_cause: item.immediateAction,
-        root_cause: item.rootCause,
-        status_id: item.status,
+        description: item.metadata?.description || item.description,
+        date: item.metadata?.date || item.incidentDate,
+        incident_category_id: item.metadata?.incident_category_id || item.incidentType,
+        risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel,
+        immediate_cause: item.metadata?.immediate_cause || item.immediateAction,
+        root_cause: item.metadata?.root_cause || item.rootCause,
+        status_id: item.metadata?.status_id || item.status,
       }));
     }
 
@@ -70,7 +76,8 @@ export const moduleService = {
 
   create: async (schemaId: string, record: any): Promise<ApiResponse<any>> => {
     const endpoint = getEndpoint(schemaId);
-    let payload = { ...record };
+    const metadata = { ...record };
+    let payload = { ...record, metadata };
 
     if (schemaId === 'hazard-reporting') {
       payload = {
@@ -112,7 +119,8 @@ export const moduleService = {
 
   update: async (schemaId: string, id: string, updates: any): Promise<ApiResponse<any>> => {
     const endpoint = getEndpoint(schemaId);
-    let payload = { ...updates };
+    const metadata = { ...updates };
+    let payload = { ...updates, metadata };
 
     if (schemaId === 'hazard-reporting') {
       payload = {

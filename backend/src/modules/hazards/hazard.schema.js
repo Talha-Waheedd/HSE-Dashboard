@@ -15,6 +15,7 @@ const createHazardSchema = Joi.object({
   location: Joi.string().max(255).optional(),
   status: Joi.string().valid(HazardStatus.DRAFT, HazardStatus.SUBMITTED).default(HazardStatus.DRAFT).optional(),
   reportedAt: Joi.date().iso().optional(),
+  metadata: Joi.object().optional(),
 });
 
 const updateHazardSchema = Joi.object({
@@ -27,6 +28,7 @@ const updateHazardSchema = Joi.object({
   location: Joi.string().max(255).optional(),
   assignedTo: Joi.string().uuid().optional().allow(null),
   reportedAt: Joi.date().iso().optional(),
+  metadata: Joi.object().optional(),
 }).min(1);
 
 const updateHazardStatusSchema = Joi.object({

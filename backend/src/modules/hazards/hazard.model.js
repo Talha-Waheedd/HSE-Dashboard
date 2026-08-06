@@ -97,6 +97,11 @@ const Hazard = sequelize.define('Hazard', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  metadata: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    comment: 'Dynamically store all extra frontend fields here to prevent dropping them',
+  },
 }, {
   tableName: 'hazards',
   paranoid: true,

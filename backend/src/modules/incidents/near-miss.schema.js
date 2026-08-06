@@ -13,6 +13,7 @@ const createNearMissSchema = Joi.object({
   status: Joi.string().optional(),
   immediateAction: Joi.string().optional(),
   reportedAt: Joi.date().iso().optional(),
+  metadata: Joi.object().optional(),
 });
 
 const updateNearMissSchema = Joi.object({
@@ -26,6 +27,7 @@ const updateNearMissSchema = Joi.object({
   rootCause: Joi.string().optional(),
   assignedTo: Joi.string().uuid().optional().allow(null),
   reportedAt: Joi.date().iso().optional(),
+  metadata: Joi.object().optional(),
 }).min(1);
 
 const updateNearMissStatusSchema = Joi.object({

@@ -131,6 +131,10 @@ const Incident = sequelize.define('Incident', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  metadata: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
 }, {
   tableName: 'incidents',
   paranoid: true,

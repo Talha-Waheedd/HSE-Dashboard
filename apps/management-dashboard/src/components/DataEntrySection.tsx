@@ -14,7 +14,7 @@ import {
   Plus, Save, Trash2, Download, Edit2, X, History,
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
   CheckCircle2, LayoutGrid, Filter, PanelRightOpen,
-  Upload, Paperclip, FileText, Eye, CalendarDays,
+  Upload, Paperclip, FileText, Eye, CalendarDays, Clock,
 } from 'lucide-react';
 import { LinkedSourceBadge } from './LinkedSourceBadge';
 import { AvatarInitials } from './AvatarInitials';
@@ -80,7 +80,7 @@ const DatePickerField = ({
           }
         }}
         inputMode="none"
-        className={`${FIELD_BASE} pr-10 appearance-none cursor-pointer`}
+        className={`${FIELD_BASE} pr-10 appearance-none cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full`}
         required={required}
         disabled={disabled}
       />
@@ -88,6 +88,52 @@ const DatePickerField = ({
     </div>
   );
 };
+
+const TimePickerField = ({
+  value,
+  onChange,
+  label,
+  required,
+  disabled,
+}: {
+  value?: string;
+  onChange: (nextValue: string) => void;
+  label: string;
+  required?: boolean;
+  disabled?: boolean;
+}) => {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const openPicker = () => inputRef.current?.showPicker?.();
+
+  return (
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="time"
+        aria-label={label}
+        value={value ?? ''}
+        onChange={e => onChange(e.target.value)}
+        onClick={openPicker}
+        onFocus={openPicker}
+        onKeyDown={e => {
+          const allowed = [
+            'Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+            'Home', 'End', 'PageUp', 'PageDown', 'Enter', 'Escape'
+          ];
+          if (!allowed.includes(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+            e.preventDefault();
+          }
+        }}
+        inputMode="none"
+        className={`${FIELD_BASE} pr-10 appearance-none cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full`}
+        required={required}
+        disabled={disabled}
+      />
+      <Clock className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+    </div>
+  );
+};
+
 const moduleSections = (schema: SectionConfig) => {
   const sections = new Map<string, ColumnSchema[]>();
   schema.columns.filter(c => !c.hideFromForm).forEach(col => {
@@ -277,13 +323,6 @@ const ActionTrackerRoute = ({ schema }: { schema: SectionConfig }) => {
 };
 
 export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) => {
-  if (schema.id === 'action-tracker') {
-    return <ActionTrackerRoute schema={schema} />;
-  }
-  
-
-
-
   const navigate = useNavigate();
   const { data: entries, loading, fetchAll, createRecord, updateRecord, deleteRecord } = useModuleData(schema.id);
   const { user } = useAuth();
@@ -363,15 +402,27 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         try {
           const response = await apiClient.get(`/employees/lookup/${empId}`);
           if (response.data && response.data.success && response.data.data) {
-            const emp = response.data.data;
-            setFormData((prev: any) => ({
-              ...prev,
-              originator: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.originator,
-              reported_by: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.reported_by,
-              person_name: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.person_name,
-              department_id: emp.department?.name || prev.department_id,
-              designation: emp.designation || prev.designation,
-            }));
+              const emp = response.data.data;
+              
+              setFormData((prev: any) => {
+                let mappedDept = prev.department_id;
+                const deptName = emp.department?.name || '';
+                if (deptName) {
+                  if (deptName.includes('Production')) mappedDept = 'PRD';
+                  else if (deptName.includes('HSE')) mappedDept = 'HSE';
+                  else if (deptName.includes('Maintenance')) mappedDept = 'ESD';
+                  else mappedDept = 'Others';
+                }
+                
+                return {
+                  ...prev,
+                  originator: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.originator,
+                  reported_by: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.reported_by,
+                  person_name: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.person_name,
+                  department_id: mappedDept,
+                  designation: emp.designation || prev.designation,
+                };
+              });
           }
         } catch (error) {
           // Ignore lookup errors silently (e.g., typing incomplete ID)
@@ -574,9 +625,13 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
     if (col.type === 'time') {
       return (
-        <div className="relative">
-          <input type="time" name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={`${FIELD_BASE} [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:w-6 [&::-webkit-calendar-picker-indicator]:h-6 [&::-webkit-calendar-picker-indicator]:mt-1`} required={col.required} readOnly={col.readonly} />
-        </div>
+        <TimePickerField
+          label={col.label}
+          value={value ?? ''}
+          onChange={v => handleInputChange({ target: { name: col.key, value: v } } as any, isEdit)}
+          required={col.required}
+          disabled={col.readonly}
+        />
       );
     }
 
@@ -1387,7 +1442,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           ) : (
             <div className="space-y-3">
               {entries.map((inc: any) => (
-                <IncidentCard key={inc.id} incident={inc} onClick={() => undefined} />
+                <IncidentCard key={inc.id} incident={inc} onClick={() => startEdit(inc)} />
               ))}
             </div>
           )}
@@ -1419,6 +1474,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     </Layout>
   );
 
+  if (schema.id === 'action-tracker') return <ActionTrackerRoute schema={schema} />;
   if (schema.id === 'hazard-reporting') return renderHazardWorkspace();
   if (schema.id === 'incident-log') return renderIncidentWorkspace();
   return renderGenericWorkspace();

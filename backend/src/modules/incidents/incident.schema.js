@@ -29,6 +29,7 @@ const createIncidentSchema = Joi.object({
   immediateAction: Joi.string().optional(),
   status: Joi.string().optional(),
   injuries: Joi.array().items(injurySchema).optional(),
+  metadata: Joi.object().optional(),
 });
 
 const updateIncidentSchema = Joi.object({
@@ -50,6 +51,7 @@ const updateIncidentSchema = Joi.object({
   investigatedBy: Joi.string().uuid().optional().allow(null),
   investigationFindings: Joi.string().optional(),
   rootCause: Joi.string().optional(),
+  metadata: Joi.object().optional(),
 }).min(1);
 
 const updateIncidentStatusSchema = Joi.object({
