@@ -7,8 +7,9 @@ import {
   ChevronRight, ChevronLeft, Menu, Bell, ChevronDown, X,
   UserCircle, Settings as SettingsIcon, HelpCircle,
   AlertTriangle, Target, FileWarning, CheckSquare, ClipboardList,
-  Users, ExternalLink
+  Users, ExternalLink, Sun, Moon
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 // ============================================================
 // Layout — SAP Fiori Shell Layout
@@ -85,6 +86,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   const { logout, user } = useAuth();
   const { hasRole } = useAuthStore();
   const { canViewReports } = usePermissions();
+  const { theme, toggleTheme } = useTheme();
 
   const activeNavGroups = [
     ...NAV_GROUPS,
@@ -161,10 +163,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 
           {/* ---- Dark Mode Toggle ---- */}
           <button
+            onClick={toggleTheme}
             className="relative flex items-center justify-center w-8 h-8 rounded text-[#6B7280] hover:text-[#2C1810] hover:bg-[#EDE8D8] transition-colors"
-            title="Toggle dark mode"
+            title="Toggle theme"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+            {theme === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
           </button>
 
           {/* ---- Notification Bell ---- */}
