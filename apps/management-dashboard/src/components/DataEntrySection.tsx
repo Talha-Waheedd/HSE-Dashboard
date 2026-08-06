@@ -306,6 +306,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [showCloseHazard, setShowCloseHazard] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [closeHazardData, setCloseHazardData] = useState({ closingProof: '', closingRemarks: '' });
+  const [reviewData, setReviewData] = useState({ remarks: '', reason: '' });
   const PAGE_SIZE = 15;
 
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
@@ -430,6 +431,31 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     } else {
       setValidationError(result.message || 'Failed to update record.');
     }
+  };
+
+  const handleReviewAction = async (action: 'Approved' | 'Rejected' | 'Open') => {
+    const selectedIds = Object.keys(selectedRows).filter(id => selectedRows[id]);
+    if (selectedIds.length === 0) {
+      alert('Please select at least one record from the table first.');
+      return;
+    }
+    
+    for (const id of selectedIds) {
+      const originalRecord = entries.find(e => e.id === id);
+      if (!originalRecord) continue;
+      
+      const updatedData = { ...originalRecord, status_id: action, status: action, reviewRemarks: reviewData.remarks, reviewReason: reviewData.reason };
+      updatedData.statusHistory = [
+        ...(originalRecord.statusHistory ?? []),
+        { user: user?.name ?? 'System', oldStatus: originalRecord.status_id ?? originalRecord.status ?? 'None', newStatus: action, timestamp: new Date().toISOString() }
+      ];
+      
+      await updateRecord(id, updatedData);
+    }
+    
+    setSelectedRows({});
+    setReviewData({ remarks: '', reason: '' });
+    setShowReviewPanel(false);
   };
 
   const filteredEntries = useMemo(() => entries.filter(entry => {
@@ -986,16 +1012,28 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         <div className="space-y-5">
           <div>
             <label className="block text-[12px] font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Remarks</label>
-            <textarea className={TEXTAREA_BASE} rows={4} placeholder="Enter review remarks..." />
+            <textarea 
+              className={TEXTAREA_BASE} 
+              rows={4} 
+              placeholder="Enter review remarks..." 
+              value={reviewData.remarks}
+              onChange={e => setReviewData({ ...reviewData, remarks: e.target.value })}
+            />
           </div>
           <div>
             <label className="block text-[12px] font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Reason</label>
-            <textarea className={TEXTAREA_BASE} rows={4} placeholder="Enter review reason..." />
+            <textarea 
+              className={TEXTAREA_BASE} 
+              rows={4} 
+              placeholder="Enter review reason..." 
+              value={reviewData.reason}
+              onChange={e => setReviewData({ ...reviewData, reason: e.target.value })}
+            />
           </div>
           <div className="flex gap-2 pt-2">
-            <button className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">Approve</button>
-            <button className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]">Reject</button>
-            <button className="h-9 px-4 text-[13px] font-medium rounded-md bg-white text-[#374151] border border-[#DEDEDE]">Reopen</button>
+            <button onClick={() => handleReviewAction('Approved')} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">Approve</button>
+            <button onClick={() => handleReviewAction('Rejected')} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]">Reject</button>
+            <button onClick={() => handleReviewAction('Open')} className="h-9 px-4 text-[13px] font-medium rounded-md bg-white text-[#374151] border border-[#DEDEDE]">Reopen</button>
           </div>
         </div>
       </SlideOverPanel>
