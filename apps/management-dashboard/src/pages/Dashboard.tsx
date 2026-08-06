@@ -179,11 +179,11 @@ export const Dashboard = () => {
           if (filters.department && filters.department !== 'All')
             f = f.filter(d => d.department_id === filters.department);
           if (filters.year && filters.year !== 'All')
-            f = f.filter(d => d.date?.startsWith(filters.year) || d.target_date?.startsWith(filters.year));
+            f = f.filter(d => d.date?.startsWith(filters.year) || d.target_date?.startsWith(filters.year) || d.createdAt?.startsWith(filters.year));
           if (filters.fromDate)
-            f = f.filter(d => { const dt = d.date || d.target_date; return dt && dt >= filters.fromDate; });
+            f = f.filter(d => { const dt = d.date || d.target_date || d.createdAt; return dt && dt >= filters.fromDate; });
           if (filters.toDate)
-            f = f.filter(d => { const dt = d.date || d.target_date; return dt && dt <= filters.toDate; });
+            f = f.filter(d => { const dt = d.date || d.target_date || d.createdAt; return dt && dt <= filters.toDate; });
           return f;
         };
 

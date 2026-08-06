@@ -44,6 +44,8 @@ export const moduleService = {
         hazard_category_id: item.metadata?.hazard_category_id || item.category,
         risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel,
         description: item.metadata?.description || item.description || item.title,
+        date: item.metadata?.date || item.reportedAt || item.createdAt || new Date().toISOString(),
+        department_id: item.metadata?.department_id || item.departmentId,
       }));
     } else if (schemaId === 'near-miss') {
       rawData = rawData.map((item: any) => ({
