@@ -7,6 +7,7 @@ import { Settings } from './pages/Settings';
 import { Reports } from './pages/Reports';
 import { Profile } from './pages/Profile';
 import { MasterManagement } from './pages/MasterManagement';
+import { LeadingLaggingIndicators } from './pages/LeadingLaggingIndicators';
 import { DataEntrySection } from './components/DataEntrySection';
 import { ALL_SECTIONS } from './config/sectionSchemas';
 import { FilterProvider } from './context/FilterContext';
@@ -73,6 +74,7 @@ function App() {
 
           {/* New Sidebar Routes */}
           <Route path="/analytics" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Analytics /></ProtectedRoute>} />
+          <Route path="/leading-lagging-indicators" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingLaggingIndicators /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Settings /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Reports /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Profile /></ProtectedRoute>} />

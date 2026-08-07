@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Menu, Bell, ChevronDown, X,
   UserCircle, Settings as SettingsIcon, HelpCircle,
   AlertTriangle, Target, FileWarning, CheckSquare, ClipboardList,
-  Users, ExternalLink, Sun, Moon
+  Users, ExternalLink, Sun, Moon, Activity
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -51,6 +51,7 @@ const NAV_GROUPS = [
   {
     label: 'REPORTING',
     items: [
+      { title: 'Leading & Lagging Indicators', href: '/leading-lagging-indicators', Icon: Activity },
       { title: 'Reports', href: '/reports', Icon: FileText },
       { title: 'Analytics', href: '/analytics', Icon: BarChart3 },
     ],
