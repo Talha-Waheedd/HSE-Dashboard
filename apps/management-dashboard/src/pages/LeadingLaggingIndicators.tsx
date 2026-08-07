@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
-import { PageHeader } from '../components/PageHeader';
+import { ContextHeader } from '../components/ContextHeader';
 import { moduleService } from '../services/api/moduleService';
 import { Triangle } from 'lucide-react';
 
@@ -91,7 +91,7 @@ export const LeadingLaggingIndicators = () => {
   return (
     <Layout>
       <div className="flex-1 overflow-y-auto">
-        <PageHeader 
+        <ContextHeader 
           title="Leading and Lagging Indicator" 
           breadcrumbs={['Reporting', 'Leading and Lagging Indicator']}
         />
