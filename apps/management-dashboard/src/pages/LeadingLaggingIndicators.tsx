@@ -2,7 +2,45 @@ import React, { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
 import { moduleService } from '../services/api/moduleService';
-import { Triangle } from 'lucide-react';
+import { KpiTile } from '../components/KpiTile';
+import { CHART_COLORS, PIE_COLORS } from '../config/constants';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  PieChart, Pie, Cell, ResponsiveContainer,
+  Tooltip as RechartsTooltip, Legend,
+} from 'recharts';
+import {
+  AlertTriangle, Target, Flame, Activity, FileWarning, ShieldAlert
+} from 'lucide-react';
+
+const EnterpriseTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white border border-[#E0E0E0] rounded-lg px-3 py-2"
+         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}>
+      <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wide mb-1">{label}</p>
+      {payload.map((p: any) => (
+        <div key={p.dataKey ?? p.name} className="flex items-center gap-2 text-[13px] font-medium">
+          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: p.color || p.fill }} />
+          <span className="text-[#1A1818]">{p.name ? `${p.name}: ` : ''}{p.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const Panel = ({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) => (
+  <div
+    className={`bg-white border border-[#E0E0E0] rounded-lg overflow-hidden ${className}`}
+    style={{ boxShadow: '0 1px 4px 0 rgba(0,0,0,0.06)' }}
+  >
+    <div className="flex items-center gap-2 px-5 py-3.5 border-b border-[#F0F0F0] bg-[#FAFAFA]">
+      <div className="w-1 h-4 rounded-full bg-[#CB0017]" />
+      <h3 className="text-[12px] font-bold text-[#374151] uppercase tracking-wider">{title}</h3>
+    </div>
+    <div className="p-5">{children}</div>
+  </div>
+);
 
 export const LeadingLaggingIndicators = () => {
   const [data, setData] = useState({
@@ -67,148 +105,130 @@ export const LeadingLaggingIndicators = () => {
     fetchData();
   }, []);
 
-  const StatusIcon = ({ status }: { status: 'up' | 'down' | 'neutral' }) => {
-    if (status === 'up') return <Triangle className="w-5 h-5 text-[#1B7C1B]" fill="currentColor" />;
-    if (status === 'down') return <Triangle className="w-5 h-5 text-[#CB0017] rotate-180" fill="currentColor" />;
-    return <Triangle className="w-5 h-5 text-[#DC8E00]" fill="currentColor" />;
-  };
+  const laggingData = [
+    { name: 'Fatalities', value: data.fatalities, fill: PIE_COLORS[5] },
+    { name: 'LTI', value: data.lti, fill: PIE_COLORS[0] },
+    { name: 'RWC/MTC', value: data.rwc_mtc, fill: PIE_COLORS[1] },
+    { name: 'First Aid', value: data.firstAid, fill: PIE_COLORS[2] },
+    { name: 'Fire', value: data.majorFire + data.minorFire, fill: PIE_COLORS[3] },
+  ];
 
-  const TableHeader = () => (
-    <thead className="bg-[#4172B8] text-white">
-      <tr>
-        <th className="py-2 px-4 text-left font-bold border border-gray-300">Indicators</th>
-        <th className="py-2 px-4 text-center font-bold border border-gray-300">Unit</th>
-        <th className="py-2 px-4 text-center font-bold border border-gray-300">2024</th>
-        <th className="py-2 px-4 text-center font-bold border border-gray-300">2025</th>
-        <th className="py-2 px-4 text-center font-bold border border-gray-300">Tar2026</th>
-        <th className="py-2 px-4 text-center font-bold border border-gray-300">YTD-2026</th>
-        <th className="py-2 px-4 text-center font-bold border border-gray-300">Status</th>
-        <th className="py-2 px-4 text-left font-bold border border-gray-300 w-1/3">Remarks</th>
-      </tr>
-    </thead>
-  );
+  const leadingData = [
+    { name: 'Hazards', value: data.hazards, fill: CHART_COLORS.success },
+    { name: 'Near Misses', value: data.nearMisses, fill: CHART_COLORS.warning },
+  ];
+
+  // Only keep metrics with values > 0 for the pie chart to keep it clean
+  const incidentBreakdown = laggingData.filter(d => d.value > 0);
+  if (incidentBreakdown.length === 0) {
+    incidentBreakdown.push({ name: 'No Incidents', value: 1, fill: CHART_COLORS.neutral });
+  }
 
   return (
     <Layout>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-gray-50/50">
         <ContextHeader 
           title="Leading and Lagging Indicator" 
           breadcrumbs={['Reporting', 'Leading and Lagging Indicator']}
+          subtitle="Visual dashboard of HSE key performance indicators"
         />
-        <div className="p-6 max-w-[1600px] mx-auto">
-          <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-            <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold text-[#1A1818]">HSE KPI Performance Summary – 2026</h2>
+        
+        <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+          {loading ? (
+            <div className="p-12 text-center text-gray-500 flex flex-col items-center">
+               <div className="w-8 h-8 border-4 border-[#CB0017] border-t-transparent rounded-full animate-spin mb-4"></div>
+               Loading metrics...
             </div>
-            
-            {loading ? (
-              <div className="p-8 text-center text-gray-500">Loading metrics...</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <TableHeader />
-                  <tbody>
-                    {/* Lagging Indicators */}
-                    <tr className="bg-[#4172B8]/10 font-bold">
-                      <td colSpan={8} className="py-2 px-4 border border-gray-300 text-[#1A1818]">Lagging Indicators</td>
-                    </tr>
-                    
-                    <tr>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Fatal Incidents</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">No</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">0</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">0</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">0</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">{data.fatalities}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center"><div className="flex justify-center"><StatusIcon status="up" /></div></td>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Zero fatalities</td>
-                    </tr>
-                    
-                    <tr className="bg-gray-50">
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">LTI</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">No</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">4</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">10</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">0</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">{data.lti}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center"><div className="flex justify-center"><StatusIcon status={data.lti > 0 ? 'down' : 'up'} /></div></td>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Tracked via system</td>
-                    </tr>
-
-                    <tr>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">RWC / MTC</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">No</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">8</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">1</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">0</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">{data.rwc_mtc}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center"><div className="flex justify-center"><StatusIcon status={data.rwc_mtc > 0 ? 'down' : 'up'} /></div></td>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Tracked via system</td>
-                    </tr>
-
-                    <tr className="bg-gray-50">
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">First Aid</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">No</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">25</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">23</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">-</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">{data.firstAid}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center"><div className="flex justify-center"><StatusIcon status="up" /></div></td>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Tracked via system</td>
-                    </tr>
-
-                    <tr>
-                      <td rowSpan={2} className="py-2 px-4 border border-gray-300 font-semibold align-middle">Fire Incidents</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">Major</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">1</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">0</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">-</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">{data.majorFire}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center"><div className="flex justify-center"><StatusIcon status={data.majorFire > 0 ? 'down' : 'up'} /></div></td>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Tracked via system</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold bg-gray-50">Minor</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold bg-gray-50">30</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold bg-gray-50">8</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold bg-gray-50">-</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold bg-gray-50">{data.minorFire}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center bg-gray-50"><div className="flex justify-center"><StatusIcon status="neutral" /></div></td>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold bg-gray-50">Tracked via system</td>
-                    </tr>
-
-                    {/* Leading Indicators */}
-                    <tr className="bg-[#4172B8]/10 font-bold">
-                      <td colSpan={8} className="py-2 px-4 border border-gray-300 text-[#1A1818]">Leading Indicators</td>
-                    </tr>
-
-                    <tr>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Hazard Spotting</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">No</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">2864</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">4011</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">3000</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">{data.hazards}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center"><div className="flex justify-center"><StatusIcon status={data.hazards >= 3000 ? 'up' : 'neutral'} /></div></td>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Auto-calculated from records</td>
-                    </tr>
-
-                    <tr className="bg-gray-50">
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Near miss</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">No</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">186</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">183</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">264</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center font-bold">{data.nearMisses}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-center"><div className="flex justify-center"><StatusIcon status={data.nearMisses >= 264 ? 'up' : 'neutral'} /></div></td>
-                      <td className="py-2 px-4 border border-gray-300 font-semibold">Auto-calculated from records</td>
-                    </tr>
-
-                  </tbody>
-                </table>
+          ) : (
+            <>
+              {/* Lagging Indicators KPI Tiles */}
+              <div>
+                <h2 className="text-lg font-bold text-[#1A1818] mb-4">Lagging Indicators</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  <KpiTile title="Fatal Incidents" value={data.fatalities} icon={ShieldAlert} color={data.fatalities > 0 ? "danger" : "success"} />
+                  <KpiTile title="LTI" value={data.lti} icon={AlertTriangle} color={data.lti > 0 ? "danger" : "success"} />
+                  <KpiTile title="RWC / MTC" value={data.rwc_mtc} icon={FileWarning} color={data.rwc_mtc > 0 ? "warning" : "success"} />
+                  <KpiTile title="First Aid" value={data.firstAid} icon={Activity} color="info" />
+                  <KpiTile title="Fire Incidents" value={data.majorFire + data.minorFire} icon={Flame} color={data.majorFire + data.minorFire > 0 ? "danger" : "success"} />
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Leading Indicators KPI Tiles */}
+              <div>
+                <h2 className="text-lg font-bold text-[#1A1818] mb-4">Leading Indicators</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <KpiTile title="Hazard Spotting" value={data.hazards} icon={AlertTriangle} color="success" />
+                  <KpiTile title="Near Misses" value={data.nearMisses} icon={Target} color="warning" />
+                </div>
+              </div>
+
+              {/* Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                
+                {/* Lagging Breakdown Bar Chart */}
+                <Panel title="Lagging Indicators Breakdown">
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={laggingData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} />
+                        <RechartsTooltip content={<EnterpriseTooltip />} cursor={{ fill: '#F3F4F6' }} />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Panel>
+
+                {/* Leading Comparison Bar Chart */}
+                <Panel title="Leading Indicators Comparison">
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={leadingData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} />
+                        <RechartsTooltip content={<EnterpriseTooltip />} cursor={{ fill: '#F3F4F6' }} />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Panel>
+
+                {/* Incident Distribution Pie Chart */}
+                <Panel title="Incident Categorization Distribution">
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={incidentBreakdown}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={70}
+                          outerRadius={90}
+                          paddingAngle={2}
+                          dataKey="value"
+                          stroke="none"
+                        >
+                          {incidentBreakdown.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip content={<EnterpriseTooltip />} />
+                        <Legend 
+                          verticalAlign="bottom" 
+                          height={36} 
+                          iconType="circle" 
+                          wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} 
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Panel>
+
+              </div>
+            </>
+          )}
         </div>
       </div>
     </Layout>
