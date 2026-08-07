@@ -83,8 +83,7 @@ export const ROOT_CAUSES = [
 export const RISK_RATINGS = [
   'Low',
   'Medium',
-  'High',
-  'Critical'
+  'High'
 ];
 
 export const STATUSES = [

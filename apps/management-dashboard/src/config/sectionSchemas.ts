@@ -57,7 +57,7 @@ export const hazardReportingSchema: SectionConfig = {
     { key: 'originator', label: 'Reported By', type: 'text', required: true, section: 'Basic Information' },
     { key: 'hazard_category_id', label: 'Hazard Category', type: 'select', options: HAZARD_CATEGORIES, required: true, section: 'Hazard Details' },
     { key: 'description', label: 'Hazard Details', type: 'textarea', required: true, section: 'Hazard Details' },
-    { key: 'unsafe_type', label: 'Type of Hazard', type: 'select', options: ['Unsafe Act', 'Unsafe Condition', 'Unsafe Environment', 'Unsafe Equipment'], section: 'Hazard Details' },
+    { key: 'unsafe_type', label: 'Type of Hazard', type: 'select', options: ['Unsafe Act', 'Unsafe Condition', 'Near Miss', 'Others'], section: 'Hazard Details' },
     { key: 'person_name', label: 'Person Name', type: 'text', section: 'Hazard Details' },
     { key: 'person_category', label: 'Person Type', type: 'select', options: ['Employee', 'Contractor', 'Visitor', 'Other'], section: 'Hazard Details' },
     { key: 'corrective_action', label: 'Corrective Action', type: 'textarea', section: 'Corrective Actions' },
@@ -68,7 +68,6 @@ export const hazardReportingSchema: SectionConfig = {
     { key: 'contractor_company', label: 'Contractor Company', type: 'select', options: CONTRACTORS, section: 'Assignment' },
     { key: 'status_id', label: 'Status', type: 'select', options: STATUSES, required: true, section: 'Assignment' },
     { key: 'initial_photo', label: 'Initial Photo', type: 'file', section: 'Attachments' },
-    { key: 'additional_photos', label: 'Additional Photos', type: 'file', section: 'Attachments' },
     { key: 'closing_proof_photo', label: 'Closing Proof Photo', type: 'file', section: 'Attachments' },
     { key: 'remarks', label: 'Remarks', type: 'textarea', section: 'Corrective Actions' }
   ]
