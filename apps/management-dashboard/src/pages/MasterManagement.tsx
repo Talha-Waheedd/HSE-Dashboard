@@ -38,8 +38,8 @@ export const MasterManagement = () => {
   return (
     <Layout>
       <ContextHeader
-        title="Master Management"
-        breadcrumbs={['Master Management', activeTab]}
+        title="Administrative Rights"
+        breadcrumbs={['Administrative Rights', activeTab]}
         subtitle="Manage master data and enterprise permissions"
         actions={[
           { label: `Add ${activeTab === 'Permissions' ? 'User' : activeTab.slice(0, -1)}`, icon: <Plus />, onClick: () => { setFormData({}); setShowAddModal(true); }, variant: 'primary' }

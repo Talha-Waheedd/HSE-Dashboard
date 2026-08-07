@@ -93,7 +93,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     ...(hasRole('System Administrator') ? [{
       label: 'ADMINISTRATION',
       items: [
-        { title: 'Master Management', href: '/master-management', Icon: Settings },
+        { title: 'Administrative Rights', href: '/master-management', Icon: Settings },
       ]
     }] : [])
   ];
