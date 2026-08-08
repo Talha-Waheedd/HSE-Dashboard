@@ -18,7 +18,7 @@ const selectClass =
   'focus:outline-none focus:border-[#7B1010] focus:ring-1 focus:ring-[#7B1010]/20 appearance-none cursor-pointer';
 
 const incidentFieldClass =
-  'h-[60px] w-full appearance-none rounded-xl border border-[#D9DDE4] bg-white px-10 text-[14px] text-[#1C1C1E] shadow-[0_1px_2px_rgba(0,0,0,0.02)] ' +
+  'h-[52px] w-full appearance-none rounded-lg border border-[#D9DDE4] bg-white px-10 text-[13px] text-[#1C1C1E] shadow-[0_1px_2px_rgba(0,0,0,0.02)] ' +
   'focus:border-[#7B1010] focus:outline-none focus:ring-2 focus:ring-[#7B1010]/10 cursor-pointer';
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -53,14 +53,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   if (isIncident) {
     return (
       <section className={`overflow-hidden rounded-xl border border-[#E3E5E9] bg-white shadow-[0_2px_8px_rgba(28,24,30,0.06)] ${className}`}>
-        <div className="flex items-center justify-between gap-4 border-b border-[#ECEEF1] px-5 py-4 sm:px-6">
+        <div className="flex items-center justify-between gap-4 border-b border-[#ECEEF1] px-4 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#F7EEF1] text-[#7B1010]">
-              <Filter className="h-8 w-8" strokeWidth={1.8} />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#F7EEF1] text-[#7B1010]">
+              <Filter className="h-6 w-6" strokeWidth={1.8} />
             </div>
             <div className="min-w-0">
-              <h2 className="text-[23px] font-bold tracking-tight text-[#241416]">Filters</h2>
-              <p className="mt-0.5 truncate text-[14px] text-[#697386]">Refine your results using the filters below</p>
+              <h2 className="text-[20px] font-bold tracking-tight text-[#241416]">Filters</h2>
+              <p className="mt-0.5 truncate text-[12px] text-[#697386]">Refine your results using the filters below</p>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-3">
@@ -69,7 +69,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <span className="hidden sm:inline">Reset All</span>
             </button>
             <span className="hidden h-7 w-px bg-[#E5E7EB] sm:block" />
-            <button type="button" onClick={() => setCollapsed(value => !value)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#D9DDE4] px-3 text-[12px] font-semibold text-[#4B5563] hover:border-[#B8A5A8] hover:bg-[#FFF9F9]">
+            <button type="button" onClick={() => setCollapsed(value => !value)} className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#D9DDE4] px-3 text-[12px] font-semibold text-[#4B5563] hover:border-[#B8A5A8] hover:bg-[#FFF9F9]">
               <span className="hidden sm:inline">{collapsed ? 'Expand' : 'Collapse'}</span>
               {collapsed ? <ChevronDown className="h-4 w-4 text-[#7B1010]" /> : <ChevronUp className="h-4 w-4 text-[#7B1010]" />}
             </button>
@@ -77,10 +77,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {!collapsed && (
-          <div className="grid grid-cols-1 gap-4 px-5 py-5 sm:grid-cols-2 lg:grid-cols-4 sm:px-6">
+          <div className="grid grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-5">
             {showYear && (
               <label className="block">
-                <span className="mb-2 block text-[12px] font-medium text-[#1C1C1E]">Year</span>
+                <span className="mb-1.5 block text-[11px] font-medium text-[#1C1C1E]">Year</span>
                 <div className="relative">
                   <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
                   <select value={filters.year} onChange={e => setFilter('year', e.target.value)} className={incidentFieldClass}>
@@ -96,7 +96,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
             {showDepartment && (
               <label className="block">
-                <span className="mb-2 block text-[12px] font-medium text-[#1C1C1E]">Department</span>
+                <span className="mb-1.5 block text-[11px] font-medium text-[#1C1C1E]">Department</span>
                 <div className="relative">
                   <Building2 className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
                   <select value={filters.department} onChange={e => setFilter('department', e.target.value)} disabled={isRestricted} className={`${incidentFieldClass} ${isRestricted ? 'cursor-not-allowed opacity-60' : ''}`}>
@@ -110,7 +110,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
             {showStatus && (
               <label className="block">
-                <span className="mb-2 block text-[12px] font-medium text-[#1C1C1E]">Status</span>
+                <span className="mb-1.5 block text-[11px] font-medium text-[#1C1C1E]">Status</span>
                 <div className="relative">
                   <CheckCircle2 className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
                   <select value={filters.status} onChange={e => setFilter('status', e.target.value)} className={incidentFieldClass}>
@@ -128,16 +128,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
             {showDateRange && (
               <div>
-                <span className="mb-2 block text-[12px] font-medium text-[#1C1C1E]">Date Range</span>
+                <span className="mb-1.5 block text-[11px] font-medium text-[#1C1C1E]">Date Range</span>
                 <div className="flex items-center gap-2">
                   <div className="relative min-w-0 flex-1">
                     <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
-                    <input type="date" aria-label="From date" value={filters.fromDate} onChange={e => setFilter('fromDate', e.target.value)} className={`${incidentFieldClass} px-10 text-[12px]`} />
+                    <input type="date" aria-label="From date" value={filters.fromDate} onChange={e => setFilter('fromDate', e.target.value)} className={`${incidentFieldClass} min-w-0 px-10 text-[12px] [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:opacity-0`} />
                   </div>
                   <span className="text-[18px] text-[#4B5563]">–</span>
                   <div className="relative min-w-0 flex-1">
                     <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
-                    <input type="date" aria-label="To date" value={filters.toDate} onChange={e => setFilter('toDate', e.target.value)} className={`${incidentFieldClass} px-10 text-[12px]`} />
+                    <input type="date" aria-label="To date" value={filters.toDate} onChange={e => setFilter('toDate', e.target.value)} className={`${incidentFieldClass} min-w-0 px-10 text-[12px] [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:opacity-0`} />
                   </div>
                 </div>
               </div>
