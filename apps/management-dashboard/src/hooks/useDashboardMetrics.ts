@@ -10,6 +10,7 @@ export interface DashboardRawData {
   drills: any[];
   legal: any[];
   audits: any[];
+  aggregate?: any;
   totalOrgManhours?: number; // Configurable / Inputted elsewhere later
 }
 
@@ -36,12 +37,13 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
       training = [], 
       inspections = [], 
       audits = [],
+      aggregate,
       totalOrgManhours = 0
     } = data;
 
     // --- Leading Indicators ---
-    const hazardSpotting = hazards.length;
-    const nearMissCount = nearMisses.length;
+    const hazardSpotting = aggregate?.hazards?.total ?? hazards.length;
+    const nearMissCount = aggregate?.nearMisses?.total ?? nearMisses.length;
     
     // Unsafe Acts
     const unsafeActs = hazards.filter(h => 
@@ -50,8 +52,11 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
       h.root_cause === 'Human Error'
     ).length;
 
-    const closedHazards = hazards.filter(h => h.status_id === 'Closed' || h.status_id === 'Close').length;
-    const hazardClosureRate = hazards.length > 0 ? Math.round((closedHazards / hazards.length) * 100) : 0;
+    const closedHazards = aggregate?.hazards
+      ? (Number(aggregate.hazards.Closed) || 0) + (Number(aggregate.hazards.closed) || 0) + (Number(aggregate.hazards.Close) || 0)
+      : hazards.filter(h => h.status_id === 'Closed' || h.status_id === 'Close').length;
+    const hazardClosureTotal = aggregate?.hazards?.total ?? hazards.length;
+    const hazardClosureRate = hazardClosureTotal > 0 ? Math.round((closedHazards / hazardClosureTotal) * 100) : 0;
 
     const totalTrainingManhours = Math.round(training.reduce((sum, t) => sum + (Number(t.manhours || t.total_manhours) || 0), 0));
     
@@ -72,7 +77,7 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
       { id: 'unsafe-acts', name: 'Unsafe Acts', value: unsafeActs, unit: 'Count', status: unsafeActs > 0 ? 'warning' : 'success', path: '/hazard-reporting', iconClass: 'text-orange-600', bgClass: 'bg-orange-100' },
       { id: 'hazard-closure', name: 'Hazard Closure', value: hazardClosureRate, unit: '%', target: 100, status: hazardClosureRate >= 80 ? 'success' : 'warning', path: '/hazard-reporting', iconClass: 'text-emerald-600', bgClass: 'bg-emerald-100' },
       { id: 'training-manhours', name: 'HSE Training Manhours', value: totalTrainingManhours, unit: 'Hrs', status: 'success', path: '/training-records', iconClass: 'text-cyan-600', bgClass: 'bg-cyan-100' },
-      { id: 'inspections', name: 'HSE Inspections/Audits', value: inspections.length + audits.length, unit: 'Count', status: 'success', path: '/audit-management', iconClass: 'text-violet-600', bgClass: 'bg-violet-100' },
+      { id: 'inspections', name: 'HSE Inspections/Audits', value: aggregate ? (Number(aggregate.inspections?.total) || 0) + (Number(aggregate.audits?.total) || 0) : inspections.length + audits.length, unit: 'Count', status: 'success', path: '/audit-management', iconClass: 'text-violet-600', bgClass: 'bg-violet-100' },
       { id: 'incident-capa-closure', name: 'Incident Inv. Actions Closure', value: incidentCapaClosureRate, unit: '%', target: 100, status: incidentCapaClosureRate >= 80 ? 'success' : 'warning', path: '/action-tracker', iconClass: 'text-indigo-600', bgClass: 'bg-indigo-100' },
       { id: 'drills', name: 'Emergency Drills (Int/Ext)', value: 'N/A', unit: 'Module Pending', status: 'neutral', isPendingModule: true },
       { id: 'capa-closure', name: 'Action Plans Closure Tracker', value: capaClosureRate, unit: '%', target: 100, status: capaClosureRate >= 80 ? 'success' : 'warning', path: '/action-tracker', iconClass: 'text-violet-600', bgClass: 'bg-violet-100' },
@@ -80,12 +85,12 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
     ];
 
     // --- Lagging Indicators ---
-    const fatalities = incidents.filter(i => i.incident_category_id === 'Fatality').length;
-    const lti = incidents.filter(i => i.incident_category_id === 'LTI').length;
-    const rwcMtc = incidents.filter(i => ['RWC', 'MTC'].includes(i.incident_category_id)).length;
-    const firstAid = incidents.filter(i => i.incident_category_id === 'First Aid').length;
-    const fireMinor = incidents.filter(i => i.incident_category_id === 'Minor Fire').length;
-    const fireMajor = incidents.filter(i => i.incident_category_id === 'Major Fire').length;
+    const fatalities = aggregate?.incidents ? Number(aggregate.incidents.Fatality) || 0 : incidents.filter(i => i.incident_category_id === 'Fatality').length;
+    const lti = aggregate?.incidents ? Number(aggregate.incidents.LTI) || 0 : incidents.filter(i => i.incident_category_id === 'LTI').length;
+    const rwcMtc = aggregate?.incidents ? (Number(aggregate.incidents.RWC) || 0) + (Number(aggregate.incidents.MTC) || 0) : incidents.filter(i => ['RWC', 'MTC'].includes(i.incident_category_id)).length;
+    const firstAid = aggregate?.incidents ? Number(aggregate.incidents['First Aid']) || 0 : incidents.filter(i => i.incident_category_id === 'First Aid').length;
+    const fireMinor = aggregate?.incidents ? Number(aggregate.incidents['Minor Fire']) || 0 : incidents.filter(i => i.incident_category_id === 'Minor Fire').length;
+    const fireMajor = aggregate?.incidents ? Number(aggregate.incidents['Major Fire']) || 0 : incidents.filter(i => i.incident_category_id === 'Major Fire').length;
     
     const recordableIncidents = fatalities + lti + rwcMtc;
     const ltir = totalOrgManhours > 0 ? ((lti * 200000) / totalOrgManhours).toFixed(2) : '0.00';

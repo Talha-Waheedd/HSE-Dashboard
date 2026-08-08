@@ -20,6 +20,7 @@ import {
   ChevronUp, ChevronDown,
 } from 'lucide-react';
 import { moduleService }        from '../services/api/moduleService';
+import { dashboardClient }      from '@cbl/api';
 import { CHART_COLORS, PIE_COLORS } from '../config/constants';
 import { useDashboardMetrics, type DashboardRawData, type MetricItem } from '../hooks/useDashboardMetrics';
 
@@ -153,6 +154,7 @@ export const Dashboard = () => {
   const [incidents,  setIncidents]  = useState<any[]>([]);
   const [capas,      setCapas]      = useState<any[]>([]);
   const [training,   setTraining]   = useState<any[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
 
   const [rawData, setRawData] = useState<DashboardRawData>({
     hazards: [], nearMisses: [], incidents: [], capas: [],
@@ -162,18 +164,23 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setDashboardStats(null);
       try {
-        const [hRes, nmRes, incRes, capRes, trRes, insRes, audRes] = await Promise.all([
-          moduleService.getAll('hazard-reporting', { page: 1, limit: 20, ...filters }),
-          moduleService.getAll('near-miss', { page: 1, limit: 20, ...filters }),
-          moduleService.getAll('incident-log', { page: 1, limit: 20, ...filters }),
-          moduleService.getAll('action-tracker', { page: 1, limit: 20, ...filters }),
-          moduleService.getAll('training-records', { page: 1, limit: 20, ...filters }),
-          moduleService.getAll('inspection-records', { page: 1, limit: 20, ...filters }),
-          moduleService.getAll('audit-management', { page: 1, limit: 20, ...filters }),
+        const [statsResponse, hRes, nmRes, incRes, capRes, trRes, insRes, audRes] = await Promise.all([
+          dashboardClient.getStats(filters).catch(() => null),
+          // Aggregate stats drive headline totals; this larger page keeps charts
+          // and category breakdowns complete for the current dashboard dataset.
+          moduleService.getAll('hazard-reporting', { page: 1, limit: 1000, ...filters }),
+          moduleService.getAll('near-miss', { page: 1, limit: 1000, ...filters }),
+          moduleService.getAll('incident-log', { page: 1, limit: 1000, ...filters }),
+          moduleService.getAll('action-tracker', { page: 1, limit: 1000, ...filters }),
+          moduleService.getAll('training-records', { page: 1, limit: 1000, ...filters }),
+          moduleService.getAll('inspection-records', { page: 1, limit: 1000, ...filters }),
+          moduleService.getAll('audit-management', { page: 1, limit: 1000, ...filters }),
         ]);
         const drRes = { data: [] };
         const legRes = { data: [] };
+        setDashboardStats(statsResponse?.data?.data ?? null);
 
         const applyFilters = (data: any[]) => {
           let f = [...data];
@@ -204,6 +211,7 @@ export const Dashboard = () => {
           training:     applyFilters(trRes.data),
           inspections:  applyFilters(insRes.data),
           audits:       applyFilters(audRes.data),
+          aggregate:    statsResponse?.data?.data ?? undefined,
           drills:       applyFilters(drRes.data),
           legal:        applyFilters(legRes.data),
           totalOrgManhours: 0,
@@ -231,25 +239,33 @@ export const Dashboard = () => {
   const { leadingMetricsDetail, laggingMetricsDetail } = useDashboardMetrics(rawData);
 
   // ===== KPI Computations (unchanged business logic) =====
-  const totalIncidents       = incidents.length;
-  const ltiCases             = incidents.filter(i => i.incident_category_id === 'LTI').length;
-  const firstAidCases        = incidents.filter(i => i.incident_category_id === 'First Aid').length;
-  const fatalities           = incidents.filter(i => i.incident_category_id === 'Fatality').length;
+  const useAggregateStats    = Boolean(dashboardStats && filters.department === 'All' && filters.status === 'All');
+  const totalIncidents       = useAggregateStats ? dashboardStats.incidents?.total : incidents.length;
+  const ltiCases             = useAggregateStats ? dashboardStats.incidents?.LTI ?? 0 : incidents.filter(i => i.incident_category_id === 'LTI').length;
+  const firstAidCases        = useAggregateStats ? dashboardStats.incidents?.['First Aid'] ?? 0 : incidents.filter(i => i.incident_category_id === 'First Aid').length;
+  const fatalities           = useAggregateStats ? dashboardStats.incidents?.Fatality ?? 0 : incidents.filter(i => i.incident_category_id === 'Fatality').length;
 
-  const totalHazards         = hazardTotal;
-  const highCriticalHazards  = hazards.filter(h => ['High', 'Critical'].includes(h.risk_rating_id)).length;
+  const totalHazards         = useAggregateStats ? dashboardStats.hazards?.total ?? 0 : hazardTotal;
+  const highCriticalHazards  = useAggregateStats && dashboardStats.hazards?.severity
+    ? (Number(dashboardStats.hazards.severity.High) || 0) + (Number(dashboardStats.hazards.severity.Critical) || 0)
+    : hazards.filter(h => ['High', 'Critical'].includes(h.risk_rating_id)).length;
 
-  const totalTrainingSessions  = training.length;
+  const totalTrainingSessions  = useAggregateStats ? dashboardStats.training?.total ?? 0 : training.length;
   const totalTrainingManhours  = Math.round(training.reduce((sum, t) => sum + (Number(t.manhours) || 0), 0));
 
-  const totalOpenCapas   = capas.filter(c => ['Open', 'Pending', 'Work in Progress'].includes(c.status_id)).length;
-  const totalClosedCapas = capas.filter(c => c.status_id === 'Close' || c.status_id === 'Closed').length;
+  const totalOpenCapas   = useAggregateStats && dashboardStats.correctiveActions
+    ? ['Open', 'Pending', 'Work in Progress'].reduce((sum, status) => sum + (Number(dashboardStats.correctiveActions[status]) || 0), 0)
+    : capas.filter(c => ['Open', 'Pending', 'Work in Progress'].includes(c.status_id)).length;
+  const totalClosedCapas = useAggregateStats && dashboardStats.correctiveActions
+    ? (Number(dashboardStats.correctiveActions.Closed) || 0) + (Number(dashboardStats.correctiveActions.Close) || 0)
+    : capas.filter(c => c.status_id === 'Close' || c.status_id === 'Closed').length;
   const overdueCapas     = capas.filter(c => {
     if (['Close','Closed'].includes(c.status_id)) return false;
     if (!c.due_date) return false;
     return new Date(c.due_date) < new Date();
   }).length;
-  const closureRateCAPA  = capas.length > 0 ? Math.round((totalClosedCapas / capas.length) * 100) : 0;
+  const totalCapas       = useAggregateStats ? dashboardStats.correctiveActions?.total ?? 0 : capas.length;
+  const closureRateCAPA  = totalCapas > 0 ? Math.round((totalClosedCapas / totalCapas) * 100) : 0;
 
   // ===== Chart Data (unchanged) =====
   const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -355,7 +371,7 @@ export const Dashboard = () => {
             unit="%"
             accent={closureRateCAPA >= 80 ? 'success' : closureRateCAPA >= 50 ? 'warning' : 'danger'}
             icon={<CheckCircle2 />}
-            subtleLine={`${totalClosedCapas}/${capas.length} CAPAs done`}
+            subtleLine={`${totalClosedCapas}/${totalCapas} CAPAs done`}
             onClick={() => navigate('/action-tracker')}
           />
           <KpiTile

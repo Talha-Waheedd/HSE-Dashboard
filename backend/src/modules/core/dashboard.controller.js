@@ -7,7 +7,7 @@ const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
  * Get HSE dashboard statistics
  */
 const getHseStats = asyncHandler(async (req, res) => {
-  const stats = await dashboardService.getHseStats(req.query.plantId);
+  const stats = await dashboardService.getHseStats(req.query);
   res.status(200).json(ApiResponse.success(stats, 'Dashboard statistics retrieved successfully'));
 });
 
