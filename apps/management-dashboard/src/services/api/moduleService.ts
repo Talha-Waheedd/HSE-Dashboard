@@ -105,7 +105,7 @@ export const moduleService = {
     } else if (schemaId === 'incident-log') {
       payload = {
         ...payload,
-        plantId: payload.plantId || '44bd548d-0e22-40ba-a8e6-c037931c2a63',
+        plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b', // CBL Plant Alpha
         title: payload.description ? payload.description.substring(0, 50) : 'Incident Log',
         description: payload.description || 'No description provided',
         incidentDate: payload.date || new Date().toISOString(),
