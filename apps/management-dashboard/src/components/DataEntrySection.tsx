@@ -1444,7 +1444,12 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           ) : (
             <div className="space-y-3">
               {entries.map((inc: any) => (
-                <IncidentCard key={inc.id} incident={inc} onClick={() => startEdit(inc)} />
+                <IncidentCard
+                  key={inc.id}
+                  incident={inc}
+                  onClick={() => navigate(`/incident-log/${inc.id}`)}
+                  onViewDetails={() => navigate(`/incident-log/${inc.id}`)}
+                />
               ))}
             </div>
           )}

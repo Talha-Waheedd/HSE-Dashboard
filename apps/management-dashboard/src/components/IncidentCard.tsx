@@ -23,12 +23,14 @@ interface Incident {
 interface IncidentCardProps {
   incident: Incident;
   onClick?: () => void;
+  onViewDetails?: () => void;
   className?: string;
 }
 
 export const IncidentCard: React.FC<IncidentCardProps> = ({
   incident,
   onClick,
+  onViewDetails,
   className = '',
 }) => {
   return (
@@ -77,9 +79,16 @@ export const IncidentCard: React.FC<IncidentCardProps> = ({
             {incident.rca_status && (
               <span className="uppercase tracking-wide mt-1">RCA: {incident.rca_status}</span>
             )}
-            <span className="flex items-center gap-1 text-[var(--brand-maroon)] mt-2 hover:underline">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onViewDetails?.();
+              }}
+              className="flex items-center gap-1 text-[var(--brand-maroon)] mt-2 hover:underline"
+            >
               View Details <ChevronRight className="w-3 h-3" />
-            </span>
+            </button>
           </div>
         </div>
       </div>
