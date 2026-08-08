@@ -166,17 +166,26 @@ export const Dashboard = () => {
       setLoading(true);
       setDashboardStats(null);
       try {
+        const safeModuleRequest = (schemaId: string) =>
+          moduleService.getAll(schemaId, { page: 1, limit: 1000, ...filters }).catch((error) => {
+            console.error(`Dashboard ${schemaId} request failed:`, error);
+            return { data: [], meta: { total: 0 } };
+          });
+
         const [statsResponse, hRes, nmRes, incRes, capRes, trRes, insRes, audRes] = await Promise.all([
-          dashboardClient.getStats(filters).catch(() => null),
+          dashboardClient.getStats(filters as unknown as Record<string, unknown>).catch((error) => {
+            console.error('Dashboard aggregate stats request failed:', error);
+            return null;
+          }),
           // Aggregate stats drive headline totals; this larger page keeps charts
           // and category breakdowns complete for the current dashboard dataset.
-          moduleService.getAll('hazard-reporting', { page: 1, limit: 1000, ...filters }),
-          moduleService.getAll('near-miss', { page: 1, limit: 1000, ...filters }),
-          moduleService.getAll('incident-log', { page: 1, limit: 1000, ...filters }),
-          moduleService.getAll('action-tracker', { page: 1, limit: 1000, ...filters }),
-          moduleService.getAll('training-records', { page: 1, limit: 1000, ...filters }),
-          moduleService.getAll('inspection-records', { page: 1, limit: 1000, ...filters }),
-          moduleService.getAll('audit-management', { page: 1, limit: 1000, ...filters }),
+          safeModuleRequest('hazard-reporting'),
+          safeModuleRequest('near-miss'),
+          safeModuleRequest('incident-log'),
+          safeModuleRequest('action-tracker'),
+          safeModuleRequest('training-records'),
+          safeModuleRequest('inspection-records'),
+          safeModuleRequest('audit-management'),
         ]);
         const drRes = { data: [] };
         const legRes = { data: [] };
