@@ -447,6 +447,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (result.success) {
       setFormData({});
       setIsAddModalOpen(false);
+      window.dispatchEvent(new CustomEvent('dashboard-refresh'));
     } else {
       setValidationError(result.message || 'Failed to save record. Please check your data.');
       document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });

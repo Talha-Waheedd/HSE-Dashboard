@@ -17,16 +17,24 @@ const createHazard = asyncHandler(async (req, res) => {
 const getAllHazards = asyncHandler(async (req, res) => {
   const options = {
     limit: parseInt(req.query.limit, 10) || 10,
-    offset: parseInt(req.query.offset, 10) || 0,
+    offset: req.query.offset !== undefined
+      ? parseInt(req.query.offset, 10) || 0
+      : ((parseInt(req.query.page, 10) || 1) - 1) * (parseInt(req.query.limit, 10) || 10),
     where: {},
+    order: [['createdAt', 'DESC']],
   };
   
   if (req.query.plantId) options.where.plantId = req.query.plantId;
-  if (req.query.status) options.where.status = req.query.status;
+  if (req.query.status && req.query.status !== 'All') options.where.status = req.query.status;
   if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
 
-  const hazards = await hazardService.getAllHazards(options);
-  res.status(200).json(ApiResponse.success(hazards, 'Hazards retrieved successfully'));
+  const result = await hazardService.getAllHazards(options);
+  res.status(200).json(ApiResponse.success(result.rows, 'Hazards retrieved successfully', {
+    page: Math.floor(options.offset / options.limit) + 1,
+    limit: options.limit,
+    total: result.count,
+    totalPages: Math.ceil(result.count / options.limit),
+  }));
 });
 
 /**

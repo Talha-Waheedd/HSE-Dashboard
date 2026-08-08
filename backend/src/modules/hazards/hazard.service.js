@@ -31,7 +31,7 @@ class HazardService {
    * Get all hazards
    */
   async getAllHazards(options = {}) {
-    return hazardRepository.findAll(options);
+    return hazardRepository.findAndCountAll(options);
   }
 
   /**

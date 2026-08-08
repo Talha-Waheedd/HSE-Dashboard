@@ -148,6 +148,7 @@ export const Dashboard = () => {
   const [isLaggingOpen, setIsLaggingOpen] = useState(false);
 
   const [hazards,    setHazards]    = useState<any[]>([]);
+  const [hazardTotal, setHazardTotal] = useState(0);
   const [nearMisses, setNearMisses] = useState<any[]>([]);
   const [incidents,  setIncidents]  = useState<any[]>([]);
   const [capas,      setCapas]      = useState<any[]>([]);
@@ -187,7 +188,9 @@ export const Dashboard = () => {
           return f;
         };
 
-        setHazards(applyFilters(hRes.data));
+        const filteredHazards = applyFilters(hRes.data);
+        setHazards(filteredHazards);
+        setHazardTotal(hRes.meta?.total ?? filteredHazards.length);
         setNearMisses(applyFilters(nmRes.data));
         setIncidents(applyFilters(incRes.data));
         setCapas(applyFilters(capRes.data));
@@ -213,12 +216,15 @@ export const Dashboard = () => {
     };
     fetchData();
 
+    const refreshInterval = window.setInterval(fetchData, 30000);
+
     const handleRefresh = () => {
       fetchData();
     };
     window.addEventListener('dashboard-refresh', handleRefresh);
     return () => {
       window.removeEventListener('dashboard-refresh', handleRefresh);
+      window.clearInterval(refreshInterval);
     };
   }, [filters]);
 
@@ -230,7 +236,7 @@ export const Dashboard = () => {
   const firstAidCases        = incidents.filter(i => i.incident_category_id === 'First Aid').length;
   const fatalities           = incidents.filter(i => i.incident_category_id === 'Fatality').length;
 
-  const totalHazards         = hazards.length;
+  const totalHazards         = hazardTotal;
   const highCriticalHazards  = hazards.filter(h => ['High', 'Critical'].includes(h.risk_rating_id)).length;
 
   const totalTrainingSessions  = training.length;
