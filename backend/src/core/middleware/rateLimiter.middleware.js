@@ -6,30 +6,38 @@ const { MESSAGES } = require('../../shared/constants/messages');
 const ApiResponse = require('../../shared/utils/ApiResponse');
 const { HTTP_STATUS } = require('../../shared/constants/httpStatus');
 
-const handler = (req, res, next) => {
+const handler = (req, res) => {
   res.status(HTTP_STATUS.TOO_MANY_REQUESTS).json(
     ApiResponse.error(MESSAGES.RATE_LIMIT_EXCEEDED),
   );
 };
 
-// Disable rate limits in development to prevent 429 errors from hot-reloading
-const bypass = (req, res, next) => next();
+const globalRateLimiter = rateLimit({
+  windowMs: config.rateLimiter.windowMs,
+  limit: config.rateLimiter.max,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler,
+  skip: () => config.env === 'test',
+});
 
-/**
- * Global rate limiter — applied to all routes.
- */
-const globalRateLimiter = bypass;
+const authRateLimiter = rateLimit({
+  windowMs: config.rateLimiter.windowMs,
+  limit: config.rateLimiter.authMax,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler,
+  skip: () => config.env === 'test',
+});
 
-/**
- * Strict rate limiter for authentication endpoints.
- * 10 attempts per 15 minutes.
- */
-const authRateLimiter = bypass;
-
-/**
- * API key-based rate limiter (per user).
- * Apply after authentication.
- */
-const userRateLimiter = bypass;
+const userRateLimiter = rateLimit({
+  windowMs: config.rateLimiter.windowMs,
+  limit: config.rateLimiter.max,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id || req.ip,
+  handler,
+  skip: () => config.env === 'test',
+});
 
 module.exports = { globalRateLimiter, authRateLimiter, userRateLimiter };

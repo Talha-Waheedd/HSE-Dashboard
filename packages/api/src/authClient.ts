@@ -12,7 +12,7 @@ export interface BackendUser {
   name?: string;
   firstName?: string;
   lastName?: string;
-  role?: string;
+  role?: string | { name?: string; permissions?: Array<{ key: string }> };
   roles?: string[];
   permissions?: string[];
   department_id?: string;

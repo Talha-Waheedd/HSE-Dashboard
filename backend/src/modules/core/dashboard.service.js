@@ -5,6 +5,7 @@ const nearMissRepository = require('../../repositories/near-miss.repository');
 const incidentRepository = require('../../repositories/incident.repository');
 const correctiveActionRepository = require('../../repositories/corrective-action.repository');
 const { Hazard, TrainingSession, HseAudit, Inspection } = require('../../database/models');
+const { Department } = require('../../database/models');
 const { Op } = require('sequelize');
 
 class DashboardService {
@@ -16,6 +17,24 @@ class DashboardService {
     const filter = {};
     if (query.plantId) filter.plantId = query.plantId;
 
+    if (query.department && query.department !== 'All') {
+      const department = await Department.findOne({
+        where: { [Op.or]: [{ code: query.department }, { name: query.department }] },
+        attributes: ['id'],
+      });
+      filter.departmentId = department?.id || '__no_matching_department__';
+    }
+
+    const statusMap = {
+      Open: ['reported', 'submitted'],
+      Pending: ['draft', 'under_investigation', 'under_review'],
+      'Work in Progress': ['corrective_action'],
+      Closed: ['closed'],
+    };
+    if (query.status && query.status !== 'All') {
+      filter.status = statusMap[query.status] || query.status;
+    }
+
     // Dashboard date filters use the timestamp common to every persisted record.
     // This keeps aggregate totals aligned with the same year/date window as the UI.
     const year = query.year && query.year !== 'All' ? String(query.year) : null;
@@ -23,11 +42,23 @@ class DashboardService {
     const toDate = query.toDate
       ? (String(query.toDate).length === 10 ? `${query.toDate} 23:59:59` : query.toDate)
       : (year ? `${year}-12-31 23:59:59` : null);
-    if (fromDate || toDate) {
-      filter.createdAt = {};
-      if (fromDate) filter.createdAt[Op.gte] = fromDate;
-      if (toDate) filter.createdAt[Op.lte] = toDate;
-    }
+    const dateRange = {};
+    if (fromDate) dateRange[Op.gte] = fromDate;
+    if (toDate) dateRange[Op.lte] = toDate;
+    const whereFor = (dateField, fallbackCreatedAt = false) => {
+      const where = { ...filter };
+      delete where.status;
+      if (fromDate || toDate) {
+        where[Op.or] = fallbackCreatedAt
+          ? [{ [dateField]: dateRange }, { createdAt: dateRange }]
+          : { [dateField]: dateRange };
+      }
+      return where;
+    };
+    const withStatus = (where, statuses = filter.status) => {
+      if (statuses) where.status = statuses;
+      return where;
+    };
 
     const [
       hazards,
@@ -39,20 +70,20 @@ class DashboardService {
       audits,
       inspections,
     ] = await Promise.all([
-      hazardRepository.countByStatus(filter),
+      hazardRepository.countByStatus(withStatus(whereFor('reportedAt', true))),
       Hazard.findAll({
         attributes: ['severityLevel', [Hazard.sequelize.fn('COUNT', 'id'), 'count']],
-        where: filter,
+        where: withStatus(whereFor('reportedAt', true)),
         group: ['severityLevel'],
         raw: true,
       }),
       // NearMissRepo doesn't have a specific count method yet, but we can use count
-      nearMissRepository.model.count({ where: filter }),
-      incidentRepository.countByTypeAndStatus(filter),
-      correctiveActionRepository.countByStatus(filter),
-      TrainingSession.count({ where: filter }),
-      HseAudit.count({ where: filter }),
-      Inspection.count({ where: filter }),
+      nearMissRepository.model.count({ where: withStatus(whereFor('reportedAt', true)) }),
+      incidentRepository.countByTypeAndStatus(withStatus(whereFor('incidentDate'))),
+      correctiveActionRepository.countByStatus(withStatus(whereFor('dueDate', true))),
+      TrainingSession.count({ where: withStatus(whereFor('scheduledDate', true)) }),
+      HseAudit.count({ where: withStatus(whereFor('scheduledDate', true)) }),
+      Inspection.count({ where: withStatus(whereFor('scheduledDate', true)) }),
     ]);
 
     // Format hazards by status
@@ -61,21 +92,31 @@ class DashboardService {
       acc.total = (acc.total || 0) + parseInt(curr.count, 10);
       return acc;
     }, { total: 0 });
+    const displaySeverity = (value) => {
+      const text = String(value || '');
+      return text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : 'Unknown';
+    };
+    const displayIncidentType = (value) => ({
+      first_aid: 'First Aid', mtc: 'MTC', lti: 'LTI', rwc: 'RWC', fatality: 'Fatality',
+      minor_fire: 'Minor Fire', significant_near_miss: 'Significant Near Miss',
+    }[String(value || '').toLowerCase()] || value);
     formattedHazards.severity = hazardSeverity.reduce((acc, curr) => {
-      acc[curr.severityLevel] = parseInt(curr.count, 10);
+      acc[displaySeverity(curr.severityLevel)] = parseInt(curr.count, 10);
       return acc;
     }, {});
 
     // Format incidents by type
     const formattedIncidents = incidents.reduce((acc, curr) => {
-      acc[curr.incidentType] = (acc[curr.incidentType] || 0) + parseInt(curr.count, 10);
+      const type = displayIncidentType(curr.incidentType);
+      acc[type] = (acc[type] || 0) + parseInt(curr.count, 10);
       acc.total = (acc.total || 0) + parseInt(curr.count, 10);
       return acc;
     }, { total: 0 });
 
     // Format corrective actions by status
     const formattedActions = actions.reduce((acc, curr) => {
-      acc[curr.status] = parseInt(curr.count, 10);
+      const status = ({ open: 'Open', in_progress: 'Work in Progress', completed: 'Closed', verified: 'Closed', overdue: 'Pending', cancelled: 'Cancelled' }[String(curr.status || '').toLowerCase()] || curr.status);
+      acc[status] = (acc[status] || 0) + parseInt(curr.count, 10);
       acc.total = (acc.total || 0) + parseInt(curr.count, 10);
       return acc;
     }, { total: 0 });

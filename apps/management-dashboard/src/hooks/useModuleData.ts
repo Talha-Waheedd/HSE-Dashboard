@@ -10,7 +10,7 @@ export const useModuleData = (schemaId: string) => {
     if (!schemaId) return;
     setLoading(true);
     try {
-      const response = await moduleService.getAll(schemaId, { page: 1, limit: 20, ...params });
+      const response = await moduleService.getAll(schemaId, { page: 1, limit: 1000, ...(params as Record<string, unknown>) });
       if (response.success) {
         setData(Array.isArray(response.data) ? response.data : []);
         setError(null);
@@ -63,6 +63,19 @@ export const useModuleData = (schemaId: string) => {
     }
   };
 
+  const updateStatus = async (id: string, status: string) => {
+    try {
+      const response = await moduleService.updateStatus(schemaId, id, status);
+      if (response.success) {
+        await fetchAll();
+        return { success: true };
+      }
+      return { success: false, message: response.message };
+    } catch (err: any) {
+      return { success: false, message: err.response?.data?.message || err.message };
+    }
+  };
+
   return {
     data,
     loading,
@@ -71,6 +84,7 @@ export const useModuleData = (schemaId: string) => {
     createRecord,
     updateRecord,
     deleteRecord
+    , updateStatus
   };
 };
 

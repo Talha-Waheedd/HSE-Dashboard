@@ -90,7 +90,8 @@ class AuthController {
    *         description: User not authorized
    */
   verifyEmailExists = asyncHandler(async (req, res) => {
-    const { email } = req.body;
+    const { email, msalToken } = req.body;
+    await authService.verifyMicrosoftToken(msalToken, email);
     const user = await authService.verifyEmailExists(email);
 
     if (user && user.status === true) {

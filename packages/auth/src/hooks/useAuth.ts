@@ -55,9 +55,10 @@ export const useAuth = () => {
               scopes: ["user.read"],
               account: account
             });
-            msalToken = tokenResponse.idToken || tokenResponse.accessToken;
+            msalToken = tokenResponse.idToken;
           } catch (e) {
-            console.warn("Silent token acquisition failed, proceeding with email only.", e);
+            console.warn("Silent token acquisition failed.", e);
+            throw new Error("Unable to verify Microsoft identity. Please retry sign-in.");
           }
 
           const verifyResponse = await authClient.verifyEmail(email, msalToken);
@@ -67,13 +68,19 @@ export const useAuth = () => {
           }
 
           const backendUser = verifyResponse.user;
+          const roleName = typeof backendUser.role === 'object'
+            ? backendUser.role?.name
+            : backendUser.role;
+          const rolePermissions = typeof backendUser.role === 'object'
+            ? backendUser.role?.permissions?.map((p) => p.key)
+            : undefined;
           const authUser = {
             id: backendUser.id.toString(),
             email: backendUser.email,
             name: backendUser.name || `${backendUser.firstName || ''} ${backendUser.lastName || ''}`.trim(),
-            role: (typeof backendUser.role === 'object' ? backendUser.role?.name : backendUser.role) || (backendUser.roles?.[0]) || 'Viewer',
+            role: roleName || backendUser.roles?.[0] || 'Viewer',
             roles: backendUser.roles,
-            permissions: backendUser.permissions || (backendUser.role?.permissions?.map((p: any) => p.key)) || [],
+            permissions: backendUser.permissions || rolePermissions || [],
             department_id: backendUser.department_id?.toString() || backendUser.departmentId?.toString(),
             plant_id: backendUser.plant_id?.toString() || backendUser.plantId?.toString()
           };

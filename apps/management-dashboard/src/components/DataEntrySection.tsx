@@ -23,7 +23,6 @@ import { MyPendingWidget } from './MyPendingWidget';
 import { IncidentCard } from './IncidentCard';
 import { SafetyEventTimeline } from './SafetyEventTimeline';
 import { uploadClient } from '../../../../packages/api/src/uploadClient';
-import { moduleService } from '../services/api/moduleService';
 import { apiClient } from '@cbl/api';
 
 interface DataEntrySectionProps {
@@ -163,10 +162,19 @@ const ActionTrackerWorkspace = ({
 }: {
   schema: SectionConfig;
 }) => {
-  const { data: cards, loading, fetchAll } = useModuleData(schema.id);
+  const { data: cards, loading, fetchAll, createRecord, updateStatus, deleteRecord } = useModuleData(schema.id);
   const [showAddCard, setShowAddCard] = useState(false);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>({});
+
+  const saveAction = async () => {
+    const result = await createRecord(formData);
+    if (result.success) {
+      setFormData({});
+      setShowAddCard(false);
+      await fetchAll();
+    }
+  };
 
   useEffect(() => {
     fetchAll();
@@ -262,13 +270,13 @@ const ActionTrackerWorkspace = ({
               </div>
 
               <div className="flex flex-wrap gap-2 mt-5">
-                <button className="h-8 px-3 text-[12px] font-medium rounded-md bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] hover:bg-[#D1FAE5] transition-colors">
+                <button onClick={() => updateStatus(String(card.id), 'closed')} className="h-8 px-3 text-[12px] font-medium rounded-md bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] hover:bg-[#D1FAE5] transition-colors">
                   Complete
                 </button>
-                <button className="h-8 px-3 text-[12px] font-medium rounded-md bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] hover:bg-[#FEE2E2] transition-colors">
+                <button onClick={() => updateStatus(String(card.id), 'cancelled')} className="h-8 px-3 text-[12px] font-medium rounded-md bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] hover:bg-[#FEE2E2] transition-colors">
                   Cancel
                 </button>
-                <button className="h-8 px-3 text-[12px] font-medium rounded-md bg-white text-[#6B7280] border border-[#DEDEDE] hover:bg-[#F5F5F5] transition-colors">
+                <button onClick={() => deleteRecord(String(card.id))} className="h-8 px-3 text-[12px] font-medium rounded-md bg-white text-[#6B7280] border border-[#DEDEDE] hover:bg-[#F5F5F5] transition-colors">
                   Delete
                 </button>
               </div>
@@ -309,7 +317,7 @@ const ActionTrackerWorkspace = ({
           <button className="h-9 px-4 text-[13px] font-medium rounded-md border border-[#DEDEDE] text-[#374151] hover:bg-[#F5F5F5]" onClick={() => setShowAddCard(false)}>
             Cancel
           </button>
-          <button className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#CB0017] text-white hover:bg-[#A8001A]">
+          <button onClick={saveAction} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#CB0017] text-white hover:bg-[#A8001A]">
             Save Action
           </button>
         </div>
@@ -350,7 +358,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
 
-  useEffect(() => { fetchAll(); }, [schema.id, fetchAll]);
+  useEffect(() => { fetchAll(filters as unknown as Record<string, unknown>); }, [schema.id, fetchAll, filters]);
   useEffect(() => { setCurrentPage(1); }, [filters, searchQuery, schema.id]);
 
   const applyComputes = (data: any, currentSchema: SectionConfig, allEntries: any[]) => {
@@ -1434,16 +1442,16 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         <div className="flex-1 space-y-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-[14px] font-bold text-[#1C1C1E]">Recent Incidents</h2>
-            <span className="text-[12px] text-[#6B7280]">{entries.length} records</span>
+             <span className="text-[12px] text-[#6B7280]">{searchedEntries.length} records</span>
           </div>
 
           {loading ? (
             <p className="text-[13px] text-[#9CA3AF]">Loading incidents...</p>
-          ) : entries.length === 0 ? (
+          ) : searchedEntries.length === 0 ? (
             <p className="text-[13px] text-[#9CA3AF]">No incidents found.</p>
           ) : (
             <div className="space-y-3">
-              {entries.map((inc: any) => (
+              {pagedEntries.map((inc: any) => (
                 <IncidentCard
                   key={inc.id}
                   incident={inc}

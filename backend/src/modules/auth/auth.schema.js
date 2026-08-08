@@ -41,6 +41,7 @@ const refreshTokenSchema = Joi.object({
 
 const verifyEmailSchema = Joi.object({
   email: Joi.string().email().lowercase().trim().required(),
+  msalToken: Joi.string().required(),
 });
 
 module.exports = {

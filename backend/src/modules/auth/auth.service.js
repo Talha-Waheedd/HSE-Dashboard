@@ -10,8 +10,44 @@ const ApiError = require('../../shared/utils/ApiError');
 const TokenType = require('../../shared/enums/TokenType');
 const { MESSAGES } = require('../../shared/constants/messages');
 const { emitter, EVENTS } = require('../../core/events/emitter');
+const jwt = require('jsonwebtoken');
+const jwksRsa = require('jwks-rsa');
+const config = require('../../database/config');
 
 class AuthService {
+  async verifyMicrosoftToken(token, email) {
+    if (!token || !config.msal.clientId || !config.msal.tenantId) {
+      throw ApiError.unauthorized('Microsoft identity token is required');
+    }
+
+    const issuer = `https://login.microsoftonline.com/${config.msal.tenantId}/v2.0`;
+    const client = jwksRsa({
+      jwksUri: `https://login.microsoftonline.com/${config.msal.tenantId}/discovery/v2.0/keys`,
+      cache: true,
+      rateLimit: true,
+    });
+
+    const getKey = (header, callback) => {
+      client.getSigningKey(header.kid)
+        .then((key) => callback(null, key.getPublicKey()))
+        .catch((error) => callback(error));
+    };
+
+    const payload = await new Promise((resolve, reject) => {
+      jwt.verify(token, getKey, {
+        algorithms: ['RS256'],
+        audience: config.msal.clientId,
+        issuer,
+      }, (error, decoded) => (error ? reject(error) : resolve(decoded)));
+    }).catch(() => { throw ApiError.unauthorized('Invalid Microsoft identity token'); });
+
+    const tokenEmail = String(payload.preferred_username || payload.email || payload.upn || '').toLowerCase();
+    if (!tokenEmail || tokenEmail !== String(email).toLowerCase()) {
+      throw ApiError.unauthorized('Microsoft identity does not match the requested account');
+    }
+    return payload;
+  }
+
   /**
    * Register a new user.
    */

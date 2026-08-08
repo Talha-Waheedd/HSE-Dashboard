@@ -14,8 +14,8 @@ const injurySchema = Joi.object({
 const createIncidentSchema = Joi.object({
   plantId: Joi.string().uuid().required(),
   departmentId: Joi.string().uuid().optional().allow(null),
-  incidentType: Joi.string().required(),
-  severityLevel: Joi.string().required(),
+  incidentType: Joi.string().valid(...Object.values(IncidentType), 'general').required(),
+  severityLevel: Joi.string().valid(...Object.values(SeverityLevel)).required(),
   title: Joi.string().max(255).required(),
   description: Joi.string().required(),
   location: Joi.string().max(255).optional(),
@@ -27,7 +27,7 @@ const createIncidentSchema = Joi.object({
   restrictedDays: Joi.number().integer().min(0).optional(),
   firstAidGiven: Joi.boolean().default(false).optional(),
   immediateAction: Joi.string().optional(),
-  status: Joi.string().optional(),
+  status: Joi.string().valid(...Object.values(IncidentStatus)).optional(),
   injuries: Joi.array().items(injurySchema).optional(),
   metadata: Joi.object().optional(),
 });
@@ -35,8 +35,8 @@ const createIncidentSchema = Joi.object({
 const updateIncidentSchema = Joi.object({
   plantId: Joi.string().uuid().optional(),
   departmentId: Joi.string().uuid().optional().allow(null),
-  incidentType: Joi.string().optional(),
-  severityLevel: Joi.string().optional(),
+  incidentType: Joi.string().valid(...Object.values(IncidentType), 'general').optional(),
+  severityLevel: Joi.string().valid(...Object.values(SeverityLevel)).optional(),
   title: Joi.string().max(255).optional(),
   description: Joi.string().optional(),
   location: Joi.string().max(255).optional(),

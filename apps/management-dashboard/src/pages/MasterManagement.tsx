@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
-import { Plus, Users, Building2, Shield, Trash2, Check, X } from 'lucide-react';
+import { Plus, Building2, Shield, Trash2 } from 'lucide-react';
 import { DEPARTMENTS } from '../config/constants';
 import { CenterModal } from '../components/CenterModal';
 

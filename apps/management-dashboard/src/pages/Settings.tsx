@@ -7,7 +7,6 @@ import { useAuth, useAuthStore } from '@cbl/auth';
 import { useTheme } from '../context/ThemeContext';
 import {
   Bell,
-  Check,
   ChevronRight,
   Database,
   LayoutGrid,

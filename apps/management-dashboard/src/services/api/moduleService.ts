@@ -25,6 +25,41 @@ const getEndpoint = (schemaId: string): string => {
   return endpoint;
 };
 
+const statusToApi = (value: unknown, schemaId: string) => {
+  const status = String(value || '').trim();
+  if (!status) return undefined;
+  if (schemaId === 'action-tracker') {
+    return ({ Open: 'open', Pending: 'open', 'Work in Progress': 'in_progress', Closed: 'completed', Cancelled: 'cancelled' }[status] || status.toLowerCase().replaceAll(' ', '_'));
+  }
+  const common: Record<string, string> = {
+    Open: schemaId === 'hazard-reporting' ? 'submitted' : 'reported',
+    Pending: schemaId === 'hazard-reporting' ? 'under_review' : 'under_investigation',
+    'Work in Progress': schemaId === 'hazard-reporting' ? 'under_review' : 'corrective_action',
+    Closed: 'closed',
+    Cancelled: 'closed',
+  };
+  return common[status] || status.toLowerCase().replaceAll(' ', '_');
+};
+
+const severityToApi = (value: unknown) => String(value || '').trim().toLowerCase() || undefined;
+const categoryToApi = (value: unknown) => {
+  const text = String(value || '').trim().toLowerCase();
+  const known = ['physical', 'chemical', 'biological', 'ergonomic', 'electrical', 'fire', 'environmental', 'behavioral', 'other'];
+  return known.includes(text) ? text : 'other';
+};
+const statusFromApi = (value: unknown) => ({
+  draft: 'Pending', reported: 'Open', submitted: 'Open', under_review: 'Pending',
+  under_investigation: 'Pending', corrective_action: 'Work in Progress', closed: 'Closed',
+}[String(value || '').toLowerCase()] || value);
+const severityFromApi = (value: unknown) => {
+  const text = String(value || '');
+  return text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : value;
+};
+const categoryFromApi = (value: unknown) => ({
+  first_aid: 'First Aid', mtc: 'MTC', lti: 'LTI', rwc: 'RWC', fatality: 'Fatality',
+  minor_fire: 'Minor Fire', significant_near_miss: 'Significant Near Miss',
+}[String(value || '').toLowerCase()] || value);
+
 export const moduleService = {
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
     const endpoint = getEndpoint(schemaId);
@@ -42,16 +77,17 @@ export const moduleService = {
       rawData = rawData.map((item: any) => ({
         ...item,
         hazard_category_id: item.metadata?.hazard_category_id || item.category || item.hazard_category_id,
-        risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel || item.severity_level,
+        risk_rating_id: item.metadata?.risk_rating_id || severityFromApi(item.severityLevel || item.severity_level),
         description: item.metadata?.description || item.description || item.title,
         date: item.metadata?.date || item.reportedAt || item.reported_at || item.createdAt || item.created_at || new Date().toISOString(),
+        status_id: item.metadata?.status_id || statusFromApi(item.status),
         department_id: item.metadata?.department_id || item.departmentId || item.department_id,
       }));
     } else if (schemaId === 'near-miss') {
       rawData = rawData.map((item: any) => ({
         ...item,
         details: item.metadata?.details || item.description,
-        investigation_required: item.metadata?.investigation_required || (item.severityLevel === 'High' || item.severity_level === 'High' ? 'Yes' : 'No'),
+        investigation_required: item.metadata?.investigation_required || (String(item.severityLevel || item.severity_level).toLowerCase() === 'high' ? 'Yes' : 'No'),
         preventive_action: item.metadata?.preventive_action || item.immediateAction || item.action_taken,
         date: item.metadata?.date || item.reportedAt || item.reported_at || item.createdAt || item.created_at || new Date().toISOString(),
         department_id: item.metadata?.department_id || item.departmentId || item.department_id,
@@ -61,11 +97,11 @@ export const moduleService = {
         ...item,
         description: item.metadata?.description || item.description,
         date: item.metadata?.date || item.incidentDate || item.incident_date || item.createdAt || item.created_at || new Date().toISOString(),
-        incident_category_id: item.metadata?.incident_category_id || item.incidentType || item.category,
-        risk_rating_id: item.metadata?.risk_rating_id || item.severityLevel || item.severity_level,
+        incident_category_id: item.metadata?.incident_category_id || categoryFromApi(item.incidentType || item.category),
+        risk_rating_id: item.metadata?.risk_rating_id || severityFromApi(item.severityLevel || item.severity_level),
         immediate_cause: item.metadata?.immediate_cause || item.immediateAction || item.action_taken,
         root_cause: item.metadata?.root_cause || item.rootCause,
-        status_id: item.metadata?.status_id || item.status,
+        status_id: item.metadata?.status_id || statusFromApi(item.status),
         department_id: item.metadata?.department_id || item.departmentId || item.department_id,
       }));
     }
@@ -87,20 +123,21 @@ export const moduleService = {
       payload = {
         ...payload,
         plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b', // CBL Plant Alpha
-        category: payload.hazard_category_id || 'other',
-        severityLevel: payload.risk_rating_id || 'low',
+        category: categoryToApi(payload.hazard_category_id),
+        severityLevel: severityToApi(payload.risk_rating_id || 'low'),
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
+        status: statusToApi(payload.status_id || 'Open', schemaId),
       };
     } else if (schemaId === 'near-miss') {
       payload = {
         ...payload,
-        plantId: payload.plantId || '44bd548d-0e22-40ba-a8e6-c037931c2a63',
+        plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b',
         title: payload.details ? payload.details.substring(0, 50) : 'Near Miss',
         description: payload.details || 'No details provided',
-        severityLevel: payload.investigation_required === 'Yes' ? 'High' : 'Low',
+        severityLevel: payload.investigation_required === 'Yes' ? 'high' : 'low',
         immediateAction: payload.preventive_action,
         reportedAt: payload.date,
-        status: payload.status || 'Open'
+        status: statusToApi(payload.status || 'Open', schemaId)
       };
     } else if (schemaId === 'incident-log') {
       payload = {
@@ -109,11 +146,11 @@ export const moduleService = {
         title: payload.description ? payload.description.substring(0, 50) : 'Incident Log',
         description: payload.description || 'No description provided',
         incidentDate: payload.date || new Date().toISOString(),
-        incidentType: payload.incident_category_id || 'General',
-        severityLevel: payload.risk_rating_id || 'Medium',
+        incidentType: String(payload.incident_category_id || 'General').toLowerCase().replaceAll(' ', '_'),
+        severityLevel: severityToApi(payload.risk_rating_id || 'Medium'),
         immediateAction: payload.immediate_cause,
         rootCause: payload.root_cause,
-        status: payload.status_id || 'Draft'
+        status: statusToApi(payload.status_id || 'Open', schemaId)
       };
     }
 
@@ -129,19 +166,20 @@ export const moduleService = {
     if (schemaId === 'hazard-reporting') {
       payload = {
         ...payload,
-        category: payload.hazard_category_id || 'other',
-        severityLevel: payload.risk_rating_id || 'low',
+        category: categoryToApi(payload.hazard_category_id),
+        severityLevel: severityToApi(payload.risk_rating_id || 'low'),
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
+        status: statusToApi(payload.status_id, schemaId),
       };
     } else if (schemaId === 'near-miss') {
       payload = {
         ...payload,
         title: payload.details ? payload.details.substring(0, 50) : 'Near Miss',
         description: payload.details,
-        severityLevel: payload.investigation_required === 'Yes' ? 'High' : 'Low',
+        severityLevel: payload.investigation_required === 'Yes' ? 'high' : 'low',
         immediateAction: payload.preventive_action,
         reportedAt: payload.date,
-        status: payload.status
+        status: statusToApi(payload.status, schemaId)
       };
     } else if (schemaId === 'incident-log') {
       payload = {
@@ -149,11 +187,11 @@ export const moduleService = {
         title: payload.description ? payload.description.substring(0, 50) : 'Incident Log',
         description: payload.description,
         incidentDate: payload.date,
-        incidentType: payload.incident_category_id,
-        severityLevel: payload.risk_rating_id,
+        incidentType: payload.incident_category_id ? String(payload.incident_category_id).toLowerCase().replaceAll(' ', '_') : undefined,
+        severityLevel: severityToApi(payload.risk_rating_id),
         immediateAction: payload.immediate_cause,
         rootCause: payload.root_cause,
-        status: payload.status_id
+        status: statusToApi(payload.status_id, schemaId)
       };
     }
 
@@ -169,7 +207,7 @@ export const moduleService = {
 
   updateStatus: async (schemaId: string, id: string, status: string, reason?: string) => {
     const endpoint = getEndpoint(schemaId);
-    const response = await apiClient.patch(`${endpoint}/${id}/status`, { status, reason });
+    const response = await apiClient.patch(`${endpoint}/${id}/status`, { status: statusToApi(status, schemaId), reason });
     return response.data;
   },
 

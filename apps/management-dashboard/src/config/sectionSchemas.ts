@@ -11,7 +11,7 @@ import {
 export interface ColumnSchema {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'datetime' | 'select' | 'textarea' | 'file';
+  type: 'text' | 'number' | 'date' | 'datetime' | 'time' | 'select' | 'textarea' | 'file';
   options?: string[];
   required?: boolean;
   readonly?: boolean;

@@ -195,6 +195,8 @@ export const Dashboard = () => {
           let f = [...data];
           if (filters.department && filters.department !== 'All')
             f = f.filter(d => d.department_id === filters.department);
+          if (filters.status && filters.status !== 'All')
+            f = f.filter(d => d.status_id === filters.status);
           if (filters.year && filters.year !== 'All')
             f = f.filter(d => d.date?.startsWith(filters.year) || d.target_date?.startsWith(filters.year) || d.createdAt?.startsWith(filters.year));
           if (filters.fromDate)

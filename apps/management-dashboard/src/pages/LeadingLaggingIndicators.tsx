@@ -145,11 +145,11 @@ export const LeadingLaggingIndicators = () => {
               <div>
                 <h2 className="text-lg font-bold text-[#1A1818] mb-4">Lagging Indicators</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  <KpiTile title="Fatal Incidents" value={data.fatalities} icon={ShieldAlert} color={data.fatalities > 0 ? "danger" : "success"} />
-                  <KpiTile title="LTI" value={data.lti} icon={AlertTriangle} color={data.lti > 0 ? "danger" : "success"} />
-                  <KpiTile title="RWC / MTC" value={data.rwc_mtc} icon={FileWarning} color={data.rwc_mtc > 0 ? "warning" : "success"} />
-                  <KpiTile title="First Aid" value={data.firstAid} icon={Activity} color="info" />
-                  <KpiTile title="Fire Incidents" value={data.majorFire + data.minorFire} icon={Flame} color={data.majorFire + data.minorFire > 0 ? "danger" : "success"} />
+                  <KpiTile label="Fatal Incidents" value={data.fatalities} icon={<ShieldAlert />} accent={data.fatalities > 0 ? "danger" : "success"} />
+                  <KpiTile label="LTI" value={data.lti} icon={<AlertTriangle />} accent={data.lti > 0 ? "danger" : "success"} />
+                  <KpiTile label="RWC / MTC" value={data.rwc_mtc} icon={<FileWarning />} accent={data.rwc_mtc > 0 ? "warning" : "success"} />
+                  <KpiTile label="First Aid" value={data.firstAid} icon={<Activity />} accent="info" />
+                  <KpiTile label="Fire Incidents" value={data.majorFire + data.minorFire} icon={<Flame />} accent={data.majorFire + data.minorFire > 0 ? "danger" : "success"} />
                 </div>
               </div>
 
@@ -157,8 +157,8 @@ export const LeadingLaggingIndicators = () => {
               <div>
                 <h2 className="text-lg font-bold text-[#1A1818] mb-4">Leading Indicators</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <KpiTile title="Hazard Spotting" value={data.hazards} icon={AlertTriangle} color="success" />
-                  <KpiTile title="Near Misses" value={data.nearMisses} icon={Target} color="warning" />
+                  <KpiTile label="Hazard Spotting" value={data.hazards} icon={<AlertTriangle />} accent="success" />
+                  <KpiTile label="Near Misses" value={data.nearMisses} icon={<Target />} accent="warning" />
                 </div>
               </div>
 

@@ -38,6 +38,8 @@ const envSchema = Joi.object({
   ALLOWED_ORIGINS: Joi.string().default('http://localhost:3000'),
   STORAGE_DRIVER: Joi.string().valid('local', 's3').default('local'),
   ENCRYPTION_KEY: Joi.string().length(32).optional(),
+  MSAL_CLIENT_ID: Joi.string().optional(),
+  MSAL_TENANT_ID: Joi.string().optional(),
 }).unknown(true);
 
 const { error, value: envVars } = envSchema.validate(process.env, { abortEarly: false });
@@ -113,6 +115,10 @@ const config = Object.freeze({
   allowedOrigins: envVars.ALLOWED_ORIGINS.split(',').map((o) => o.trim()),
   storageDriver: envVars.STORAGE_DRIVER,
   encryptionKey: envVars.ENCRYPTION_KEY,
+  msal: {
+    clientId: envVars.MSAL_CLIENT_ID,
+    tenantId: envVars.MSAL_TENANT_ID,
+  },
 });
 
 module.exports = config;

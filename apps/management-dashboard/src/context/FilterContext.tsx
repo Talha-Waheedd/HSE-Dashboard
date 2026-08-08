@@ -1,6 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useAuthStore } from '@cbl/auth';
 
 export interface Filters {
   year: string;
@@ -19,7 +18,6 @@ interface FilterContextType {
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuthStore();
   const [filters, setFilters] = useState<Filters>({
     year: '2026',
     auditType: 'All',
