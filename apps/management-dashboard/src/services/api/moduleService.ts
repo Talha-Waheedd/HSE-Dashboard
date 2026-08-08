@@ -86,7 +86,7 @@ export const moduleService = {
     if (schemaId === 'hazard-reporting') {
       payload = {
         ...payload,
-        plantId: payload.plantId || '44bd548d-0e22-40ba-a8e6-c037931c2a63', // Fallback to a valid plant UUID if not present
+        plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b', // CBL Plant Alpha
         category: payload.hazard_category_id || 'other',
         severityLevel: payload.risk_rating_id || 'low',
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',

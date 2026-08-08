@@ -17,7 +17,7 @@ const requireRoles = (requiredRoles = []) => (req, res, next) => {
   if (!req.user) return next(ApiError.unauthorized());
 
   const userRoleName = req.user.role?.name;
-  if (userRoleName === ROLES.SYSTEM_ADMINISTRATOR) return next();
+  if ([ROLES.SYSTEM_ADMINISTRATOR, 'super_admin', 'Super Admin'].includes(userRoleName)) return next();
 
   if (!requiredRoles.includes(userRoleName)) {
     return next(ApiError.forbidden(MESSAGES.FORBIDDEN));
@@ -38,7 +38,7 @@ const requirePermissions = (requiredPermissions = []) => (req, res, next) => {
   if (!req.user) return next(ApiError.unauthorized());
 
   const userRoleName = req.user.role?.name;
-  if (userRoleName === ROLES.SYSTEM_ADMINISTRATOR) return next();
+  if ([ROLES.SYSTEM_ADMINISTRATOR, 'super_admin', 'Super Admin'].includes(userRoleName)) return next();
 
   const userPermissions = req.user.role?.permissions?.map((p) => p.key) || [];
   const hasAll = requiredPermissions.every((p) => userPermissions.includes(p));

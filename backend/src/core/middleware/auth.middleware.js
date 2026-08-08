@@ -13,6 +13,19 @@ const TokenType = require('../../shared/enums/TokenType');
  */
 const authenticate = async (req, res, next) => {
   try {
+    // Local dashboard preview mode has no real login token. Keep this escape hatch
+    // development-only and require an explicit frontend preview header.
+    if (
+      process.env.NODE_ENV === 'development' &&
+      process.env.PREVIEW_AUTH === 'true' &&
+      req.headers['x-preview-auth'] === 'true'
+    ) {
+      const previewUser = await userRepository.findByIdWithRole(process.env.PREVIEW_USER_ID);
+      if (!previewUser) throw ApiError.unauthorized(MESSAGES.UNAUTHORIZED);
+      req.user = previewUser;
+      return next();
+    }
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw ApiError.unauthorized(MESSAGES.TOKEN_MISSING);

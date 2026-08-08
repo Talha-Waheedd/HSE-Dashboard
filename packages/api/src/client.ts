@@ -25,6 +25,9 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    if (import.meta.env?.VITE_BYPASS_AUTH === "true") {
+      config.headers["X-Preview-Auth"] = "true";
+    }
     return config;
   },
   (error: AxiosError) => {
