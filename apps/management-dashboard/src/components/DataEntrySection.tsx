@@ -1427,7 +1427,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           { label: 'Report Incident', icon: <Plus />, onClick: () => setIsAddModalOpen(true), variant: 'primary' }
         ]}
       >
-        <FilterBar />
+        <FilterBar variant="incident" />
       </ContextHeader>
 
       <div className="p-6 flex flex-col xl:flex-row gap-6">
