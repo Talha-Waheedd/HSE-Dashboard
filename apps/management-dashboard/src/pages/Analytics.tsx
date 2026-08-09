@@ -510,6 +510,21 @@ export const Analytics = () => {
     </Panel>;
   };
 
+  const renderSpecialistAuditsSummary = () => {
+    const groups = [
+      ['3ʳᵈ Party/ Regulators Assessments', '#A6A6A6', [['Ammonia Shortening Plant 3ʳᵈ Party Inspection', '🏭'], ['Racks Integrity Assessment', '🗄️'], ['Lifting Equipment Assessments', '🪝'], ['LPG Storage License', '🛢️']]],
+      ['Critical/Specialist Audits', '#2F65AD', [['Inspection Of First Aid Boxes', '🩹'], ['Wheelchairs Inspection', '♿'], ['Inspection Emergency Handling Kits', '🧰'], ['Stretchers Inspection', '🚑']]],
+      ['Critical/Specialist Audits', '#2F65AD', [['Noise Monitoring', '🔊'], ['Lux Level Monitoring', '💡'], ['Inspection Of Ambulance', '🚐'], ['Permit to Work Audit', '📄']]],
+      ['Critical/Specialist Audits', '#2F65AD', [['Inspection Of Conveyors & Rollers', '⚙️'], ['Inspection Of Ovens', '🔥'], ['Inspection Of Project Sites', '🏗️'], ['Inspection Of Chiller Plants', '❄️'], ['Inspection Of Edible Oil tanks', '🛢️']]],
+    ] as const;
+    return <Panel title="Assurance — Specialist Audits & Assessments" className="border-[#2F65AD]">
+      <div className="space-y-5">
+        <div className="flex items-center gap-4 border-b border-dashed border-[#64748B] pb-4"><img src="/logo.svg" alt="LU" className="h-14 w-auto" /><h2 className="text-2xl font-bold text-[#111827] sm:text-3xl">Audits & Inspections</h2><img src="/image.png" alt="CBL" className="ml-auto h-14 w-14 object-contain" /></div>
+        {groups.map(([group, color, items]) => <div key={`${group}-${items.length}`} className="grid grid-cols-1 gap-4 border-b border-dashed border-[#64748B] pb-5 lg:grid-cols-[300px_1fr]"><div className="flex min-h-20 items-center px-4 py-4 text-lg font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]" style={{ backgroundColor: color }}>{group}</div><div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-5">{items.map(([label, icon]) => <div key={label} className="flex flex-col items-center text-center"><div className="flex h-24 w-24 items-center justify-center border border-[#374151] bg-[#F8FAFC] text-5xl shadow-sm transition hover:scale-105">{icon}</div><p className="mt-2 text-xs font-medium leading-4 text-[#111827] sm:text-sm">{label}</p></div>)}</div></div>)}
+      </div>
+    </Panel>;
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -608,6 +623,7 @@ export const Analytics = () => {
             {renderLegalComplianceSummary()}
             {renderLegalActionItemsSummary()}
             {renderAuditsInspectionsSummary()}
+            {renderSpecialistAuditsSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
