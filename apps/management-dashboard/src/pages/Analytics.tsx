@@ -425,6 +425,23 @@ export const Analytics = () => {
     </Panel>;
   };
 
+  const renderTrainingGallery = () => {
+    const galleryItems = [
+      ['Work At Height', '🧗', 'from-[#2D6A9F] to-[#A7D3E8]'], ['One Point Lesson', '📋', 'from-[#6B4F3A] to-[#D6B08A]'], ['Chemical Handling, Safe Work Practices', '🧪', 'from-[#7B6D56] to-[#D8C49C]'], ['Safe Material Handling', '📦', 'from-[#3B789A] to-[#B9D8E5]'], ['Hands On Fire Fighting Training', '🧯', 'from-[#6D513B] to-[#E7B26D]'],
+      ['Fire Fighting, Types of extinguishers', '🔥', 'from-[#8A4A32] to-[#E7B48D]'], ['ERP/ Fire Fighting', '🚒', 'from-[#4C6872] to-[#D8B08B]'], ['Fire Fighting, Classes Of fire', '🧑‍🚒', 'from-[#8C704C] to-[#E0C69C]'], ['Hands On Fire Fighting Training', '🧯', 'from-[#638146] to-[#B7D38B]'], ['Fire Triangle and types of fire and its extinguishers', '🔺', 'from-[#59463A] to-[#D1B59B]'],
+      ['Gas Charging, Hot Work', '⚙️', 'from-[#6A4C3D] to-[#C99567]'], ['ERP/ Safe Work Practice', '🦺', 'from-[#35728D] to-[#A7D1D8]'], ['Hot Work, Safe work Practices', '🔥', 'from-[#66513F] to-[#D2A77D]'], ['Hazard Identification', '⚠️', 'from-[#506A55] to-[#B8D1B5]'], ['Gas Charging, Hot Work', '⚙️', 'from-[#54768A] to-[#C8A27C]'],
+      ['Trainee OPT Hands On Fire Fighting Trainings', '🧯', 'from-[#5B4A52] to-[#D6B8A5]'], ['Toolbox Talk', '🗣️', 'from-[#4B4D52] to-[#B2A48C]'], ['Safe Handling, OPL', '✅', 'from-[#607B5A] to-[#C9D7A8]'], ['Emergency Response', '🚨', 'from-[#3C6F84] to-[#A8CED6]'], ['Fire Fighting, Classes Of fire', '🧑‍🚒', 'from-[#806049] to-[#D7B88F]'],
+    ];
+    return <Panel title="Safety Trainings Classroom + On Ground" className="border-[#D00000]">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {galleryItems.map(([label, icon, gradient], index) => <article key={`${label}-${index}`} className="group overflow-hidden border border-[#C9C9C9] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div className={`relative flex h-32 items-center justify-center bg-gradient-to-br ${gradient}`}><div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,.45),transparent_35%),linear-gradient(135deg,transparent_45%,rgba(0,0,0,.18))]" /><span className="relative text-6xl drop-shadow-md transition group-hover:scale-110">{icon}</span><span className="absolute right-2 top-2 rounded-full bg-white/85 px-2 py-0.5 text-[10px] font-bold text-[#374151]">Training {index + 1}</span></div>
+          <div className="flex min-h-[54px] items-center justify-center p-2 text-center text-xs font-bold leading-4 text-[#1F2937] sm:text-sm">{label}</div>
+        </article>)}
+      </div>
+    </Panel>;
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -519,6 +536,7 @@ export const Analytics = () => {
             {renderAdminSummary()}
             {renderQcSummary()}
             {renderTrainingAwarenessSummary()}
+            {renderTrainingGallery()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
