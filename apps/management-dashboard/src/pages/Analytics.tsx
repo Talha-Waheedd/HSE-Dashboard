@@ -145,6 +145,50 @@ export const Analytics = () => {
     return { name: date.toLocaleString('default', { month: 'short' }), Hazards: inMonth(records.hazards), Incidents: inMonth(records.incidents), 'Near Misses': inMonth(records.nearMisses) };
   }), [records]);
 
+  const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
+  const departmentRecords = (items: any[], department: string) => items.filter(item => {
+    const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
+    return value === department.toLowerCase() || value.includes(department.toLowerCase());
+  });
+  const departmentalRows: any[] = [
+    { label: 'Hazard Reporting', unit: 'No', target: 3000, actual: (items: RecordSet) => items.hazards.length },
+    { label: 'Near Miss', unit: 'No', target: 264, actual: (items: RecordSet) => items.nearMisses.length },
+    { label: 'Unsafe Acts', unit: 'No', target: 0, lower: true, actual: (items: RecordSet) => items.hazards.filter(item => String(item.unsafe_type || item.category || '').toLowerCase().includes('unsafe act')).length },
+    { label: 'Hazard Closure (%)', unit: '%', target: 100, actual: (items: RecordSet) => items.hazards.length ? Math.round((items.hazards.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length / items.hazards.length) * 100) : 0 },
+    { label: 'HSE Training Manhours', unit: 'No', target: 15000, actual: (items: RecordSet) => Math.round(items.trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours) || 0), 0)) },
+    { label: 'Incident Investigation Action Closure (%)', unit: '%', target: 100, actual: (items: RecordSet) => items.capas.length ? Math.round((items.capas.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length / items.capas.length) * 100) : 0 },
+    { label: 'Emergency Drills', unit: 'No', target: 6, actual: (_items: RecordSet) => '—' as number | string },
+    { label: 'Actions Plan Closure Tracker (%)', unit: '%', target: 100, actual: (items: RecordSet) => items.capas.length ? Math.round((items.capas.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length / items.capas.length) * 100) : 0 },
+    { label: 'Fatal Incidents', unit: 'No', target: 0, lower: true, actual: (items: RecordSet) => countCategories(items.incidents, ['fatal']) },
+    { label: 'LTI', unit: 'No', target: 0, lower: true, actual: (items: RecordSet) => countCategories(items.incidents, ['lost time', 'lti']) },
+    { label: 'LTIR', unit: 'Rate', target: 0, lower: true, actual: (_items: RecordSet) => '—' as number | string },
+    { label: 'Recordable Incidents', unit: 'No', target: 0, lower: true, actual: (items: RecordSet) => countCategories(items.incidents, ['lost time', 'lti', 'restricted', 'rwc', 'medical treatment', 'mtc']) },
+    { label: 'TRIR', unit: 'Rate', target: 0, lower: true, actual: (_items: RecordSet) => '—' as number | string },
+    { label: 'First Aid', unit: 'No', target: 0, actual: (items: RecordSet) => countCategories(items.incidents, ['first aid']) },
+    { label: 'Fire Incidents — Major', unit: 'No', target: 0, lower: true, actual: (items: RecordSet) => countCategories(items.incidents, ['major fire']) },
+    { label: 'Fire Incidents — Minor', unit: 'No', target: 0, lower: true, actual: (items: RecordSet) => countCategories(items.incidents, ['minor fire']) },
+  ];
+
+  const renderDepartmentalTable = () => (
+    <Panel title={`Monthly Departmental HSE KPIs — ${filters.year}`}>
+      <div className="overflow-x-auto">
+        <table className="min-w-[1380px] w-full border-collapse text-[11px]">
+          <thead>
+            <tr className="bg-[#4777BE] text-white"><th rowSpan={2} className="border border-[#1F2937] px-3 py-2 text-left">HSE KPIs</th>{departmentNames.map(department => <th key={department} colSpan={2} className="border border-[#1F2937] px-2 py-2 text-center">{department}</th>)}<th colSpan={2} className="border border-[#1F2937] px-2 py-2 text-center">{filters.year}</th></tr>
+            <tr className="bg-[#D7E5F3] text-[#1F2937]">{[...departmentNames, filters.year].flatMap(department => [<th key={`${department}-target`} className="border border-[#94A3B8] px-2 py-1.5">Tar</th>, <th key={`${department}-actual`} className="border border-[#94A3B8] px-2 py-1.5">Actual</th>])}</tr>
+          </thead>
+          <tbody>
+            <tr><td colSpan={departmentNames.length * 2 + 3} className="border border-[#94A3B8] bg-[#B9D3EA] px-3 py-2 text-center text-[15px] font-bold text-[#008C45]">Leading Indicators</td></tr>
+            {departmentalRows.slice(0, 8).map(row => <tr key={row.label}><td className="border border-[#94A3B8] bg-[#D7E5F3] px-2 py-2 font-semibold text-[#1F2937]">{row.label}</td>{departmentNames.map(department => { const subset: RecordSet = { hazards: departmentRecords(current.hazards, department), incidents: departmentRecords(current.incidents, department), nearMisses: departmentRecords(current.nearMisses, department), trainings: departmentRecords(current.trainings, department), audits: departmentRecords(current.audits, department), inspections: departmentRecords(current.inspections, department), capas: departmentRecords(current.capas, department) }; const actual = row.actual(subset); const good = typeof actual === 'number' && (row.lower ? actual <= row.target : actual >= row.target); return <><td key={`${row.label}-${department}-target`} className="border border-[#CBD5E1] px-2 py-2 text-center">{row.target}{row.unit === '%' ? '%' : ''}</td><td key={`${row.label}-${department}-actual`} className={`border border-[#CBD5E1] px-2 py-2 text-center font-bold ${actual === '—' ? '' : good ? 'bg-[#C6E0B4]' : 'bg-[#F8CBAD]'}`}>{actual}{row.unit === '%' && actual !== '—' ? '%' : ''}</td></>; })}<td className="border border-[#CBD5E1] px-2 py-2 text-center font-semibold">{row.target}{row.unit === '%' ? '%' : ''}</td><td className="border border-[#CBD5E1] px-2 py-2 text-center font-bold">{valueFor(row.label === 'Hazard Reporting' ? 'hazards' : row.label === 'Near Miss' ? 'nearMisses' : row.label === 'HSE Training Manhours' ? 'training' : row.label === 'Hazard Closure (%)' ? 'closure' : 'capaClosure')}{row.unit === '%' ? '%' : ''}</td></tr>)}
+            <tr><td colSpan={departmentNames.length * 2 + 3} className="border border-[#94A3B8] bg-[#B9D3EA] px-3 py-2 text-center text-[15px] font-bold text-[#EF1111]">Lagging Indicators</td></tr>
+            {departmentalRows.slice(8).map(row => <tr key={row.label}><td className="border border-[#94A3B8] bg-[#D7E5F3] px-2 py-2 font-semibold text-[#1F2937]">{row.label}</td>{departmentNames.map(department => { const subset: RecordSet = { hazards: departmentRecords(current.hazards, department), incidents: departmentRecords(current.incidents, department), nearMisses: departmentRecords(current.nearMisses, department), trainings: departmentRecords(current.trainings, department), audits: departmentRecords(current.audits, department), inspections: departmentRecords(current.inspections, department), capas: departmentRecords(current.capas, department) }; const actual = row.actual(subset); const good = typeof actual === 'number' && (row.lower ? actual <= row.target : actual >= row.target); return <><td key={`${row.label}-${department}-target`} className="border border-[#CBD5E1] px-2 py-2 text-center">{row.target}</td><td key={`${row.label}-${department}-actual`} className={`border border-[#CBD5E1] px-2 py-2 text-center font-bold ${actual === '—' ? '' : good ? 'bg-[#C6E0B4]' : 'bg-[#F8CBAD]'}`}>{actual}</td></>; })}<td className="border border-[#CBD5E1] px-2 py-2 text-center font-semibold">{row.target}</td><td className="border border-[#CBD5E1] px-2 py-2 text-center font-bold">{laggingValue(row.key)}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 text-[11px] text-[#6B7280]">Department columns are populated from department codes/names on backend records. Green indicates target met; amber indicates attention required.</p>
+    </Panel>
+  );
+
   const renderScorecard = (title: string, rows: IndicatorRow[], lagging = false) => (
     <Panel title={title}>
       <div className="overflow-x-auto">
@@ -181,6 +225,7 @@ export const Analytics = () => {
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-6"><KpiTile label="Hazards" value={current.hazards.length} icon={<AlertTriangle />} accent="warning" /><KpiTile label="Near Misses" value={current.nearMisses.length} icon={<Target />} accent="info" /><KpiTile label="Fatalities" value={metrics.fatal} icon={<ShieldAlert />} accent={metrics.fatal ? 'danger' : 'success'} /><KpiTile label="LTI" value={metrics.lti} icon={<FileText />} accent={metrics.lti ? 'danger' : 'success'} /><KpiTile label="Training" value={current.trainings.length} icon={<Users />} accent="success" /><KpiTile label="Audits / Inspections" value={current.audits.length + current.inspections.length} icon={<ClipboardCheck />} accent="info" /></div>
             {renderScorecard('Lagging Indicators', laggingRows, true)}
             {renderScorecard('Leading Indicators', leadingRows)}
+            {renderDepartmentalTable()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
