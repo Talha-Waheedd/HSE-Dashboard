@@ -278,6 +278,26 @@ export const Analytics = () => {
     );
   };
 
+  const renderHighRiskSummary = () => {
+    const highRisk = current.hazards.filter(item => ['high', 'critical'].includes(String(item.risk_rating_id || item.severityLevel || item.severity || '').toLowerCase()));
+    const closed = highRisk.filter(item => ['closed', 'close'].includes(String(item.status_id || item.status || '').toLowerCase())).length;
+    const grouped = (items: any[], keys: string[]) => Object.entries(items.reduce((result, item) => { const value = String(keys.map(key => item[key]).find(value => value !== undefined && value !== null && value !== '') || 'Unspecified'); result[value] = (result[value] || 0) + 1; return result; }, {} as Record<string, number>)).map(([name, value]) => ({ name, value: Number(value) })).sort((a, b) => b.value - a.value);
+    const categoryData = grouped(highRisk, ['hazard_category_id', 'category', 'unsafe_type', 'root_cause']);
+    const departments = ['Production', 'ESD & UTY', 'Admin', 'HSE', 'Stores', 'Projects'];
+    const departmentData = departments.map(name => { const items = highRisk.filter(item => String(item.department_id || item.departmentId || item.department || '').toLowerCase().includes(name.toLowerCase().split(' ')[0])); const done = items.filter(item => ['closed', 'close'].includes(String(item.status_id || item.status || '').toLowerCase())).length; return { name, Total: items.length, Closed: done, Open: items.length - done }; }).filter(item => item.Total > 0);
+    const concerns = categoryData.slice(0, 8).map(item => item.name);
+    const chart = (title: string, data: any[], bars: { key: string; color: string }[], height = 300) => <Panel title={title}><div style={{ height }}><ResponsiveContainer width="100%" height="100%"><BarChart data={data} margin={{ top: 24, right: 10, left: 0, bottom: 35 }}><CartesianGrid vertical={false} stroke="#E5E7EB" /><XAxis dataKey="name" interval={0} angle={data.length > 5 ? -20 : 0} textAnchor={data.length > 5 ? 'end' : 'middle'} tick={{ fontSize: 10 }} /><YAxis allowDecimals={false} /><Tooltip /><Legend />{bars.map(bar => <Bar key={bar.key} dataKey={bar.key} fill={bar.color} radius={[2, 2, 0, 0]} label={{ position: 'top', fill: '#111827', fontSize: 11, fontWeight: 700 }} />)}</BarChart></ResponsiveContainer></div></Panel>;
+    return (
+      <Panel title={`High Risk Observations YTD (${incidentSummary.monthName})-${filters.year === 'All' ? new Date().getFullYear() : filters.year}`}>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(600px,1.45fr)_minmax(270px,.55fr)]">
+          <div className="space-y-5"><div>{chart('High-Risk Observations', categoryData, [{ key: 'value', color: '#4472C4' }], 320)}</div><div>{chart('High Risk Observation Dept-Wise', departmentData, [{ key: 'Total', color: '#5B9BD5' }, { key: 'Closed', color: '#ED7D31' }, { key: 'Open', color: '#A5A5A5' }], 300)}</div></div>
+          <div className="space-y-5"><div className="rounded-lg bg-[#E7E6E6] p-5 text-center text-[20px] font-bold leading-8 text-[#111827] shadow-[2px_3px_5px_rgba(0,0,0,.25)]">Total ={highRisk.length}<br />Closed = {closed}<br />%Compliance ={highRisk.length ? Math.round((closed / highRisk.length) * 100) : 0}%</div><div className="rounded-[42px] border-[3px] border-[#244579] bg-[#203864] p-5"><div className="bg-[#F21B0C] px-3 py-2 text-center text-[18px] font-bold text-white">TOP CONCERNS</div><div className="mt-5 min-h-[260px] bg-white p-4 text-[15px] font-semibold leading-7 text-[#111827]">{concerns.length ? concerns.map(concern => <div key={concern}>▪ {concern}</div>) : <div>No high-risk concerns found.</div>}</div></div></div>
+        </div>
+        <div className="mt-4 text-[11px] text-[#6B7280]">High-risk observations include hazard records rated High or Critical. Values reflect the selected Analytics filters.</div>
+      </Panel>
+    );
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -363,6 +383,7 @@ export const Analytics = () => {
             {renderFirstAidSummary()}
             {renderNearMissSummary()}
             {renderHazardEliminationSummary()}
+            {renderHighRiskSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
