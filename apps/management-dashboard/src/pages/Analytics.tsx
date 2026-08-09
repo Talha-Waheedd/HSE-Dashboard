@@ -318,6 +318,19 @@ export const Analytics = () => {
     );
   };
 
+  const renderHsePerformanceSummary = () => {
+    const trainingHours = Math.round(current.trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours) || 0), 0));
+    const cards = [
+      { title: <>Incident<br />Action Items<br />Closing Status</>, actual: metrics.actionClosure, target: 90, unit: '%', targetText: 'TARGET = 90%', color: '#4472C4' },
+      { title: <>Hazards<br />Closing Status</>, actual: metrics.closure, target: 90, unit: '%', targetText: 'TARGET = 90%', color: '#4472C4' },
+      { title: <>HSE Trainings</>, actual: trainingHours, target: 15000, unit: '', targetText: 'TARGET = 1250 MHRS PER MONTH', color: '#4472C4' },
+      { title: <>Near miss</>, actual: current.nearMisses.length, target: 22, unit: '', targetText: 'TARGET = 22 PER MONTH', color: '#4472C4' },
+      { title: <>Hazard Spotting {filters.year}</>, actual: current.hazards.length, target: 250, unit: '', targetText: 'TARGET = 250 PER MONTH', color: '#4472C4' },
+    ];
+    const renderCard = (card: typeof cards[number]) => <div className="flex min-h-[300px] flex-col border border-[#B7B7B7] bg-white p-4"><h3 className="min-h-[72px] text-center text-[22px] font-bold leading-tight text-[#111827]">{card.title}</h3><div className="h-[210px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Actual', value: card.actual }, { name: 'Target', value: card.target }]} dataKey="value" outerRadius="64%" label={({ value }) => `${value}${card.unit}`}>{[card.color, '#ED7D31'].map((fill, index) => <Cell key={index} fill={fill} />)}</Pie><Legend verticalAlign="bottom" iconType="square" /></PieChart></ResponsiveContainer></div><p className="mt-auto text-center text-[14px] font-bold text-[#D00000]">{card.targetText}</p></div>;
+    return <Panel title={`HSE Performance — ${incidentSummary.monthName} ${filters.year === 'All' ? new Date().getFullYear() : filters.year}`}><div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">{renderCard(cards[0])}{renderCard(cards[1])}<div className="space-y-5">{renderCard(cards[2])}{renderCard(cards[3])}</div>{renderCard(cards[4])}</div></Panel>;
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -405,6 +418,7 @@ export const Analytics = () => {
             {renderHazardEliminationSummary()}
             {renderHighRiskSummary()}
             {renderActionsLogSummary()}
+            {renderHsePerformanceSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
