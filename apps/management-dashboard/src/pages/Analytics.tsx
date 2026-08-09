@@ -13,7 +13,11 @@ type RecordSet = { hazards: any[]; incidents: any[]; nearMisses: any[]; training
 type IndicatorRow = { label: string; unit: string; key: string; target?: number; remark: string; category?: string };
 
 const emptyRecords: RecordSet = { hazards: [], incidents: [], nearMisses: [], trainings: [], audits: [], inspections: [], capas: [] };
-const yearOf = (record: any) => String(record.date || record.incidentDate || record.reportedAt || record.scheduledDate || record.due_date || record.createdAt || '').slice(0, 4);
+const yearOf = (record: any) => dateOf(record).slice(0, 4);
+const dateOf = (record: any) => String(record.date || record.incidentDate || record.incident_date || record.reportedAt || record.reported_at || record.scheduledDate || record.scheduled_date || record.dueDate || record.due_date || record.createdAt || record.created_at || '');
+const departmentOf = (record: any) => String(record.department_id || record.departmentId || record.department?.id || record.department?.code || record.department?.name || '').toLowerCase();
+const statusOf = (record: any) => String(record.status_id || record.status || record.statusId || '').toLowerCase();
+const trainingManhours = (record: any) => Number(record.manhours || record.total_manhours || record.hours || ((Number(record.durationMinutes || record.duration_minutes) || 0) / 60)) || 0;
 const categoryOf = (record: any) => String(record.incident_category_id || record.incidentType || record.category || '').toLowerCase().replaceAll('_', ' ').trim();
 const isCategory = (record: any, values: string[]) => values.some(value => categoryOf(record) === value || categoryOf(record).includes(value));
 const countCategories = (records: any[], values: string[]) => records.filter(record => isCategory(record, values)).length;
@@ -47,19 +51,25 @@ export const Analytics = () => {
 
   useEffect(() => {
     let cancelled = false;
+    let requestId = 0;
     const load = async () => {
+      const currentRequestId = ++requestId;
       setLoading(true);
       try {
-        const [hazards, incidents, nearMisses, trainings, audits, inspections, capas] = await Promise.all([
-          moduleService.getAll('hazard-reporting'), moduleService.getAll('incident-log'), moduleService.getAll('near-miss'),
-          moduleService.getAll('training-records'), moduleService.getAll('audit-management'), moduleService.getAll('inspection-records'), moduleService.getAll('action-tracker'),
+        const allRecordsParams = { limit: 10000, offset: 0 };
+        const results = await Promise.allSettled([
+          moduleService.getAll('hazard-reporting', allRecordsParams), moduleService.getAll('incident-log', allRecordsParams), moduleService.getAll('near-miss', allRecordsParams),
+          moduleService.getAll('training-records', allRecordsParams), moduleService.getAll('audit-management', allRecordsParams), moduleService.getAll('inspection-records', allRecordsParams), moduleService.getAll('action-tracker', allRecordsParams),
         ]);
-        if (!cancelled) setRecords({ hazards: hazards.data || [], incidents: incidents.data || [], nearMisses: nearMisses.data || [], trainings: trainings.data || [], audits: audits.data || [], inspections: inspections.data || [], capas: capas.data || [] });
+        const dataAt = (index: number) => results[index].status === 'fulfilled' ? results[index].value.data || [] : [];
+        const failed = results.filter(result => result.status === 'rejected');
+        if (failed.length) console.warn(`Analytics loaded with ${failed.length} unavailable data source(s).`);
+        if (!cancelled && currentRequestId === requestId) setRecords({ hazards: dataAt(0), incidents: dataAt(1), nearMisses: dataAt(2), trainings: dataAt(3), audits: dataAt(4), inspections: dataAt(5), capas: dataAt(6) });
       } catch (error) {
         console.error('Analytics data fetch failed', error);
-        if (!cancelled) setRecords(emptyRecords);
+        if (!cancelled && currentRequestId === requestId) setRecords(emptyRecords);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && currentRequestId === requestId) setLoading(false);
       }
     };
     load();
@@ -70,8 +80,8 @@ export const Analytics = () => {
   }, []);
 
   const applyFilters = (items: any[]) => items.filter(item => {
-    const date = String(item.date || item.incidentDate || item.reportedAt || item.scheduledDate || item.due_date || item.createdAt || '');
-    if (filters.department !== 'All' && filters.department && item.department_id !== filters.department && item.departmentId !== filters.department) return false;
+    const date = dateOf(item);
+    if (filters.department !== 'All' && filters.department && departmentOf(item) !== String(filters.department).toLowerCase()) return false;
     if (filters.year !== 'All' && filters.year && !date.startsWith(filters.year)) return false;
     if (filters.fromDate && date.slice(0, 10) < filters.fromDate) return false;
     if (filters.toDate && date.slice(0, 10) > filters.toDate) return false;
@@ -93,11 +103,11 @@ export const Analytics = () => {
     const firstAid = countCategories(incidents, ['first aid']);
     const majorFire = countCategories(incidents, ['major fire']);
     const minorFire = countCategories(incidents, ['minor fire']);
-    const closedHazards = hazards.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length;
+    const closedHazards = hazards.filter(item => ['closed', 'close', 'resolved', 'completed', 'verified', 'approved'].includes(statusOf(item))).length;
     const closure = hazards.length ? Math.round((closedHazards / hazards.length) * 100) : 0;
     const unsafeActs = hazards.filter(item => String(item.unsafe_type || item.category || '').toLowerCase().includes('unsafe act')).length;
     const incidentActions = current.capas.filter(item => String(item.source || item.module_source || '').toLowerCase().includes('incident'));
-    const closedActions = incidentActions.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length;
+    const closedActions = incidentActions.filter(item => ['closed', 'close', 'resolved', 'completed', 'verified', 'approved'].includes(statusOf(item))).length;
     const actionClosure = incidentActions.length ? Math.round((closedActions / incidentActions.length) * 100) : 0;
     return { fatal, lti, rwc, mtc, firstAid, majorFire, minorFire, closure, unsafeActs, actionClosure, recordable: lti + rwc + mtc + majorFire + minorFire };
   }, [current]);
@@ -116,7 +126,7 @@ export const Analytics = () => {
     { label: 'Legal Compliance', unit: '%', key: 'legal', remark: 'No legal-compliance API source is currently configured.' },
   ];
 
-  const valueFor = (key: string) => ({ hazards: current.hazards.length, nearMisses: current.nearMisses.length, unsafeActs: metrics.unsafeActs, closure: metrics.closure, training: current.trainings.length, assurance: current.audits.length + current.inspections.length, actionClosure: metrics.actionClosure, capaClosure: current.capas.length ? Math.round((current.capas.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length / current.capas.length) * 100) : 0, initiatives: '—', drills: '—', legal: '—' }[key] ?? '—');
+  const valueFor = (key: string) => ({ hazards: current.hazards.length, nearMisses: current.nearMisses.length, unsafeActs: metrics.unsafeActs, closure: metrics.closure, training: Math.round(current.trainings.reduce((sum, item) => sum + trainingManhours(item), 0)), assurance: current.audits.length + current.inspections.length, actionClosure: metrics.actionClosure, capaClosure: current.capas.length ? Math.round((current.capas.filter(item => ['closed', 'close', 'completed', 'verified', 'approved'].includes(statusOf(item))).length / current.capas.length) * 100) : 0, initiatives: '—', drills: '—', legal: '—' }[key] ?? '—');
   const laggingRows: IndicatorRow[] = [
     { label: 'Fatal Incidents', unit: 'No', key: 'fatal', target: 0, remark: 'Zero fatalities target.' },
     { label: 'LTI', unit: 'No', key: 'lti', target: 0, remark: 'Lost-time injury count.' },
@@ -133,7 +143,7 @@ export const Analytics = () => {
     const yearItems = items.filter(item => yearOf(item) === year);
     if (key === 'hazards') return yearItems.length;
     if (key === 'nearMisses') return yearItems.length;
-    if (key === 'training') return yearItems.length;
+    if (key === 'training') return Math.round(yearItems.reduce((sum, item) => sum + trainingManhours(item), 0));
     if (key === 'assurance') return yearItems.length;
     if (key === 'fatal' || key === 'lti' || key === 'firstAid' || key === 'majorFire' || key === 'minorFire') return countCategories(yearItems, key === 'fatal' ? ['fatal'] : key === 'lti' ? ['lost time', 'lti'] : key === 'firstAid' ? ['first aid'] : [key.replace('Fire', ' fire')]);
     return '—';
@@ -148,7 +158,7 @@ export const Analytics = () => {
 
   const incidentSummary = useMemo(() => {
     const year = filters.year === 'All' ? String(new Date().getFullYear()) : filters.year;
-    const dated = [...records.incidents, ...records.nearMisses].filter(item => yearOf(item) === year);
+    const dated = [...current.incidents, ...current.nearMisses].filter(item => yearOf(item) === year);
     const latestDate = dated.reduce((latest, item) => {
       const value = String(item.date || item.incidentDate || item.reportedAt || item.createdAt || '');
       return value > latest ? value : latest;
@@ -157,9 +167,9 @@ export const Analytics = () => {
     const monthName = new Date(Number(year), monthIndex, 1).toLocaleString('default', { month: 'long' });
     const inMonth = (item: any) => yearOf(item) === year && Number(String(item.date || item.incidentDate || item.reportedAt || item.createdAt || '').slice(5, 7)) - 1 === monthIndex;
     const recordable = (item: any) => isCategory(item, ['fatal', 'lost time', 'lti', 'restricted', 'rwc', 'medical treatment', 'mtc']);
-    const categoryCount = (category: string[], month = false) => [...records.incidents, ...records.nearMisses].filter(item => (month ? inMonth(item) : yearOf(item) === year) && isCategory(item, category)).length;
+    const categoryCount = (category: string[], month = false) => [...current.incidents, ...current.nearMisses].filter(item => (month ? inMonth(item) : yearOf(item) === year) && isCategory(item, category)).length;
     const monthly = Array.from({ length: monthIndex + 1 }, (_, index) => {
-      const monthItems = [...records.incidents, ...records.nearMisses].filter(item => yearOf(item) === year && Number(String(item.date || item.incidentDate || item.reportedAt || item.createdAt || '').slice(5, 7)) - 1 === index);
+      const monthItems = [...current.incidents, ...current.nearMisses].filter(item => yearOf(item) === year && Number(dateOf(item).slice(5, 7)) - 1 === index);
       return {
         name: new Date(Number(year), index, 1).toLocaleString('default', { month: 'short' }),
         'First Aid Cases': monthItems.filter(item => isCategory(item, ['first aid'])).length,
@@ -169,21 +179,21 @@ export const Analytics = () => {
       };
     });
     const ytd = {
-      recordable: records.incidents.filter(item => yearOf(item) === year && recordable(item)).length,
+      recordable: current.incidents.filter(item => yearOf(item) === year && recordable(item)).length,
       firstAid: categoryCount(['first aid']),
       shortCircuit: categoryCount(['short circuit', 'short-circuiting']),
       fire: categoryCount(['fire']),
-      potential: records.nearMisses.filter(item => yearOf(item) === year).length,
+      potential: current.nearMisses.filter(item => yearOf(item) === year).length,
     };
     const month = {
-      recordable: [...records.incidents].filter(item => inMonth(item) && recordable(item)).length,
+      recordable: [...current.incidents].filter(item => inMonth(item) && recordable(item)).length,
       firstAid: categoryCount(['first aid'], true),
       shortCircuit: categoryCount(['short circuit', 'short-circuiting'], true),
       fire: categoryCount(['fire'], true),
-      potential: records.nearMisses.filter(item => inMonth(item)).length,
+      potential: current.nearMisses.filter(item => inMonth(item)).length,
     };
     return { year, monthName, ytd, month, monthly };
-  }, [records, filters.year]);
+  }, [current, filters.year]);
 
   const renderIncidentSummary = () => {
     const rows = [
@@ -320,7 +330,7 @@ export const Analytics = () => {
   };
 
   const renderHsePerformanceSummary = () => {
-    const trainingHours = Math.round(current.trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours) || 0), 0));
+    const trainingHours = Math.round(current.trainings.reduce((sum, item) => sum + trainingManhours(item), 0));
     const cards = [
       { title: <>Incident<br />Action Items<br />Closing Status</>, actual: metrics.actionClosure, target: 90, unit: '%', targetText: 'TARGET = 90%', color: '#4472C4' },
       { title: <>Hazards<br />Closing Status</>, actual: metrics.closure, target: 90, unit: '%', targetText: 'TARGET = 90%', color: '#4472C4' },
@@ -357,7 +367,7 @@ export const Analytics = () => {
     const hazards = scoped(current.hazards); const incidents = scoped(current.incidents); const nearMisses = scoped(current.nearMisses); const trainings = scoped(current.trainings); const capas = scoped(current.capas);
     const firstAid = incidents.filter(item => isCategory(item, ['first aid'])).length; const recordable = incidents.filter(item => isCategory(item, ['lost time', 'lti', 'restricted', 'rwc', 'medical treatment', 'mtc'])).length; const fire = incidents.filter(item => isCategory(item, ['fire'])).length;
     const closed = capas.filter(item => ['closed', 'close', 'completed', 'verified'].includes(String(item.status_id || item.status || '').toLowerCase())).length; const hazardClosed = hazards.filter(item => ['closed', 'close'].includes(String(item.status_id || item.status || '').toLowerCase())).length;
-    const trainingHours = Math.round(trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours) || 0), 0));
+    const trainingHours = Math.round(trainings.reduce((sum, item) => sum + trainingManhours(item), 0));
     const chart = (title: string, data: { name: string; value: number }[], color: string) => <Panel title={title}><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={data} margin={{ top: 25, right: 12, left: 0, bottom: 12 }}><CartesianGrid vertical={false} stroke="#E5E7EB" /><XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 700 }} /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="value" fill={color} label={{ position: 'top', fontWeight: 700 }} /></BarChart></ResponsiveContainer></div></Panel>;
     return <Panel title={`ESD & UTY — ${incidentSummary.monthName} ${filters.year === 'All' ? new Date().getFullYear() : filters.year}`}><div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(420px,.9fr)_minmax(600px,1.1fr)]"><div className="space-y-5"><div className="border border-[#1F2937] p-4 text-[16px] leading-9"><p>□ &nbsp; RECORDABLE INJURY={recordable}</p><p>□ &nbsp; ONE FIRST AID CASE={firstAid}</p><p>□ &nbsp; FIRE INCIDENTS={fire}</p></div>{chart('Safety Trainings', [{ name: 'Actual', value: trainingHours }, { name: 'Target', value: 3000 }], '#A5A5A5')}</div><div className="space-y-5"><Panel title="Hazards Reporting & Elimination Status"><div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-[1fr_1fr]"><div className="grid grid-cols-3 border border-[#1F2937] text-center"><div className="border-r border-[#1F2937] p-3 font-bold">Total Corrective Actions Assigned</div><div className="border-r border-[#1F2937] p-3 font-bold">Completed</div><div className="p-3 font-bold">Pending</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{capas.length}</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{closed}</div><div className="border-t border-[#1F2937] p-5 text-2xl font-bold">{capas.length - closed}</div></div><div className="text-center"><div className="mx-auto h-[180px] max-w-[220px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Closed', value: hazardClosed }, { name: 'Open', value: hazards.length - hazardClosed }]} dataKey="value" innerRadius="55%" outerRadius="75%" label><Cell fill="#4472C4" /><Cell fill="#70AD47" /></Pie></PieChart></ResponsiveContainer></div><p className="text-2xl font-bold">{hazards.length ? Math.round((hazardClosed / hazards.length) * 100) : 0}%</p></div></div></Panel>{chart('Nearmisses Reporting', [{ name: 'Actual', value: nearMisses.length }, { name: 'Target', value: 12 }], '#ED7D31')}</div></div></Panel>;
   };
@@ -366,7 +376,7 @@ export const Analytics = () => {
     const scoped = (items: any[]) => items.filter(item => String(item.department_id || item.departmentId || item.department || '').toLowerCase().includes('store'));
     const hazards = scoped(current.hazards); const incidents = scoped(current.incidents); const nearMisses = scoped(current.nearMisses); const trainings = scoped(current.trainings); const capas = scoped(current.capas);
     const recordable = incidents.filter(item => isCategory(item, ['lost time', 'lti', 'restricted', 'rwc', 'medical treatment', 'mtc'])).length; const firstAid = incidents.filter(item => isCategory(item, ['first aid'])).length; const closed = capas.filter(item => ['closed', 'close', 'completed', 'verified'].includes(String(item.status_id || item.status || '').toLowerCase())).length; const hazardClosed = hazards.filter(item => ['closed', 'close'].includes(String(item.status_id || item.status || '').toLowerCase())).length;
-    const trainingHours = Math.round(trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours) || 0), 0));
+    const trainingHours = Math.round(trainings.reduce((sum, item) => sum + trainingManhours(item), 0));
     const miniChart = (title: string, actual: number, target: number, color: string) => <Panel title={title}><div className="h-[230px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Actual', value: actual }, { name: 'Target', value: target }]} margin={{ top: 25, right: 8, left: -20, bottom: 0 }}><XAxis dataKey="name" tick={{ fontSize: 13, fontWeight: 700 }} /><YAxis hide /><Tooltip /><Bar dataKey="value" fill={color} label={{ position: 'top', fontWeight: 700 }} /></BarChart></ResponsiveContainer></div></Panel>;
     return <Panel title={`Stores — ${incidentSummary.monthName} ${filters.year === 'All' ? new Date().getFullYear() : filters.year}`}><div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(440px,.9fr)_minmax(600px,1.1fr)]"><div className="space-y-5"><div className="border border-[#1F2937] p-4 text-[16px] leading-9"><p>□ &nbsp; RECORDABLE INJURY={recordable}</p><p>□ &nbsp; FIRST AID CASE={firstAid}</p></div>{miniChart('Nearmisses Reporting', nearMisses.length, 24, '#FFC000')}{miniChart('Safety Trainings', trainingHours, 900, '#D2691E')}</div><div><Panel title="Hazards Reporting & Elimination Status"><div className="space-y-5"><div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-2"><div className="border border-[#1F2937]"><div className="grid grid-cols-3 text-center"><div className="border-r border-[#1F2937] p-3 font-bold">Hazards Reporting</div><div className="border-r border-[#1F2937] p-3 font-bold">Actual</div><div className="p-3 font-bold">Target</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{hazards.length}</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{hazards.length}</div><div className="border-t border-[#1F2937] p-5 text-2xl font-bold">240</div></div></div><div className="text-center"><div className="mx-auto h-[170px] max-w-[210px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Closed', value: hazardClosed }, { name: 'Open', value: hazards.length - hazardClosed }]} dataKey="value" innerRadius="55%" outerRadius="75%" label><Cell fill="#4472C4" /><Cell fill="#70AD47" /></Pie></PieChart></ResponsiveContainer></div><p className="text-2xl font-bold">{hazards.length ? Math.round((hazardClosed / hazards.length) * 100) : 0}%</p></div></div><div className="grid grid-cols-3 border border-[#1F2937] text-center"><div className="border-r border-[#1F2937] p-4 font-bold">Total Corrective Actions Assigned</div><div className="border-r border-[#1F2937] p-4 font-bold">Completed</div><div className="p-4 font-bold">Pending</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{capas.length}</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{closed}</div><div className="border-t border-[#1F2937] p-5 text-2xl font-bold">{capas.length - closed}</div></div></div></Panel></div></div></Panel>;
   };
@@ -375,7 +385,7 @@ export const Analytics = () => {
     const scoped = (items: any[]) => items.filter(item => { const value = String(item.department_id || item.departmentId || item.department || '').toLowerCase(); return value.includes('adm') || value.includes('admin'); });
     const hazards = scoped(current.hazards); const incidents = scoped(current.incidents); const nearMisses = scoped(current.nearMisses); const trainings = scoped(current.trainings); const capas = scoped(current.capas);
     const recordable = incidents.filter(item => isCategory(item, ['lost time', 'lti', 'restricted', 'rwc', 'medical treatment', 'mtc'])).length; const firstAid = incidents.filter(item => isCategory(item, ['first aid'])).length; const fire = incidents.filter(item => isCategory(item, ['fire'])).length; const closed = capas.filter(item => ['closed', 'close', 'completed', 'verified'].includes(String(item.status_id || item.status || '').toLowerCase())).length; const hazardClosed = hazards.filter(item => ['closed', 'close'].includes(String(item.status_id || item.status || '').toLowerCase())).length;
-    const trainingHours = Math.round(trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours) || 0), 0));
+    const trainingHours = Math.round(trainings.reduce((sum, item) => sum + trainingManhours(item), 0));
     const miniChart = (title: string, actual: number, target: number, color: string) => <Panel title={title}><div className="h-[230px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Actual', value: actual }, { name: 'Target', value: target }]} margin={{ top: 25, right: 8, left: -20, bottom: 0 }}><XAxis dataKey="name" tick={{ fontSize: 13, fontWeight: 700 }} /><YAxis hide /><Tooltip /><Bar dataKey="value" fill={color} label={{ position: 'top', fontWeight: 700 }} /></BarChart></ResponsiveContainer></div></Panel>;
     return <Panel title={`Admin — ${incidentSummary.monthName} ${filters.year === 'All' ? new Date().getFullYear() : filters.year}`}><div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(440px,.9fr)_minmax(600px,1.1fr)]"><div className="space-y-5"><div className="border border-[#1F2937] p-4 text-[16px] leading-9"><p>□ &nbsp; ZERO RECORDABLE INJURY={recordable}</p><p>□ &nbsp; FIRST AID CASE={firstAid}</p><p>□ &nbsp; FIRE INCIDENT={fire}</p></div>{miniChart('Nearmisses Reporting', nearMisses.length, 12, '#ED7D31')}{miniChart('Safety Trainings', trainingHours, 600, '#FFC000')}</div><div><Panel title="Hazards Reporting & Elimination Status"><div className="space-y-5"><div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-2"><div className="border border-[#1F2937]"><div className="grid grid-cols-3 text-center"><div className="border-r border-[#1F2937] p-3 font-bold">Hazards Reporting</div><div className="border-r border-[#1F2937] p-3 font-bold">Actual</div><div className="p-3 font-bold">Target</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{hazards.length}</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{hazards.length}</div><div className="border-t border-[#1F2937] p-5 text-2xl font-bold">180</div></div></div><div className="text-center"><div className="mx-auto h-[170px] max-w-[210px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Closed', value: hazardClosed }, { name: 'Open', value: hazards.length - hazardClosed }]} dataKey="value" innerRadius="55%" outerRadius="75%" label><Cell fill="#4472C4" /><Cell fill="#70AD47" /></Pie></PieChart></ResponsiveContainer></div><p className="text-2xl font-bold">{hazards.length ? Math.round((hazardClosed / hazards.length) * 100) : 0}%</p></div></div><div className="grid grid-cols-3 border border-[#1F2937] text-center"><div className="border-r border-[#1F2937] p-4 font-bold">Total Corrective Actions Assigned</div><div className="border-r border-[#1F2937] p-4 font-bold">Completed</div><div className="p-4 font-bold">Pending</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{capas.length}</div><div className="border-r border-t border-[#1F2937] p-5 text-2xl font-bold">{closed}</div><div className="border-t border-[#1F2937] p-5 text-2xl font-bold">{capas.length - closed}</div></div></div></Panel></div></div></Panel>;
   };
@@ -383,7 +393,7 @@ export const Analytics = () => {
   const renderQcSummary = () => {
     const scoped = (items: any[]) => items.filter(item => { const value = String(item.department_id || item.departmentId || item.department || '').toLowerCase(); return value.includes('qc') || value.includes('npd') || value.includes('fs'); });
     const hazards = scoped(current.hazards); const incidents = scoped(current.incidents); const nearMisses = scoped(current.nearMisses); const trainings = scoped(current.trainings);
-    const recordable = incidents.filter(item => isCategory(item, ['lost time', 'lti', 'restricted', 'rwc', 'medical treatment', 'mtc'])).length; const firstAid = incidents.filter(item => isCategory(item, ['first aid'])).length; const trainingHours = Math.round(trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours) || 0), 0));
+    const recordable = incidents.filter(item => isCategory(item, ['lost time', 'lti', 'restricted', 'rwc', 'medical treatment', 'mtc'])).length; const firstAid = incidents.filter(item => isCategory(item, ['first aid'])).length; const trainingHours = Math.round(trainings.reduce((sum, item) => sum + trainingManhours(item), 0));
     const chart = (title: string, actual: number, target: number, color: string) => <Panel title={title}><div className="h-[250px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Actual', value: actual }, { name: 'Target', value: target }]} margin={{ top: 28, right: 10, left: -20, bottom: 0 }}><XAxis dataKey="name" tick={{ fontSize: 14, fontWeight: 700 }} /><YAxis hide /><Tooltip /><Bar dataKey="value" fill={color} label={{ position: 'top', fontWeight: 700 }} /></BarChart></ResponsiveContainer></div></Panel>;
     return <Panel title={`QC & NPD — ${incidentSummary.monthName} ${filters.year === 'All' ? new Date().getFullYear() : filters.year}`}><div className="border border-[#1F2937] p-4 text-[16px] leading-9"><p>□ &nbsp; ZERO RECORDABLE INJURY={recordable}</p><p>□ &nbsp; ZERO FIRST AID CASE ={firstAid}</p></div><div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">{chart('Nearmisses Reporting', nearMisses.length, 10, '#ED7D31')}{chart('Hazards Reporting', hazards.length, 180, '#70AD47')}</div><div className="mt-5">{chart('Safety Trainings', trainingHours, 600, '#5B9BD5')}</div></Panel>;
   };
@@ -393,8 +403,8 @@ export const Analytics = () => {
       const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
       return !value || value.includes('hse') || value.includes('training') || value.includes('all');
     });
-    const hoursForYear = (year: number) => Math.round(trainingRecords.filter(item => yearOf(item) === String(year)).reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours || item.hours) || 0), 0));
-    const totalHours = Math.round(current.trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours || item.hours) || 0), 0));
+    const hoursForYear = (year: number) => Math.round(trainingRecords.filter(item => yearOf(item) === String(year)).reduce((sum, item) => sum + trainingManhours(item), 0));
+    const totalHours = Math.round(current.trainings.reduce((sum, item) => sum + trainingManhours(item), 0));
     const topics = [
       ['Food Safety', '#4472C4', '🍴'], ['Fire Prevention & Safety', '#FF595E', '🧯'], ['Occupational Safety', '#FFB703', '✋'],
       ['CBTA', '#20B99A', '⛑'], ['Safety Handbook & Video Based Training Program', '#5B9BD5', '🦺'], ['Sustainability & Stakeholder Engagement', '#00A651', '🌿'],
@@ -536,7 +546,7 @@ export const Analytics = () => {
     { label: 'Near Miss', unit: 'No', target: 264, actual: (items: RecordSet) => items.nearMisses.length },
     { label: 'Unsafe Acts', unit: 'No', target: 0, lower: true, actual: (items: RecordSet) => items.hazards.filter(item => String(item.unsafe_type || item.category || '').toLowerCase().includes('unsafe act')).length },
     { label: 'Hazard Closure (%)', unit: '%', target: 100, actual: (items: RecordSet) => items.hazards.length ? Math.round((items.hazards.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length / items.hazards.length) * 100) : 0 },
-    { label: 'HSE Training Manhours', unit: 'No', target: 15000, actual: (items: RecordSet) => Math.round(items.trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours) || 0), 0)) },
+    { label: 'HSE Training Manhours', unit: 'No', target: 15000, actual: (items: RecordSet) => Math.round(items.trainings.reduce((sum, item) => sum + trainingManhours(item), 0)) },
     { label: 'Incident Investigation Action Closure (%)', unit: '%', target: 100, actual: (items: RecordSet) => items.capas.length ? Math.round((items.capas.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length / items.capas.length) * 100) : 0 },
     { label: 'Emergency Drills', unit: 'No', target: 6, actual: (_items: RecordSet) => '—' as number | string },
     { label: 'Actions Plan Closure Tracker (%)', unit: '%', target: 100, actual: (items: RecordSet) => items.capas.length ? Math.round((items.capas.filter(item => ['closed', 'close'].includes(String(item.status_id || '').toLowerCase())).length / items.capas.length) * 100) : 0 },

@@ -59,6 +59,9 @@ const categoryFromApi = (value: unknown) => ({
   first_aid: 'First Aid', mtc: 'MTC', lti: 'LTI', rwc: 'RWC', fatality: 'Fatality',
   minor_fire: 'Minor Fire', significant_near_miss: 'Significant Near Miss',
 }[String(value || '').toLowerCase()] || value);
+const notifyDashboardRefresh = () => {
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('dashboard-refresh'));
+};
 
 export const moduleService = {
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
@@ -104,6 +107,17 @@ export const moduleService = {
         actions: item.metadata?.actions || item.actions || [],
         status_id: item.metadata?.status_id || statusFromApi(item.status),
         department_id: item.metadata?.department_id || item.departmentId || item.department_id,
+      }));
+    }
+
+    if (schemaId === 'training-records' || schemaId === 'audit-management' || schemaId === 'inspection-records' || schemaId === 'action-tracker') {
+      rawData = rawData.map((item: any) => ({
+        ...item,
+        date: item.metadata?.date || item.scheduledDate || item.scheduled_date || item.dueDate || item.due_date || item.createdAt || item.created_at,
+        department_id: item.metadata?.department_id || item.departmentId || item.department_id || item.department?.id,
+        status_id: item.metadata?.status_id || item.status,
+        source: item.metadata?.source || item.sourceType || item.source_type,
+        manhours: item.metadata?.manhours || item.manhours || item.total_manhours || (Number(item.durationMinutes || item.duration_minutes) || 0) / 60,
       }));
     }
 
@@ -156,6 +170,7 @@ export const moduleService = {
     }
 
     const response = await apiClient.post(endpoint, payload);
+    notifyDashboardRefresh();
     return response.data;
   },
 
@@ -197,30 +212,35 @@ export const moduleService = {
     }
 
     const response = await apiClient.put(`${endpoint}/${id}`, payload);
+    notifyDashboardRefresh();
     return response.data;
   },
 
   delete: async (schemaId: string, id: string): Promise<ApiResponse<null>> => {
     const endpoint = getEndpoint(schemaId);
     const response = await apiClient.delete(`${endpoint}/${id}`);
+    notifyDashboardRefresh();
     return response.data;
   },
 
   updateStatus: async (schemaId: string, id: string, status: string, reason?: string) => {
     const endpoint = getEndpoint(schemaId);
     const response = await apiClient.patch(`${endpoint}/${id}/status`, { status: statusToApi(status, schemaId), reason });
+    notifyDashboardRefresh();
     return response.data;
   },
 
   restore: async (schemaId: string, id: string) => {
     const endpoint = getEndpoint(schemaId);
     const response = await apiClient.post(`${endpoint}/${id}/restore`);
+    notifyDashboardRefresh();
     return response.data;
   },
 
   bulk: async (schemaId: string, records: any[]) => {
     const endpoint = getEndpoint(schemaId);
     const response = await apiClient.post(`${endpoint}/bulk`, { records });
+    notifyDashboardRefresh();
     return response.data;
   },
 
