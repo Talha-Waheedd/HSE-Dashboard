@@ -10,7 +10,7 @@ import {
   Tooltip as RechartsTooltip, Legend,
 } from 'recharts';
 import {
-  AlertTriangle, Target, Flame, Activity, FileWarning, ShieldAlert
+  AlertTriangle, Target, Flame, Activity, FileWarning, ShieldAlert, GraduationCap, ClipboardCheck, SearchCheck
 } from 'lucide-react';
 
 const EnterpriseTooltip = ({ active, payload, label }: any) => {
@@ -46,76 +46,107 @@ export const LeadingLaggingIndicators = () => {
   const [data, setData] = useState({
     fatalities: 0,
     lti: 0,
-    rwc_mtc: 0,
     firstAid: 0,
+    mtc: 0,
+    rwc: 0,
     majorFire: 0,
     minorFire: 0,
     hazards: 0,
     nearMisses: 0,
+    training: 0,
+    audits: 0,
+    inspections: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const [hazardsRes, nearMissRes, incidentsRes] = await Promise.all([
+        const [hazardsRes, nearMissRes, incidentsRes, trainingRes, auditsRes, inspectionsRes] = await Promise.all([
           moduleService.getAll('hazard-reporting'),
           moduleService.getAll('near-miss'),
-          moduleService.getAll('incident-log')
+          moduleService.getAll('incident-log'),
+          moduleService.getAll('training-records'),
+          moduleService.getAll('audit-management'),
+          moduleService.getAll('inspection-records'),
         ]);
 
         const hazards = hazardsRes.data || [];
         const nearMisses = nearMissRes.data || [];
         const incidents = incidentsRes.data || [];
+        const trainings = trainingRes.data || [];
+        const audits = auditsRes.data || [];
+        const inspections = inspectionsRes.data || [];
 
         let fatalities = 0;
         let lti = 0;
-        let rwc_mtc = 0;
         let firstAid = 0;
+        let mtc = 0;
+        let rwc = 0;
         let majorFire = 0;
         let minorFire = 0;
 
         incidents.forEach(inc => {
-          const cat = inc.incident_category_id?.toLowerCase() || '';
-          if (cat.includes('fatality')) fatalities++;
-          else if (cat.includes('lti')) lti++;
-          else if (cat.includes('rwc') || cat.includes('mtc')) rwc_mtc++;
+          const cat = String(inc.incident_category_id || inc.incidentType || inc.category || '').toLowerCase().replaceAll('_', ' ');
+          if (cat.includes('fatal')) fatalities++;
+          else if (cat.includes('lost time') || cat === 'lti') lti++;
+          else if (cat.includes('restricted') || cat === 'rwc') rwc++;
+          else if (cat.includes('medical treatment') || cat === 'mtc') mtc++;
           else if (cat.includes('first aid')) firstAid++;
           else if (cat.includes('major fire')) majorFire++;
           else if (cat.includes('minor fire')) minorFire++;
         });
 
+        if (cancelled) return;
         setData({
           fatalities,
           lti,
-          rwc_mtc,
           firstAid,
+          mtc,
+          rwc,
           majorFire,
           minorFire,
           hazards: hazards.length,
           nearMisses: nearMisses.length,
+          training: trainings.length,
+          audits: audits.length,
+          inspections: inspections.length,
         });
       } catch (err) {
         console.error('Error fetching data for leading/lagging indicators:', err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchData();
+    const refreshHandler = () => fetchData();
+    window.addEventListener('dashboard-refresh', refreshHandler);
+    const interval = window.setInterval(refreshHandler, 30000);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('dashboard-refresh', refreshHandler);
+      window.clearInterval(interval);
+    };
   }, []);
 
   const laggingData = [
     { name: 'Fatalities', value: data.fatalities, fill: PIE_COLORS[5] },
     { name: 'LTI', value: data.lti, fill: PIE_COLORS[0] },
-    { name: 'RWC/MTC', value: data.rwc_mtc, fill: PIE_COLORS[1] },
+    { name: 'RWC', value: data.rwc, fill: PIE_COLORS[1] },
+    { name: 'MTC', value: data.mtc, fill: PIE_COLORS[2] },
     { name: 'First Aid', value: data.firstAid, fill: PIE_COLORS[2] },
     { name: 'Fire', value: data.majorFire + data.minorFire, fill: PIE_COLORS[3] },
   ];
 
   const leadingData = [
-    { name: 'Hazards', value: data.hazards, fill: CHART_COLORS.success },
-    { name: 'Near Misses', value: data.nearMisses, fill: CHART_COLORS.warning },
+    { name: 'Training', value: data.training, fill: CHART_COLORS.success },
+    { name: 'Audits', value: data.audits, fill: CHART_COLORS.primary },
+    { name: 'Inspections', value: data.inspections, fill: CHART_COLORS.info },
+    { name: 'Hazards', value: data.hazards, fill: CHART_COLORS.warning },
+    { name: 'Near Misses', value: data.nearMisses, fill: CHART_COLORS.danger },
   ];
 
   // Only keep metrics with values > 0 for the pie chart to keep it clean
@@ -141,26 +172,27 @@ export const LeadingLaggingIndicators = () => {
             </div>
           ) : (
             <>
-              {/* Lagging Indicators KPI Tiles */}
-              <div>
-                <h2 className="text-lg font-bold text-[#1A1818] mb-4">Lagging Indicators</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  <KpiTile label="Fatal Incidents" value={data.fatalities} icon={<ShieldAlert />} accent={data.fatalities > 0 ? "danger" : "success"} />
-                  <KpiTile label="LTI" value={data.lti} icon={<AlertTriangle />} accent={data.lti > 0 ? "danger" : "success"} />
-                  <KpiTile label="RWC / MTC" value={data.rwc_mtc} icon={<FileWarning />} accent={data.rwc_mtc > 0 ? "warning" : "success"} />
-                  <KpiTile label="First Aid" value={data.firstAid} icon={<Activity />} accent="info" />
-                  <KpiTile label="Fire Incidents" value={data.majorFire + data.minorFire} icon={<Flame />} accent={data.majorFire + data.minorFire > 0 ? "danger" : "success"} />
+              <section className="rounded-2xl border border-[#DDEFE2] bg-[#F8FCF9] p-5 sm:p-6">
+                <div className="flex items-start gap-3 border-b border-[#DDEFE2] pb-4">
+                  <div className="rounded-lg bg-[#E8F6EC] p-2 text-[#15803D]"><Activity className="h-5 w-5" /></div>
+                  <div><h2 className="text-xl font-bold text-[#1A1818]">Leading Indicators</h2><p className="mt-1 text-[12px] text-[#6B7280]">Proactive activities that help prevent incidents.</p></div>
                 </div>
-              </div>
+                <div className="mt-5 space-y-5">
+                  <div><h3 className="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-[#374151]"><GraduationCap className="h-4 w-4 text-[#15803D]" /> Engagement & reporting</h3><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"><KpiTile label="HSE Training" value={data.training} icon={<GraduationCap />} accent="success" /><KpiTile label="Hazard Reports" value={data.hazards} icon={<AlertTriangle />} accent="success" /><KpiTile label="Near-Miss Reports" value={data.nearMisses} icon={<Target />} accent="warning" /></div></div>
+                  <div><h3 className="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-[#374151]"><SearchCheck className="h-4 w-4 text-[#2563EB]" /> Assurance activities</h3><div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><KpiTile label="HSE Audits" value={data.audits} icon={<ClipboardCheck />} accent="info" /><KpiTile label="HSE Inspections" value={data.inspections} icon={<SearchCheck />} accent="info" /></div></div>
+                </div>
+              </section>
 
-              {/* Leading Indicators KPI Tiles */}
-              <div>
-                <h2 className="text-lg font-bold text-[#1A1818] mb-4">Leading Indicators</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <KpiTile label="Hazard Spotting" value={data.hazards} icon={<AlertTriangle />} accent="success" />
-                  <KpiTile label="Near Misses" value={data.nearMisses} icon={<Target />} accent="warning" />
+              <section className="rounded-2xl border border-[#F3DADA] bg-[#FFF9F9] p-5 sm:p-6">
+                <div className="flex items-start gap-3 border-b border-[#F3DADA] pb-4">
+                  <div className="rounded-lg bg-[#FDECEC] p-2 text-[#B91C1C]"><ShieldAlert className="h-5 w-5" /></div>
+                  <div><h2 className="text-xl font-bold text-[#1A1818]">Lagging Indicators</h2><p className="mt-1 text-[12px] text-[#6B7280]">Recordable outcomes retrieved from incident records.</p></div>
                 </div>
-              </div>
+                <div className="mt-5 space-y-5">
+                  <div><h3 className="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-[#374151]"><FileWarning className="h-4 w-4 text-[#B91C1C]" /> Injury and illness outcomes</h3><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"><KpiTile label="First-Aid Cases" value={data.firstAid} icon={<Activity />} accent="info" /><KpiTile label="Medical Treatment Cases" value={data.mtc} icon={<FileWarning />} accent={data.mtc > 0 ? 'warning' : 'success'} /><KpiTile label="Restricted Work Cases" value={data.rwc} icon={<FileWarning />} accent={data.rwc > 0 ? 'warning' : 'success'} /><KpiTile label="Lost-Time Injuries" value={data.lti} icon={<AlertTriangle />} accent={data.lti > 0 ? 'danger' : 'success'} /></div></div>
+                  <div><h3 className="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-[#374151]"><ShieldAlert className="h-4 w-4 text-[#B91C1C]" /> Severe events</h3><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"><KpiTile label="Fatalities" value={data.fatalities} icon={<ShieldAlert />} accent={data.fatalities > 0 ? 'danger' : 'success'} /><KpiTile label="Fire Incidents" value={data.majorFire + data.minorFire} icon={<Flame />} accent={data.majorFire + data.minorFire > 0 ? 'danger' : 'success'} /></div></div>
+                </div>
+              </section>
 
               {/* Charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
