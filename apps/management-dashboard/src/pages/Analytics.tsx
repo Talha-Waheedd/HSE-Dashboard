@@ -298,6 +298,26 @@ export const Analytics = () => {
     );
   };
 
+  const renderActionsLogSummary = () => {
+    const departments = [
+      ['Production', ['production', 'prd']], ['ESD & UTY', ['esd', 'uty', 'utilities']], ['ADM', ['adm', 'admin']], ['HSE', ['hse']],
+    ] as const;
+    const closedStatus = ['closed', 'close', 'completed', 'verified'];
+    const rows = departments.map(([name, aliases]) => {
+      const items = current.capas.filter(item => { const department = String(item.department_id || item.departmentId || item.department || '').toLowerCase(); return aliases.some(alias => department.includes(alias)); });
+      const closed = items.filter(item => closedStatus.includes(String(item.status_id || item.status || '').toLowerCase())).length;
+      return { name, Total: items.length, Open: items.length - closed, Closed: closed };
+    }).filter(row => row.Total > 0);
+    const total = current.capas.length;
+    const closed = current.capas.filter(item => closedStatus.includes(String(item.status_id || item.status || '').toLowerCase())).length;
+    const closureRate = total ? Math.round((closed / total) * 100) : 0;
+    return (
+      <Panel title={`HSE Actions Log Status YTD ${filters.year === 'All' ? new Date().getFullYear() : filters.year} ${incidentSummary.monthName}`}>
+        <div className="border-t-[6px] border-[#C00000] pt-5"><div className="h-[370px] w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={rows} margin={{ top: 28, right: 18, left: 8, bottom: 20 }}><CartesianGrid vertical={false} stroke="#E5E7EB" /><XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 700 }} /><YAxis allowDecimals={false} /><Tooltip /><Legend /><Bar dataKey="Total" fill="#4472C4" radius={[2, 2, 0, 0]} label={{ position: 'top', fill: '#111827', fontWeight: 700 }} /><Bar dataKey="Open" fill="#ED7D31" radius={[2, 2, 0, 0]} label={{ position: 'top', fill: '#111827', fontWeight: 700 }} /><Bar dataKey="Closed" fill="#A5A5A5" radius={[2, 2, 0, 0]} label={{ position: 'top', fill: '#111827', fontWeight: 700 }} /></BarChart></ResponsiveContainer></div><div className="mx-auto mt-5 max-w-md border border-[#1F2937] px-6 py-3 text-center text-[20px]">Overall Closure Rate = <span className="font-bold text-[#FF0000]">{closureRate}%</span></div><p className="mx-auto mt-10 max-w-5xl bg-[#E7E6E6] px-3 py-1 text-center text-[13px] italic text-[#17365D]">* HSE Champions / Area Owners to close their respective actions and give status / timelines back to HSE for record</p></div>
+      </Panel>
+    );
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -384,6 +404,7 @@ export const Analytics = () => {
             {renderNearMissSummary()}
             {renderHazardEliminationSummary()}
             {renderHighRiskSummary()}
+            {renderActionsLogSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
