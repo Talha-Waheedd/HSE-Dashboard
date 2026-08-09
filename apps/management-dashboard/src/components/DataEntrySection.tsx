@@ -9,7 +9,7 @@ import type { SectionConfig, ColumnSchema } from '../config/sectionSchemas';
 import { usePermissions, useAuth } from '@cbl/auth';
 import { useModuleData } from '../hooks/useModuleData';
 import { useFilters } from '../context/FilterContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus, Save, Trash2, Download, Edit2, X, History, ArrowUpDown,
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
@@ -346,6 +346,7 @@ const ActionTrackerRoute = ({ schema }: { schema: SectionConfig }) => {
 
 export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: entries, loading, fetchAll, createRecord, updateRecord, deleteRecord } = useModuleData(schema.id);
   const { user } = useAuth();
   const permissions = usePermissions();
@@ -372,9 +373,13 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const PAGE_SIZE = 15;
 
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
+  const routeCategory = schema.id === 'incident-log' ? searchParams.get('category') : null;
 
   useEffect(() => { fetchAll(filters as unknown as Record<string, unknown>); }, [schema.id, fetchAll, filters]);
   useEffect(() => { setCurrentPage(1); }, [filters, searchQuery, schema.id]);
+  useEffect(() => {
+    if (schema.id === 'incident-log' && routeCategory) setSearchQuery(routeCategory);
+  }, [schema.id, routeCategory]);
 
   const applyComputes = (data: any, currentSchema: SectionConfig, allEntries: any[]) => {
     const nextData = { ...data };
@@ -548,8 +553,13 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (filters.year && filters.year !== 'All' && recordDate && !recordDate.startsWith(filters.year)) return false;
     if (filters.fromDate && recordDate && recordDate < filters.fromDate) return false;
     if (filters.toDate && recordDate && recordDate > filters.toDate) return false;
+    if (routeCategory) {
+      const normalize = (value: unknown) => String(value || '').toLowerCase().replaceAll('_', ' ').trim();
+      const category = entry.incident_category_id || entry.incidentType || entry.category;
+      if (normalize(category) !== normalize(routeCategory)) return false;
+    }
     return true;
-  }), [entries, filters]);
+  }), [entries, filters, routeCategory]);
 
   const searchedEntries = useMemo(() => {
     if (!searchQuery.trim()) return filteredEntries;

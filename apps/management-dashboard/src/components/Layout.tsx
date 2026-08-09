@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, usePermissions, useAuthStore } from '@cbl/auth';
 import { useNotifications } from '../hooks/useNotifications';
@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Menu, Bell, ChevronDown, X,
   UserCircle, Settings as SettingsIcon, HelpCircle,
   AlertTriangle, Target, FileWarning, CheckSquare, ClipboardList,
-  Users, ExternalLink, Sun, Moon, Activity
+  Users, ExternalLink, Sun, Moon, Activity, ShieldAlert
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -18,7 +18,16 @@ import { useTheme } from '../context/ThemeContext';
 // ============================================================
 
 // Nav group structure — grouped like SAP Fiori left navigation
-const NAV_GROUPS = [
+type NavItem = {
+  title: string;
+  href: string;
+  Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  children?: NavItem[];
+};
+
+type NavGroup = { label: string; items: NavItem[] };
+
+const NAV_GROUPS: NavGroup[] = [
   {
     label: 'OVERVIEW',
     items: [
@@ -51,13 +60,37 @@ const NAV_GROUPS = [
   {
     label: 'REPORTING',
     items: [
-      { title: 'Leading & Lagging Indicators', href: '/leading-lagging-indicators', Icon: Activity },
       { title: 'Reports', href: '/reports', Icon: FileText },
       { title: 'Analytics', href: '/analytics', Icon: BarChart3 },
     ],
   },
-
-] as const;
+  {
+    label: 'LEADING INDICATORS',
+    items: [{
+      title: 'Leading Indicators', href: '/leading-lagging-indicators', Icon: Activity,
+      children: [
+        { title: 'Training', href: '/training-records', Icon: Users },
+        { title: 'Audits', href: '/audit-management', Icon: ClipboardList },
+        { title: 'Inspections', href: '/inspection-records', Icon: ClipboardList },
+        { title: 'Hazard Reporting', href: '/hazard-reporting', Icon: AlertTriangle },
+        { title: 'Near-Miss Reporting', href: '/near-miss', Icon: Target },
+      ],
+    }],
+  },
+  {
+    label: 'LAGGING INDICATORS',
+    items: [{
+      title: 'Lagging Indicators', href: '/incident-log', Icon: FileWarning,
+      children: [
+        { title: 'First Aid Cases', href: '/incident-log?category=First%20Aid', Icon: Activity },
+        { title: 'Medical Treatment Cases', href: '/incident-log?category=MTC', Icon: FileWarning },
+        { title: 'Restricted Work Cases', href: '/incident-log?category=RWC', Icon: FileWarning },
+        { title: 'Lost-Time Injuries', href: '/incident-log?category=LTI', Icon: AlertTriangle },
+        { title: 'Fatalities', href: '/incident-log?category=Fatality', Icon: ShieldAlert },
+      ],
+    }],
+  },
+];
 
 const NOTIF_TYPE = {
   danger: { dot: '#EF4444', line: '#FEE2E2' },
@@ -66,10 +99,15 @@ const NOTIF_TYPE = {
 };
 
 // Helper: resolve active state robustly
-const getIsActive = (pathname: string, href: string): boolean => {
-  if (href === '/dashboard') return pathname === '/dashboard';
-  return pathname === href || pathname.startsWith(href + '/');
+const getIsActive = (pathname: string, href: string, search = ''): boolean => {
+  const [targetPath, targetQuery] = href.split('?');
+  if (targetQuery) return pathname === targetPath && search === `?${targetQuery}`;
+  if (targetPath === '/dashboard') return pathname === '/dashboard';
+  return pathname === targetPath || pathname.startsWith(targetPath + '/');
 };
+
+const hasActiveChild = (item: NavItem, pathname: string, search: string): boolean =>
+  getIsActive(pathname, item.href, search) || Boolean(item.children?.some(child => hasActiveChild(child, pathname, search)));
 
 // Helper: get user initials
 const getInitials = (name?: string): string => {
@@ -82,6 +120,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [expandedNavItems, setExpandedNavItems] = useState<Record<string, boolean>>({});
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { logout, user } = useAuth();
@@ -89,7 +128,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   const { canViewReports } = usePermissions();
   const { theme, toggleTheme } = useTheme();
 
-  const activeNavGroups = [
+  const activeNavGroups: NavGroup[] = [
     ...NAV_GROUPS,
     ...(hasRole('System Administrator') ? [{
       label: 'ADMINISTRATION',
@@ -100,6 +139,63 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   ];
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const activeParents: Record<string, boolean> = {};
+    activeNavGroups.forEach(group => group.items.forEach(item => {
+      if (item.children?.some(child => hasActiveChild(child, location.pathname, location.search))) {
+        activeParents[item.href] = true;
+      }
+    }));
+    setExpandedNavItems(previous => ({ ...previous, ...activeParents }));
+  }, [location.pathname, location.search]);
+
+  const toggleNavItem = (href: string) => {
+    setExpandedNavItems(previous => ({ ...previous, [href]: !previous[href] }));
+  };
+
+  const renderNavItem = (item: NavItem, depth = 0): React.ReactNode => {
+    if (item.href === '/reports' && !canViewReports()) return null;
+    const hasChildren = Boolean(item.children?.length);
+    const isActive = getIsActive(location.pathname, item.href, location.search);
+    const isBranchActive = hasActiveChild(item, location.pathname, location.search);
+    const isExpanded = expandedNavItems[item.href] ?? isBranchActive;
+    const baseClass = `relative flex items-center gap-3 rounded-md text-[13px] font-medium transition-all duration-150 ${collapsed ? 'justify-center px-2 py-2.5' : depth > 0 ? 'px-3 py-1.5 ml-3' : 'px-3 py-2'}`;
+    const baseStyle = {
+      color: isActive || (hasChildren && isBranchActive) ? '#FFFFFF' : 'var(--sidebar-text, rgba(255,255,255,0.85))',
+      backgroundColor: isActive ? 'var(--sidebar-active-bg, rgba(255,255,255,0.15))' : 'transparent',
+    };
+
+    return (
+      <React.Fragment key={item.href}>
+        {hasChildren ? (
+          <button
+            type="button"
+            onClick={() => toggleNavItem(item.href)}
+            className={`${baseClass} w-full`}
+            style={baseStyle}
+            title={collapsed ? item.title : undefined}
+          >
+            <item.Icon className="shrink-0" style={{ width: 16, height: 16, color: isBranchActive ? '#FFFFFF' : 'rgba(255,255,255,0.65)' }} />
+            {!collapsed && <span className="flex-1 truncate text-left leading-snug pb-[1px]">{item.title}</span>}
+            {!collapsed && <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />}
+          </button>
+        ) : (
+          <NavLink
+            to={item.href}
+            onClick={() => setMobileMenuOpen(false)}
+            className={baseClass}
+            style={baseStyle}
+            title={collapsed ? item.title : undefined}
+          >
+            <item.Icon className="shrink-0" style={{ width: 16, height: 16, color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.65)' }} />
+            {!collapsed && <span className="truncate leading-snug pb-[1px]">{item.title}</span>}
+          </NavLink>
+        )}
+        {hasChildren && isExpanded && !collapsed && <div className="mt-0.5 space-y-0.5">{item.children?.map(child => renderNavItem(child, depth + 1))}</div>}
+      </React.Fragment>
+    );
+  };
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -380,51 +476,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 )}
                 {/* Group items */}
                 <div className="space-y-0.5 px-2">
-                  {group.items.map(item => {
-                    if (item.href === '/reports' && !canViewReports()) return null;
-                    const isActive = getIsActive(location.pathname, item.href);
-
-                    return (
-                      <NavLink
-                        key={item.href}
-                        to={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`
-                          relative flex items-center gap-3 rounded-md
-                          text-[13px] font-medium transition-all duration-150
-                          ${collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2'}
-                        `}
-                        style={{
-                          color: isActive
-                            ? '#FFFFFF'
-                            : 'var(--sidebar-text, rgba(255,255,255,0.85))',
-                          backgroundColor: isActive
-                            ? 'var(--sidebar-active-bg, rgba(255,255,255,0.15))'
-                            : 'transparent',
-                        }}
-                        onMouseEnter={e => {
-                          if (!isActive)
-                            (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--sidebar-hover-bg, rgba(255,255,255,0.08))';
-                        }}
-                        onMouseLeave={e => {
-                          if (!isActive)
-                            (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                        }}
-                        title={collapsed ? item.title : undefined}
-                      >
-                        <item.Icon
-                          className="shrink-0"
-                          style={{
-                            width: 16, height: 16,
-                            color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.65)'
-                          }}
-                        />
-                        {!collapsed && (
-                          <span className="truncate leading-snug pb-[1px]">{item.title}</span>
-                        )}
-                      </NavLink>
-                    );
-                  })}
+                  {group.items.map(item => renderNavItem(item))}
                 </div>
 
                 {/* Subtle divider — not between last group */}
