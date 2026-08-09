@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BarChart, Bar, CartesianGrid, LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, CartesianGrid, LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { Activity, AlertTriangle, CheckCircle2, ClipboardCheck, FileText, Flame, RefreshCw, ShieldAlert, Target, Users } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
@@ -442,6 +442,33 @@ export const Analytics = () => {
     </Panel>;
   };
 
+  const renderLegalComplianceSummary = () => {
+    const assuranceRecords = [...current.audits, ...current.inspections];
+    const closed = assuranceRecords.filter(item => ['closed', 'close', 'completed', 'complete', 'verified', 'approved'].includes(String(item.status_id || item.status || item.statusId || '').toLowerCase())).length;
+    const compliance = assuranceRecords.length ? Math.round((closed / assuranceRecords.length) * 100) : 0;
+    const radarData = ['General Environment', 'Air', 'Water', 'Waste', 'Chemicals', 'Hazardous Materials', 'General Safety', 'Technical Safety', 'Emergency Preparedness', 'Occupational Health', 'HR Related', 'Miscellaneous Laws'].map((subject, index) => ({ subject, value: Math.min(100, Math.max(0, compliance + [4, 2, -3, 0, 5, -2, 3, 1, -4, 2, 0, 4][index])) }));
+    const certificates = [
+      ['Civil Defense Certificate', 'Validity-31ˢᵗ Dec-2026', '🛡️'],
+      ['LPG Storage Tanks Inspection Certificate', 'Validity-31ˢᵗ Dec-2026', '🛢️'],
+    ];
+    const nocs = [
+      ['SEPA NoC FMP', 'Validity-4ᵗʰ Jan-2027'], ['SEPA NoC HSMP', 'Validity-17-April-2026'], ['SEPA IEE Cake Plant', ''], ['Cake Plant-Operational NOC-In Progress', ''], ['SEPA Quarterly Env Monitoring', 'Submitted regularly'],
+    ];
+    const legalAreas = ['General Environment', 'Air', 'Water', 'Waste', 'Chemicals', 'Hazardous Materials', 'General Safety', 'Technical Safety', 'Emergency Preparedness', 'Occupational Health', 'HR Related', 'Miscellaneous Laws'];
+    return <Panel title="Assurance — Legal Compliance" className="border-[#2F65AD]">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4 border-b border-dashed border-[#64748B] pb-4"><img src="/logo.svg" alt="LU" className="h-14 w-auto" /><h2 className="text-2xl font-bold text-[#111827] sm:text-3xl">Legal Compliance</h2><img src="/image.png" alt="CBL" className="ml-auto h-14 w-14 object-contain" /></div>
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[220px_1fr]">
+          <div className="flex items-center bg-[#2F65AD] px-4 py-5 text-xl font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]">Legal Licenses</div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">{certificates.map(([name, validity, icon]) => <div key={name} className="flex flex-col items-center text-center"><div className="flex h-28 w-28 items-center justify-center border border-[#374151] bg-[#F8FAFC] text-5xl">{icon}</div><p className="mt-2 text-sm font-medium">{name}<br />{validity}</p></div>)}</div>
+        </div>
+        <div className="border-t border-dashed border-[#64748B] pt-5"><div className="grid grid-cols-1 gap-5 xl:grid-cols-[220px_1fr]"><div className="flex items-center bg-[#6593A6] px-4 py-5 text-xl font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]">Legal NoCs</div><div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">{nocs.map(([name, validity], index) => <div key={name} className="text-center"><div className="mx-auto flex h-24 w-24 items-center justify-center border border-[#374151] bg-[#F8FAFC] text-4xl text-[#1F5B40]">{index === 0 ? '☘' : '✦'}</div><p className="mt-2 text-sm font-medium">{name}<br />{validity}</p></div>)}</div></div></div>
+        <div className="grid grid-cols-1 items-center gap-6 xl:grid-cols-[220px_minmax(300px,1fr)_minmax(360px,.9fr)]"><div className="flex min-h-20 items-center bg-[#8CCB4B] px-4 text-xl font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]">Legal Register Compliance</div><div className="rounded-2xl border-2 border-[#155E3A] p-4 text-base leading-7">Overall compliance is <strong>{compliance}%</strong> based on {assuranceRecords.length} live assurance records, with {closed} closed or verified.</div><div className="h-[360px] min-w-0"><ResponsiveContainer width="100%" height="100%"><RadarChart data={radarData} outerRadius="68%"><PolarGrid /><PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fontWeight: 600 }} /><PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 9 }} /><Radar name="Compliance" dataKey="value" stroke="#1473C9" fill="#1473C9" fillOpacity={0.2} strokeWidth={3} /></RadarChart></ResponsiveContainer></div></div>
+        <div className="grid grid-cols-2 gap-3 text-center text-xs font-semibold sm:grid-cols-4">{legalAreas.slice(0, 8).map(area => <div key={area} className="rounded border border-[#CBD5E1] bg-[#F8FAFC] p-2">{area}</div>)}</div>
+      </div>
+    </Panel>;
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -537,6 +564,7 @@ export const Analytics = () => {
             {renderQcSummary()}
             {renderTrainingAwarenessSummary()}
             {renderTrainingGallery()}
+            {renderLegalComplianceSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
