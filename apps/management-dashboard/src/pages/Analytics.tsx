@@ -43,6 +43,7 @@ export const Analytics = () => {
   const [records, setRecords] = useState<RecordSet>(emptyRecords);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'summary' | 'pyramid'>('summary');
+  const [activeTab, setActiveTab] = useState<'kpi' | 'department' | 'training' | 'assurance'>('kpi');
 
   useEffect(() => {
     let cancelled = false;
@@ -588,6 +589,9 @@ export const Analytics = () => {
         <FilterBar />
       </ContextHeader>
       <main className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
+        <nav aria-label="Analytics sections" className="sticky top-0 z-10 grid grid-cols-2 overflow-hidden rounded-xl border border-[#D9E1EC] bg-white shadow-sm sm:grid-cols-4">
+          {([['kpi', 'HSE KPI’s Review'], ['department', 'Department-Wise HSE KPIs Status'], ['training', 'HSE Trainings'], ['assurance', 'Assurance']] as const).map(([tab, label]) => <button key={tab} onClick={() => { setActiveTab(tab); setView('summary'); }} className={`min-h-12 border-b-2 px-3 py-3 text-xs font-bold transition sm:text-sm ${activeTab === tab ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-transparent text-[#374151] hover:bg-[#F8FAFC] hover:text-[#CB0017]'}`}>{label}</button>)}
+        </nav>
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D9E1EC] bg-white p-3 shadow-sm"><div className="flex gap-2"><button onClick={() => setView('summary')} className={`rounded-md px-4 py-2 text-[12px] font-semibold ${view === 'summary' ? 'bg-[#CB0017] text-white' : 'bg-[#F3F4F6] text-[#374151]'}`}>KPI Performance Summary</button><button onClick={() => setView('pyramid')} className={`rounded-md px-4 py-2 text-[12px] font-semibold ${view === 'pyramid' ? 'bg-[#CB0017] text-white' : 'bg-[#F3F4F6] text-[#374151]'}`}>Safety Pyramid</button></div><span className="text-[11px] text-[#6B7280]">Live data · {filters.year === 'All' ? 'All years' : `YTD ${filters.year}`}</span></div>
 
         {view === 'pyramid' ? (
@@ -600,6 +604,12 @@ export const Analytics = () => {
             </Panel>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Safety Events Trend"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.success} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.warning} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Pyramid Category Comparison"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Hazards', value: current.hazards.length }, { name: 'Near Miss', value: current.nearMisses.length }, { name: 'Recordable', value: metrics.recordable }, { name: 'Fatality', value: metrics.fatal }]}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="value" fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></Panel></div>
           </>
+        ) : activeTab === 'department' ? (
+          <>{renderDepartmentalTable()}</>
+        ) : activeTab === 'training' ? (
+          <>{renderTrainingAwarenessSummary()}{renderTrainingGallery()}</>
+        ) : activeTab === 'assurance' ? (
+          <>{renderLegalComplianceSummary()}{renderLegalActionItemsSummary()}{renderAuditsInspectionsSummary()}{renderSpecialistAuditsSummary()}</>
         ) : (
           <>
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-6"><KpiTile label="Hazards" value={current.hazards.length} icon={<AlertTriangle />} accent="warning" /><KpiTile label="Near Misses" value={current.nearMisses.length} icon={<Target />} accent="info" /><KpiTile label="Fatalities" value={metrics.fatal} icon={<ShieldAlert />} accent={metrics.fatal ? 'danger' : 'success'} /><KpiTile label="LTI" value={metrics.lti} icon={<FileText />} accent={metrics.lti ? 'danger' : 'success'} /><KpiTile label="Training" value={current.trainings.length} icon={<Users />} accent="success" /><KpiTile label="Audits / Inspections" value={current.audits.length + current.inspections.length} icon={<ClipboardCheck />} accent="info" /></div>
