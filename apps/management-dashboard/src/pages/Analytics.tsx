@@ -470,10 +470,10 @@ export const Analytics = () => {
   };
 
   const renderLegalActionItemsSummary = () => {
-    const actions = current.capas.filter(item => {
-      const value = `${item.title || ''} ${item.description || ''} ${item.area || ''} ${item.category || ''} ${item.action_type || ''}`.toLowerCase();
-      return !value || value.includes('legal') || value.includes('compliance') || value.includes('audit') || value.includes('environment');
-    });
+    // The action tracker is the source of truth for this assurance table. Keep
+    // every returned action so continuation rows are not lost when a record's
+    // legal reference is stored in a different backend field.
+    const actions = current.capas;
     const text = (item: any, keys: string[], fallback = '—') => String(keys.map(key => item[key]).find(value => value !== undefined && value !== null && value !== '') ?? fallback);
     const statusClass = (status: string) => { const value = status.toLowerCase(); return value.includes('done') || value.includes('closed') || value.includes('complete') ? 'bg-[#00B050]' : value.includes('pending') ? 'bg-[#FF0000]' : 'bg-[#FFC000]'; };
     return <Panel title="Assurance — Pending Legal Action Items" className="border-[#2F65AD]">
