@@ -11,7 +11,7 @@ import { useModuleData } from '../hooks/useModuleData';
 import { useFilters } from '../context/FilterContext';
 import { useNavigate } from 'react-router-dom';
 import {
-  Plus, Save, Trash2, Download, Edit2, X, History,
+  Plus, Save, Trash2, Download, Edit2, X, History, ArrowUpDown,
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
   CheckCircle2, LayoutGrid, Filter, PanelRightOpen,
   Upload, Paperclip, FileText, Eye, CalendarDays, Clock,
@@ -20,8 +20,6 @@ import { LinkedSourceBadge } from './LinkedSourceBadge';
 import { AvatarInitials } from './AvatarInitials';
 import { DepartmentStatusBar } from './DepartmentStatusBar';
 import { MyPendingWidget } from './MyPendingWidget';
-import { IncidentCard } from './IncidentCard';
-import { SafetyEventTimeline } from './SafetyEventTimeline';
 import { uploadClient } from '../../../../packages/api/src/uploadClient';
 import { apiClient } from '@cbl/api';
 
@@ -360,6 +358,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [validationError, setValidationError] = useState<string | null>(null);
   const [statusHistoryModal, setStatusHistoryModal] = useState<{ isOpen: boolean; record: any | null }>({ isOpen: false, record: null });
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [density, setDensity] = useState<'comfortable' | 'compact' | 'spacious'>('comfortable');
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
@@ -555,13 +554,35 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const searchedEntries = useMemo(() => {
     if (!searchQuery.trim()) return filteredEntries;
     const q = searchQuery.toLowerCase();
-    return filteredEntries.filter(entry => schema.columns.some(col => String(entry[col.key] ?? '').toLowerCase().includes(q)));
+    return filteredEntries.filter(entry => JSON.stringify(entry).toLowerCase().includes(q));
   }, [filteredEntries, searchQuery, schema.columns]);
 
-  const totalPages = Math.max(1, Math.ceil(searchedEntries.length / PAGE_SIZE));
-  const pagedEntries = searchedEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-  const startRecord = searchedEntries.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endRecord = Math.min(currentPage * PAGE_SIZE, searchedEntries.length);
+  const sortedEntries = useMemo(() => {
+    if (!sortConfig) return searchedEntries;
+    const valueForSort = (entry: any) => {
+      const values: Record<string, unknown> = {
+        incidentNumber: entry.incidentNumber || entry.incident_number || entry.id,
+        date: entry.date || entry.incidentDate || entry.incident_date || entry.createdAt,
+        description: entry.description,
+        emp_id: entry.emp_id,
+        department_id: entry.department_id || entry.departmentId,
+        incident_category_id: entry.incident_category_id || entry.incidentType,
+        location: entry.location,
+        risk_rating_id: entry.risk_rating_id || entry.severityLevel,
+        status_id: entry.status_id || entry.status,
+      };
+      return String(values[sortConfig.key] ?? '').toLowerCase();
+    };
+    return [...searchedEntries].sort((left, right) => {
+      const comparison = valueForSort(left).localeCompare(valueForSort(right), undefined, { numeric: true, sensitivity: 'base' });
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+  }, [searchedEntries, sortConfig]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedEntries.length / PAGE_SIZE));
+  const pagedEntries = sortedEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const startRecord = sortedEntries.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endRecord = Math.min(currentPage * PAGE_SIZE, sortedEntries.length);
   const visibleColumns = schema.columns.filter(col => !col.hideFromForm && col.type !== 'file');
   const sectionGroups = moduleSections(schema);
   const exportCSV = async () => {
@@ -1524,57 +1545,120 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         breadcrumbs={[schema.title]}
         subtitle="Log, track, and investigate safety incidents"
         actions={[
+          ...(canExportCSV() ? [{ label: 'Export CSV', icon: <Download />, onClick: exportCSV, variant: 'outlined' as const }] : []),
           { label: 'Report Incident', icon: <Plus />, onClick: () => setIsAddModalOpen(true), variant: 'primary' }
         ]}
       >
         <FilterBar variant="incident" />
       </ContextHeader>
 
-      <div className="p-6 flex flex-col xl:flex-row gap-6">
-        <div className="flex-1 space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-[14px] font-bold text-[#1C1C1E]">Recent Incidents</h2>
-             <span className="text-[12px] text-[#6B7280]">{searchedEntries.length} records</span>
+      <div className="p-6 space-y-5">
+        <div className={`${CARD} overflow-hidden`}>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F0F0F0] px-4 py-3">
+            <div>
+              <h2 className="text-[14px] font-bold text-[#1C1C1E]">Incident Records</h2>
+              <p className="mt-0.5 text-[12px] text-[#6B7280]">{searchedEntries.length} records from the latest backend data</p>
+            </div>
+            <div className="relative w-full max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9CA3AF]" />
+              <input
+                type="search"
+                placeholder="Search incidents..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full h-9 pl-9 pr-3 text-[13px] border border-[#DEDEDE] rounded-md bg-white focus:outline-none focus:border-[#CB0017] focus:ring-2 focus:ring-[#CB0017]/15"
+              />
+            </div>
           </div>
 
-          {loading ? (
-            <p className="text-[13px] text-[#9CA3AF]">Loading incidents...</p>
-          ) : searchedEntries.length === 0 ? (
-            <p className="text-[13px] text-[#9CA3AF]">No incidents found.</p>
-          ) : (
-            <div className="space-y-3">
-              {pagedEntries.map((inc: any) => (
-                <IncidentCard
-                  key={inc.id}
-                  incident={inc}
-                  onClick={() => navigate(`/incident-log/${inc.id}`)}
-                  onViewDetails={() => navigate(`/incident-log/${inc.id}`)}
-                />
-              ))}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1120px] enterprise-table">
+              <thead>
+                <tr>
+                  {[
+                    ['incidentNumber', 'Incident No.'], ['date', 'Date'], ['description', 'Description'],
+                    ['emp_id', 'Emp ID'], ['department_id', 'Department'], ['incident_category_id', 'Category'],
+                    ['location', 'Location'], ['risk_rating_id', 'Severity'], ['status_id', 'Status']
+                  ].map(([key, label]) => (
+                    <th key={key}>
+                      <button
+                        type="button"
+                        onClick={() => setSortConfig(current => current?.key === key ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' } : { key, direction: 'asc' })}
+                        className="inline-flex items-center gap-1.5 text-left"
+                      >
+                        {label}
+                        <ArrowUpDown className={`h-3.5 w-3.5 ${sortConfig?.key === key ? 'text-[#CB0017]' : 'text-[#9CA3AF]'}`} />
+                      </button>
+                    </th>
+                  ))}
+                  <th className="text-center">View Details</th>
+                  <th className="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading && pagedEntries.length === 0 ? Array.from({ length: 5 }).map((_, index) => (
+                  <tr key={`incident-loading-${index}`}>
+                    {Array.from({ length: 11 }).map((__, cellIndex) => <td key={cellIndex}><div className="h-3.5 w-[70%] rounded bg-[#F0F0F0] animate-pulse" /></td>)}
+                  </tr>
+                )) : pagedEntries.length === 0 ? (
+                  <tr>
+                    <td colSpan={11}>
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <FileText className="mb-3 h-12 w-12 text-[#E0E0E0]" />
+                        <p className="text-[14px] font-semibold text-[#374151]">{searchQuery ? 'No matching incidents' : 'No incident records found'}</p>
+                        <p className="mt-1 text-[12px] text-[#9CA3AF]">Try changing the search or active filters.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : pagedEntries.map((incident: any, rowIndex: number) => {
+                  const incidentNumber = incident.incidentNumber || incident.incident_number || incident.id;
+                  const date = incident.date || incident.incidentDate || incident.incident_date;
+                  const department = incident.department_id || incident.departmentId || '—';
+                  const category = incident.incident_category_id || incident.incidentType || '—';
+                  const severity = incident.risk_rating_id || incident.severityLevel || '—';
+                  const status = incident.status_id || incident.status || '—';
+                  return (
+                    <tr key={incident.id} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}>
+                      <td className="font-semibold text-[#2C1810]">{incidentNumber}</td>
+                      <td>{date ? String(date).slice(0, 10) : '—'}</td>
+                      <td className="max-w-[260px] truncate" title={incident.description || ''}>{incident.description || '—'}</td>
+                      <td>{incident.emp_id || '—'}</td>
+                      <td>{department}</td>
+                      <td>{category}</td>
+                      <td>{incident.location || '—'}</td>
+                      <td>{severity !== '—' ? <StatusBadge status={severity} size="sm" /> : '—'}</td>
+                      <td>{status !== '—' ? <StatusBadge status={status} size="sm" /> : '—'}</td>
+                      <td className="text-center">
+                        <button type="button" onClick={() => navigate(`/incident-log/${incident.id}`)} className="text-[12px] font-semibold text-[#CB0017] hover:underline">
+                          View Details <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
+                        </button>
+                      </td>
+                      <td className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          {canEditData() && <button type="button" aria-label="Edit incident" onClick={() => startEdit(incident)} className="h-7 w-7 rounded text-[#6B7280] hover:bg-[#FFF7F7] hover:text-[#CB0017]"><Edit2 className="mx-auto h-3.5 w-3.5" /></button>}
+                          {canDeleteData() && <button type="button" aria-label="Delete incident" onClick={() => handleDelete(incident.id)} className="h-7 w-7 rounded text-[#6B7280] hover:bg-red-50 hover:text-red-600"><Trash2 className="mx-auto h-3.5 w-3.5" /></button>}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {sortedEntries.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#F0F0F0] bg-[#FAFAFA] px-4 py-3">
+              <p className="text-[12px] text-[#6B7280]">Showing <span className="font-semibold text-[#374151]">{startRecord}-{endRecord}</span> of <span className="font-semibold text-[#374151]">{sortedEntries.length}</span> records</p>
+              <div className="flex items-center gap-1">
+                <button type="button" onClick={() => setCurrentPage(page => Math.max(1, page - 1))} disabled={currentPage === 1} className="h-8 w-8 rounded border border-[#DEDEDE] bg-white disabled:opacity-40"><ChevronLeft className="mx-auto h-4 w-4" /></button>
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => {
+                  const page = totalPages <= 5 ? index + 1 : Math.min(totalPages - 4, Math.max(1, currentPage - 2)) + index;
+                  return <button type="button" key={page} onClick={() => setCurrentPage(page)} className={`h-8 w-8 rounded border text-[13px] font-medium ${page === currentPage ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-[#DEDEDE] bg-white text-[#374151]'}`}>{page}</button>;
+                })}
+                <button type="button" onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))} disabled={currentPage === totalPages} className="h-8 w-8 rounded border border-[#DEDEDE] bg-white disabled:opacity-40"><ChevronRight className="mx-auto h-4 w-4" /></button>
+              </div>
             </div>
           )}
-        </div>
-
-        <div className="w-full xl:w-[320px] shrink-0 space-y-5">
-          <SafetyEventTimeline
-            title="Recent Critical Events"
-            events={entries.slice(0, 5).map((incident: any) => ({
-              id: String(incident.id ?? incident.incident_id),
-              type: incident.severity === 'Critical' ? 'critical' : 'warning',
-              time: incident.incident_date || incident.date_time || '',
-              title: incident.incident_number || 'Incident',
-              description: incident.description || '',
-            }))}
-          />
-          
-          <div className={`${CARD} p-5`}>
-            <h3 className="text-[12px] font-bold text-[#374151] uppercase tracking-wide mb-4">Quick Links</h3>
-            <div className="flex flex-wrap gap-2">
-              <LinkedSourceBadge id="CAPA-Dashboard" type="AUD" onClick={() => navigate('/action-tracker')} />
-              <LinkedSourceBadge id="Hazards-Open" type="HAZ" onClick={() => navigate('/hazard-reporting')} />
-              <LinkedSourceBadge id="NearMiss-Log" type="NM" onClick={() => navigate('/near-miss')} />
-            </div>
-          </div>
         </div>
       </div>
       {isAddModalOpen && renderAddEditModal()}
