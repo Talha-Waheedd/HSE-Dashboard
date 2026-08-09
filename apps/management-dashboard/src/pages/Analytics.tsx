@@ -259,6 +259,25 @@ export const Analytics = () => {
     );
   };
 
+  const renderHazardEliminationSummary = () => {
+    const departments = [
+      ['Production', ['prd', 'production']], ['Stores', ['stores', 'store']], ['Admin', ['adm', 'admin']],
+      ['QC/NPD/FS', ['qc/fs/npd', 'qc', 'fs', 'npd']], ['HSE', ['hse']], ['ESD & Utilities', ['esd', 'utilities', 'maintenance']], ['Projects', ['project', 'projects']],
+    ] as const;
+    const isClosed = (item: any) => ['closed', 'close', 'completed', 'verified'].includes(String(item.status_id || item.status || '').toLowerCase());
+    const departmentItems = (aliases: readonly string[]) => current.capas.filter(item => { const value = String(item.department_id || item.departmentId || item.department || '').toLowerCase(); return aliases.some(alias => value === alias || value.includes(alias)); });
+    const rowFor = (items: any[]) => { const total = items.length; const completed = items.filter(isClosed).length; const pending = total - completed; return { total, completed, pending, compliance: total ? Math.round((completed / total) * 100) : 0 }; };
+    const departmentRows = departments.map(([name, aliases]) => ({ name, ...rowFor(departmentItems(aliases)) }));
+    const overall = rowFor(current.capas);
+    const riskRows = (['Low', 'Medium', 'High'] as const).map(level => { const items = current.capas.filter(item => String(item.severity || item.risk_rating_id || item.riskLevel || '').toLowerCase() === level.toLowerCase()); return { name: level, ...rowFor(items) }; });
+    return (
+      <Panel title={`Hazards Elimination Status — YTD ${filters.year === 'All' ? new Date().getFullYear() : filters.year} ${incidentSummary.monthName}`}>
+        <div className="overflow-x-auto"><table className="min-w-[760px] w-full border-collapse text-[13px]"><thead><tr className="bg-[#0878C1] text-white"><th className="border border-[#1F2937] px-3 py-3 text-left">Department</th><th className="border border-[#1F2937] px-3 py-3">Total No. of Corrective Actions Assigned</th><th className="border border-[#1F2937] px-3 py-3">Completed</th><th className="border border-[#1F2937] px-3 py-3">Pending</th><th className="border border-[#1F2937] px-3 py-3">Compliance (%)</th></tr></thead><tbody>{departmentRows.map(row => <tr key={row.name}><td className="border border-[#64748B] bg-[#D7E5F3] px-3 py-2 font-semibold">{row.name}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{row.total}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{row.completed}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{row.pending}</td><td className={`border border-[#64748B] px-3 py-2 text-center font-bold ${row.compliance >= 80 ? 'bg-[#C6E0B4]' : 'bg-[#F8CBAD]'}`}>{row.compliance}%</td></tr>)}<tr className="bg-[#E2F0D9] text-[15px]"><td className="border border-[#64748B] px-3 py-2 font-bold">Overall</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{overall.total}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{overall.completed}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{overall.pending}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{overall.compliance}%</td></tr></tbody></table></div>
+        <div className="mt-6 overflow-x-auto"><table className="min-w-[700px] w-full border-collapse text-[13px]"><thead><tr className="bg-[#0878C1] text-white"><th className="border border-[#1F2937] px-3 py-3 text-left">Risk Level</th><th className="border border-[#1F2937] px-3 py-3">Total</th><th className="border border-[#1F2937] px-3 py-3">Completed</th><th className="border border-[#1F2937] px-3 py-3">Pending</th><th className="border border-[#1F2937] px-3 py-3">% Compliance</th></tr></thead><tbody>{riskRows.map(row => <tr key={row.name}><td className={`border border-[#64748B] px-3 py-2 font-bold ${row.name === 'Low' ? 'bg-[#FFFF00]' : row.name === 'Medium' ? 'bg-[#FFC000]' : 'bg-[#FF0000]'}`}>{row.name}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{row.total}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{row.completed}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{row.pending}</td><td className={`border border-[#64748B] px-3 py-2 text-center font-bold ${row.compliance >= 80 ? 'bg-[#C6E0B4]' : 'bg-[#F8CBAD]'}`}>{row.compliance}%</td></tr>)}<tr className="bg-[#E2F0D9] text-[15px]"><td className="border border-[#64748B] px-3 py-2 text-center font-bold">Total</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{overall.total}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{overall.completed}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{overall.pending}</td><td className="border border-[#64748B] px-3 py-2 text-center font-bold">{overall.compliance}%</td></tr></tbody></table></div>
+      </Panel>
+    );
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -343,6 +362,7 @@ export const Analytics = () => {
             {renderIncidentSummary()}
             {renderFirstAidSummary()}
             {renderNearMissSummary()}
+            {renderHazardEliminationSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
