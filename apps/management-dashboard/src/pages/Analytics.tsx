@@ -469,6 +469,27 @@ export const Analytics = () => {
     </Panel>;
   };
 
+  const renderLegalActionItemsSummary = () => {
+    const actions = current.capas.filter(item => {
+      const value = `${item.title || ''} ${item.description || ''} ${item.area || ''} ${item.category || ''} ${item.action_type || ''}`.toLowerCase();
+      return !value || value.includes('legal') || value.includes('compliance') || value.includes('audit') || value.includes('environment');
+    });
+    const text = (item: any, keys: string[], fallback = '—') => String(keys.map(key => item[key]).find(value => value !== undefined && value !== null && value !== '') ?? fallback);
+    const statusClass = (status: string) => { const value = status.toLowerCase(); return value.includes('done') || value.includes('closed') || value.includes('complete') ? 'bg-[#00B050]' : value.includes('pending') ? 'bg-[#FF0000]' : 'bg-[#FFC000]'; };
+    return <Panel title="Assurance — Pending Legal Action Items" className="border-[#2F65AD]">
+      <div className="overflow-x-auto">
+        <table className="min-w-[1450px] w-full border-collapse text-xs text-[#111827]">
+          <caption className="bg-[#9DC3E6] px-3 py-2 text-center text-xl font-bold">Legal Action Items Tracker</caption>
+          <thead className="bg-[#DDEBF7] font-bold"><tr>{['Sr. #', 'Date', 'Month', 'Auditor Name', 'Action Derived From', 'Audit Description', 'Area/Clauses', 'Actions / Recommendation', 'Severity', 'Resp Dept', 'Resp Manager', 'Target date', 'Action Item Status'].map(label => <th key={label} className="border border-[#374151] px-2 py-2">{label}</th>)}</tr></thead>
+          <tbody>{actions.length ? actions.map((item, index) => {
+            const status = text(item, ['status', 'status_id', 'action_status'], 'WIP'); const severity = text(item, ['severity', 'risk_level', 'priority'], 'High'); const date = text(item, ['target_date', 'due_date', 'dueDate', 'date']);
+            return <tr key={item.id || index} className="align-middle text-center"><td className="border border-[#374151] px-2 py-3">{index + 1}</td><td className="border border-[#374151] px-2 py-3">{date}</td><td className="border border-[#374151] px-2 py-3">{date !== '—' ? new Date(date).toLocaleString('en-US', { month: 'long' }) : '—'}</td><td className="border border-[#374151] px-2 py-3">{text(item, ['auditor_name', 'auditor', 'owner_name'], '—')}</td><td className="border border-[#374151] px-2 py-3">{text(item, ['action_derived_from', 'source', 'source_type'], 'Third Party Inspection/ Audit')}</td><td className="border border-[#374151] px-2 py-3">{text(item, ['audit_description', 'description', 'title'], 'Legal Gap Assessment')}</td><td className="max-w-[210px] whitespace-normal border border-[#374151] px-2 py-3 text-left">{text(item, ['area_clauses', 'area', 'clause', 'legal_reference'], 'Legal compliance requirement')}</td><td className="max-w-[240px] whitespace-normal border border-[#374151] px-2 py-3 text-left">{text(item, ['recommendation', 'action', 'description', 'title'], 'Corrective action required')}</td><td className={`border border-[#374151] px-2 py-3 font-semibold text-white ${severity.toLowerCase().includes('high') ? 'bg-[#FF0000]' : severity.toLowerCase().includes('medium') ? 'bg-[#FFC000] text-black' : 'bg-[#00B050]'}`}>{severity}</td><td className="border border-[#374151] px-2 py-3">{text(item, ['responsible_department', 'department', 'department_id'], 'HSE')}</td><td className="border border-[#374151] px-2 py-3">{text(item, ['responsible_manager', 'assignee_name', 'assigned_to'], '—')}</td><td className="border border-[#374151] px-2 py-3">{date}</td><td className={`border border-[#374151] px-2 py-3 font-semibold ${statusClass(status)}`}>{status}</td></tr>;
+          }) : <tr><td colSpan={13} className="border border-[#374151] px-4 py-8 text-center text-sm text-[#64748B]">No legal action items found in the latest backend data.</td></tr>}</tbody>
+        </table>
+      </div>
+    </Panel>;
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -565,6 +586,7 @@ export const Analytics = () => {
             {renderTrainingAwarenessSummary()}
             {renderTrainingGallery()}
             {renderLegalComplianceSummary()}
+            {renderLegalActionItemsSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
