@@ -387,6 +387,44 @@ export const Analytics = () => {
     return <Panel title={`QC & NPD — ${incidentSummary.monthName} ${filters.year === 'All' ? new Date().getFullYear() : filters.year}`}><div className="border border-[#1F2937] p-4 text-[16px] leading-9"><p>□ &nbsp; ZERO RECORDABLE INJURY={recordable}</p><p>□ &nbsp; ZERO FIRST AID CASE ={firstAid}</p></div><div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">{chart('Nearmisses Reporting', nearMisses.length, 10, '#ED7D31')}{chart('Hazards Reporting', hazards.length, 180, '#70AD47')}</div><div className="mt-5">{chart('Safety Trainings', trainingHours, 600, '#5B9BD5')}</div></Panel>;
   };
 
+  const renderTrainingAwarenessSummary = () => {
+    const trainingRecords = records.trainings.filter(item => {
+      const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
+      return !value || value.includes('hse') || value.includes('training') || value.includes('all');
+    });
+    const hoursForYear = (year: number) => Math.round(trainingRecords.filter(item => yearOf(item) === String(year)).reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours || item.hours) || 0), 0));
+    const totalHours = Math.round(current.trainings.reduce((sum, item) => sum + (Number(item.manhours || item.total_manhours || item.hours) || 0), 0));
+    const topics = [
+      ['Food Safety', '#4472C4', '🍴'], ['Fire Prevention & Safety', '#FF595E', '🧯'], ['Occupational Safety', '#FFB703', '✋'],
+      ['CBTA', '#20B99A', '⛑'], ['Safety Handbook & Video Based Training Program', '#5B9BD5', '🦺'], ['Sustainability & Stakeholder Engagement', '#00A651', '🌿'],
+    ];
+    const year = filters.year === 'All' ? new Date().getFullYear() : Number(filters.year);
+    return <Panel title={`Training and Awareness — ${year}`} className="border-[#C6B4D7]">
+      <div className="space-y-6">
+        <div className="rounded-lg bg-[#A66DD1] px-4 py-3 text-center text-xl font-bold text-white sm:text-2xl">Total {totalHours.toLocaleString()} (YTD) Man-hours clocked till 30ᵗʰ June-{String(year).slice(-2)}</div>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(250px,.8fr)_minmax(360px,1.25fr)_minmax(260px,.8fr)]">
+          <div className="rounded-md border border-[#4472C4] bg-[#4472C4] p-3 text-white">
+            <h3 className="text-xl font-bold">3 Years Training Journey</h3>
+            <div className="mt-8 space-y-8 text-sm font-semibold sm:text-base">
+              {[2026, 2025, 2024].map(itemYear => <div key={itemYear} className="flex items-center justify-between gap-3"><span>{itemYear} Manhours:</span><strong className="text-lg text-[#9BE15D]">{hoursForYear(itemYear).toLocaleString()}</strong></div>)}
+            </div>
+            <div className="mt-8 rounded bg-white/15 p-3 text-center text-sm">Projected target: <strong>15,000 man-hours</strong></div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {topics.map(([label, color, icon]) => <div key={label} className="flex flex-col items-center justify-center text-center"><div className="flex h-20 w-20 items-center justify-center rounded-full border-[10px] text-3xl shadow-sm sm:h-24 sm:w-24" style={{ borderColor: color, backgroundColor: `${color}18` }}>{icon}</div><p className="mt-2 text-xs font-bold leading-tight text-[#1F2937] sm:text-sm">{label}</p></div>)}
+          </div>
+          <div className="bg-[#B47EA4] p-5 text-sm font-semibold leading-5 text-white sm:text-base">
+            <p>Includes both Classroom sessions and shop floor sessions.</p>
+            <ul className="mt-5 space-y-1.5">{['Emergency Response Plan', 'Work At Height, Hot Work, Lifting Heavy Equipments, confined space.', 'Electrical Safety', 'Machine Guarding & Interlocking', 'Induction Training Session', 'Hand Tools & Power tools', 'PTW System', 'Manual Handling & Material Shifting', 'Oven Safeties', 'Risk Assessment', 'Importance Of PPEs.', 'Conveyors Safety', 'OPIs Training'].map(topic => <li key={topic} className="flex gap-2"><span>–</span><span>{topic}</span></li>)}</ul>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {['Training & Awareness', 'Competency Assessment', 'Learning & Development'].map((label, index) => <div key={label} className={`rounded px-4 py-3 text-center text-sm font-bold text-white ${index === 0 ? 'bg-[#A5A5A5]' : index === 1 ? 'bg-[#111827]' : 'bg-[#4472C4]'}`}>{label}</div>)}
+        </div>
+      </div>
+    </Panel>;
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -480,6 +518,7 @@ export const Analytics = () => {
             {renderStoresSummary()}
             {renderAdminSummary()}
             {renderQcSummary()}
+            {renderTrainingAwarenessSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
