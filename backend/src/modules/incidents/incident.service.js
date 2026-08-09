@@ -18,11 +18,19 @@ class IncidentService {
       throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
     }
 
-    data.reportedBy = userId;
-    data.createdBy = userId;
+    const { actions, metadata, ...incidentData } = data;
+    const persistedData = {
+      ...incidentData,
+      metadata: {
+        ...(metadata || {}),
+        ...(actions !== undefined ? { actions } : {}),
+      },
+      reportedBy: userId,
+      createdBy: userId,
+    };
     
-    if (![IncidentStatus.DRAFT, IncidentStatus.REPORTED].includes(data.status)) {
-      data.status = IncidentStatus.DRAFT;
+    if (![IncidentStatus.DRAFT, IncidentStatus.REPORTED].includes(persistedData.status)) {
+      persistedData.status = IncidentStatus.DRAFT;
     }
 
     // Generate incident number (e.g. INC-2026-0001)
@@ -36,16 +44,16 @@ class IncidentService {
       paranoid: false, // Include deleted in the count to avoid duplicate numbers
     });
     
-    data.incidentNumber = `INC-${currentYear}-${String(count + 1).padStart(4, '0')}`;
+    persistedData.incidentNumber = `INC-${currentYear}-${String(count + 1).padStart(4, '0')}`;
 
     const transaction = await sequelize.transaction();
     try {
       // 1. Create incident
-      const incident = await incidentRepository.create(data, { transaction });
+      const incident = await incidentRepository.create(persistedData, { transaction });
 
       // 2. Create injuries if provided
-      if (data.injuries && Array.isArray(data.injuries) && data.injuries.length > 0) {
-        const injuriesData = data.injuries.map(injury => ({
+      if (persistedData.injuries && Array.isArray(persistedData.injuries) && persistedData.injuries.length > 0) {
+        const injuriesData = persistedData.injuries.map(injury => ({
           ...injury,
           incidentId: incident.id,
         }));
@@ -89,8 +97,17 @@ class IncidentService {
       if (!plant) throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
     }
 
-    updateData.updatedBy = userId;
-    return incidentRepository.updateById(id, updateData);
+    const { actions, metadata, ...incidentFields } = updateData;
+    const nextMetadata = {
+      ...(incident.metadata || {}),
+      ...(metadata || {}),
+      ...(actions !== undefined ? { actions } : {}),
+    };
+    return incidentRepository.updateById(id, {
+      ...incidentFields,
+      metadata: nextMetadata,
+      updatedBy: userId,
+    });
   }
 
   /**

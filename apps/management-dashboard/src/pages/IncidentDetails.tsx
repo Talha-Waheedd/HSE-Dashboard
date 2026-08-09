@@ -47,6 +47,7 @@ export const IncidentDetails = () => {
 
   const metadata = incident?.metadata || {};
   const field = (key: string, fallback?: unknown) => incident?.[key] ?? metadata[key] ?? fallback;
+  const actions = Array.isArray(metadata.actions) ? metadata.actions : [];
 
   return (
     <Layout>
@@ -109,8 +110,6 @@ export const IncidentDetails = () => {
                   <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <DetailItem label="Immediate action" value={field('immediateAction', field('immediate_cause'))} />
                     <DetailItem label="Root cause" value={field('rootCause', field('root_cause'))} />
-                    <DetailItem label="Action items" value={field('action_items')} />
-                    <DetailItem label="Corrective actions" value={field('corrective_actions')} />
                   </div>
                 </section>
 
@@ -130,6 +129,28 @@ export const IncidentDetails = () => {
 
               <section className="rounded-xl border border-[#E8E0D2] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)] sm:p-6">
                 <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-4">
+                  <ShieldAlert className="h-4 w-4 text-[#CB0017]" />
+                  <h2 className="text-[15px] font-bold text-[#2C1810]">Actions</h2>
+                </div>
+                {actions.length === 0 ? (
+                  <p className="mt-5 text-[13px] text-[#8A8F98]">No actions recorded for this incident.</p>
+                ) : (
+                  <div className="mt-5 space-y-3">
+                    {actions.map((action: any, index: number) => (
+                      <div key={`detail-action-${index}`} className="grid grid-cols-1 gap-3 rounded-lg border border-[#F0F0F0] bg-[#FBFBFA] p-4 sm:grid-cols-[minmax(0,1.7fr)_minmax(120px,.7fr)_minmax(130px,.8fr)_100px_110px]">
+                        <DetailItem label="Action" value={action.action} />
+                        <DetailItem label="Responsibility" value={action.responsibility} />
+                        <DetailItem label="Timeline / Deadline" value={action.timeline} />
+                        <DetailItem label="Severity" value={action.severity} />
+                        <DetailItem label="Status" value={action.status} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="rounded-xl border border-[#E8E0D2] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)] sm:p-6">
+                <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-4">
                   <CalendarDays className="h-4 w-4 text-[#CB0017]" />
                   <h2 className="text-[15px] font-bold text-[#2C1810]">Additional record fields</h2>
                 </div>
@@ -140,7 +161,6 @@ export const IncidentDetails = () => {
                   <DetailItem label="Restricted days" value={field('restrictedDays', field('restricted_days'))} />
                   <DetailItem label="First aid given" value={field('firstAidGiven', field('first_aid_given'))} />
                   <DetailItem label="Evidence" value={field('evidence_upload')} />
-                  <DetailItem label="Preventive actions" value={field('preventive_actions')} />
                   <DetailItem label="Timeline" value={field('timeline')} />
                 </div>
               </section>

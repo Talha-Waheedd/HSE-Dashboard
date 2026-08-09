@@ -11,7 +11,7 @@ import {
 export interface ColumnSchema {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'datetime' | 'time' | 'select' | 'textarea' | 'file';
+  type: 'text' | 'number' | 'date' | 'datetime' | 'time' | 'select' | 'textarea' | 'file' | 'actions';
   options?: string[];
   required?: boolean;
   readonly?: boolean;
@@ -130,11 +130,9 @@ export const incidentLogSchema: SectionConfig = {
     { key: 'department_id', label: 'Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Basic Information' },
     { key: 'incident_category_id', label: 'Incident Category', type: 'select', options: INCIDENT_CATEGORIES, required: true, section: 'Incident Details' },
     { key: 'root_cause_id', label: 'Root Cause', type: 'select', options: ROOT_CAUSES, required: true, section: 'Incident Details' },
-    { key: 'action_items', label: 'Action Items', type: 'textarea', section: 'Investigation' },
     { key: 'immediate_cause', label: 'Immediate Cause', type: 'textarea', section: 'Investigation' },
     { key: 'root_cause', label: 'Root Cause', type: 'textarea', section: 'Investigation' },
-    { key: 'corrective_actions', label: 'Corrective Actions', type: 'textarea', section: 'Investigation' },
-    { key: 'preventive_actions', label: 'Preventive Actions', type: 'textarea', section: 'Investigation' },
+    { key: 'actions', label: 'Actions', type: 'actions', section: 'Actions' },
     { key: 'evidence_upload', label: 'Evidence Upload', type: 'file', section: 'Investigation' },
     { key: 'responsible_person', label: 'Responsible Person', type: 'text', section: 'Assignment' },
     { key: 'risk_rating_id', label: 'Risk Rating', type: 'select', options: RISK_RATINGS, required: true, section: 'Assignment' },

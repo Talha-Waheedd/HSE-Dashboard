@@ -101,6 +101,7 @@ export const moduleService = {
         risk_rating_id: item.metadata?.risk_rating_id || severityFromApi(item.severityLevel || item.severity_level),
         immediate_cause: item.metadata?.immediate_cause || item.immediateAction || item.action_taken,
         root_cause: item.metadata?.root_cause || item.rootCause,
+        actions: item.metadata?.actions || item.actions || [],
         status_id: item.metadata?.status_id || statusFromApi(item.status),
         department_id: item.metadata?.department_id || item.departmentId || item.department_id,
       }));

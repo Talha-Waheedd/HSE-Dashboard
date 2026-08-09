@@ -11,6 +11,14 @@ const injurySchema = Joi.object({
   description: Joi.string().optional(),
 });
 
+const actionSchema = Joi.object({
+  action: Joi.string().trim().min(1).max(2000).required(),
+  responsibility: Joi.string().trim().max(255).allow('').optional(),
+  timeline: Joi.date().iso().allow('', null).optional(),
+  severity: Joi.string().valid('Low', 'Medium', 'High', 'low', 'medium', 'high').required(),
+  status: Joi.string().valid('Open', 'Planned', 'Closed', 'open', 'planned', 'closed').required(),
+});
+
 const createIncidentSchema = Joi.object({
   plantId: Joi.string().uuid().required(),
   departmentId: Joi.string().uuid().optional().allow(null),
@@ -29,6 +37,7 @@ const createIncidentSchema = Joi.object({
   immediateAction: Joi.string().optional(),
   status: Joi.string().valid(...Object.values(IncidentStatus)).optional(),
   injuries: Joi.array().items(injurySchema).optional(),
+  actions: Joi.array().items(actionSchema).max(100).optional(),
   metadata: Joi.object().optional(),
 });
 
@@ -51,6 +60,7 @@ const updateIncidentSchema = Joi.object({
   investigatedBy: Joi.string().uuid().optional().allow(null),
   investigationFindings: Joi.string().optional(),
   rootCause: Joi.string().optional(),
+  actions: Joi.array().items(actionSchema).max(100).optional(),
   metadata: Joi.object().optional(),
 }).min(1);
 

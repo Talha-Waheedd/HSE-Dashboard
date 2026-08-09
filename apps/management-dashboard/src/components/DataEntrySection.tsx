@@ -43,6 +43,22 @@ const CARD =
 
 const STATUS_COLUMNS = new Set(['status_id', 'risk_rating_id', 'investigation_required']);
 
+type IncidentAction = {
+  action: string;
+  responsibility: string;
+  timeline: string;
+  severity: 'Low' | 'Medium' | 'High';
+  status: 'Open' | 'Planned' | 'Closed';
+};
+
+const createIncidentAction = (): IncidentAction => ({
+  action: '',
+  responsibility: '',
+  timeline: '',
+  severity: 'Medium',
+  status: 'Open',
+});
+
 const DatePickerField = ({
   value,
   onChange,
@@ -390,6 +406,13 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       if (data.completion_date && data.completion_date > today) return 'Completion date cannot be in the future.';
       if (data.status_id === 'Closed' && !data.completion_date) return 'A completion date is required to close a CAPA.';
     }
+    if (schema.id === 'incident-log' && Array.isArray(data.actions)) {
+      for (let index = 0; index < data.actions.length; index += 1) {
+        const action = data.actions[index];
+        if (!String(action?.action ?? '').trim()) return `Action ${index + 1} text is required.`;
+        if (action.timeline && action.timeline > today) return `Action ${index + 1} deadline cannot be in the future.`;
+      }
+    }
     return null;
   };
 
@@ -663,6 +686,75 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     const visible = columns.filter(col => shouldShowConditionalField(schema.id, col.key, isAddModalOpen ? formData : editFormData));
     if (schema.id === 'near-miss' && sectionTitle === 'Investigation' && formData.investigation_required !== 'Yes' && editFormData.investigation_required !== 'Yes') {
       return null;
+    }
+    if (schema.id === 'incident-log' && sectionTitle === 'Actions') {
+      const isEdit = Boolean(editingId);
+      const source = isEdit ? editFormData : formData;
+      const actions: IncidentAction[] = Array.isArray(source.actions) ? source.actions : [];
+      const setActions = (nextActions: IncidentAction[]) => {
+        if (isEdit) setEditFormData((previous: any) => ({ ...previous, actions: nextActions }));
+        else setFormData((previous: any) => ({ ...previous, actions: nextActions }));
+      };
+      const updateAction = (index: number, key: keyof IncidentAction, value: string) => {
+        setActions(actions.map((row, rowIndex) => rowIndex === index ? { ...row, [key]: value } : row));
+      };
+
+      return (
+        <div key={sectionTitle} className="rounded-2xl border border-[#EAEAEA] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-5 rounded-full bg-[#CB0017]" />
+              <div>
+                <h3 className="text-[14px] font-semibold text-[#1A1818]">Actions</h3>
+                <div className="mt-2 h-px w-24 bg-[#F0F0F0]" />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActions([...actions, createIncidentAction()])}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#CB0017] px-3 py-1.5 text-[12px] font-semibold text-[#CB0017] hover:bg-[#FFF5F6]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Action
+            </button>
+          </div>
+          <p className="mt-3 text-[12px] text-[#6B7280]">Track corrective and preventive work against this incident.</p>
+          <div className="mt-4 space-y-3">
+            {actions.length === 0 && <div className="rounded-lg border border-dashed border-[#D9D9D9] px-4 py-5 text-center text-[12px] text-[#9CA3AF]">No actions added yet.</div>}
+            {actions.map((row, index) => (
+              <div key={`incident-action-${index}`} className="grid grid-cols-1 items-end gap-2 rounded-lg border border-[#EEEEEE] bg-[#FCFCFC] p-3 md:grid-cols-[minmax(0,1.7fr)_minmax(120px,.65fr)_minmax(145px,.8fr)_110px_120px_auto]">
+                <div>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Action</label>
+                  <input className={FIELD_BASE} value={row.action} onChange={event => updateAction(index, 'action', event.target.value)} placeholder="Describe the action" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Responsibility</label>
+                  <input className={FIELD_BASE} value={row.responsibility} onChange={event => updateAction(index, 'responsibility', event.target.value)} placeholder="Person / team" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Timeline / Deadline</label>
+                  <DatePickerField label="Timeline / Deadline" value={row.timeline} onChange={value => updateAction(index, 'timeline', value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Severity</label>
+                  <select className={FIELD_BASE} value={row.severity} onChange={event => updateAction(index, 'severity', event.target.value)}>
+                    {['Low', 'Medium', 'High'].map(option => <option key={option}>{option}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Status</label>
+                  <select className={FIELD_BASE} value={row.status} onChange={event => updateAction(index, 'status', event.target.value)}>
+                    {['Open', 'Planned', 'Closed'].map(option => <option key={option}>{option}</option>)}
+                  </select>
+                </div>
+                <button type="button" aria-label={`Remove action ${index + 1}`} onClick={() => setActions(actions.filter((_, rowIndex) => rowIndex !== index))} className="inline-flex h-9 items-center justify-center rounded-md border border-[#F1C5C9] px-2 text-[#CB0017] hover:bg-[#FFF5F6]">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
     }
     return (
       <div key={sectionTitle} className="rounded-2xl border border-[#EAEAEA] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
