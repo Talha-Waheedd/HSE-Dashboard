@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BarChart, Bar, CartesianGrid, LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { BarChart, Bar, CartesianGrid, LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Activity, AlertTriangle, CheckCircle2, ClipboardCheck, FileText, Flame, RefreshCw, ShieldAlert, Target, Users } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
@@ -145,6 +145,71 @@ export const Analytics = () => {
     return { name: date.toLocaleString('default', { month: 'short' }), Hazards: inMonth(records.hazards), Incidents: inMonth(records.incidents), 'Near Misses': inMonth(records.nearMisses) };
   }), [records]);
 
+  const incidentSummary = useMemo(() => {
+    const year = filters.year === 'All' ? String(new Date().getFullYear()) : filters.year;
+    const dated = [...records.incidents, ...records.nearMisses].filter(item => yearOf(item) === year);
+    const latestDate = dated.reduce((latest, item) => {
+      const value = String(item.date || item.incidentDate || item.reportedAt || item.createdAt || '');
+      return value > latest ? value : latest;
+    }, `${year}-01-01`);
+    const monthIndex = Math.max(0, Math.min(11, Number(latestDate.slice(5, 7)) - 1));
+    const monthName = new Date(Number(year), monthIndex, 1).toLocaleString('default', { month: 'long' });
+    const inMonth = (item: any) => yearOf(item) === year && Number(String(item.date || item.incidentDate || item.reportedAt || item.createdAt || '').slice(5, 7)) - 1 === monthIndex;
+    const recordable = (item: any) => isCategory(item, ['fatal', 'lost time', 'lti', 'restricted', 'rwc', 'medical treatment', 'mtc']);
+    const categoryCount = (category: string[], month = false) => [...records.incidents, ...records.nearMisses].filter(item => (month ? inMonth(item) : yearOf(item) === year) && isCategory(item, category)).length;
+    const monthly = Array.from({ length: monthIndex + 1 }, (_, index) => {
+      const monthItems = [...records.incidents, ...records.nearMisses].filter(item => yearOf(item) === year && Number(String(item.date || item.incidentDate || item.reportedAt || item.createdAt || '').slice(5, 7)) - 1 === index);
+      return {
+        name: new Date(Number(year), index, 1).toLocaleString('default', { month: 'short' }),
+        'First Aid Cases': monthItems.filter(item => isCategory(item, ['first aid'])).length,
+        'Recordable Injuries': monthItems.filter(recordable).length,
+        'Potential Incidents': monthItems.filter(item => records.nearMisses.includes(item)).length,
+        'Fire Incidents': monthItems.filter(item => isCategory(item, ['fire'])).length,
+      };
+    });
+    const ytd = {
+      recordable: records.incidents.filter(item => yearOf(item) === year && recordable(item)).length,
+      firstAid: categoryCount(['first aid']),
+      shortCircuit: categoryCount(['short circuit', 'short-circuiting']),
+      fire: categoryCount(['fire']),
+      potential: records.nearMisses.filter(item => yearOf(item) === year).length,
+    };
+    const month = {
+      recordable: [...records.incidents].filter(item => inMonth(item) && recordable(item)).length,
+      firstAid: categoryCount(['first aid'], true),
+      shortCircuit: categoryCount(['short circuit', 'short-circuiting'], true),
+      fire: categoryCount(['fire'], true),
+      potential: records.nearMisses.filter(item => inMonth(item)).length,
+    };
+    return { year, monthName, ytd, month, monthly };
+  }, [records, filters.year]);
+
+  const renderIncidentSummary = () => {
+    const rows = [
+      ['RECORDABLE INJURIES', incidentSummary.month.recordable, incidentSummary.ytd.recordable],
+      ['FIRST AID CASES', incidentSummary.month.firstAid, incidentSummary.ytd.firstAid],
+      ['SHORT-CIRCUITING', incidentSummary.month.shortCircuit, incidentSummary.ytd.shortCircuit],
+      ['FIRE INCIDENTS', incidentSummary.month.fire, incidentSummary.ytd.fire],
+      ['POTENTIAL INCIDENTS', incidentSummary.month.potential, incidentSummary.ytd.potential],
+    ];
+    const totalMonth = rows.reduce((sum, row) => sum + Number(row[1]), 0);
+    const totalYtd = rows.reduce((sum, row) => sum + Number(row[2]), 0);
+    const trirTarget = 0.14;
+    const trirYtd = 0;
+    return (
+      <Panel title={`Summary of Incidents YTD ${incidentSummary.year} (${incidentSummary.monthName})`}>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(300px,.7fr)_minmax(600px,1.3fr)]">
+          <div className="flex min-h-[300px] flex-col items-center justify-center border border-[#C7C7C7] p-4">
+            <h3 className="text-center text-[16px] font-bold text-[#1F2937]">Total Recordable Injury Rate YTD<br />({incidentSummary.monthName}-{incidentSummary.year})</h3>
+            <div className="mt-3 h-[190px] w-full"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Target', value: trirTarget }, { name: 'YTD TRIR', value: trirYtd }]} dataKey="value" innerRadius={0} outerRadius={78} label={({ value }) => Number(value).toFixed(2)}><Cell fill="#5B9BD5" /><Cell fill="#ED7D31" /></Pie><Legend verticalAlign="bottom" iconType="square" /></PieChart></ResponsiveContainer></div>
+          </div>
+          <div className="overflow-x-auto"><table className="min-w-[480px] w-full border-collapse text-[13px]"><thead><tr className="bg-[#AEBBCD] text-[25px] font-bold"><th className="border border-[#1F2937] px-3 py-2 text-left">INCIDENT</th><th className="border border-[#1F2937] px-3 py-2">{incidentSummary.monthName.slice(0, 3)}</th><th className="border border-[#1F2937] px-3 py-2">YTD</th></tr></thead><tbody>{rows.map(row => <tr key={String(row[0])}><td className="border border-[#1F2937] px-3 py-2 font-medium">{row[0]}</td><td className="border border-[#1F2937] px-3 py-2 text-center">{String(row[1]).padStart(2, '0')}</td><td className="border border-[#1F2937] px-3 py-2 text-center">{String(row[2]).padStart(2, '0')}</td></tr>)}<tr className="bg-[#C6E0B4] font-bold"><td className="border border-[#1F2937] px-3 py-2 text-right">TOTAL</td><td className="border border-[#1F2937] px-3 py-2 text-center">{totalMonth}</td><td className="border border-[#1F2937] px-3 py-2 text-center">{totalYtd}</td></tr></tbody></table></div>
+        </div>
+        <div className="mt-6 border border-[#C7C7C7] p-4"><h3 className="mb-3 text-center text-xl font-bold text-[#1F2937]">Significant Incidents</h3><div className="h-[320px] min-w-[620px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={incidentSummary.monthly} margin={{ top: 18, right: 16, left: 0, bottom: 0 }}><CartesianGrid vertical={false} stroke="#E5E7EB" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Legend /><Bar dataKey="First Aid Cases" fill="#4472C4" /><Bar dataKey="Recordable Injuries" fill="#ED7D31" /><Bar dataKey="Potential Incidents" fill="#70AD47" /><Bar dataKey="Fire Incidents" fill="#FFC000" /></BarChart></ResponsiveContainer></div></div>
+      </Panel>
+    );
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -226,6 +291,7 @@ export const Analytics = () => {
             {renderScorecard('Lagging Indicators', laggingRows, true)}
             {renderScorecard('Leading Indicators', leadingRows)}
             {renderDepartmentalTable()}
+            {renderIncidentSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
