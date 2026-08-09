@@ -490,6 +490,26 @@ export const Analytics = () => {
     </Panel>;
   };
 
+  const renderAuditsInspectionsSummary = () => {
+    const inspectionTotal = current.audits.length + current.inspections.length;
+    const groups = [
+      ['Fire Infrastructure', '#2F65AD', [['Fire Hydrant, Hose reels Inspections', '🚒'], ['Fire Alarm Panel/Smoke Detectors Inspections', '🚨'], ['Fire Extinguishers Inspection', '🧯'], ['Fire Pumps Inspection', '💧']]],
+      ['Electrical Infrastructure', '#6593A6', [['Thermography Of Electrical DBs', '🌡️'], ['Inspection Of LT/HT Room', '⚡'], ['Electrical DBs Inspection', '🔌'], ['Earthing Pits Inspection', '⏚']]],
+      ['Machinery & Work Equipment', '#5BA8BC', [['Grinder Inspections', '⚙️'], ['Welding Plant Inspections', '🔧'], ['Machine Safeties and Interlocking Audits', '🦺'], ['Machine Guarding Audits', '⛔']]],
+      ['Mobile Lifting Equipment', '#5BA8BC', [['Forklift Inspections', '🚜'], ['Overhead Crane Inspection', '🏗️'], ['Mobile Cranes Inspection', '🏗'], ['Scissor Lift Inspection', '🛗']]],
+    ] as const;
+    return <Panel title="Assurance — Audits & Inspections" className="border-[#2F65AD]">
+      <div className="space-y-5">
+        <div className="flex items-center gap-4 border-b border-dashed border-[#64748B] pb-4"><img src="/logo.svg" alt="LU" className="h-14 w-auto" /><h2 className="text-2xl font-bold text-[#111827] sm:text-3xl">Audits & Inspections</h2><img src="/image.png" alt="CBL" className="ml-auto h-14 w-14 object-contain" /></div>
+        <div className="rounded-md bg-[#DDEBF7] px-4 py-3 text-center text-sm font-semibold text-[#1F2937]">{inspectionTotal} live audit and inspection records loaded from the backend</div>
+        {groups.map(([group, color, items]) => <div key={group} className="grid grid-cols-1 gap-4 border-b border-dashed border-[#64748B] pb-5 lg:grid-cols-[250px_1fr]">
+          <div className="flex min-h-20 items-center px-4 py-4 text-xl font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]" style={{ backgroundColor: color }}>{group}</div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">{items.map(([label, icon]) => <div key={label} className="flex flex-col items-center text-center"><div className="flex h-24 w-24 items-center justify-center border border-[#374151] bg-[#F8FAFC] text-5xl shadow-sm transition hover:scale-105">{icon}</div><p className="mt-2 text-xs font-medium leading-4 text-[#111827] sm:text-sm">{label}</p></div>)}</div>
+        </div>)}
+      </div>
+    </Panel>;
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -587,6 +607,7 @@ export const Analytics = () => {
             {renderTrainingGallery()}
             {renderLegalComplianceSummary()}
             {renderLegalActionItemsSummary()}
+            {renderAuditsInspectionsSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
