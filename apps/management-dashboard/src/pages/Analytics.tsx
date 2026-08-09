@@ -210,6 +210,35 @@ export const Analytics = () => {
     );
   };
 
+  const renderFirstAidSummary = () => {
+    const firstAid = current.incidents.filter(item => isCategory(item, ['first aid']));
+    const field = (item: any, keys: string[]) => keys.map(key => item[key]).find(value => value !== undefined && value !== null && value !== '') || 'Unspecified';
+    const grouped = (items: any[], keys: string[]) => Object.entries(items.reduce((result, item) => { const value = String(field(item, keys)); result[value] = (result[value] || 0) + 1; return result; }, {} as Record<string, number>)).map(([name, value]) => ({ name, value: Number(value) }));
+    const year = filters.year === 'All' ? String(new Date().getFullYear()) : filters.year;
+    const monthly = Array.from({ length: 12 }, (_, month) => ({ name: new Date(Number(year), month, 1).toLocaleString('default', { month: 'short' }), value: firstAid.filter(item => yearOf(item) === year && Number(String(item.date || item.incidentDate || item.createdAt || '').slice(5, 7)) - 1 === month).length }));
+    const departmentData = grouped(firstAid, ['department_id', 'departmentId', 'department']);
+    const shiftData = grouped(firstAid, ['shift']);
+    const genderData = grouped(firstAid, ['gender', 'gender_wise', 'genderWise']);
+    const categoryData = grouped(firstAid, ['first_aid_category', 'injury_category', 'incident_subcategory', 'category']);
+    const locationData = grouped(firstAid, ['location', 'area', 'area_manager']);
+    const chart = (title: string, data: { name: string; value: number }[], color: string, height = 220) => <Panel title={title}><div style={{ height }}><ResponsiveContainer width="100%" height="100%"><BarChart data={data} margin={{ top: 18, right: 12, left: 0, bottom: 4 }}><CartesianGrid vertical={false} stroke="#E5E7EB" /><XAxis dataKey="name" tick={{ fontSize: 11 }} /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="value" fill={color} radius={[2, 2, 0, 0]} label={{ position: 'top', fill: '#111827', fontSize: 12, fontWeight: 700 }} /></BarChart></ResponsiveContainer></div></Panel>;
+    return (
+      <Panel title={`Summary of First Aid Cases YTD ${year} (YTD ${incidentSummary.monthName})`}>
+        <div className="mb-5 inline-flex overflow-hidden rounded border border-[#7C2D12] text-[16px] font-bold"><span className="bg-[#F4B183] px-4 py-2">Total No. of First-Aid Cases</span><span className="bg-[#C65911] px-6 py-2 text-white">{firstAid.length}</span></div>
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+          {chart(`First Aid Monthly Trend ${year}`, monthly, '#4472C4', 270)}
+          {chart('First Aid Cases Dept Wise', departmentData, '#4472C4', 270)}
+        </div>
+        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {chart('Shift-wise', shiftData, '#4472C4', 190)}
+          {chart('Gender Wise', genderData, '#4472C4', 190)}
+          {chart('Category Wise', categoryData, '#FFC000', 190)}
+          {chart('Location Wise', locationData, '#4472C4', 190)}
+        </div>
+      </Panel>
+    );
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -292,6 +321,7 @@ export const Analytics = () => {
             {renderScorecard('Leading Indicators', leadingRows)}
             {renderDepartmentalTable()}
             {renderIncidentSummary()}
+            {renderFirstAidSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
