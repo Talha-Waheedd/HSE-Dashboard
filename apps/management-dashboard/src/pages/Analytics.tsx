@@ -239,6 +239,26 @@ export const Analytics = () => {
     );
   };
 
+  const renderNearMissSummary = () => {
+    const nearMisses = current.nearMisses;
+    const field = (item: any, keys: string[]) => keys.map(key => item[key]).find(value => value !== undefined && value !== null && value !== '') || 'Unspecified';
+    const grouped = (items: any[], keys: string[]) => Object.entries(items.reduce((result, item) => { const value = String(field(item, keys)); result[value] = (result[value] || 0) + 1; return result; }, {} as Record<string, number>)).map(([name, value]) => ({ name, value: Number(value) })).sort((a, b) => b.value - a.value);
+    const categoryData = grouped(nearMisses, ['near_miss_category', 'incident_subcategory', 'unsafe_type', 'category', 'details']);
+    const departmentData = grouped(nearMisses, ['department_id', 'departmentId', 'department']);
+    const locationData = grouped(nearMisses, ['location', 'area', 'area_manager']);
+    const chart = (title: string, data: { name: string; value: number }[], color: string, height = 270) => <Panel title={title}><div style={{ height }}><ResponsiveContainer width="100%" height="100%"><BarChart data={data.slice(0, 12)} margin={{ top: 20, right: 12, left: 0, bottom: 30 }}><CartesianGrid vertical={false} stroke="#E5E7EB" /><XAxis dataKey="name" interval={0} angle={data.length > 6 ? -28 : 0} textAnchor={data.length > 6 ? 'end' : 'middle'} tick={{ fontSize: 10 }} /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="value" fill={color} radius={[2, 2, 0, 0]} label={{ position: 'top', fill: '#111827', fontSize: 12, fontWeight: 700 }} /></BarChart></ResponsiveContainer></div></Panel>;
+    return (
+      <Panel title={`Summary of Near-Miss Incidents YTD ${filters.year === 'All' ? new Date().getFullYear() : filters.year} (YTD ${incidentSummary.monthName})`}>
+        <div className="mb-5 inline-flex overflow-hidden rounded border border-[#7C2D12] text-[16px] font-bold"><span className="bg-[#F4B183] px-4 py-2">Total Near-Miss Incidents</span><span className="bg-[#C65911] px-6 py-2 text-white">{nearMisses.length}</span></div>
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(560px,1.45fr)_minmax(300px,.75fr)]">
+          {chart('Near-Miss Category Wise', categoryData, '#4472C4', 320)}
+          <Panel title="Dept Wise Near Miss"><div className="h-[280px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={departmentData} dataKey="value" nameKey="name" cx="50%" cy="45%" outerRadius={88} label={({ value }) => value}><Cell fill="#4472C4" /><Cell fill="#ED7D31" /><Cell fill="#A5A5A5" /><Cell fill="#FFC000" /><Cell fill="#70AD47" /><Tooltip /><Legend verticalAlign="bottom" /></Pie></PieChart></ResponsiveContainer></div></Panel>
+        </div>
+        <div className="mt-5">{chart('Location Wise (Near-Miss Incidents)', locationData, '#4472C4', 310)}</div>
+      </Panel>
+    );
+  };
+
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
     const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
@@ -322,6 +342,7 @@ export const Analytics = () => {
             {renderDepartmentalTable()}
             {renderIncidentSummary()}
             {renderFirstAidSummary()}
+            {renderNearMissSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
           </>
         )}
