@@ -9,6 +9,7 @@ import { Profile } from './pages/Profile';
 import { MasterManagement } from './pages/MasterManagement';
 import { LeadingLaggingIndicators } from './pages/LeadingLaggingIndicators';
 import { LeadingIndicatorDetails } from './pages/LeadingIndicatorDetails';
+import { LaggingIndicatorDetails } from './pages/LaggingIndicatorDetails';
 import { IncidentDetails } from './pages/IncidentDetails';
 import { DataEntrySection } from './components/DataEntrySection';
 import { ALL_SECTIONS } from './config/sectionSchemas';
@@ -81,6 +82,9 @@ function App() {
           <Route path="/leading-indicators/incident-investigation" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="incident-investigation" /></ProtectedRoute>} />
           <Route path="/leading-indicators/emergency-drills" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="emergency-drills" /></ProtectedRoute>} />
           <Route path="/leading-indicators/action-plan-closure" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="action-plan-closure" /></ProtectedRoute>} />
+          <Route path="/lagging-indicators/fire" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="fire" /></ProtectedRoute>} />
+          <Route path="/lagging-indicators/ltir" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="ltir" /></ProtectedRoute>} />
+          <Route path="/lagging-indicators/trir" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="trir" /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Settings /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Reports /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Profile /></ProtectedRoute>} />
