@@ -23,6 +23,8 @@ export const LaggingIndicatorDetails = ({ kind }: { kind: Kind }) => {
   const [workers, setWorkers] = useState('0');
   const [workingDays, setWorkingDays] = useState('365');
   const [workingHours, setWorkingHours] = useState('8');
+  const [calculatedRate, setCalculatedRate] = useState<number | null>(null);
+  const [calculationError, setCalculationError] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,11 +63,26 @@ export const LaggingIndicatorDetails = ({ kind }: { kind: Kind }) => {
   const injuryRows = filteredIncidents.filter(row => ['lti', 'lost time', 'restricted', 'rwc', 'medical treatment', 'mtc'].some(value => categoryOf(row).includes(value)));
   const ltiRows = filteredIncidents.filter(row => categoryOf(row).includes('lti') || categoryOf(row).includes('lost time'));
   const formulaInjuries = kind === 'ltir' ? ltiRows.length : injuryRows.length;
-  const denominator = Number(workers) * Number(workingDays) * Number(workingHours);
-  const rate = denominator > 0 && formulaInjuries >= 0 ? (formulaInjuries * 200000) / denominator : 0;
+  const calculateRate = () => {
+    const workerCount = Number(workers);
+    const dayCount = Number(workingDays);
+    const hourCount = Number(workingHours);
+    if (!Number.isFinite(workerCount) || !Number.isFinite(dayCount) || !Number.isFinite(hourCount) || workers.trim() === '' || workingDays.trim() === '' || workingHours.trim() === '') {
+      setCalculationError('Enter valid numeric values for workers, working days, and daily working hours.');
+      setCalculatedRate(null);
+      return;
+    }
+    if (workerCount <= 0 || dayCount <= 0 || hourCount <= 0) {
+      setCalculationError('Workers, working days, and daily working hours must all be greater than zero.');
+      setCalculatedRate(null);
+      return;
+    }
+    setCalculationError('');
+    setCalculatedRate((formulaInjuries * 200000) / (workerCount * dayCount * hourCount));
+  };
 
   return <Layout><ContextHeader title={`${titles[kind]}${kind !== 'fire' ? ' — Rate Calculation' : ' Incidents'}`} breadcrumbs={['Lagging Indicators', titles[kind]]} subtitle={kind === 'fire' ? 'Fire-related incidents from the incident database.' : 'Automatically calculated from live incident and workforce records.'}><FilterBar /></ContextHeader><main className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6">
-    {loading ? <div className="flex min-h-[300px] items-center justify-center"><RefreshCw className="h-8 w-8 animate-spin text-[#CB0017]" /></div> : kind === 'fire' ? <><div className="grid grid-cols-2 gap-4 lg:grid-cols-3"><KpiTile label="Total Fire Incidents" value={fireRows.length} icon={<Flame />} accent={fireRows.length ? 'danger' : 'success'} /><KpiTile label="Major Fire" value={fireRows.filter(row => categoryOf(row).includes('major')).length} icon={<AlertTriangle />} accent="warning" /><KpiTile label="Minor Fire" value={fireRows.filter(row => categoryOf(row).includes('minor')).length} icon={<Flame />} accent="info" /></div><Panel title="Fire Incidents — Live Records"><IncidentTable rows={fireRows} /></Panel></> : <><Panel title={`${titles[kind]} Formula`}><div className="rounded-lg bg-[#F8FAFC] p-5 text-center text-lg font-semibold text-[#1F2937]">{titles[kind]} = (Total Number of Injuries × 200,000) ÷ (Total Number of Workers × Total Number of Working Days × Total Number of Working Hours)</div><div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['Total Number of Injuries', String(formulaInjuries), false], ['Total Number of Workers', workers, true], ['Total Working Days', workingDays, true], ['Total Working Hours', workingHours, true]].map(([label, value, editable]) => <label key={String(label)} className="text-sm font-semibold text-[#374151]">{label}<input type="number" min="0" value={String(value)} readOnly={!editable} onChange={event => editable && (label === 'Total Number of Workers' ? setWorkers(event.target.value) : label === 'Total Working Days' ? setWorkingDays(event.target.value) : setWorkingHours(event.target.value))} className="mt-1 w-full rounded-md border border-[#CBD5E1] px-3 py-2 text-base" /></label>)}</div><div className="mt-5 rounded-xl border-2 border-[#CB0017] p-5 text-center"><p className="text-sm font-semibold uppercase tracking-wide text-[#64748B]">Calculated {titles[kind]}</p><p className="mt-1 text-4xl font-bold text-[#CB0017]">{rate.toFixed(2)}</p>{denominator === 0 && <p className="mt-2 text-xs text-[#B91C1C]">Enter a positive worker, day, and hour value to calculate the rate.</p>}</div></Panel><Panel title="Included Injury Records"><IncidentTable rows={kind === 'ltir' ? ltiRows : injuryRows} /></Panel></>}
+    {loading ? <div className="flex min-h-[300px] items-center justify-center"><RefreshCw className="h-8 w-8 animate-spin text-[#CB0017]" /></div> : kind === 'fire' ? <><div className="grid grid-cols-2 gap-4 lg:grid-cols-3"><KpiTile label="Total Fire Incidents" value={fireRows.length} icon={<Flame />} accent={fireRows.length ? 'danger' : 'success'} /><KpiTile label="Major Fire" value={fireRows.filter(row => categoryOf(row).includes('major')).length} icon={<AlertTriangle />} accent="warning" /><KpiTile label="Minor Fire" value={fireRows.filter(row => categoryOf(row).includes('minor')).length} icon={<Flame />} accent="info" /></div><Panel title="Fire Incidents — Live Records"><IncidentTable rows={fireRows} /></Panel></> : <><Panel title={`${titles[kind]} Formula`}><div className="rounded-lg bg-[#F8FAFC] p-5 text-center text-lg font-semibold text-[#1F2937]">{titles[kind]} = (Total Injuries × 200,000) ÷ (Total Workers × Working Days × Daily Working Hours)</div><div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['Total Injuries', String(formulaInjuries), false], ['Total Workers', workers, true], ['Working Days', workingDays, true], ['Daily Working Hours', workingHours, true]].map(([label, value, editable]) => <label key={String(label)} className="text-sm font-semibold text-[#374151]">{label}{label === 'Total Injuries' && <span className="ml-1 text-xs font-normal text-[#64748B]">(from backend)</span>}<input type="number" min="0" value={String(value)} readOnly={!editable} onChange={event => editable && (label === 'Total Workers' ? setWorkers(event.target.value) : label === 'Working Days' ? setWorkingDays(event.target.value) : setWorkingHours(event.target.value))} className={`mt-1 w-full rounded-md border px-3 py-2 text-base ${editable ? 'border-[#CBD5E1]' : 'border-[#94A3B8] bg-[#F1F5F9]'}`} /></label>)}</div><div className="mt-5 flex flex-col items-center gap-3"><button type="button" onClick={calculateRate} className="rounded-md bg-[#CB0017] px-8 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#A80013]">Calculate {titles[kind]}</button>{calculationError && <p role="alert" className="text-sm font-semibold text-[#B91C1C]">{calculationError}</p>}</div><div className="mt-5 rounded-xl border-2 border-[#CB0017] p-5 text-center"><p className="text-sm font-semibold uppercase tracking-wide text-[#64748B]">Calculated {titles[kind]}</p><p className="mt-1 text-4xl font-bold text-[#CB0017]">{calculatedRate === null ? '—' : calculatedRate.toFixed(2)}</p>{calculatedRate === null && !calculationError && <p className="mt-2 text-xs text-[#64748B]">Enter valid inputs, then click Calculate.</p>}</div></Panel><Panel title="Included Injury Records"><IncidentTable rows={kind === 'ltir' ? ltiRows : injuryRows} /></Panel></>}
   </main></Layout>;
 };
 
