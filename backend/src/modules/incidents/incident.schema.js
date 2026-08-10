@@ -13,6 +13,11 @@ const injurySchema = Joi.object({
 
 const actionSchema = Joi.object({
   action: Joi.string().trim().min(1).max(2000).required(),
+  // New action assignments. The fields remain optional at the API boundary so
+  // older incidents can still be edited without data loss.
+  responsible_person: Joi.string().trim().max(255).allow('').optional(),
+  responsible_department: Joi.string().trim().max(255).allow('').optional(),
+  // Backward-compatible alias used by incidents created before the rename.
   responsibility: Joi.string().trim().max(255).allow('').optional(),
   timeline: Joi.date().iso().allow('', null).optional(),
   severity: Joi.string().valid('Low', 'Medium', 'High', 'low', 'medium', 'high').required(),

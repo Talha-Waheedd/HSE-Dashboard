@@ -134,6 +134,7 @@ const Incident = sequelize.define('Incident', {
   metadata: {
     type: DataTypes.JSON,
     allowNull: true,
+    comment: 'Extensible form data, including incident action rows with responsible_person, responsible_department, timeline, severity, and status',
   },
 }, {
   tableName: 'incidents',

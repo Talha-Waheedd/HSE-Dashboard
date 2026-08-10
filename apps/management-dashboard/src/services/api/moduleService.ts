@@ -62,6 +62,15 @@ const categoryFromApi = (value: unknown) => ({
 const notifyDashboardRefresh = () => {
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('dashboard-refresh'));
 };
+const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? actions.map((item: any) => ({
+  action: String(item?.action ?? item?.action_description ?? '').trim(),
+  responsible_person: String(item?.responsible_person ?? item?.responsiblePerson ?? item?.responsibility ?? item?.responsible ?? '').trim(),
+  responsible_department: String(item?.responsible_department ?? item?.responsibleDepartment ?? '').trim(),
+  timeline: item?.timeline ?? item?.deadline ?? item?.timeline_deadline ?? '',
+  severity: ['Low', 'Medium', 'High'].includes(item?.severity) ? item.severity : 'Medium',
+  status: ['Open', 'Planned', 'Closed'].includes(item?.status) ? item.status : 'Open',
+  legacy: item?.legacy === true || (!item?.responsible_person && !item?.responsiblePerson && !item?.responsible_department && !item?.responsibleDepartment),
+})) : [];
 
 export const moduleService = {
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
@@ -104,7 +113,7 @@ export const moduleService = {
         risk_rating_id: item.metadata?.risk_rating_id || severityFromApi(item.severityLevel || item.severity_level),
         immediate_cause: item.metadata?.immediate_cause || item.immediateAction || item.action_taken,
         root_cause: item.metadata?.root_cause || item.rootCause,
-        actions: item.metadata?.actions || item.actions || [],
+        actions: normalizeIncidentActions(item.metadata?.actions || item.actions || []),
         status_id: item.metadata?.status_id || statusFromApi(item.status),
         department_id: item.metadata?.department_id || item.departmentId || item.department_id,
       }));
@@ -165,6 +174,7 @@ export const moduleService = {
         severityLevel: severityToApi(payload.risk_rating_id || 'Medium'),
         immediateAction: payload.immediate_cause,
         rootCause: payload.root_cause,
+        actions: normalizeIncidentActions(payload.actions),
         status: statusToApi(payload.status_id || 'Open', schemaId)
       };
     }
@@ -207,6 +217,7 @@ export const moduleService = {
         severityLevel: severityToApi(payload.risk_rating_id),
         immediateAction: payload.immediate_cause,
         rootCause: payload.root_cause,
+        actions: normalizeIncidentActions(payload.actions),
         status: statusToApi(payload.status_id, schemaId)
       };
     }

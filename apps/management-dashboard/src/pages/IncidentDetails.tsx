@@ -8,6 +8,15 @@ import { apiClient } from '@cbl/api';
 
 const valueOrDash = (value: unknown) => value === undefined || value === null || value === '' ? '—' : String(value);
 
+const normalizeAction = (action: any) => ({
+  action: action?.action ?? action?.action_description,
+  responsiblePerson: action?.responsible_person ?? action?.responsiblePerson ?? action?.responsibility ?? action?.responsible,
+  responsibleDepartment: action?.responsible_department ?? action?.responsibleDepartment,
+  timeline: action?.timeline ?? action?.deadline ?? action?.timeline_deadline,
+  severity: action?.severity,
+  status: action?.status,
+});
+
 const DetailItem = ({ label, value }: { label: string; value: unknown }) => (
   <div className="rounded-lg border border-[#F0F0F0] bg-[#FBFBFA] px-3.5 py-3">
     <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#9CA3AF]">{label}</p>
@@ -47,7 +56,9 @@ export const IncidentDetails = () => {
 
   const metadata = incident?.metadata || {};
   const field = (key: string, fallback?: unknown) => incident?.[key] ?? metadata[key] ?? fallback;
-  const actions = Array.isArray(metadata.actions) ? metadata.actions : [];
+  const actions = Array.isArray(metadata.actions)
+    ? metadata.actions.map(normalizeAction)
+    : Array.isArray(incident?.actions) ? incident.actions.map(normalizeAction) : [];
 
   return (
     <Layout>
@@ -137,9 +148,10 @@ export const IncidentDetails = () => {
                 ) : (
                   <div className="mt-5 space-y-3">
                     {actions.map((action: any, index: number) => (
-                      <div key={`detail-action-${index}`} className="grid grid-cols-1 gap-3 rounded-lg border border-[#F0F0F0] bg-[#FBFBFA] p-4 sm:grid-cols-[minmax(0,1.7fr)_minmax(120px,.7fr)_minmax(130px,.8fr)_100px_110px]">
+                      <div key={`detail-action-${index}`} className="grid grid-cols-1 gap-3 rounded-lg border border-[#F0F0F0] bg-[#FBFBFA] p-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(130px,.8fr)_minmax(130px,.8fr)_145px_100px_110px]">
                         <DetailItem label="Action" value={action.action} />
-                        <DetailItem label="Responsibility" value={action.responsibility} />
+                        <DetailItem label="Responsible Person" value={action.responsiblePerson} />
+                        <DetailItem label="Responsible Department" value={action.responsibleDepartment} />
                         <DetailItem label="Timeline / Deadline" value={action.timeline} />
                         <DetailItem label="Severity" value={action.severity} />
                         <DetailItem label="Status" value={action.status} />

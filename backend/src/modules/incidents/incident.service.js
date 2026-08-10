@@ -7,6 +7,16 @@ const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { sequelize } = require('../../database/connection');
 
+const normalizeActions = (actions) => (Array.isArray(actions) ? actions.map((item) => ({
+  ...item,
+  action: String(item?.action ?? item?.action_description ?? '').trim(),
+  responsible_person: String(item?.responsible_person ?? item?.responsiblePerson ?? item?.responsibility ?? item?.responsible ?? '').trim(),
+  responsible_department: String(item?.responsible_department ?? item?.responsibleDepartment ?? '').trim(),
+  timeline: item?.timeline ?? item?.deadline ?? item?.timeline_deadline ?? null,
+  severity: ['Low', 'Medium', 'High'].includes(item?.severity) ? item.severity : 'Medium',
+  status: ['Open', 'Planned', 'Closed'].includes(item?.status) ? item.status : 'Open',
+})) : []);
+
 class IncidentService {
   /**
    * Report a new incident
@@ -23,7 +33,7 @@ class IncidentService {
       ...incidentData,
       metadata: {
         ...(metadata || {}),
-        ...(actions !== undefined ? { actions } : {}),
+        ...(actions !== undefined ? { actions: normalizeActions(actions) } : {}),
       },
       reportedBy: userId,
       createdBy: userId,
@@ -101,7 +111,7 @@ class IncidentService {
     const nextMetadata = {
       ...(incident.metadata || {}),
       ...(metadata || {}),
-      ...(actions !== undefined ? { actions } : {}),
+      ...(actions !== undefined ? { actions: normalizeActions(actions) } : {}),
     };
     return incidentRepository.updateById(id, {
       ...incidentFields,
