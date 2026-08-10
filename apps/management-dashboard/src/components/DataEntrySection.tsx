@@ -40,6 +40,7 @@ const CARD =
   'bg-white border border-[#E0E0E0] rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.06)]';
 
 const STATUS_COLUMNS = new Set(['status_id', 'risk_rating_id', 'investigation_required']);
+const MAX_INCIDENT_ACTIONS = 15;
 
 type IncidentAction = {
   action: string;
@@ -759,13 +760,15 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             <button
               type="button"
               onClick={() => setActions([...actions, createIncidentAction()])}
-              className="inline-flex items-center gap-1.5 rounded-md border border-[#CB0017] px-3 py-1.5 text-[12px] font-semibold text-[#CB0017] hover:bg-[#FFF5F6]"
+              disabled={actions.length >= MAX_INCIDENT_ACTIONS}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#CB0017] px-3 py-1.5 text-[12px] font-semibold text-[#CB0017] hover:bg-[#FFF5F6] disabled:cursor-not-allowed disabled:border-[#D1D5DB] disabled:text-[#9CA3AF] disabled:hover:bg-transparent"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Action
             </button>
           </div>
           <p className="mt-3 text-[12px] text-[#6B7280]">Track corrective and preventive work against this incident.</p>
+          {actions.length >= MAX_INCIDENT_ACTIONS && <p className="mt-2 text-[12px] font-semibold text-[#CB0017]">Maximum limit of 15 actions reached.</p>}
           <div className="mt-4 space-y-3">
             {actions.length === 0 && <div className="rounded-lg border border-dashed border-[#D9D9D9] px-4 py-5 text-center text-[12px] text-[#9CA3AF]">No actions added yet.</div>}
             {actions.map((row, index) => (

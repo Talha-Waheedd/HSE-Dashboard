@@ -17,12 +17,19 @@ const normalizeActions = (actions) => (Array.isArray(actions) ? actions.map((ite
   status: ['Open', 'Planned', 'Closed'].includes(item?.status) ? item.status : 'Open',
 })) : []);
 
+const validateActionLimit = (actions) => {
+  if (Array.isArray(actions) && actions.length > 15) {
+    throw ApiError.badRequest('An incident can contain a maximum of 15 actions.');
+  }
+};
+
 class IncidentService {
   /**
    * Report a new incident
    * Uses a transaction to create the incident and any associated injuries
    */
   async createIncident(data, userId) {
+    validateActionLimit(data.actions);
     const plant = await plantRepository.findById(data.plantId);
     if (!plant) {
       throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
@@ -100,6 +107,7 @@ class IncidentService {
    * Update incident (excludes injuries array which requires separate handling)
    */
   async updateIncident(id, updateData, userId) {
+    validateActionLimit(updateData.actions);
     const incident = await this.getIncidentById(id);
 
     if (updateData.plantId && updateData.plantId !== incident.plantId) {
