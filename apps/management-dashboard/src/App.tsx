@@ -8,6 +8,7 @@ import { Reports } from './pages/Reports';
 import { Profile } from './pages/Profile';
 import { MasterManagement } from './pages/MasterManagement';
 import { LeadingLaggingIndicators } from './pages/LeadingLaggingIndicators';
+import { LeadingIndicatorDetails } from './pages/LeadingIndicatorDetails';
 import { IncidentDetails } from './pages/IncidentDetails';
 import { DataEntrySection } from './components/DataEntrySection';
 import { ALL_SECTIONS } from './config/sectionSchemas';
@@ -76,6 +77,10 @@ function App() {
           {/* New Sidebar Routes */}
           <Route path="/analytics" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Analytics /></ProtectedRoute>} />
           <Route path="/leading-lagging-indicators" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingLaggingIndicators /></ProtectedRoute>} />
+          <Route path="/leading-indicators/hazard-closing" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="hazard-closing" /></ProtectedRoute>} />
+          <Route path="/leading-indicators/incident-investigation" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="incident-investigation" /></ProtectedRoute>} />
+          <Route path="/leading-indicators/emergency-drills" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="emergency-drills" /></ProtectedRoute>} />
+          <Route path="/leading-indicators/action-plan-closure" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="action-plan-closure" /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Settings /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Reports /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Profile /></ProtectedRoute>} />
