@@ -148,7 +148,10 @@ export const IncidentDetails = () => {
                 ) : (
                   <div className="mt-5 space-y-3">
                     {actions.map((action: any, index: number) => (
-                      <div key={`detail-action-${index}`} className="grid grid-cols-1 gap-3 rounded-lg border border-[#F0F0F0] bg-[#FBFBFA] p-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(130px,.8fr)_minmax(130px,.8fr)_145px_100px_110px]">
+                      <div key={`detail-action-${index}`} className="grid grid-cols-1 gap-3 rounded-lg border border-[#F0F0F0] bg-[#FBFBFA] p-4 sm:grid-cols-[42px_minmax(0,1.5fr)_minmax(130px,.8fr)_minmax(130px,.8fr)_145px_100px_110px]">
+                        <div className="flex min-h-[58px] items-center justify-center rounded-md bg-[#F7EDEB] text-[14px] font-bold text-[#CB0017]" aria-label={`Action number ${index + 1}`}>
+                          {index + 1}
+                        </div>
                         <DetailItem label="Action" value={action.action} />
                         <DetailItem label="Responsible Person" value={action.responsiblePerson} />
                         <DetailItem label="Responsible Department" value={action.responsibleDepartment} />

@@ -772,7 +772,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           <div className="mt-4 space-y-3">
             {actions.length === 0 && <div className="rounded-lg border border-dashed border-[#D9D9D9] px-4 py-5 text-center text-[12px] text-[#9CA3AF]">No actions added yet.</div>}
             {actions.map((row, index) => (
-              <div key={`incident-action-${index}`} className="grid grid-cols-1 items-end gap-2 rounded-lg border border-[#EEEEEE] bg-[#FCFCFC] p-3 md:grid-cols-[minmax(0,1.5fr)_minmax(130px,.8fr)_minmax(130px,.8fr)_145px_110px_110px_auto]">
+              <div key={`incident-action-${index}`} className="grid grid-cols-1 items-end gap-2 rounded-lg border border-[#EEEEEE] bg-[#FCFCFC] p-3 md:grid-cols-[42px_minmax(0,1.5fr)_minmax(130px,.8fr)_minmax(130px,.8fr)_145px_110px_110px_auto]">
+                <div className="flex h-9 items-center justify-center rounded-md bg-[#F7EDEB] text-[13px] font-bold text-[#CB0017]" aria-label={`Action number ${index + 1}`}>
+                  {index + 1}
+                </div>
                 <div>
                   <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Action</label>
                   <input className={FIELD_BASE} value={row.action} onChange={event => updateAction(index, 'action', event.target.value)} placeholder="Describe the action" />
