@@ -436,6 +436,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [savedModalOpen, setSavedModalOpen] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
+  const [attachmentWarning, setAttachmentWarning] = useState<string | null>(null);
   const [statusHistoryModal, setStatusHistoryModal] = useState<{ isOpen: boolean; record: any | null }>({ isOpen: false, record: null });
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
@@ -536,11 +538,24 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     try {
       const result = await createRecord({ ...dataToSave, __idempotencyKey: idempotencyKey });
       if (result.success && result.data?.id) {
+        if (schema.id === 'hazard-reporting' && Object.keys(pendingFiles).length > 0) {
+          const uploadResults = await Promise.allSettled(
+            Object.values(pendingFiles).map(file => uploadClient.upload(file, {
+              sourceType: 'hazard',
+              sourceId: result.data.id,
+            }))
+          );
+          const failedUploads = uploadResults.filter(item => item.status === 'rejected').length;
+          if (failedUploads > 0) {
+            setAttachmentWarning(`${failedUploads} attachment${failedUploads > 1 ? 's' : ''} could not be uploaded. The hazard record was saved.`);
+          }
+        }
         // Reload only after the API has confirmed a committed row. The API
         // sorts hazards by createdAt DESC, so the new row is first when the
         // active filters include its date/department.
         await fetchAll(filters as unknown as Record<string, unknown>);
         setFormData({});
+        setPendingFiles({});
         setIsAddModalOpen(false);
         setSavedModalOpen(true);
         window.dispatchEvent(new CustomEvent('dashboard-refresh'));
@@ -717,8 +732,20 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           </div>
           <input type="file" className="sr-only" onChange={(event) => {
             const file = event.target.files?.[0];
-            if (file) uploadClient.upload(file, { module: schema.id, recordId: selectedRecordId || '' })
-              .catch((error: unknown) => console.error('Attachment upload failed', error));
+            if (!file) return;
+            // A new hazard has no source ID until the main record is committed.
+            // Queue the file and upload it only after the create API returns the
+            // generated hazard ID.
+            if (schema.id === 'hazard-reporting' && !isEdit) {
+              setPendingFiles(previous => ({ ...previous, [col.key]: file }));
+              return;
+            }
+            if (!selectedRecordId) {
+              setValidationError('Save the record before uploading an attachment.');
+              return;
+            }
+            uploadClient.upload(file, { sourceType: schema.id === 'hazard-reporting' ? 'hazard' : schema.id, sourceId: selectedRecordId })
+              .catch((error: unknown) => setValidationError(error instanceof Error ? error.message : 'Attachment upload failed.'));
           }} />
         </label>
       );
@@ -932,7 +959,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               <p className="text-[12px] text-[#6B7280] mt-1">Scrollable enterprise form with section cards and future-ready placeholders.</p>
             </div>
             <button
-              onClick={() => { setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setFormData({}); setEditFormData({}); }}
+              onClick={() => { setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null); setPendingFiles({}); setFormData({}); setEditFormData({}); }}
               className="w-8 h-8 rounded-md text-[#9CA3AF] hover:text-[#1A1818] hover:bg-[#F5F5F5] transition-colors"
             >
               <X className="h-4 w-4 mx-auto" />
@@ -1008,6 +1035,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                   setIsAddModalOpen(false);
                   setEditingId(null);
                   setValidationError(null);
+                  setPendingFiles({});
+                  setAttachmentWarning(null);
                   setFormData({});
                   setEditFormData({});
                 }}
@@ -1039,7 +1068,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         </div>
         <h2 id="saved-title" className="mt-4 text-xl font-bold text-[#166534]">Saved</h2>
         <p className="mt-2 text-sm text-[#64748B]">The Hazard Reporting record was saved successfully.</p>
-        <button type="button" autoFocus onClick={() => setSavedModalOpen(false)} className="mt-6 rounded-md bg-[#CB0017] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#A8001A]">
+        {attachmentWarning && <p className="mt-3 rounded-md bg-[#FFF7ED] px-3 py-2 text-xs text-[#9A3412]">{attachmentWarning}</p>}
+        <button type="button" autoFocus onClick={() => { setSavedModalOpen(false); setAttachmentWarning(null); }} className="mt-6 rounded-md bg-[#CB0017] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#A8001A]">
           Done
         </button>
       </div>
