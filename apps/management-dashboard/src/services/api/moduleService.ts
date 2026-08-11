@@ -28,6 +28,9 @@ const getEndpoint = (schemaId: string): string => {
 const statusToApi = (value: unknown, schemaId: string) => {
   const status = String(value || '').trim();
   if (!status) return undefined;
+  if (schemaId === 'training-records') {
+    return ({ Open: 'scheduled', Pending: 'scheduled', 'Work in Progress': 'in_progress', Closed: 'completed', Cancelled: 'cancelled' }[status] || status.toLowerCase().replaceAll(' ', '_'));
+  }
   if (schemaId === 'action-tracker') {
     return ({ Open: 'open', Pending: 'open', 'Work in Progress': 'in_progress', Closed: 'completed', Cancelled: 'cancelled' }[status] || status.toLowerCase().replaceAll(' ', '_'));
   }
@@ -59,6 +62,7 @@ const trainingTypeToApi = (value: unknown) => ({
 const statusFromApi = (value: unknown) => ({
   draft: 'Pending', reported: 'Open', submitted: 'Open', under_review: 'Pending',
   under_investigation: 'Pending', corrective_action: 'Work in Progress', resolved: 'Closed', closed: 'Closed',
+  scheduled: 'Pending', in_progress: 'Work in Progress', completed: 'Closed', cancelled: 'Cancelled',
 }[String(value || '').toLowerCase()] || value);
 const severityFromApi = (value: unknown) => {
   const text = String(value || '');
@@ -85,7 +89,16 @@ export const moduleService = {
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
     const endpoint = getEndpoint(schemaId);
     const requestParams = { ...(params || {}) };
-    if ((schemaId === 'hazard-reporting' || schemaId === 'near-miss') && requestParams.status && requestParams.status !== 'All') {
+
+    // Global filter controls use "All" as a display value.  It must never be
+    // sent to an API as a literal database value (for example, status=All),
+    // otherwise a valid collection is incorrectly returned as empty.
+    Object.entries(requestParams).forEach(([key, value]) => {
+      if (value === '' || value === null || value === undefined || value === 'All') {
+        delete requestParams[key];
+      }
+    });
+    if ((schemaId === 'hazard-reporting' || schemaId === 'near-miss' || schemaId === 'training-records') && requestParams.status && requestParams.status !== 'All') {
       requestParams.status = statusToApi(requestParams.status, schemaId);
     }
     const response = await apiClient.get(endpoint, { params: requestParams });
@@ -139,7 +152,7 @@ export const moduleService = {
         department_id: item.metadata?.department_id || item.departmentId || item.department_id || item.department?.id,
         department_name: item.metadata?.department_name || item.department?.name,
         department_code: item.metadata?.department_code || item.department?.code,
-        status_id: item.metadata?.status_id || item.status,
+        status_id: item.metadata?.status_id || statusFromApi(item.status),
         source: item.metadata?.source || item.sourceType || item.source_type,
         training_type: item.metadata?.training_type || item.trainingType || item.training_type,
         trainer: item.metadata?.trainer || item.trainerName || item.trainer_name || item.trainer?.name,

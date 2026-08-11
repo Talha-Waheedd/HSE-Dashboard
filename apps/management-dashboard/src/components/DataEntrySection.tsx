@@ -632,7 +632,26 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const filteredEntries = useMemo(() => entries.filter(entry => {
-    if (filters.department && filters.department !== 'All' && entry.department_id !== filters.department) return false;
+    const normalizedDepartment = (value: unknown) => String(value || '')
+      .trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const selectedDepartment = normalizedDepartment(filters.department);
+    const departmentAliases: Record<string, string[]> = {
+      adm: ['adm', 'admin'],
+      esd: ['esd', 'esdutilities', 'maintenance'],
+      hse: ['hse', 'hsedepartment', 'depthse'],
+      prd: ['prd', 'production', 'productiondepartment'],
+      projects: ['projects', 'project', 'prj'],
+      qcfsnpd: ['qcfsnpd', 'qc', 'qcnpdfs'],
+      stores: ['stores', 'store'],
+    };
+    const selectedAliases = departmentAliases[selectedDepartment] || [selectedDepartment];
+    const recordDepartments = [entry.department_id, entry.department_name, entry.department_code]
+      .map(normalizedDepartment);
+    // Forms store a department UUID while the global filter can be a code or
+    // label (for example HSE / HSE Department). Match all representations.
+    if (filters.department && filters.department !== 'All' && !recordDepartments.some(department =>
+      selectedAliases.includes(department) || departmentAliases[department]?.includes(selectedDepartment)
+    )) return false;
     if (filters.status && filters.status !== 'All' && entry.status_id !== filters.status) return false;
     const recordDate = entry.date || entry.target_date || entry.due_date;
     if (filters.year && filters.year !== 'All' && recordDate && !recordDate.startsWith(filters.year)) return false;

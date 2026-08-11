@@ -22,10 +22,13 @@ const getAllSessions = asyncHandler(async (req, res) => {
     where: {},
   };
   
-  if (req.query.plantId) options.where.plantId = req.query.plantId;
-  if (req.query.departmentId) options.where.departmentId = req.query.departmentId;
-  if (req.query.status) options.where.status = req.query.status;
-  if (req.query.trainingType) options.where.trainingType = req.query.trainingType;
+  // Be defensive with shared frontend filters. "All" is a UI placeholder,
+  // not a valid database value and must not turn a populated table into zero
+  // results if a client sends it.
+  if (req.query.plantId && req.query.plantId !== 'All') options.where.plantId = req.query.plantId;
+  if (req.query.departmentId && req.query.departmentId !== 'All') options.where.departmentId = req.query.departmentId;
+  if (req.query.status && req.query.status !== 'All') options.where.status = req.query.status;
+  if (req.query.trainingType && req.query.trainingType !== 'All') options.where.trainingType = req.query.trainingType;
   if (req.query.year && /^\d{4}$/.test(req.query.year)) options.where.scheduledDate = { [Op.between]: [`${req.query.year}-01-01`, `${req.query.year}-12-31`] };
   if (req.query.month && /^\d{1,2}$/.test(req.query.month)) {
     const year = String(req.query.year || new Date().getFullYear()); const month = String(req.query.month).padStart(2, '0');

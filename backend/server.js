@@ -1,6 +1,8 @@
 'use strict';
 
-require('dotenv').config();
+// Local project settings must take precedence over inherited shell values.
+// In particular, the dashboard preview API relies on PREVIEW_AUTH from .env.
+require('dotenv').config({ override: true });
 
 const http = require('http');
 const app = require('./src/app');
