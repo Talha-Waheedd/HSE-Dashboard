@@ -22,7 +22,6 @@ import { AvatarInitials } from './AvatarInitials';
 import { DepartmentStatusBar } from './DepartmentStatusBar';
 import { MyPendingWidget } from './MyPendingWidget';
 import { uploadClient } from '../../../../packages/api/src/uploadClient';
-import { apiClient } from '@cbl/api';
 import { LocationCombobox } from './LocationCombobox';
 
 interface DataEntrySectionProps {
@@ -514,44 +513,6 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       setFormData((prev: any) => applyComputes({ ...prev, [name]: finalValue }, schema, entries));
     }
   };
-
-  useEffect(() => {
-    const empId = formData.emp_id;
-    if (empId && empId.length >= 3) {
-      const timeoutId = setTimeout(async () => {
-        try {
-          const response = await apiClient.get(`/employees/lookup/${empId}`);
-          if (response.data && response.data.success && response.data.data) {
-              const emp = response.data.data;
-              
-              setFormData((prev: any) => {
-                let mappedDept = prev.department_id;
-                const deptName = emp.department?.name || '';
-                if (deptName) {
-                  if (deptName.includes('Production')) mappedDept = 'PRD';
-                  else if (deptName.includes('HSE')) mappedDept = 'HSE';
-                  else if (deptName.includes('Maintenance')) mappedDept = 'ESD';
-                  else mappedDept = 'Others';
-                }
-                
-                return {
-                  ...prev,
-                  originator: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.originator,
-                  reported_by: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.reported_by,
-                  person_name: emp.user?.firstName ? `${emp.user.firstName} ${emp.user.lastName}` : prev.person_name,
-                  department_id: mappedDept,
-                  designation: emp.designation || prev.designation,
-                  gender: emp.user?.gender || emp.gender || prev.gender,
-                };
-              });
-          }
-        } catch (error) {
-          // Ignore lookup errors silently (e.g., typing incomplete ID)
-        }
-      }, 500);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [formData.emp_id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
