@@ -2,9 +2,14 @@
 
 const hazardRepository = require('../../repositories/hazard.repository');
 const plantRepository = require('../../repositories/plant.repository');
+const employeeRepository = require('../../repositories/employee.repository');
 const HazardStatus = require('../../shared/enums/HazardStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
+
+const allowUnverifiedHazardEmployee = () =>
+  process.env.NODE_ENV !== 'production' &&
+  process.env.ALLOW_UNVERIFIED_HAZARD_EMPLOYEE === 'true';
 
 class HazardService {
   /**
@@ -14,6 +19,20 @@ class HazardService {
     const plant = await plantRepository.findById(data.plantId);
     if (!plant) {
       throw new ApiError(404, MESSAGES.PLANT_NOT_FOUND);
+    }
+
+    // Employee ID is stored in metadata rather than as a hazards-table FK.
+    // Keep it optional only behind this development flag while the employee
+    // master data is unavailable; production always validates the reference.
+    const employeeId = String(data.metadata?.emp_id || '').trim();
+    if (!allowUnverifiedHazardEmployee()) {
+      if (!employeeId) {
+        throw ApiError.badRequest('Employee ID is required for hazard reporting.');
+      }
+      const employee = await employeeRepository.findByEmployeeId(employeeId);
+      if (!employee) {
+        throw ApiError.badRequest('Employee ID does not match an employee record.');
+      }
     }
     
     data.reportedBy = userId;

@@ -30,6 +30,10 @@ export interface SectionConfig {
   columns: ColumnSchema[];
 }
 
+// Development-only escape hatch while the employee master data is being
+// onboarded. Production builds omit this flag and retain the required field.
+const allowUnverifiedHazardEmployee = import.meta.env.VITE_ALLOW_UNVERIFIED_HAZARD_EMPLOYEE === 'true';
+
 export const hazardReportingSchema: SectionConfig = {
   id: 'hazard-reporting',
   title: 'Hazard Reporting',
@@ -38,7 +42,7 @@ export const hazardReportingSchema: SectionConfig = {
   icon: 'AlertTriangle',
   columns: [
     { key: 's_no', label: 'S#', type: 'text', hideFromForm: true, compute: d => d.s_no || '' },
-    { key: 'emp_id', label: 'Emp ID', type: 'text', section: 'Basic Information' },
+    { key: 'emp_id', label: 'Emp ID', type: 'text', required: !allowUnverifiedHazardEmployee, section: 'Basic Information' },
     { key: 'date', label: 'Date', type: 'date', required: true, section: 'Basic Information' },
     {
       key: 'month',
@@ -81,7 +85,7 @@ export const nearMissSchema: SectionConfig = {
   icon: 'Target',
   columns: [
     { key: 's_no', label: 'S#', type: 'text', hideFromForm: true, compute: d => d.s_no || '' },
-    { key: 'emp_id', label: 'Emp ID', type: 'text', section: 'Basic Information' },
+    { key: 'emp_id', label: 'Emp ID', type: 'text', required: true, section: 'Basic Information' },
     { key: 'date', label: 'Date', type: 'date', required: true, section: 'Basic Information' },
     {
       key: 'month',
@@ -120,7 +124,7 @@ export const incidentLogSchema: SectionConfig = {
   icon: 'FileWarning',
   columns: [
     { key: 's_no', label: 'S.No', type: 'text', hideFromForm: true, compute: d => d.s_no || '' },
-    { key: 'emp_id', label: 'Emp ID', type: 'text', section: 'Basic Information' },
+    { key: 'emp_id', label: 'Emp ID', type: 'text', required: true, section: 'Basic Information' },
     { key: 'date', label: 'Date', type: 'date', required: true, section: 'Basic Information' },
     { key: 'description', label: 'Description', type: 'textarea', required: true, section: 'Basic Information' },
     { key: 'shift', label: 'Shift', type: 'select', options: ['A', 'B', 'C', 'General'], required: true, section: 'Basic Information' },
