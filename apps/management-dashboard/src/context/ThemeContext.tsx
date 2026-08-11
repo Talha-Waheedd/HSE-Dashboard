@@ -14,10 +14,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
-    }
+    // The HSE workspace always opens in light mode. Users can still switch
+    // to dark mode explicitly through the theme control.
+    document.documentElement.classList.remove('dark');
   }, []);
 
   const toggleTheme = () => {
