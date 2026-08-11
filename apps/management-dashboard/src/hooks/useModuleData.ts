@@ -41,7 +41,7 @@ export const useModuleData = (schemaId: string) => {
       }
       return { success: false, message: response.message };
     } catch (err: any) {
-      return { success: false, message: err.response?.data?.message || err.message };
+      return { success: false, message: apiErrorMessage(err) };
     }
   };
 

@@ -3,6 +3,7 @@
 const ApiResponse = require('../../shared/utils/ApiResponse');
 const { HTTP_STATUS } = require('../../shared/constants/httpStatus');
 const { MESSAGES } = require('../../shared/constants/messages');
+const logger = require('../../shared/utils/logger');
 
 /**
  * Validate middleware factory.
@@ -28,6 +29,7 @@ const validate = (schema, source = 'body') => (req, res, next) => {
       message: d.message.replace(/['"]/g, ''),
     }));
 
+    logger.warn(`Request validation failed: ${errors.map(({ field, message }) => `${field}: ${message}`).join('; ')}`);
     return res.status(HTTP_STATUS.UNPROCESSABLE_ENTITY).json(
       ApiResponse.error(MESSAGES.VALIDATION_ERROR, errors),
     );
