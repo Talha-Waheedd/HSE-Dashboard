@@ -9,12 +9,21 @@ const { requirePermissions } = require('../../core/middleware/rbac.middleware');
 const { createHazardSchema, updateHazardSchema, updateHazardStatusSchema } = require('./hazard.schema');
 const { PERMISSIONS } = require('../../shared/constants/permissions');
 
+// Local-only escape hatch for form development. It is deliberately disabled
+// in production even if an environment variable is accidentally set.
+const bypassHazardValidation = (req, res, next) => {
+  if (process.env.NODE_ENV !== 'production' && process.env.BYPASS_HAZARD_VALIDATION === 'true') {
+    return next();
+  }
+  return validate(createHazardSchema)(req, res, next);
+};
+
 router.use(authenticate);
 
 router.post(
   '/',
   requirePermissions([PERMISSIONS.HSE_REPORT_HAZARD]),
-  validate(createHazardSchema),
+  bypassHazardValidation,
   hazardController.createHazard
 );
 

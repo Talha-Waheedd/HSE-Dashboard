@@ -42,6 +42,7 @@ const CARD =
 
 const STATUS_COLUMNS = new Set(['status_id', 'risk_rating_id', 'investigation_required']);
 const MAX_INCIDENT_ACTIONS = 15;
+const bypassHazardValidation = import.meta.env.VITE_BYPASS_HAZARD_VALIDATION === 'true';
 
 const paginationItems = (currentPage: number, totalPages: number): Array<number | 'ellipsis-start' | 'ellipsis-end'> => {
   if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -471,6 +472,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const validateFormData = (data: any): string | null => {
+    if (schema.id === 'hazard-reporting' && bypassHazardValidation) return null;
     // Check required fields dynamically
     for (const col of schema.columns) {
       if (col.required && !col.hideFromForm) {

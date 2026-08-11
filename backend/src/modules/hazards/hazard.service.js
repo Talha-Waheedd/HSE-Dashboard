@@ -7,6 +7,15 @@ const HazardStatus = require('../../shared/enums/HazardStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 
+const DEFAULT_PLANT_ID = '5126923e-b77f-4eb6-8b98-d5fc9db8d71b';
+const isUuid = (value) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
+const normalizeStatus = (value) => {
+  const normalized = String(value || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+  return Object.values(HazardStatus).includes(normalized) ? normalized : HazardStatus.DRAFT;
+};
+const bypassHazardValidation = () =>
+  process.env.NODE_ENV !== 'production' && process.env.BYPASS_HAZARD_VALIDATION === 'true';
+
 const allowUnverifiedHazardEmployee = () =>
   process.env.NODE_ENV !== 'production' &&
   process.env.ALLOW_UNVERIFIED_HAZARD_EMPLOYEE === 'true';
@@ -16,9 +25,28 @@ class HazardService {
    * Report a new hazard
    */
   async createHazard(data, userId) {
-    const plant = await plantRepository.findById(data.plantId);
-    if (!plant) {
-      throw new ApiError(404, MESSAGES.PLANT_NOT_FOUND);
+    if (bypassHazardValidation()) {
+      const metadata = data.metadata && typeof data.metadata === 'object' ? data.metadata : {};
+      // The database has mandatory columns and a status enum. Normalize every
+      // raw development payload into safe persisted values while retaining the
+      // original form input in metadata for later cleanup/review.
+      data = {
+        ...data,
+        plantId: isUuid(data.plantId) ? data.plantId : DEFAULT_PLANT_ID,
+        departmentId: isUuid(data.departmentId) ? data.departmentId : null,
+        category: String(data.category || 'other').trim().toLowerCase() || 'other',
+        severityLevel: String(data.severityLevel || 'low').trim().toLowerCase() || 'low',
+        title: String(data.title || data.description || 'Hazard Report').trim().slice(0, 255) || 'Hazard Report',
+        description: String(data.description || 'No description provided').trim() || 'No description provided',
+        status: normalizeStatus(data.status),
+        reportedAt: data.reportedAt && !Number.isNaN(Date.parse(data.reportedAt)) ? data.reportedAt : new Date(),
+        metadata: { ...metadata, ...(data.emp_id !== undefined ? { emp_id: data.emp_id } : {}) },
+      };
+    } else {
+      const plant = await plantRepository.findById(data.plantId);
+      if (!plant) {
+        throw new ApiError(404, MESSAGES.PLANT_NOT_FOUND);
+      }
     }
 
     // Employee ID is stored in metadata rather than as a hazards-table FK.
@@ -39,9 +67,7 @@ class HazardService {
     data.createdBy = userId;
     // Overwrite status to draft or submitted if specified, but defaults to draft.
     // Business logic: only drafts or submitted allowed on creation.
-    if (![HazardStatus.DRAFT, HazardStatus.SUBMITTED].includes(data.status)) {
-      data.status = HazardStatus.DRAFT;
-    }
+    if (![HazardStatus.DRAFT, HazardStatus.SUBMITTED].includes(data.status)) data.status = HazardStatus.DRAFT;
 
     return hazardRepository.create(data);
   }
