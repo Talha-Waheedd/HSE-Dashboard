@@ -50,6 +50,12 @@ const categoryToApi = (value: unknown) => {
   const known = ['physical', 'chemical', 'biological', 'ergonomic', 'electrical', 'fire', 'environmental', 'behavioral', 'other'];
   return known.includes(text) ? text : 'other';
 };
+const trainingTypeToApi = (value: unknown) => ({
+  internal: 'other', external: 'other', 'toolbox talk': 'toolbox_talk', 'safety briefing': 'refresher',
+  'fire drill': 'fire_safety', orientation: 'induction', induction: 'induction', refresher: 'refresher',
+  toolbox_talk: 'toolbox_talk', fire_safety: 'fire_safety', first_aid: 'first_aid', ppe_usage: 'ppe_usage',
+  chemical_handling: 'chemical_handling', emergency_response: 'emergency_response', other: 'other',
+}[String(value || '').trim().toLowerCase()] || 'other');
 const statusFromApi = (value: unknown) => ({
   draft: 'Pending', reported: 'Open', submitted: 'Open', under_review: 'Pending',
   under_investigation: 'Pending', corrective_action: 'Work in Progress', resolved: 'Closed', closed: 'Closed',
@@ -131,9 +137,15 @@ export const moduleService = {
         ...item,
         date: item.metadata?.date || item.scheduledDate || item.scheduled_date || item.dueDate || item.due_date || item.createdAt || item.created_at,
         department_id: item.metadata?.department_id || item.departmentId || item.department_id || item.department?.id,
+        department_name: item.metadata?.department_name || item.department?.name,
+        department_code: item.metadata?.department_code || item.department?.code,
         status_id: item.metadata?.status_id || item.status,
         source: item.metadata?.source || item.sourceType || item.source_type,
-        manhours: item.metadata?.manhours || item.manhours || item.total_manhours || (Number(item.durationMinutes || item.duration_minutes) || 0) / 60,
+        training_type: item.metadata?.training_type || item.trainingType || item.training_type,
+        trainer: item.metadata?.trainer || item.trainerName || item.trainer_name || item.trainer?.name,
+        topic: item.metadata?.topic || item.title,
+        participants: item.metadata?.participants || item.participantCount || item.participant_count || item.maxAttendees || item.max_attendees,
+        manhours: item.metadata?.manhours || item.manhours || item.total_manhours || ((Number(item.participantCount || item.participant_count || item.maxAttendees || item.max_attendees) || 0) * ((Number(item.durationMinutes || item.duration_minutes) || 0) / 60)),
       }));
     }
 
@@ -184,6 +196,23 @@ export const moduleService = {
         actions: normalizeIncidentActions(payload.actions),
         status: statusToApi(payload.status_id || 'Open', schemaId)
       };
+    } else if (schemaId === 'training-records') {
+      const participants = Number(payload.participants) || undefined;
+      const durationMinutes = Number(payload.duration_minutes) || undefined;
+      payload = {
+        ...payload,
+        plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b',
+        departmentId: payload.department_id,
+        title: payload.topic || 'Training Session',
+        trainingType: trainingTypeToApi(payload.training_type),
+        scheduledDate: payload.date,
+        trainerName: payload.trainer,
+        maxAttendees: participants,
+        participantCount: participants,
+        durationMinutes,
+        manhours: Number(payload.manhours) || (participants && durationMinutes ? participants * durationMinutes / 60 : undefined),
+        status: 'completed',
+      };
     }
 
     const response = await apiClient.post(endpoint, payload);
@@ -226,6 +255,21 @@ export const moduleService = {
         rootCause: payload.root_cause,
         actions: normalizeIncidentActions(payload.actions),
         status: statusToApi(payload.status_id, schemaId)
+      };
+    } else if (schemaId === 'training-records') {
+      const participants = Number(payload.participants) || undefined;
+      const durationMinutes = Number(payload.duration_minutes) || undefined;
+      payload = {
+        ...payload,
+        departmentId: payload.department_id,
+        title: payload.topic,
+        trainingType: payload.training_type ? trainingTypeToApi(payload.training_type) : undefined,
+        scheduledDate: payload.date,
+        trainerName: payload.trainer,
+        maxAttendees: participants,
+        participantCount: participants,
+        durationMinutes,
+        manhours: Number(payload.manhours) || (participants && durationMinutes ? participants * durationMinutes / 60 : undefined),
       };
     }
 

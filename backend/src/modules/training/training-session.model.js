@@ -47,6 +47,7 @@ const TrainingSession = sequelize.define('TrainingSession', {
     allowNull: false,
     comment: 'FK → users.id — who is conducting the training',
   },
+  trainerName: { type: DataTypes.STRING(255), allowNull: true },
   scheduledDate: {
     type: DataTypes.DATEONLY,
     allowNull: false,
@@ -68,6 +69,9 @@ const TrainingSession = sequelize.define('TrainingSession', {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  participantCount: { type: DataTypes.INTEGER, allowNull: true },
+  manhours: { type: DataTypes.DECIMAL(12, 2), allowNull: true },
+  sourceFingerprint: { type: DataTypes.STRING(64), allowNull: true, unique: true },
   notes: {
     type: DataTypes.TEXT,
     allowNull: true,
@@ -90,6 +94,7 @@ const TrainingSession = sequelize.define('TrainingSession', {
     { fields: ['status'], name: 'training_sessions_status_idx' },
     { fields: ['training_type'], name: 'training_sessions_type_idx' },
     { fields: ['scheduled_date'], name: 'training_sessions_date_idx' },
+    { fields: ['source_fingerprint'], unique: true, name: 'training_sessions_source_fingerprint_unique' },
   ],
 });
 

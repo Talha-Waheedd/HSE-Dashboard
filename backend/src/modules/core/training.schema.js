@@ -8,6 +8,7 @@ const createTrainingSchema = Joi.object({
   plantId: Joi.string().uuid().required(),
   departmentId: Joi.string().uuid().optional().allow(null),
   title: Joi.string().max(255).required(),
+  trainerName: Joi.string().max(255).optional(),
   description: Joi.string().optional(),
   trainingType: Joi.string().valid(...Object.values(TrainingType)).required(),
   scheduledDate: Joi.date().iso().required(),
@@ -15,6 +16,8 @@ const createTrainingSchema = Joi.object({
   durationMinutes: Joi.number().integer().min(1).optional(),
   venue: Joi.string().max(255).optional(),
   maxAttendees: Joi.number().integer().min(1).optional(),
+  participantCount: Joi.number().integer().min(1).optional(),
+  manhours: Joi.number().min(0).optional(),
   notes: Joi.string().optional(),
   status: Joi.string().valid(TrainingStatus.SCHEDULED, TrainingStatus.IN_PROGRESS).default(TrainingStatus.SCHEDULED).optional(),
 });
@@ -23,6 +26,7 @@ const updateTrainingSchema = Joi.object({
   plantId: Joi.string().uuid().optional(),
   departmentId: Joi.string().uuid().optional().allow(null),
   title: Joi.string().max(255).optional(),
+  trainerName: Joi.string().max(255).optional(),
   description: Joi.string().optional(),
   trainingType: Joi.string().valid(...Object.values(TrainingType)).optional(),
   scheduledDate: Joi.date().iso().optional(),
@@ -30,6 +34,8 @@ const updateTrainingSchema = Joi.object({
   durationMinutes: Joi.number().integer().min(1).optional(),
   venue: Joi.string().max(255).optional(),
   maxAttendees: Joi.number().integer().min(1).optional(),
+  participantCount: Joi.number().integer().min(1).optional(),
+  manhours: Joi.number().min(0).optional(),
   notes: Joi.string().optional(),
   status: Joi.string().valid(...Object.values(TrainingStatus)).optional(),
 }).min(1);

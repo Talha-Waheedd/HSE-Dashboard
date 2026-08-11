@@ -538,7 +538,7 @@ export const Analytics = () => {
 
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
-    const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
+    const value = String(item.department_code || item.department?.code || item.department_name || item.department?.name || item.department_id || item.departmentId || '').toLowerCase();
     return value === department.toLowerCase() || value.includes(department.toLowerCase());
   });
   const departmentalRows: any[] = [

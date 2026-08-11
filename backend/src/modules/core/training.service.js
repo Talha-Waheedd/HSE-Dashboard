@@ -6,6 +6,7 @@ const TrainingStatus = require('../../shared/enums/TrainingStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { sequelize } = require('../../database/connection');
+const { Department } = require('../../database/models');
 
 class TrainingService {
   /**
@@ -31,7 +32,7 @@ class TrainingService {
    * Get all training sessions
    */
   async getAllSessions(options = {}) {
-    return trainingRepository.findAll(options);
+    return trainingRepository.findAndCountAll({ ...options, include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }], distinct: true, order: [['scheduledDate', 'DESC'], ['createdAt', 'DESC']] });
   }
 
   /**

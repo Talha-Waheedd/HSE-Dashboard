@@ -1,0 +1,8085 @@
+{
+  "source": "C:/Users/PMLS/Downloads/Departmental Training Log YTD-June-2026.xlsx",
+  "sheets": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June"
+  ],
+  "sourceRows": 1063,
+  "successful": 909,
+  "duplicates": 138,
+  "failed": 16,
+  "departmentsCreated": [
+    "Store",
+    "PRD",
+    "QC/NPD/FS",
+    "Stores",
+    "PRJ",
+    "ESD",
+    "QC",
+    "Project"
+  ],
+  "rows": [
+    {
+      "sheet": "January",
+      "row": 1,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "January",
+      "row": 7,
+      "result": "imported",
+      "date": "2026-01-01",
+      "department": "HSE",
+      "manhours": 20
+    },
+    {
+      "sheet": "January",
+      "row": 8,
+      "result": "imported",
+      "date": "2026-01-01",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 9,
+      "result": "imported",
+      "date": "2026-01-01",
+      "department": "HSE",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "January",
+      "row": 10,
+      "result": "imported",
+      "date": "2026-01-01",
+      "department": "HSE",
+      "manhours": 1.5
+    },
+    {
+      "sheet": "January",
+      "row": 11,
+      "result": "imported",
+      "date": "2026-01-01",
+      "department": "HSE",
+      "manhours": 0.67
+    },
+    {
+      "sheet": "January",
+      "row": 12,
+      "result": "imported",
+      "date": "2026-01-01",
+      "department": "HSE",
+      "manhours": 20
+    },
+    {
+      "sheet": "January",
+      "row": 13,
+      "result": "imported",
+      "date": "2026-01-01",
+      "department": "HSE",
+      "manhours": 0.33
+    },
+    {
+      "sheet": "January",
+      "row": 14,
+      "result": "imported",
+      "date": "2026-01-01",
+      "department": "HSE",
+      "manhours": 9.5
+    },
+    {
+      "sheet": "January",
+      "row": 15,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "HSE",
+      "manhours": 2.75
+    },
+    {
+      "sheet": "January",
+      "row": 16,
+      "result": "imported",
+      "date": "2026-03-01",
+      "department": "HSE",
+      "manhours": 10.5
+    },
+    {
+      "sheet": "January",
+      "row": 17,
+      "result": "imported",
+      "date": "2026-04-01",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 18,
+      "result": "imported",
+      "date": "2026-05-01",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 19,
+      "result": "imported",
+      "date": "2026-06-01",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 20,
+      "result": "imported",
+      "date": "2026-07-01",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 21,
+      "result": "imported",
+      "date": "2026-08-01",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 22,
+      "result": "imported",
+      "date": "2026-08-01",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 23,
+      "result": "imported",
+      "date": "2026-08-01",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 24,
+      "result": "imported",
+      "date": "2026-09-01",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 25,
+      "result": "imported",
+      "date": "2026-10-01",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 26,
+      "result": "imported",
+      "date": "2026-10-01",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 27,
+      "result": "imported",
+      "date": "2026-10-01",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 28,
+      "result": "imported",
+      "date": "2026-11-01",
+      "department": "HSE",
+      "manhours": 9
+    },
+    {
+      "sheet": "January",
+      "row": 29,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "January",
+      "row": 30,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 31,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 0.75
+    },
+    {
+      "sheet": "January",
+      "row": 32,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 16.33
+    },
+    {
+      "sheet": "January",
+      "row": 33,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 12
+    },
+    {
+      "sheet": "January",
+      "row": 34,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 6
+    },
+    {
+      "sheet": "January",
+      "row": 35,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 36,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 9
+    },
+    {
+      "sheet": "January",
+      "row": 37,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 1.5
+    },
+    {
+      "sheet": "January",
+      "row": 38,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 39,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "HSE",
+      "manhours": 14
+    },
+    {
+      "sheet": "January",
+      "row": 40,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 27
+    },
+    {
+      "sheet": "January",
+      "row": 41,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 27
+    },
+    {
+      "sheet": "January",
+      "row": 42,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 27
+    },
+    {
+      "sheet": "January",
+      "row": 43,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 28.5
+    },
+    {
+      "sheet": "January",
+      "row": 44,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 28.5
+    },
+    {
+      "sheet": "January",
+      "row": 45,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 28.5
+    },
+    {
+      "sheet": "January",
+      "row": 46,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 18
+    },
+    {
+      "sheet": "January",
+      "row": 47,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 18
+    },
+    {
+      "sheet": "January",
+      "row": 48,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 18
+    },
+    {
+      "sheet": "January",
+      "row": 49,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 32
+    },
+    {
+      "sheet": "January",
+      "row": 50,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 32
+    },
+    {
+      "sheet": "January",
+      "row": 51,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 18.67
+    },
+    {
+      "sheet": "January",
+      "row": 52,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 18.67
+    },
+    {
+      "sheet": "January",
+      "row": 53,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 54,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 55,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 16.5
+    },
+    {
+      "sheet": "January",
+      "row": 56,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 57,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 58,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "HSE",
+      "manhours": 0.75
+    },
+    {
+      "sheet": "January",
+      "row": 59,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 60,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "HSE",
+      "manhours": 23.33
+    },
+    {
+      "sheet": "January",
+      "row": 61,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "HSE",
+      "manhours": 10.5
+    },
+    {
+      "sheet": "January",
+      "row": 62,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "HSE",
+      "manhours": 15
+    },
+    {
+      "sheet": "January",
+      "row": 63,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 64,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 65,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 66,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 67,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 68,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 69,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 70,
+      "result": "imported",
+      "date": "2026-01-17",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 71,
+      "result": "imported",
+      "date": "2026-01-17",
+      "department": "HSE",
+      "manhours": 26
+    },
+    {
+      "sheet": "January",
+      "row": 72,
+      "result": "imported",
+      "date": "2026-01-17",
+      "department": "HSE",
+      "manhours": 34
+    },
+    {
+      "sheet": "January",
+      "row": 73,
+      "result": "imported",
+      "date": "2026-01-17",
+      "department": "HSE",
+      "manhours": 26
+    },
+    {
+      "sheet": "January",
+      "row": 74,
+      "result": "imported",
+      "date": "2026-01-17",
+      "department": "HSE",
+      "manhours": 34
+    },
+    {
+      "sheet": "January",
+      "row": 75,
+      "result": "imported",
+      "date": "2026-01-17",
+      "department": "HSE",
+      "manhours": 26
+    },
+    {
+      "sheet": "January",
+      "row": 76,
+      "result": "imported",
+      "date": "2026-01-17",
+      "department": "HSE",
+      "manhours": 34
+    },
+    {
+      "sheet": "January",
+      "row": 77,
+      "result": "imported",
+      "date": "2026-01-19",
+      "department": "HSE",
+      "manhours": 1426
+    },
+    {
+      "sheet": "January",
+      "row": 78,
+      "result": "imported",
+      "date": "2026-01-19",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 79,
+      "result": "imported",
+      "date": "2026-01-19",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 80,
+      "result": "imported",
+      "date": "2026-01-20",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 81,
+      "result": "imported",
+      "date": "2026-01-20",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 82,
+      "result": "imported",
+      "date": "2026-01-21",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 83,
+      "result": "imported",
+      "date": "2026-01-21",
+      "department": "HSE",
+      "manhours": 0.75
+    },
+    {
+      "sheet": "January",
+      "row": 84,
+      "result": "imported",
+      "date": "2026-01-22",
+      "department": "HSE",
+      "manhours": 1.67
+    },
+    {
+      "sheet": "January",
+      "row": 85,
+      "result": "imported",
+      "date": "2026-01-22",
+      "department": "HSE",
+      "manhours": 0.75
+    },
+    {
+      "sheet": "January",
+      "row": 86,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "HSE",
+      "manhours": 9.75
+    },
+    {
+      "sheet": "January",
+      "row": 87,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "HSE",
+      "manhours": 3.75
+    },
+    {
+      "sheet": "January",
+      "row": 88,
+      "result": "imported",
+      "date": "2026-01-24",
+      "department": "HSE",
+      "manhours": 13.33
+    },
+    {
+      "sheet": "January",
+      "row": 89,
+      "result": "imported",
+      "date": "2026-01-24",
+      "department": "HSE",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 90,
+      "result": "imported",
+      "date": "2026-01-24",
+      "department": "HSE",
+      "manhours": 12
+    },
+    {
+      "sheet": "January",
+      "row": 91,
+      "result": "imported",
+      "date": "2026-01-24",
+      "department": "HSE",
+      "manhours": 4
+    },
+    {
+      "sheet": "January",
+      "row": 92,
+      "result": "imported",
+      "date": "2026-01-24",
+      "department": "HSE",
+      "manhours": 6
+    },
+    {
+      "sheet": "January",
+      "row": 93,
+      "result": "imported",
+      "date": "2026-01-24",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "January",
+      "row": 94,
+      "result": "imported",
+      "date": "2026-01-26",
+      "department": "HSE",
+      "manhours": 2.92
+    },
+    {
+      "sheet": "January",
+      "row": 95,
+      "result": "imported",
+      "date": "2026-01-26",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 96,
+      "result": "imported",
+      "date": "2026-01-27",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "January",
+      "row": 97,
+      "result": "imported",
+      "date": "2026-01-27",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 98,
+      "result": "imported",
+      "date": "2026-01-28",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 99,
+      "result": "imported",
+      "date": "2026-01-28",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "January",
+      "row": 100,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "HSE",
+      "manhours": 0.5
+    },
+    {
+      "sheet": "January",
+      "row": 101,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "January",
+      "row": 102,
+      "result": "imported",
+      "date": "2026-01-30",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "January",
+      "row": 103,
+      "result": "imported",
+      "date": "2026-01-31",
+      "department": "HSE",
+      "manhours": 8
+    },
+    {
+      "sheet": "January",
+      "row": 105,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "Store",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 106,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "Store",
+      "manhours": 6.33
+    },
+    {
+      "sheet": "January",
+      "row": 107,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "Store",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 108,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "Store",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "January",
+      "row": 109,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "Store",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 110,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "Store",
+      "manhours": 15
+    },
+    {
+      "sheet": "January",
+      "row": 111,
+      "result": "imported",
+      "date": "2026-05-01",
+      "department": "Store",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 112,
+      "result": "imported",
+      "date": "2026-09-01",
+      "department": "Store",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 113,
+      "result": "imported",
+      "date": "2026-09-01",
+      "department": "Store",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 114,
+      "result": "imported",
+      "date": "2026-09-01",
+      "department": "Store",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 115,
+      "result": "imported",
+      "date": "2026-09-01",
+      "department": "Store",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "January",
+      "row": 116,
+      "result": "imported",
+      "date": "2026-09-01",
+      "department": "Store",
+      "manhours": 14
+    },
+    {
+      "sheet": "January",
+      "row": 117,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "Store",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "January",
+      "row": 118,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "Store",
+      "manhours": 15
+    },
+    {
+      "sheet": "January",
+      "row": 119,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "Store",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "January",
+      "row": 120,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "Store",
+      "manhours": 13.33
+    },
+    {
+      "sheet": "January",
+      "row": 121,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "Store",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "January",
+      "row": 122,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "Store",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 123,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "Store",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "January",
+      "row": 124,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "Store",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "January",
+      "row": 125,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "Store",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 126,
+      "result": "imported",
+      "date": "2026-01-19",
+      "department": "Store",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "January",
+      "row": 127,
+      "result": "imported",
+      "date": "2026-01-19",
+      "department": "Store",
+      "manhours": 15
+    },
+    {
+      "sheet": "January",
+      "row": 128,
+      "result": "imported",
+      "date": "2026-01-22",
+      "department": "Store",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "January",
+      "row": 129,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "Store",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "January",
+      "row": 130,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "Store",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "January",
+      "row": 131,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "Store",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 132,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "Store",
+      "manhours": 6.33
+    },
+    {
+      "sheet": "January",
+      "row": 133,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "Store",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "January",
+      "row": 134,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "Store",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 135,
+      "result": "imported",
+      "date": "2026-01-26",
+      "department": "Store",
+      "manhours": 11.5
+    },
+    {
+      "sheet": "January",
+      "row": 142,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 143,
+      "result": "imported",
+      "date": "2026-02-01",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 144,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 145,
+      "result": "imported",
+      "date": "2026-05-01",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 146,
+      "result": "imported",
+      "date": "2026-05-01",
+      "department": "PRD",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "January",
+      "row": 147,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 148,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 149,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 150,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "PRD",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 151,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 152,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 153,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 154,
+      "result": "imported",
+      "date": "2026-01-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 155,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 156,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 157,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "PRD",
+      "manhours": 9.5
+    },
+    {
+      "sheet": "January",
+      "row": 158,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "PRD",
+      "manhours": 20
+    },
+    {
+      "sheet": "January",
+      "row": 159,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 160,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 161,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 162,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 163,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 164,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 165,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 166,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 167,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 168,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 169,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 170,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 171,
+      "result": "imported",
+      "date": "2026-01-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 172,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 173,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 174,
+      "result": "imported",
+      "date": "2026-01-20",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 175,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 176,
+      "result": "imported",
+      "date": "2026-01-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 177,
+      "result": "imported",
+      "date": "2026-01-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 178,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 179,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 180,
+      "result": "imported",
+      "date": "2026-01-22",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 181,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 182,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 183,
+      "result": "imported",
+      "date": "2026-01-23",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 184,
+      "result": "imported",
+      "date": "2026-01-26",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 185,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 186,
+      "result": "imported",
+      "date": "2026-01-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 187,
+      "result": "imported",
+      "date": "2026-01-28",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 188,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 189,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 190,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 191,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 192,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 193,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 194,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 195,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 196,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 197,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 198,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 199,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 200,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 201,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 202,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 203,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 204,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 205,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "January",
+      "row": 206,
+      "result": "imported",
+      "date": "2026-01-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 209,
+      "result": "imported",
+      "date": "2026-03-01",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 210,
+      "result": "imported",
+      "date": "2026-03-01",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 211,
+      "result": "imported",
+      "date": "2026-03-01",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 212,
+      "result": "imported",
+      "date": "2026-04-01",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 213,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 214,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 215,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "January",
+      "row": 216,
+      "result": "imported",
+      "date": "2026-12-01",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 217,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 218,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 219,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 220,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 221,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 222,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 223,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "January",
+      "row": 224,
+      "result": "imported",
+      "date": "2026-01-13",
+      "department": "QC/NPD/FS",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "January",
+      "row": 225,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 226,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 227,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 228,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "January",
+      "row": 229,
+      "result": "imported",
+      "date": "2026-01-15",
+      "department": "QC/NPD/FS",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "January",
+      "row": 233,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "February",
+      "row": 1,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "February",
+      "row": 7,
+      "result": "imported",
+      "date": "2026-01-02",
+      "department": "HSE",
+      "manhours": 9
+    },
+    {
+      "sheet": "February",
+      "row": 8,
+      "result": "imported",
+      "date": "2026-02-02",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "February",
+      "row": 9,
+      "result": "imported",
+      "date": "2026-03-02",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "February",
+      "row": 10,
+      "result": "imported",
+      "date": "2026-03-02",
+      "department": "HSE",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "February",
+      "row": 11,
+      "result": "imported",
+      "date": "2026-03-02",
+      "department": "HSE",
+      "manhours": 10.5
+    },
+    {
+      "sheet": "February",
+      "row": 12,
+      "result": "imported",
+      "date": "2026-03-02",
+      "department": "HSE",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "February",
+      "row": 13,
+      "result": "imported",
+      "date": "2026-03-02",
+      "department": "HSE",
+      "manhours": 10.5
+    },
+    {
+      "sheet": "February",
+      "row": 14,
+      "result": "imported",
+      "date": "2026-04-02",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "February",
+      "row": 15,
+      "result": "imported",
+      "date": "2026-05-02",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "February",
+      "row": 16,
+      "result": "imported",
+      "date": "2026-05-02",
+      "department": "HSE",
+      "manhours": 5.25
+    },
+    {
+      "sheet": "February",
+      "row": 17,
+      "result": "imported",
+      "date": "2026-05-02",
+      "department": "HSE",
+      "manhours": 5.25
+    },
+    {
+      "sheet": "February",
+      "row": 18,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "February",
+      "row": 19,
+      "result": "imported",
+      "date": "2026-07-02",
+      "department": "HSE",
+      "manhours": 6
+    },
+    {
+      "sheet": "February",
+      "row": 20,
+      "result": "imported",
+      "date": "2026-07-02",
+      "department": "HSE",
+      "manhours": 15
+    },
+    {
+      "sheet": "February",
+      "row": 21,
+      "result": "imported",
+      "date": "2026-09-02",
+      "department": "HSE",
+      "manhours": 0.83
+    },
+    {
+      "sheet": "February",
+      "row": 22,
+      "result": "imported",
+      "date": "2026-09-02",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "February",
+      "row": 23,
+      "result": "imported",
+      "date": "2026-10-02",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 24,
+      "result": "imported",
+      "date": "2026-10-02",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "February",
+      "row": 25,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 26,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "HSE",
+      "manhours": 4.5
+    },
+    {
+      "sheet": "February",
+      "row": 27,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "HSE",
+      "manhours": 2
+    },
+    {
+      "sheet": "February",
+      "row": 28,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "HSE",
+      "manhours": 1.5
+    },
+    {
+      "sheet": "February",
+      "row": 29,
+      "result": "imported",
+      "date": "2026-12-02",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "February",
+      "row": 30,
+      "result": "imported",
+      "date": "2026-12-02",
+      "department": "HSE",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "February",
+      "row": 31,
+      "result": "imported",
+      "date": "2026-12-02",
+      "department": "HSE",
+      "manhours": 5.25
+    },
+    {
+      "sheet": "February",
+      "row": 32,
+      "result": "imported",
+      "date": "2026-12-02",
+      "department": "HSE",
+      "manhours": 21.75
+    },
+    {
+      "sheet": "February",
+      "row": 33,
+      "result": "imported",
+      "date": "2026-12-02",
+      "department": "HSE",
+      "manhours": 31.5
+    },
+    {
+      "sheet": "February",
+      "row": 34,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 35,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 36,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 37,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "HSE",
+      "manhours": 3.75
+    },
+    {
+      "sheet": "February",
+      "row": 38,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 39,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "HSE",
+      "manhours": 2
+    },
+    {
+      "sheet": "February",
+      "row": 40,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "HSE",
+      "manhours": 6.42
+    },
+    {
+      "sheet": "February",
+      "row": 41,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "HSE",
+      "manhours": 6.75
+    },
+    {
+      "sheet": "February",
+      "row": 42,
+      "result": "imported",
+      "date": "2026-02-15",
+      "department": "HSE",
+      "manhours": 13.33
+    },
+    {
+      "sheet": "February",
+      "row": 43,
+      "result": "imported",
+      "date": "2026-02-15",
+      "department": "HSE",
+      "manhours": 1.33
+    },
+    {
+      "sheet": "February",
+      "row": 44,
+      "result": "imported",
+      "date": "2026-02-15",
+      "department": "HSE",
+      "manhours": 9.5
+    },
+    {
+      "sheet": "February",
+      "row": 45,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 46,
+      "result": "imported",
+      "date": "2026-02-17",
+      "department": "HSE",
+      "manhours": 0.67
+    },
+    {
+      "sheet": "February",
+      "row": 47,
+      "result": "imported",
+      "date": "2026-02-18",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "February",
+      "row": 48,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 49,
+      "result": "imported",
+      "date": "2026-02-20",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 50,
+      "result": "imported",
+      "date": "2026-02-21",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 51,
+      "result": "imported",
+      "date": "2026-02-22",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 52,
+      "result": "imported",
+      "date": "2026-02-23",
+      "department": "HSE",
+      "manhours": 28
+    },
+    {
+      "sheet": "February",
+      "row": 53,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "February",
+      "row": 56,
+      "result": "imported",
+      "date": "2026-02-02",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 57,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 58,
+      "result": "imported",
+      "date": "2026-04-02",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 59,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "February",
+      "row": 60,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "February",
+      "row": 61,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "Stores",
+      "manhours": 8.33
+    },
+    {
+      "sheet": "February",
+      "row": 62,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "February",
+      "row": 63,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "Stores",
+      "manhours": 9
+    },
+    {
+      "sheet": "February",
+      "row": 64,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "Stores",
+      "manhours": 9.5
+    },
+    {
+      "sheet": "February",
+      "row": 65,
+      "result": "imported",
+      "date": "2026-09-02",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 66,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 67,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 68,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "Stores",
+      "manhours": 13
+    },
+    {
+      "sheet": "February",
+      "row": 69,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "Stores",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 70,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "February",
+      "row": 71,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "February",
+      "row": 72,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "February",
+      "row": 73,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "Stores",
+      "manhours": 6
+    },
+    {
+      "sheet": "February",
+      "row": 74,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "Stores",
+      "manhours": 12
+    },
+    {
+      "sheet": "February",
+      "row": 75,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 76,
+      "result": "imported",
+      "date": "2026-02-17",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "February",
+      "row": 77,
+      "result": "imported",
+      "date": "2026-02-18",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 78,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "Stores",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "February",
+      "row": 79,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "February",
+      "row": 80,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "February",
+      "row": 81,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "February",
+      "row": 82,
+      "result": "imported",
+      "date": "2026-02-20",
+      "department": "Stores",
+      "manhours": 11
+    },
+    {
+      "sheet": "February",
+      "row": 83,
+      "result": "imported",
+      "date": "2026-02-20",
+      "department": "Stores",
+      "manhours": 12
+    },
+    {
+      "sheet": "February",
+      "row": 84,
+      "result": "imported",
+      "date": "2026-02-20",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 85,
+      "result": "imported",
+      "date": "2026-02-23",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "February",
+      "row": 86,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "February",
+      "row": 87,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "Stores",
+      "manhours": 11.33
+    },
+    {
+      "sheet": "February",
+      "row": 88,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "February",
+      "row": 89,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "February",
+      "row": 90,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "February",
+      "row": 91,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "Stores",
+      "manhours": 11
+    },
+    {
+      "sheet": "February",
+      "row": 92,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "Stores",
+      "manhours": 13
+    },
+    {
+      "sheet": "February",
+      "row": 98,
+      "result": "imported",
+      "date": "2026-02-02",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 99,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 100,
+      "result": "imported",
+      "date": "2026-04-02",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 101,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 102,
+      "result": "imported",
+      "date": "2026-05-02",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 103,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 104,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 105,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 106,
+      "result": "imported",
+      "date": "2026-05-02",
+      "department": "PRD",
+      "manhours": 6.5
+    },
+    {
+      "sheet": "February",
+      "row": 107,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 108,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 109,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 110,
+      "result": "imported",
+      "date": "2026-12-02",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 111,
+      "result": "imported",
+      "date": "2026-12-02",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 112,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 113,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 114,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 115,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 116,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 117,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 118,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 119,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 120,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 121,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 122,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 123,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 124,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 125,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 126,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 127,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 128,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 129,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 130,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "February",
+      "row": 131,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 132,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "February",
+      "row": 133,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 4.5
+    },
+    {
+      "sheet": "February",
+      "row": 134,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 135,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 136,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 137,
+      "result": "imported",
+      "date": "2026-02-16",
+      "department": "PRD",
+      "manhours": 8.5
+    },
+    {
+      "sheet": "February",
+      "row": 138,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 139,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 140,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 141,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 142,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 143,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 144,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 145,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 146,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 147,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 148,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 149,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 150,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 151,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 152,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 153,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 154,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 155,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 156,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 157,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 158,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 159,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 160,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 161,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 162,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 163,
+      "result": "imported",
+      "date": "2026-02-18",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 164,
+      "result": "imported",
+      "date": "2026-02-18",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 165,
+      "result": "imported",
+      "date": "2026-02-18",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 166,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 167,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 168,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 169,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 170,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 171,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 172,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRD",
+      "manhours": 9
+    },
+    {
+      "sheet": "February",
+      "row": 173,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 174,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 175,
+      "result": "imported",
+      "date": "2026-02-20",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 176,
+      "result": "imported",
+      "date": "2026-02-20",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 177,
+      "result": "imported",
+      "date": "2026-02-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 178,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 179,
+      "result": "imported",
+      "date": "2026-02-26",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 183,
+      "result": "imported",
+      "date": "2026-02-13",
+      "department": "PRJ",
+      "manhours": 8
+    },
+    {
+      "sheet": "February",
+      "row": 184,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 185,
+      "result": "imported",
+      "date": "2026-02-18",
+      "department": "PRJ",
+      "manhours": 30
+    },
+    {
+      "sheet": "February",
+      "row": 186,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRJ",
+      "manhours": 40
+    },
+    {
+      "sheet": "February",
+      "row": 187,
+      "result": "imported",
+      "date": "2026-02-19",
+      "department": "PRJ",
+      "manhours": 80
+    },
+    {
+      "sheet": "February",
+      "row": 188,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "PRJ",
+      "manhours": 24
+    },
+    {
+      "sheet": "February",
+      "row": 189,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "PRJ",
+      "manhours": 32
+    },
+    {
+      "sheet": "February",
+      "row": 190,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "PRJ",
+      "manhours": 36
+    },
+    {
+      "sheet": "February",
+      "row": 191,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "PRJ",
+      "manhours": 30
+    },
+    {
+      "sheet": "February",
+      "row": 192,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "February",
+      "row": 195,
+      "result": "imported",
+      "date": "2026-04-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 196,
+      "result": "imported",
+      "date": "2026-05-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 197,
+      "result": "imported",
+      "date": "2026-06-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 198,
+      "result": "imported",
+      "date": "2026-07-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 199,
+      "result": "imported",
+      "date": "2026-08-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 200,
+      "result": "imported",
+      "date": "2026-09-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 201,
+      "result": "imported",
+      "date": "2026-10-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 202,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 203,
+      "result": "imported",
+      "date": "2026-12-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 204,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 9.5
+    },
+    {
+      "sheet": "February",
+      "row": 205,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 206,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 207,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 208,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 209,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 210,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 211,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 212,
+      "result": "imported",
+      "date": "2026-11-02",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 213,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 214,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 215,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 216,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 217,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 218,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 219,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 220,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 221,
+      "result": "imported",
+      "date": "2026-02-14",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 222,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 223,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 224,
+      "result": "imported",
+      "date": "2026-02-27",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "February",
+      "row": 228,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "March",
+      "row": 1,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "March",
+      "row": 7,
+      "result": "imported",
+      "date": "2026-01-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 8,
+      "result": "imported",
+      "date": "2026-01-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 9,
+      "result": "imported",
+      "date": "2026-01-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 10,
+      "result": "imported",
+      "date": "2026-02-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 11,
+      "result": "imported",
+      "date": "2026-02-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 12,
+      "result": "imported",
+      "date": "2026-02-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 13,
+      "result": "imported",
+      "date": "2026-03-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 14,
+      "result": "imported",
+      "date": "2026-03-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 15,
+      "result": "imported",
+      "date": "2026-03-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 16,
+      "result": "imported",
+      "date": "2026-04-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 17,
+      "result": "imported",
+      "date": "2026-04-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 18,
+      "result": "imported",
+      "date": "2026-04-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 19,
+      "result": "imported",
+      "date": "2026-05-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 20,
+      "result": "imported",
+      "date": "2026-05-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 21,
+      "result": "imported",
+      "date": "2026-05-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 22,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 23,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 24,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 25,
+      "result": "imported",
+      "date": "2026-07-03",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 26,
+      "result": "imported",
+      "date": "2026-07-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 27,
+      "result": "imported",
+      "date": "2026-07-03",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 28,
+      "result": "imported",
+      "date": "2026-07-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 29,
+      "result": "imported",
+      "date": "2026-08-03",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 30,
+      "result": "imported",
+      "date": "2026-08-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 31,
+      "result": "imported",
+      "date": "2026-08-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 32,
+      "result": "imported",
+      "date": "2026-08-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 33,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 34,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 35,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 36,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 37,
+      "result": "imported",
+      "date": "2026-10-03",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 38,
+      "result": "imported",
+      "date": "2026-10-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 39,
+      "result": "imported",
+      "date": "2026-10-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 40,
+      "result": "imported",
+      "date": "2026-10-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 41,
+      "result": "imported",
+      "date": "2026-11-03",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 42,
+      "result": "imported",
+      "date": "2026-11-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 43,
+      "result": "imported",
+      "date": "2026-11-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 44,
+      "result": "imported",
+      "date": "2026-11-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 45,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 46,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 47,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 48,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "HSE",
+      "manhours": 5
+    },
+    {
+      "sheet": "March",
+      "row": 49,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 50,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 51,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 52,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 53,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "HSE",
+      "manhours": 5
+    },
+    {
+      "sheet": "March",
+      "row": 54,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 55,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 56,
+      "result": "imported",
+      "date": "2026-03-14",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 57,
+      "result": "imported",
+      "date": "2026-03-14",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 58,
+      "result": "imported",
+      "date": "2026-03-14",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 59,
+      "result": "imported",
+      "date": "2026-03-14",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 60,
+      "result": "imported",
+      "date": "2026-03-15",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 61,
+      "result": "imported",
+      "date": "2026-03-15",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 62,
+      "result": "imported",
+      "date": "2026-03-15",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 63,
+      "result": "imported",
+      "date": "2026-03-15",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 64,
+      "result": "imported",
+      "date": "2026-03-16",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 65,
+      "result": "imported",
+      "date": "2026-03-16",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 66,
+      "result": "imported",
+      "date": "2026-03-16",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 67,
+      "result": "imported",
+      "date": "2026-03-16",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 68,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "March",
+      "row": 69,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "HSE",
+      "manhours": 4.75
+    },
+    {
+      "sheet": "March",
+      "row": 70,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "HSE",
+      "manhours": 11.67
+    },
+    {
+      "sheet": "March",
+      "row": 71,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "March",
+      "row": 72,
+      "result": "imported",
+      "date": "2026-03-20",
+      "department": "HSE",
+      "manhours": 19
+    },
+    {
+      "sheet": "March",
+      "row": 73,
+      "result": "imported",
+      "date": "2026-03-20",
+      "department": "HSE",
+      "manhours": 19
+    },
+    {
+      "sheet": "March",
+      "row": 74,
+      "result": "imported",
+      "date": "2026-03-20",
+      "department": "HSE",
+      "manhours": 19
+    },
+    {
+      "sheet": "March",
+      "row": 78,
+      "result": "imported",
+      "date": "2026-04-03",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "March",
+      "row": 79,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "Stores",
+      "manhours": 13.5
+    },
+    {
+      "sheet": "March",
+      "row": 80,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "Stores",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 81,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "March",
+      "row": 82,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "Stores",
+      "manhours": 7.67
+    },
+    {
+      "sheet": "March",
+      "row": 83,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "March",
+      "row": 84,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "March",
+      "row": 85,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "Stores",
+      "manhours": 0.7
+    },
+    {
+      "sheet": "March",
+      "row": 86,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "March",
+      "row": 87,
+      "result": "imported",
+      "date": "2026-11-03",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "March",
+      "row": 88,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "Stores",
+      "manhours": 9.33
+    },
+    {
+      "sheet": "March",
+      "row": 89,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "March",
+      "row": 90,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "March",
+      "row": 91,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "March",
+      "row": 92,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "March",
+      "row": 93,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "Stores",
+      "manhours": 11.5
+    },
+    {
+      "sheet": "March",
+      "row": 94,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "Stores",
+      "manhours": 16
+    },
+    {
+      "sheet": "March",
+      "row": 95,
+      "result": "imported",
+      "date": "2026-03-16",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "March",
+      "row": 96,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "March",
+      "row": 97,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "March",
+      "row": 98,
+      "result": "imported",
+      "date": "2026-03-25",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "March",
+      "row": 99,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "Stores",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "March",
+      "row": 100,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "Stores",
+      "manhours": 14.5
+    },
+    {
+      "sheet": "March",
+      "row": 101,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "Stores",
+      "manhours": 12.5
+    },
+    {
+      "sheet": "March",
+      "row": 108,
+      "result": "imported",
+      "date": "2026-03-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 109,
+      "result": "imported",
+      "date": "2026-04-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 110,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 111,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 112,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 113,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 114,
+      "result": "imported",
+      "date": "2026-07-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 115,
+      "result": "imported",
+      "date": "2026-08-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 116,
+      "result": "imported",
+      "date": "2026-08-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 117,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 118,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 119,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 120,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 121,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 122,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 123,
+      "result": "imported",
+      "date": "2026-10-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 124,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 125,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 126,
+      "result": "imported",
+      "date": "2026-10-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 127,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 128,
+      "result": "imported",
+      "date": "2026-11-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 129,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 130,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 131,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 132,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 133,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 134,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 135,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 136,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "PRD",
+      "manhours": 5.5
+    },
+    {
+      "sheet": "March",
+      "row": 137,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 138,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 139,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 140,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 141,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 142,
+      "result": "imported",
+      "date": "2026-03-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 143,
+      "result": "imported",
+      "date": "2026-03-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 144,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 145,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 146,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 147,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 148,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 149,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 150,
+      "result": "imported",
+      "date": "2026-03-17",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 151,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 152,
+      "result": "imported",
+      "date": "2026-03-24",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 153,
+      "result": "imported",
+      "date": "2026-03-24",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 154,
+      "result": "imported",
+      "date": "2026-03-25",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 155,
+      "result": "imported",
+      "date": "2026-03-25",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "March",
+      "row": 156,
+      "result": "imported",
+      "date": "2026-03-25",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 157,
+      "result": "imported",
+      "date": "2026-03-25",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "March",
+      "row": 158,
+      "result": "imported",
+      "date": "2026-03-25",
+      "department": "PRD",
+      "manhours": 4.5
+    },
+    {
+      "sheet": "March",
+      "row": 159,
+      "result": "imported",
+      "date": "2026-03-25",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 160,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 161,
+      "result": "imported",
+      "date": "2026-03-26",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 162,
+      "result": "imported",
+      "date": "2026-03-26",
+      "department": "PRD",
+      "manhours": 8.5
+    },
+    {
+      "sheet": "March",
+      "row": 163,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 164,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 165,
+      "result": "imported",
+      "date": "2026-03-26",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 166,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 167,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 168,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 169,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 170,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 171,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 172,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 173,
+      "result": "imported",
+      "date": "2026-03-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 174,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 175,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 176,
+      "result": "imported",
+      "date": "2026-03-28",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 177,
+      "result": "imported",
+      "date": "2026-03-28",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 180,
+      "result": "imported",
+      "date": "2026-04-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 181,
+      "result": "imported",
+      "date": "2026-05-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 182,
+      "result": "imported",
+      "date": "2026-06-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 183,
+      "result": "imported",
+      "date": "2026-07-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 184,
+      "result": "imported",
+      "date": "2026-08-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 185,
+      "result": "imported",
+      "date": "2026-09-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 186,
+      "result": "imported",
+      "date": "2026-10-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 187,
+      "result": "imported",
+      "date": "2026-11-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 188,
+      "result": "imported",
+      "date": "2026-12-03",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 189,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 190,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 191,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 192,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "March",
+      "row": 193,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "March",
+      "row": 194,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "March",
+      "row": 195,
+      "result": "imported",
+      "date": "2026-03-13",
+      "department": "QC/NPD/FS",
+      "manhours": 6.33
+    },
+    {
+      "sheet": "March",
+      "row": 196,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 197,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 198,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 199,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 9.5
+    },
+    {
+      "sheet": "March",
+      "row": 200,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 201,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 202,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 203,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 204,
+      "result": "imported",
+      "date": "2026-03-18",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 205,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 206,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 207,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 208,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 209,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 210,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 211,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 212,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 213,
+      "result": "imported",
+      "date": "2026-03-19",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 214,
+      "result": "imported",
+      "date": "2026-03-20",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 215,
+      "result": "imported",
+      "date": "2026-03-20",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 216,
+      "result": "imported",
+      "date": "2026-03-20",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 217,
+      "result": "imported",
+      "date": "2026-03-20",
+      "department": "QC/NPD/FS",
+      "manhours": 10
+    },
+    {
+      "sheet": "March",
+      "row": 218,
+      "result": "imported",
+      "date": "2026-03-31",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "March",
+      "row": 219,
+      "result": "imported",
+      "date": "2026-03-31",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "March",
+      "row": 220,
+      "result": "imported",
+      "date": "2026-03-31",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "March",
+      "row": 221,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "March",
+      "row": 225,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "April",
+      "row": 1,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "April",
+      "row": 7,
+      "result": "imported",
+      "date": "2026-01-04",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "April",
+      "row": 8,
+      "result": "imported",
+      "date": "2026-02-04",
+      "department": "HSE",
+      "manhours": 1.33
+    },
+    {
+      "sheet": "April",
+      "row": 9,
+      "result": "imported",
+      "date": "2026-02-04",
+      "department": "HSE",
+      "manhours": 14.67
+    },
+    {
+      "sheet": "April",
+      "row": 10,
+      "result": "imported",
+      "date": "2026-02-04",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "April",
+      "row": 11,
+      "result": "imported",
+      "date": "2026-03-04",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "April",
+      "row": 12,
+      "result": "imported",
+      "date": "2026-03-04",
+      "department": "HSE",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "April",
+      "row": 13,
+      "result": "imported",
+      "date": "2026-04-04",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "April",
+      "row": 14,
+      "result": "imported",
+      "date": "2026-04-04",
+      "department": "HSE",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "April",
+      "row": 15,
+      "result": "imported",
+      "date": "2026-04-04",
+      "department": "HSE",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "April",
+      "row": 16,
+      "result": "imported",
+      "date": "2026-05-04",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "April",
+      "row": 17,
+      "result": "imported",
+      "date": "2026-05-04",
+      "department": "HSE",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "April",
+      "row": 18,
+      "result": "imported",
+      "date": "2026-06-04",
+      "department": "HSE",
+      "manhours": 1.67
+    },
+    {
+      "sheet": "April",
+      "row": 19,
+      "result": "imported",
+      "date": "2026-06-04",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "April",
+      "row": 20,
+      "result": "imported",
+      "date": "2026-06-04",
+      "department": "HSE",
+      "manhours": 5.83
+    },
+    {
+      "sheet": "April",
+      "row": 21,
+      "result": "imported",
+      "date": "2026-07-04",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 22,
+      "result": "imported",
+      "date": "2026-07-04",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 23,
+      "result": "imported",
+      "date": "2026-07-04",
+      "department": "HSE",
+      "manhours": 3.73
+    },
+    {
+      "sheet": "April",
+      "row": 24,
+      "result": "imported",
+      "date": "2026-07-04",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "April",
+      "row": 25,
+      "result": "imported",
+      "date": "2026-07-04",
+      "department": "HSE",
+      "manhours": 1.67
+    },
+    {
+      "sheet": "April",
+      "row": 26,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "HSE",
+      "manhours": 3
+    },
+    {
+      "sheet": "April",
+      "row": 27,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "HSE",
+      "manhours": 2
+    },
+    {
+      "sheet": "April",
+      "row": 28,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "HSE",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "April",
+      "row": 29,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "HSE",
+      "manhours": 11
+    },
+    {
+      "sheet": "April",
+      "row": 30,
+      "result": "imported",
+      "date": "2026-09-04",
+      "department": "HSE",
+      "manhours": 17
+    },
+    {
+      "sheet": "April",
+      "row": 31,
+      "result": "imported",
+      "date": "2026-09-04",
+      "department": "HSE",
+      "manhours": 11.33
+    },
+    {
+      "sheet": "April",
+      "row": 32,
+      "result": "imported",
+      "date": "2026-09-04",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "April",
+      "row": 33,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "April",
+      "row": 34,
+      "result": "imported",
+      "date": "2026-11-04",
+      "department": "HSE",
+      "manhours": 21.67
+    },
+    {
+      "sheet": "April",
+      "row": 35,
+      "result": "imported",
+      "date": "2026-11-04",
+      "department": "HSE",
+      "manhours": 21.67
+    },
+    {
+      "sheet": "April",
+      "row": 36,
+      "result": "imported",
+      "date": "2026-12-04",
+      "department": "HSE",
+      "manhours": 8.17
+    },
+    {
+      "sheet": "April",
+      "row": 37,
+      "result": "imported",
+      "date": "2026-04-13",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "April",
+      "row": 38,
+      "result": "imported",
+      "date": "2026-04-20",
+      "department": "HSE",
+      "manhours": 23.25
+    },
+    {
+      "sheet": "April",
+      "row": 39,
+      "result": "imported",
+      "date": "2026-04-22",
+      "department": "HSE",
+      "manhours": 15
+    },
+    {
+      "sheet": "April",
+      "row": 40,
+      "result": "imported",
+      "date": "2026-04-22",
+      "department": "HSE",
+      "manhours": 15
+    },
+    {
+      "sheet": "April",
+      "row": 41,
+      "result": "imported",
+      "date": "2026-04-23",
+      "department": "HSE",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "April",
+      "row": 42,
+      "result": "imported",
+      "date": "2026-04-23",
+      "department": "HSE",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "April",
+      "row": 43,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "HSE",
+      "manhours": 12
+    },
+    {
+      "sheet": "April",
+      "row": 44,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "HSE",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "April",
+      "row": 45,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "HSE",
+      "manhours": 5
+    },
+    {
+      "sheet": "April",
+      "row": 46,
+      "result": "imported",
+      "date": "2026-04-28",
+      "department": "HSE",
+      "manhours": 26.67
+    },
+    {
+      "sheet": "April",
+      "row": 47,
+      "result": "imported",
+      "date": "2026-04-28",
+      "department": "HSE",
+      "manhours": 26.67
+    },
+    {
+      "sheet": "April",
+      "row": 48,
+      "result": "imported",
+      "date": "2026-04-29",
+      "department": "HSE",
+      "manhours": 16
+    },
+    {
+      "sheet": "April",
+      "row": 49,
+      "result": "imported",
+      "date": "2026-04-29",
+      "department": "HSE",
+      "manhours": 16
+    },
+    {
+      "sheet": "April",
+      "row": 50,
+      "result": "imported",
+      "date": "2026-04-29",
+      "department": "HSE",
+      "manhours": 0.67
+    },
+    {
+      "sheet": "April",
+      "row": 54,
+      "result": "imported",
+      "date": "2026-03-04",
+      "department": "Stores",
+      "manhours": 12.5
+    },
+    {
+      "sheet": "April",
+      "row": 55,
+      "result": "imported",
+      "date": "2026-03-04",
+      "department": "Stores",
+      "manhours": 8.33
+    },
+    {
+      "sheet": "April",
+      "row": 56,
+      "result": "imported",
+      "date": "2026-03-04",
+      "department": "Stores",
+      "manhours": 6
+    },
+    {
+      "sheet": "April",
+      "row": 57,
+      "result": "imported",
+      "date": "2026-03-04",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "April",
+      "row": 58,
+      "result": "imported",
+      "date": "2026-03-04",
+      "department": "Stores",
+      "manhours": 4.33
+    },
+    {
+      "sheet": "April",
+      "row": 59,
+      "result": "imported",
+      "date": "2026-03-04",
+      "department": "Stores",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 60,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "April",
+      "row": 61,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "Stores",
+      "manhours": 13.5
+    },
+    {
+      "sheet": "April",
+      "row": 62,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "April",
+      "row": 63,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "April",
+      "row": 64,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "Stores",
+      "manhours": 12
+    },
+    {
+      "sheet": "April",
+      "row": 65,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "Stores",
+      "manhours": 6
+    },
+    {
+      "sheet": "April",
+      "row": 66,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "Stores",
+      "manhours": 5.67
+    },
+    {
+      "sheet": "April",
+      "row": 67,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "April",
+      "row": 68,
+      "result": "imported",
+      "date": "2026-04-15",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "April",
+      "row": 69,
+      "result": "imported",
+      "date": "2026-04-17",
+      "department": "Stores",
+      "manhours": 12.5
+    },
+    {
+      "sheet": "April",
+      "row": 70,
+      "result": "imported",
+      "date": "2026-04-17",
+      "department": "Stores",
+      "manhours": 7.33
+    },
+    {
+      "sheet": "April",
+      "row": 71,
+      "result": "imported",
+      "date": "2026-04-17",
+      "department": "Stores",
+      "manhours": 12
+    },
+    {
+      "sheet": "April",
+      "row": 72,
+      "result": "imported",
+      "date": "2026-04-17",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "April",
+      "row": 73,
+      "result": "imported",
+      "date": "2026-04-17",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "April",
+      "row": 74,
+      "result": "imported",
+      "date": "2026-04-17",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "April",
+      "row": 75,
+      "result": "imported",
+      "date": "2026-04-22",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "April",
+      "row": 76,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "Stores",
+      "manhours": 11
+    },
+    {
+      "sheet": "April",
+      "row": 77,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "April",
+      "row": 78,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "April",
+      "row": 79,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "Stores",
+      "manhours": 6.33
+    },
+    {
+      "sheet": "April",
+      "row": 80,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "Stores",
+      "manhours": 14
+    },
+    {
+      "sheet": "April",
+      "row": 81,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "Stores",
+      "manhours": 12.5
+    },
+    {
+      "sheet": "April",
+      "row": 88,
+      "result": "imported",
+      "date": "2026-02-04",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 89,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 90,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 91,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 92,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 93,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 94,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 95,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 96,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 97,
+      "result": "imported",
+      "date": "2026-09-04",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 98,
+      "result": "imported",
+      "date": "2026-10-04",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 99,
+      "result": "imported",
+      "date": "2026-04-15",
+      "department": "PRD",
+      "manhours": 5.5
+    },
+    {
+      "sheet": "April",
+      "row": 100,
+      "result": "imported",
+      "date": "2026-04-15",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 101,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 102,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 103,
+      "result": "imported",
+      "date": "2026-04-18",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 104,
+      "result": "imported",
+      "date": "2026-04-20",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 105,
+      "result": "imported",
+      "date": "2026-04-22",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 106,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 107,
+      "result": "imported",
+      "date": "2026-04-24",
+      "department": "PRD",
+      "manhours": 2.25
+    },
+    {
+      "sheet": "April",
+      "row": 108,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 5
+    },
+    {
+      "sheet": "April",
+      "row": 109,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 110,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 5.5
+    },
+    {
+      "sheet": "April",
+      "row": 111,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 112,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 113,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 114,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 115,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 116,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 117,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 118,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 119,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 120,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 121,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 122,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 123,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 124,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 125,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 126,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 127,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 128,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 129,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 130,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 131,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 132,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 133,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 134,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 135,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 136,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 137,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 138,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 139,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 140,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 141,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 142,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 143,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 144,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 145,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 146,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 147,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 148,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 149,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 150,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 151,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 152,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 153,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 154,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 155,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 156,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 157,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "April",
+      "row": 158,
+      "result": "imported",
+      "date": "2026-04-27",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "April",
+      "row": 159,
+      "result": "imported",
+      "date": "2026-04-30",
+      "department": "PRD",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "April",
+      "row": 160,
+      "result": "imported",
+      "date": "2026-04-30",
+      "department": "PRD",
+      "manhours": 5
+    },
+    {
+      "sheet": "April",
+      "row": 161,
+      "result": "imported",
+      "date": "2026-04-30",
+      "department": "PRD",
+      "manhours": 5
+    },
+    {
+      "sheet": "April",
+      "row": 162,
+      "result": "imported",
+      "date": "2026-04-30",
+      "department": "PRD",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "April",
+      "row": 166,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "April",
+      "row": 167,
+      "result": "imported",
+      "date": "2026-08-04",
+      "department": "QC/NPD/FS",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "April",
+      "row": 168,
+      "result": "imported",
+      "date": "2026-04-15",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "April",
+      "row": 169,
+      "result": "imported",
+      "date": "2026-04-18",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "April",
+      "row": 170,
+      "result": "imported",
+      "date": "2026-04-18",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "April",
+      "row": 171,
+      "result": "imported",
+      "date": "2026-04-18",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "April",
+      "row": 172,
+      "result": "imported",
+      "date": "2026-04-18",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "April",
+      "row": 173,
+      "result": "imported",
+      "date": "2026-04-18",
+      "department": "QC/NPD/FS",
+      "manhours": 5
+    },
+    {
+      "sheet": "April",
+      "row": 174,
+      "result": "imported",
+      "date": "2026-04-18",
+      "department": "QC/NPD/FS",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "April",
+      "row": 178,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "MAY",
+      "row": 1,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "MAY",
+      "row": 3,
+      "result": "imported",
+      "date": "2026-07-05",
+      "department": "ESD",
+      "manhours": 6.4
+    },
+    {
+      "sheet": "MAY",
+      "row": 6,
+      "result": "imported",
+      "date": "2026-01-05",
+      "department": "HSE",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 7,
+      "result": "imported",
+      "date": "2026-01-05",
+      "department": "HSE",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 8,
+      "result": "imported",
+      "date": "2026-01-05",
+      "department": "HSE",
+      "manhours": 14
+    },
+    {
+      "sheet": "MAY",
+      "row": 9,
+      "result": "imported",
+      "date": "2026-01-05",
+      "department": "HSE",
+      "manhours": 1.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 10,
+      "result": "imported",
+      "date": "2026-05-05",
+      "department": "HSE",
+      "manhours": 8.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 11,
+      "result": "imported",
+      "date": "2026-05-05",
+      "department": "HSE",
+      "manhours": 6
+    },
+    {
+      "sheet": "MAY",
+      "row": 12,
+      "result": "imported",
+      "date": "2026-07-05",
+      "department": "HSE",
+      "manhours": 6.4
+    },
+    {
+      "sheet": "MAY",
+      "row": 13,
+      "result": "imported",
+      "date": "2026-08-05",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "MAY",
+      "row": 14,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "HSE",
+      "manhours": 13.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 15,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "HSE",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 16,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "HSE",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 17,
+      "result": "imported",
+      "date": "2026-05-13",
+      "department": "HSE",
+      "manhours": 6
+    },
+    {
+      "sheet": "MAY",
+      "row": 18,
+      "result": "imported",
+      "date": "2026-05-15",
+      "department": "HSE",
+      "manhours": 6
+    },
+    {
+      "sheet": "MAY",
+      "row": 19,
+      "result": "imported",
+      "date": "2026-05-15",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "MAY",
+      "row": 20,
+      "result": "imported",
+      "date": "2026-05-16",
+      "department": "HSE",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 21,
+      "result": "imported",
+      "date": "2026-05-16",
+      "department": "HSE",
+      "manhours": 9.75
+    },
+    {
+      "sheet": "MAY",
+      "row": 22,
+      "result": "imported",
+      "date": "2026-05-17",
+      "department": "HSE",
+      "manhours": 17
+    },
+    {
+      "sheet": "MAY",
+      "row": 23,
+      "result": "imported",
+      "date": "2026-05-17",
+      "department": "HSE",
+      "manhours": 1.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 24,
+      "result": "imported",
+      "date": "2026-05-17",
+      "department": "HSE",
+      "manhours": 19
+    },
+    {
+      "sheet": "MAY",
+      "row": 25,
+      "result": "imported",
+      "date": "2026-05-17",
+      "department": "HSE",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 26,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 27,
+      "result": "imported",
+      "date": "2026-05-18",
+      "department": "HSE",
+      "manhours": 2.25
+    },
+    {
+      "sheet": "MAY",
+      "row": 28,
+      "result": "imported",
+      "date": "2026-05-18",
+      "department": "HSE",
+      "manhours": 1.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 29,
+      "result": "imported",
+      "date": "2026-05-18",
+      "department": "HSE",
+      "manhours": 11
+    },
+    {
+      "sheet": "MAY",
+      "row": 30,
+      "result": "imported",
+      "date": "2026-05-18",
+      "department": "HSE",
+      "manhours": 11
+    },
+    {
+      "sheet": "MAY",
+      "row": 31,
+      "result": "imported",
+      "date": "2026-05-19",
+      "department": "HSE",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 32,
+      "result": "imported",
+      "date": "2026-05-19",
+      "department": "HSE",
+      "manhours": 1.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 33,
+      "result": "imported",
+      "date": "2026-05-19",
+      "department": "HSE",
+      "manhours": 21
+    },
+    {
+      "sheet": "MAY",
+      "row": 34,
+      "result": "imported",
+      "date": "2026-05-19",
+      "department": "HSE",
+      "manhours": 21
+    },
+    {
+      "sheet": "MAY",
+      "row": 35,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "HSE",
+      "manhours": 8.25
+    },
+    {
+      "sheet": "MAY",
+      "row": 36,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "HSE",
+      "manhours": 45
+    },
+    {
+      "sheet": "MAY",
+      "row": 37,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "HSE",
+      "manhours": 45
+    },
+    {
+      "sheet": "MAY",
+      "row": 38,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "HSE",
+      "manhours": 45
+    },
+    {
+      "sheet": "MAY",
+      "row": 39,
+      "result": "imported",
+      "date": "2026-05-23",
+      "department": "HSE",
+      "manhours": 51
+    },
+    {
+      "sheet": "MAY",
+      "row": 40,
+      "result": "imported",
+      "date": "2026-05-23",
+      "department": "HSE",
+      "manhours": 51
+    },
+    {
+      "sheet": "MAY",
+      "row": 41,
+      "result": "imported",
+      "date": "2026-05-23",
+      "department": "HSE",
+      "manhours": 6
+    },
+    {
+      "sheet": "MAY",
+      "row": 42,
+      "result": "imported",
+      "date": "2026-05-26",
+      "department": "HSE",
+      "manhours": 9
+    },
+    {
+      "sheet": "MAY",
+      "row": 45,
+      "result": "imported",
+      "date": "2026-02-05",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 46,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 47,
+      "result": "imported",
+      "date": "2026-05-05",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 48,
+      "result": "imported",
+      "date": "2026-06-05",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 49,
+      "result": "imported",
+      "date": "2026-08-05",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 50,
+      "result": "imported",
+      "date": "2026-08-05",
+      "department": "Stores",
+      "manhours": 12.92
+    },
+    {
+      "sheet": "MAY",
+      "row": 51,
+      "result": "imported",
+      "date": "2026-08-05",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 52,
+      "result": "imported",
+      "date": "2026-08-05",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 53,
+      "result": "imported",
+      "date": "2026-08-05",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 54,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 55,
+      "result": "imported",
+      "date": "2026-09-05",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "MAY",
+      "row": 56,
+      "result": "imported",
+      "date": "2026-09-05",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 57,
+      "result": "imported",
+      "date": "2026-10-05",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 58,
+      "result": "imported",
+      "date": "2026-05-13",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 59,
+      "result": "imported",
+      "date": "2026-05-13",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 60,
+      "result": "imported",
+      "date": "2026-05-14",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 61,
+      "result": "imported",
+      "date": "2026-05-15",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 62,
+      "result": "imported",
+      "date": "2026-05-15",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 63,
+      "result": "imported",
+      "date": "2026-05-15",
+      "department": "Stores",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 64,
+      "result": "imported",
+      "date": "2026-05-15",
+      "department": "Stores",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 65,
+      "result": "imported",
+      "date": "2026-05-15",
+      "department": "Stores",
+      "manhours": 11
+    },
+    {
+      "sheet": "MAY",
+      "row": 66,
+      "result": "imported",
+      "date": "2026-05-15",
+      "department": "Stores",
+      "manhours": 13
+    },
+    {
+      "sheet": "MAY",
+      "row": 67,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "MAY",
+      "row": 68,
+      "result": "imported",
+      "date": "2026-05-18",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 69,
+      "result": "imported",
+      "date": "2026-05-18",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 70,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 71,
+      "result": "imported",
+      "date": "2026-05-22",
+      "department": "Stores",
+      "manhours": 12.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 72,
+      "result": "imported",
+      "date": "2026-05-22",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 73,
+      "result": "imported",
+      "date": "2026-05-22",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 74,
+      "result": "imported",
+      "date": "2025-05-22",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 75,
+      "result": "imported",
+      "date": "2026-05-22",
+      "department": "Stores",
+      "manhours": 9.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 76,
+      "result": "imported",
+      "date": "2026-05-22",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "MAY",
+      "row": 77,
+      "result": "imported",
+      "date": "2026-05-22",
+      "department": "Stores",
+      "manhours": 12.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 78,
+      "result": "imported",
+      "date": "2026-05-23",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 79,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "MAY",
+      "row": 86,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 87,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 88,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 89,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "PRD",
+      "manhours": 5.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 90,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 91,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 92,
+      "result": "imported",
+      "date": "2026-05-05",
+      "department": "PRD",
+      "manhours": 20
+    },
+    {
+      "sheet": "MAY",
+      "row": 93,
+      "result": "imported",
+      "date": "2026-05-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 94,
+      "result": "imported",
+      "date": "2026-05-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 95,
+      "result": "imported",
+      "date": "2026-06-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 96,
+      "result": "imported",
+      "date": "2026-06-05",
+      "department": "PRD",
+      "manhours": 20
+    },
+    {
+      "sheet": "MAY",
+      "row": 97,
+      "result": "imported",
+      "date": "2026-06-05",
+      "department": "PRD",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 98,
+      "result": "imported",
+      "date": "2026-06-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 99,
+      "result": "imported",
+      "date": "2026-06-05",
+      "department": "PRD",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 100,
+      "result": "imported",
+      "date": "2026-07-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 101,
+      "result": "imported",
+      "date": "2026-07-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 102,
+      "result": "imported",
+      "date": "2026-07-05",
+      "department": "PRD",
+      "manhours": 5.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 103,
+      "result": "imported",
+      "date": "2026-08-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 104,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 105,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 106,
+      "result": "imported",
+      "date": "2026-09-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 107,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 108,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "PRD",
+      "manhours": 7
+    },
+    {
+      "sheet": "MAY",
+      "row": 109,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 110,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 111,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 112,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 113,
+      "result": "imported",
+      "date": "2026-12-05",
+      "department": "PRD",
+      "manhours": 7
+    },
+    {
+      "sheet": "MAY",
+      "row": 114,
+      "result": "imported",
+      "date": "2026-05-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 115,
+      "result": "imported",
+      "date": "2026-05-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 116,
+      "result": "imported",
+      "date": "2026-05-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 117,
+      "result": "imported",
+      "date": "2026-05-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 118,
+      "result": "imported",
+      "date": "2026-05-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 119,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 120,
+      "result": "imported",
+      "date": "2026-05-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 121,
+      "result": "imported",
+      "date": "2026-05-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 122,
+      "result": "imported",
+      "date": "2026-05-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 123,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 124,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 125,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 126,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 127,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 7
+    },
+    {
+      "sheet": "MAY",
+      "row": 128,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 129,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 130,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 131,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 132,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 133,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 134,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 135,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 136,
+      "result": "imported",
+      "date": "2026-05-21",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 137,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 138,
+      "result": "imported",
+      "date": "2026-05-23",
+      "department": "PRD",
+      "manhours": 6.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 139,
+      "result": "imported",
+      "date": "2026-05-23",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 140,
+      "result": "imported",
+      "date": "2026-05-23",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "MAY",
+      "row": 141,
+      "result": "imported",
+      "date": "2026-05-23",
+      "department": "PRD",
+      "manhours": 8.5
+    },
+    {
+      "sheet": "MAY",
+      "row": 145,
+      "result": "imported",
+      "date": "2026-02-05",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 146,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 147,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 148,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 149,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 150,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 151,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 152,
+      "result": "imported",
+      "date": "2026-04-05",
+      "department": "QC",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 153,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "MAY",
+      "row": 154,
+      "result": "imported",
+      "date": "2026-05-05",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 155,
+      "result": "imported",
+      "date": "2026-05-14",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 156,
+      "result": "imported",
+      "date": "2026-05-18",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 157,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 158,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 159,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "QC",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 160,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 161,
+      "result": "imported",
+      "date": "2026-05-20",
+      "department": "QC",
+      "manhours": 3.33
+    },
+    {
+      "sheet": "MAY",
+      "row": 162,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 163,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 164,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 165,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 166,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "MAY",
+      "row": 167,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 168,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 169,
+      "result": "imported",
+      "date": "2026-05-25",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "MAY",
+      "row": 172,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "June",
+      "row": 1,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "June",
+      "row": 4,
+      "result": "imported",
+      "date": "2026-06-28",
+      "department": "ESD",
+      "manhours": 14
+    },
+    {
+      "sheet": "June",
+      "row": 5,
+      "result": "imported",
+      "date": "2026-06-29",
+      "department": "ESD",
+      "manhours": 22
+    },
+    {
+      "sheet": "June",
+      "row": 6,
+      "result": "imported",
+      "date": "2026-04-06",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "June",
+      "row": 7,
+      "result": "imported",
+      "date": "2026-04-06",
+      "department": "HSE",
+      "manhours": 1
+    },
+    {
+      "sheet": "June",
+      "row": 8,
+      "result": "imported",
+      "date": "2026-07-06",
+      "department": "HSE",
+      "manhours": 8.25
+    },
+    {
+      "sheet": "June",
+      "row": 9,
+      "result": "imported",
+      "date": "2026-07-06",
+      "department": "HSE",
+      "manhours": 10.5
+    },
+    {
+      "sheet": "June",
+      "row": 10,
+      "result": "imported",
+      "date": "2026-07-06",
+      "department": "HSE",
+      "manhours": 10.5
+    },
+    {
+      "sheet": "June",
+      "row": 11,
+      "result": "imported",
+      "date": "2026-06-06",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "June",
+      "row": 12,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 13,
+      "result": "imported",
+      "date": "2026-12-06",
+      "department": "HSE",
+      "manhours": 9.5
+    },
+    {
+      "sheet": "June",
+      "row": 14,
+      "result": "imported",
+      "date": "2026-06-13",
+      "department": "HSE",
+      "manhours": 1.5
+    },
+    {
+      "sheet": "June",
+      "row": 15,
+      "result": "imported",
+      "date": "2026-06-13",
+      "department": "HSE",
+      "manhours": 7
+    },
+    {
+      "sheet": "June",
+      "row": 16,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "HSE",
+      "manhours": 0.75
+    },
+    {
+      "sheet": "June",
+      "row": 17,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "HSE",
+      "manhours": 11
+    },
+    {
+      "sheet": "June",
+      "row": 18,
+      "result": "imported",
+      "date": "2026-06-15",
+      "department": "HSE",
+      "manhours": 0.75
+    },
+    {
+      "sheet": "June",
+      "row": 19,
+      "result": "imported",
+      "date": "2026-06-15",
+      "department": "HSE",
+      "manhours": 8.5
+    },
+    {
+      "sheet": "June",
+      "row": 20,
+      "result": "imported",
+      "date": "2026-06-16",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "June",
+      "row": 21,
+      "result": "imported",
+      "date": "2026-06-16",
+      "department": "HSE",
+      "manhours": 11.5
+    },
+    {
+      "sheet": "June",
+      "row": 22,
+      "result": "imported",
+      "date": "2026-06-16",
+      "department": "HSE",
+      "manhours": 11
+    },
+    {
+      "sheet": "June",
+      "row": 23,
+      "result": "imported",
+      "date": "2026-06-17",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "June",
+      "row": 24,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "HSE",
+      "manhours": 19
+    },
+    {
+      "sheet": "June",
+      "row": 25,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "HSE",
+      "manhours": 8.25
+    },
+    {
+      "sheet": "June",
+      "row": 26,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "June",
+      "row": 27,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "June",
+      "row": 28,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "HSE",
+      "manhours": 4.67
+    },
+    {
+      "sheet": "June",
+      "row": 29,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "HSE",
+      "manhours": 6.13
+    },
+    {
+      "sheet": "June",
+      "row": 30,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "HSE",
+      "manhours": 6.13
+    },
+    {
+      "sheet": "June",
+      "row": 31,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "HSE",
+      "manhours": 19
+    },
+    {
+      "sheet": "June",
+      "row": 32,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "HSE",
+      "manhours": 1
+    },
+    {
+      "sheet": "June",
+      "row": 33,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "HSE",
+      "manhours": 4
+    },
+    {
+      "sheet": "June",
+      "row": 34,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "HSE",
+      "manhours": 11.25
+    },
+    {
+      "sheet": "June",
+      "row": 35,
+      "result": "imported",
+      "date": "2026-06-20",
+      "department": "HSE",
+      "manhours": 0.75
+    },
+    {
+      "sheet": "June",
+      "row": 36,
+      "result": "imported",
+      "date": "2026-06-20",
+      "department": "HSE",
+      "manhours": 1.75
+    },
+    {
+      "sheet": "June",
+      "row": 37,
+      "result": "imported",
+      "date": "2026-06-20",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 38,
+      "result": "imported",
+      "date": "2026-06-21",
+      "department": "HSE",
+      "manhours": 1.5
+    },
+    {
+      "sheet": "June",
+      "row": 39,
+      "result": "imported",
+      "date": "2026-06-20",
+      "department": "HSE",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 40,
+      "result": "imported",
+      "date": "2026-06-26",
+      "department": "HSE",
+      "manhours": 2.5
+    },
+    {
+      "sheet": "June",
+      "row": 41,
+      "result": "imported",
+      "date": "2026-06-27",
+      "department": "HSE",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "June",
+      "row": 42,
+      "result": "imported",
+      "date": "2026-06-27",
+      "department": "HSE",
+      "manhours": 6.75
+    },
+    {
+      "sheet": "June",
+      "row": 43,
+      "result": "imported",
+      "date": "2026-06-27",
+      "department": "HSE",
+      "manhours": 4
+    },
+    {
+      "sheet": "June",
+      "row": 44,
+      "result": "imported",
+      "date": "2026-06-28",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "June",
+      "row": 45,
+      "result": "imported",
+      "date": "2026-06-29",
+      "department": "HSE",
+      "manhours": 1.25
+    },
+    {
+      "sheet": "June",
+      "row": 46,
+      "result": "imported",
+      "date": "2026-06-29",
+      "department": "HSE",
+      "manhours": 0.67
+    },
+    {
+      "sheet": "June",
+      "row": 47,
+      "result": "imported",
+      "date": "2026-01-06",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "June",
+      "row": 48,
+      "result": "imported",
+      "date": "2026-03-06",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "June",
+      "row": 49,
+      "result": "imported",
+      "date": "2026-05-06",
+      "department": "Stores",
+      "manhours": 8
+    },
+    {
+      "sheet": "June",
+      "row": 50,
+      "result": "imported",
+      "date": "2026-05-06",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "June",
+      "row": 51,
+      "result": "imported",
+      "date": "2026-05-06",
+      "department": "Stores",
+      "manhours": 8.33
+    },
+    {
+      "sheet": "June",
+      "row": 52,
+      "result": "imported",
+      "date": "2026-05-06",
+      "department": "Stores",
+      "manhours": 6
+    },
+    {
+      "sheet": "June",
+      "row": 53,
+      "result": "imported",
+      "date": "2026-05-06",
+      "department": "Stores",
+      "manhours": 11
+    },
+    {
+      "sheet": "June",
+      "row": 54,
+      "result": "imported",
+      "date": "2026-05-06",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "June",
+      "row": 55,
+      "result": "imported",
+      "date": "2026-08-06",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "June",
+      "row": 56,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "June",
+      "row": 57,
+      "result": "imported",
+      "date": "2026-10-06",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "June",
+      "row": 58,
+      "result": "imported",
+      "date": "2026-12-06",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "June",
+      "row": 59,
+      "result": "imported",
+      "date": "2026-12-06",
+      "department": "Stores",
+      "manhours": 4.33
+    },
+    {
+      "sheet": "June",
+      "row": 60,
+      "result": "imported",
+      "date": "2026-12-06",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "June",
+      "row": 61,
+      "result": "imported",
+      "date": "2026-12-06",
+      "department": "Stores",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "June",
+      "row": 62,
+      "result": "imported",
+      "date": "2026-06-15",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "June",
+      "row": 63,
+      "result": "imported",
+      "date": "2026-06-17",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "June",
+      "row": 64,
+      "result": "imported",
+      "date": "2026-06-17",
+      "department": "Stores",
+      "manhours": 3
+    },
+    {
+      "sheet": "June",
+      "row": 65,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "Stores",
+      "manhours": 11
+    },
+    {
+      "sheet": "June",
+      "row": 66,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "Stores",
+      "manhours": 13.5
+    },
+    {
+      "sheet": "June",
+      "row": 67,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "Stores",
+      "manhours": 6
+    },
+    {
+      "sheet": "June",
+      "row": 68,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "Stores",
+      "manhours": 9
+    },
+    {
+      "sheet": "June",
+      "row": 69,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "Stores",
+      "manhours": 2.67
+    },
+    {
+      "sheet": "June",
+      "row": 70,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "Stores",
+      "manhours": 5.33
+    },
+    {
+      "sheet": "June",
+      "row": 71,
+      "result": "imported",
+      "date": "2026-06-23",
+      "department": "Stores",
+      "manhours": 15
+    },
+    {
+      "sheet": "June",
+      "row": 85,
+      "result": "imported",
+      "date": "2026-06-13",
+      "department": "Project",
+      "manhours": 8
+    },
+    {
+      "sheet": "June",
+      "row": 86,
+      "result": "duplicate"
+    },
+    {
+      "sheet": "June",
+      "row": 92,
+      "result": "imported",
+      "date": "2026-01-06",
+      "department": "PRD",
+      "manhours": 30
+    },
+    {
+      "sheet": "June",
+      "row": 93,
+      "result": "imported",
+      "date": "2026-03-06",
+      "department": "PRD",
+      "manhours": 30
+    },
+    {
+      "sheet": "June",
+      "row": 94,
+      "result": "imported",
+      "date": "2026-03-06",
+      "department": "PRD",
+      "manhours": 30
+    },
+    {
+      "sheet": "June",
+      "row": 95,
+      "result": "imported",
+      "date": "2026-03-06",
+      "department": "PRD",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "June",
+      "row": 96,
+      "result": "imported",
+      "date": "2026-03-06",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 97,
+      "result": "imported",
+      "date": "2026-03-06",
+      "department": "PRD",
+      "manhours": 15
+    },
+    {
+      "sheet": "June",
+      "row": 98,
+      "result": "imported",
+      "date": "2026-03-06",
+      "department": "PRD",
+      "manhours": 15
+    },
+    {
+      "sheet": "June",
+      "row": 99,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "June",
+      "row": 100,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "June",
+      "row": 101,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "June",
+      "row": 102,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "PRD",
+      "manhours": 45
+    },
+    {
+      "sheet": "June",
+      "row": 103,
+      "result": "imported",
+      "date": "2026-10-06",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 104,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 105,
+      "result": "imported",
+      "date": "2026-06-13",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 106,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 107,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "June",
+      "row": 108,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 109,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 15
+    },
+    {
+      "sheet": "June",
+      "row": 110,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 15
+    },
+    {
+      "sheet": "June",
+      "row": 111,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "June",
+      "row": 112,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "June",
+      "row": 113,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "June",
+      "row": 114,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 45
+    },
+    {
+      "sheet": "June",
+      "row": 115,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 116,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 117,
+      "result": "imported",
+      "date": "2026-06-14",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 118,
+      "result": "imported",
+      "date": "2026-06-15",
+      "department": "PRD",
+      "manhours": 8.5
+    },
+    {
+      "sheet": "June",
+      "row": 119,
+      "result": "imported",
+      "date": "2026-06-16",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 120,
+      "result": "imported",
+      "date": "2026-06-18",
+      "department": "PRD",
+      "manhours": 3.5
+    },
+    {
+      "sheet": "June",
+      "row": 121,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "PRD",
+      "manhours": 5.5
+    },
+    {
+      "sheet": "June",
+      "row": 122,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 123,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "PRD",
+      "manhours": 9
+    },
+    {
+      "sheet": "June",
+      "row": 124,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 125,
+      "result": "imported",
+      "date": "2026-06-20",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 126,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 127,
+      "result": "imported",
+      "date": "2026-06-19",
+      "department": "PRD",
+      "manhours": 7.5
+    },
+    {
+      "sheet": "June",
+      "row": 128,
+      "result": "imported",
+      "date": "2026-06-29",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 129,
+      "result": "imported",
+      "date": "2026-06-30",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 130,
+      "result": "imported",
+      "date": "2026-06-30",
+      "department": "PRD",
+      "manhours": 10
+    },
+    {
+      "sheet": "June",
+      "row": 154,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "June",
+      "row": 155,
+      "result": "imported",
+      "date": "2026-09-06",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "June",
+      "row": 156,
+      "result": "imported",
+      "date": "2026-10-06",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "June",
+      "row": 157,
+      "result": "imported",
+      "date": "2026-06-27",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "June",
+      "row": 158,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    },
+    {
+      "sheet": "June",
+      "row": 159,
+      "result": "imported",
+      "date": "2026-06-27",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "June",
+      "row": 160,
+      "result": "imported",
+      "date": "2026-06-27",
+      "department": "QC",
+      "manhours": 5
+    },
+    {
+      "sheet": "June",
+      "row": 161,
+      "result": "imported",
+      "date": "2026-06-27",
+      "department": "QC",
+      "manhours": 6.67
+    },
+    {
+      "sheet": "June",
+      "row": 176,
+      "result": "failed",
+      "reason": "Missing or invalid date, department, trainer, topic, participants, or duration"
+    }
+  ]
+}
