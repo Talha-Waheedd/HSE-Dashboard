@@ -10,7 +10,7 @@ export const useModuleData = (schemaId: string) => {
     if (!schemaId) return;
     setLoading(true);
     try {
-      const response = await moduleService.getAll(schemaId, { page: 1, limit: 1000, ...(params as Record<string, unknown>) });
+      const response = await moduleService.getAll(schemaId, { page: 1, limit: schemaId === 'hazard-reporting' ? 10000 : 1000, ...(params as Record<string, unknown>) });
       if (response.success) {
         setData(Array.isArray(response.data) ? response.data : []);
         setError(null);

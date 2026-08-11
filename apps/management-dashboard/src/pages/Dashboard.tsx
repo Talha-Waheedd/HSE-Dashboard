@@ -167,7 +167,7 @@ export const Dashboard = () => {
       setDashboardStats(null);
       try {
         const safeModuleRequest = (schemaId: string) =>
-          moduleService.getAll(schemaId, { page: 1, limit: 1000, ...filters }).catch((error) => {
+          moduleService.getAll(schemaId, { page: 1, limit: schemaId === 'hazard-reporting' ? 10000 : 1000, ...filters }).catch((error) => {
             console.error(`Dashboard ${schemaId} request failed:`, error);
             return { data: [], meta: { total: 0 } };
           });

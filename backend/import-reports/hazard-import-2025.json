@@ -1,0 +1,2607 @@
+{
+  "sourceRows": 4011,
+  "successful": 0,
+  "skipped": 0,
+  "duplicates": 73,
+  "alreadyImported": 3887,
+  "failed": 51,
+  "warnings": 3847,
+  "issues": [
+    {
+      "sourceRow": 273,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 273,
+        "sNo": "270",
+        "date": null,
+        "month": "February",
+        "originatedDepartment": "HSE",
+        "originatorName": "Imran Gul",
+        "location": "Line 10 Ishida Hall",
+        "description": "Cartons trolley wheel is damaged causing the trolley to tilt to one side.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 274,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 274,
+        "sNo": "271",
+        "date": null,
+        "month": "February",
+        "originatedDepartment": "HSE",
+        "originatorName": "Imran Gul",
+        "location": "Line 10 mixing",
+        "description": "Poorly insulated wires of weighing machine poses risk of electrocution.",
+        "responsibleDepartment": "PRD",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 276,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 276,
+        "sNo": "273",
+        "date": "1015-02-03",
+        "month": "February",
+        "originatedDepartment": "HSE",
+        "originatorName": "Imran Gul",
+        "location": "Line 8 C Packing",
+        "description": "Chain cover of packing machine is missing.",
+        "responsibleDepartment": "PRD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 305,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 305,
+        "sNo": "302",
+        "date": "1015-02-12",
+        "month": "February",
+        "originatedDepartment": "HSE",
+        "originatorName": "Abdullah Ilyas",
+        "location": "Line 01 packing",
+        "description": "Shrink wrap machine limit switch is non-functional, poses a serious safety risk to workers.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 415,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 415,
+        "sNo": "412",
+        "date": null,
+        "month": "February",
+        "originatedDepartment": "HSE",
+        "originatorName": "Safiullah Baloch",
+        "location": "Cake Plant Construction site",
+        "description": "Side railings are missing at open edges, railings must be installed to avoid any falling hazard.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 705,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 705,
+        "sNo": "702",
+        "date": null,
+        "month": "March",
+        "originatedDepartment": "HSE",
+        "originatorName": "Abdullah",
+        "location": "Line 08 Oven",
+        "description": "IGF cover is missing, leaving the electrical circuitry exposed with hanging wires. Installation of cover needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 722,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 722,
+        "sNo": "719",
+        "date": "2024-03-24",
+        "month": "March",
+        "originatedDepartment": "HSE",
+        "originatorName": "Mubashir mustafa",
+        "location": "Line 07 Packing",
+        "description": "SGN packing machine limiut switch observed bypassed, poses high risk of severe injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 842,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 842,
+        "sNo": "839",
+        "date": null,
+        "month": "April",
+        "originatedDepartment": "HSE",
+        "originatorName": "Imran",
+        "location": "Line 10",
+        "description": "Uninsulated electrical cable are strewn on the floor, poses electrocution risk.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 957,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 957,
+        "sNo": "954",
+        "date": null,
+        "month": "May",
+        "originatedDepartment": "HSE",
+        "originatorName": "Safiullah",
+        "location": "Line 08 Oven",
+        "description": "Bolts are missing preventing cover from being securely installedin its position, exposing moving parts.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 979,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 979,
+        "sNo": "976",
+        "date": null,
+        "month": "May",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "OLD LPG Construction Site",
+        "description": "Workers working at height without wearing proper safety hareness and there is no any proper platform, poses risk of falling from height.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1047,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 1047,
+        "sNo": "1044",
+        "date": null,
+        "month": "May",
+        "originatedDepartment": "Stores",
+        "originatorName": "M Aarif",
+        "location": "Warehouse",
+        "description": "Warehouse floor is damagad, crerating slip/trip hazard and cause injury.",
+        "responsibleDepartment": "ADM",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1294,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 1294,
+        "sNo": "1291",
+        "date": null,
+        "month": "July",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "M. Azeem",
+        "location": "L-1 cutting",
+        "description": "Tray under dough hopper is damaged the sharp edeges can cause injury.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1394,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 1394,
+        "sNo": "1391",
+        "date": null,
+        "month": "July",
+        "originatedDepartment": "PRD",
+        "originatorName": "Hamza Ashraf",
+        "location": "L-4 Oven",
+        "description": "Damaged ucrete floor causing trip/fall hazard. Repairance needed.",
+        "responsibleDepartment": "ADM",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1395,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 1395,
+        "sNo": "1392",
+        "date": null,
+        "month": "July",
+        "originatedDepartment": "PRD",
+        "originatorName": "Hamza Ashraf",
+        "location": "oven area",
+        "description": "Oven helpers observed doing cleaning of hot wire mesh job without heat resistant gloves.",
+        "responsibleDepartment": "PRD",
+        "severity": "high",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1398,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 1398,
+        "sNo": "1395",
+        "date": null,
+        "month": "July",
+        "originatedDepartment": "PRD",
+        "originatorName": "Hamza Ashraf",
+        "location": "Oven area",
+        "description": "High Noise above 85 DB observed in oven area. Engineering controls needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1399,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 1399,
+        "sNo": "1396",
+        "date": null,
+        "month": "July",
+        "originatedDepartment": "PRD",
+        "originatorName": "Hamza Ashraf",
+        "location": "L-10 cutting",
+        "description": "Live electrical wires exposed in a open electrical panel, creating a electroccution hazard.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1690,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 1690,
+        "sNo": "1687",
+        "date": null,
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Safeeullah",
+        "location": "Line 2B Packing",
+        "description": "The QR code machine’s safety guard is damage and rotating components exposed, creating a significant pinch hazard that could result in serious hand or finger injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "Machine Guarding Projects",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3446,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3446,
+        "sNo": "3443",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Danish",
+        "location": "L-5 Pack",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3463,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3463,
+        "sNo": "3460",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Syed Shakir Shah",
+        "location": "L-7 Pack",
+        "description": "Missing cover/guard and exposing the moving parts creating risk of hand intervention and savere injury.Proper cover /guards needed to ensure safety.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3464,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3464,
+        "sNo": "3461",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Uzair Shaikh",
+        "location": "L-6 Pack",
+        "description": "The electrical wire are exposed at the electrical board located on mold motor gear box that can cause electrical shock. Proper securing of wiring is needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3465,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3465,
+        "sNo": "3462",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Saqlain Hyder",
+        "location": "L-3 Pack",
+        "description": "Oil leakage observed creating a risk of machine failure and slipping hazard, immidiate inspection and cleaning of floor is required.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3466,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3466,
+        "sNo": "3463",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Gh Murtaza",
+        "location": "L-9 Pack",
+        "description": "Loose cables/ wires observed laying on the floor creating risk of trip/fall and electric shock hazard. Immidiate securing of weires are needed.",
+        "responsibleDepartment": "PRD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3488,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3488,
+        "sNo": "3485",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Arslan",
+        "location": "L-10 Ishida Hall",
+        "description": "Workers observed doing packing while loocking here and there instead of looking at the boxes and cutters, this activity creates a high risk of hand entanglement and hand injuries, proper training on safe work should be given to workers.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3489,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3489,
+        "sNo": "3486",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Muzammil",
+        "location": "L-10 A",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3490,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3490,
+        "sNo": "3487",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Wajid Hussain",
+        "location": "L-9 Pack",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3491,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3491,
+        "sNo": "3488",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Wahid Bux",
+        "location": "L-3 Pack",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3492,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3492,
+        "sNo": "3489",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Sajid Kareem",
+        "location": "L-10B",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3493,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3493,
+        "sNo": "3490",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Shoaib Ahmed",
+        "location": "L-9 Pack",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3494,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3494,
+        "sNo": "3491",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "AB Jabbar",
+        "location": "L-6 Pack",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3495,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3495,
+        "sNo": "3492",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "M. Sabir",
+        "location": "L-3 Pack",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3650,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3650,
+        "sNo": "3647",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "M. Sabir",
+        "location": "L-9 Pack",
+        "description": "Sharp Edges of the metal sheet are exposed creating a risk of entanglemwent and cuts, proper securing of sheet is required.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3651,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3651,
+        "sNo": "3648",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Muhammad Sabir",
+        "location": "Line-10 B Creaming",
+        "description": "Oil leakage observed from compressed air pipe, it needs to be inspected to avoid any incident.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3652,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3652,
+        "sNo": "3649",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Syed Shakir Shah",
+        "location": "Line-3,4 Oven",
+        "description": "Floor observed damaged poses risk of trip/fall. It should be repaired to avoid any incident.",
+        "responsibleDepartment": "ADM",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3653,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3653,
+        "sNo": "3650",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Waqar Ali Bhutto",
+        "location": "Ishida Hall",
+        "description": "Loose cables/wiring observed on walkaways, they should be removed.",
+        "responsibleDepartment": "ESD",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3654,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3654,
+        "sNo": "3651",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Waliullah",
+        "location": "Line-9 Oven",
+        "description": "Two tubelights observed out of function, they should be replaced to maintain proper illumination.",
+        "responsibleDepartment": "ESD",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3655,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3655,
+        "sNo": "3652",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Imtiaz Ali",
+        "location": "Line-6 Packing",
+        "description": "Loose wiring from printer needs to be fixed to avoid any incident.",
+        "responsibleDepartment": "ESD",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3656,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3656,
+        "sNo": "3653",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Zubair",
+        "location": "Packing Area",
+        "description": "Loose wiring/cables found on walkways, they need to be fixed",
+        "responsibleDepartment": "ESD",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3657,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3657,
+        "sNo": "3654",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Murtaza",
+        "location": "RMS-1",
+        "description": "Round pillar guard observed unfixed, need proper fixing to avoid physical injury.",
+        "responsibleDepartment": "ADM",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3658,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3658,
+        "sNo": "3655",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Abdul Aziz",
+        "location": "Warehouse",
+        "description": "Cartons observed stacked unsafely, may fall any time.",
+        "responsibleDepartment": "Stores",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3659,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3659,
+        "sNo": "3656",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Abdul Aziz",
+        "location": "Line 04",
+        "description": "No proper pathway for crossing across the machine, workers go under and over the conveyor. Proper pathway should be installed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3660,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3660,
+        "sNo": "3657",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Syed Shakir Shah",
+        "location": "Line 05 Cutting",
+        "description": "Floor is damaged from multiple locations, poses tripping hazard to workers.",
+        "responsibleDepartment": "ADM",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3661,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3661,
+        "sNo": "3658",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Sajid Kareem",
+        "location": "L-5 Pack",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3662,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3662,
+        "sNo": "3659",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "RO Plant",
+        "description": "damaged electric board, replace damaged board with a new one.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3663,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3663,
+        "sNo": "3660",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "Gate 3",
+        "description": "worker without PPEs at site, enfoece PPEs.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3664,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3664,
+        "sNo": "3661",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "compressor room",
+        "description": "Damaged gloves observed, causing cut hazard, replace gloves.",
+        "responsibleDepartment": "Projects",
+        "severity": "low",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3665,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3665,
+        "sNo": "3662",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "line 11",
+        "description": "Harness belt not hooked by worker, falling hazard, enforce use of Harness at height.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3666,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3666,
+        "sNo": "3663",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "3-bed",
+        "description": "Grinder cover found removed, risk of injury, cover should be installed.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3667,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3667,
+        "sNo": "3664",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "3-bed",
+        "description": "Harness belt not hooked by worker, falling hazard, enforce use of Harness at height.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3668,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3668,
+        "sNo": "3665",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "3-bed",
+        "description": "Planks are not tied properly , always ties planks before commencing work.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3669,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3669,
+        "sNo": "3666",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Zahid Hussain",
+        "location": "L-8C",
+        "description": "Motor is overheating and can cause fire, immidiate inspection and greasing is required to prevent fire hazard.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3671,
+      "issues": [
+        "invalid_or_non_2025_date",
+        "unmapped_originated_department",
+        "missing_type_defaulted_to_other"
+      ],
+      "row": {
+        "sourceRow": 3671,
+        "sNo": "3668",
+        "date": null,
+        "month": "November",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "AB Jabbar",
+        "location": "L-6",
+        "description": "No proper walkays are present in paking area creating risk of head injury by hitting their hand to the conveyors, proper walkways should be build to prevent such injuries.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    }
+  ],
+  "duplicateRows": [
+    {
+      "sourceRow": 43,
+      "row": {
+        "sourceRow": 43,
+        "sNo": "40",
+        "date": "2025-05-01",
+        "month": "January",
+        "originatedDepartment": "HSE",
+        "originatorName": "Mubashir Mustafa",
+        "location": "Line 03 China 07",
+        "description": "Heater cover are missing, posing risks of burn injuries, fire hazards and equipment damage.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 473,
+      "row": {
+        "sourceRow": 473,
+        "sNo": "470",
+        "date": "2025-12-02",
+        "month": "February",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Sikandar",
+        "location": "Line-08 Packing",
+        "description": "Crossover required to move from one channel to another.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 671,
+      "row": {
+        "sourceRow": 671,
+        "sNo": "668",
+        "date": "2025-01-02",
+        "month": "February",
+        "originatedDepartment": "Stores",
+        "originatorName": "Ashraf",
+        "location": "RMS Roof",
+        "description": "Ac outer, electrical cover removed, poses risk of electrocution. Cover must be closed.",
+        "responsibleDepartment": "ESD",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 672,
+      "row": {
+        "sourceRow": 672,
+        "sNo": "669",
+        "date": "2025-01-02",
+        "month": "February",
+        "originatedDepartment": "Stores",
+        "originatorName": "Ashraf",
+        "location": "RMS Roof",
+        "description": "Sugar Exhauster cover removed, exposing high rotating parts. Cover should be installed all the time to avoid any serious injury.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 673,
+      "row": {
+        "sourceRow": 673,
+        "sNo": "670",
+        "date": "2025-01-02",
+        "month": "February",
+        "originatedDepartment": "Stores",
+        "originatorName": "Muhammad Arif Shaikh",
+        "location": "FGS Warehouse",
+        "description": "Some of the lights of FGS warehouse non-operational, makes low illumination. Malfunction lights should be replaced.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 922,
+      "row": {
+        "sourceRow": 922,
+        "sNo": "919",
+        "date": "2025-08-05",
+        "month": "May",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Abdul Aziz",
+        "location": "Line 04",
+        "description": "No proper pathway for crossing across the machine, workers go under and over the conveyor. Proper pathway should be installed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 923,
+      "row": {
+        "sourceRow": 923,
+        "sNo": "920",
+        "date": "2025-08-05",
+        "month": "May",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Syed Shakir Shah",
+        "location": "Line 05 Cutting",
+        "description": "Floor is damaged from multiple locations, poses tripping hazard to workers.",
+        "responsibleDepartment": "ADM",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 924,
+      "row": {
+        "sourceRow": 924,
+        "sNo": "921",
+        "date": "2025-08-05",
+        "month": "May",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "M Azeem",
+        "location": "Line 02 Cutting",
+        "description": "Dough lifter door is missing, the failure of the trolley can result in falling on the person underneath.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 925,
+      "row": {
+        "sourceRow": 925,
+        "sNo": "922",
+        "date": "2025-08-05",
+        "month": "May",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Najeeb Khan",
+        "location": "Line 06 cutting",
+        "description": "Roller motor wires are loose, poses electrocution hazard to workers.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 962,
+      "row": {
+        "sourceRow": 962,
+        "sNo": "959",
+        "date": "2025-05-15",
+        "month": "May",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Nadeem Mahar",
+        "location": "Line 08 Platform",
+        "description": "Line 08 platform is damage, poses fall hazard for the workers during filter cleaning activity.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 963,
+      "row": {
+        "sourceRow": 963,
+        "sNo": "960",
+        "date": "2025-05-16",
+        "month": "May",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Najeeb Khan",
+        "location": "Line 06 cutting",
+        "description": "Hopper tray is damaged, poses cut or laceration injury to workers.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 964,
+      "row": {
+        "sourceRow": 964,
+        "sNo": "961",
+        "date": "2025-07-17",
+        "month": "MAy",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "M Azeem",
+        "location": "Line 01 Cutting to Oven",
+        "description": "Hopper tray is damaged, poses cut or laceration injury to workers.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 996,
+      "row": {
+        "sourceRow": 996,
+        "sNo": "993",
+        "date": "2025-05-27",
+        "month": "May",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "M Azeem",
+        "location": "Line 02 Cutting",
+        "description": "Dough lifter door is damage, Dough trolley may fall on someone and cause serious injury.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "DOne",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 997,
+      "row": {
+        "sourceRow": 997,
+        "sNo": "994",
+        "date": "2025-05-27",
+        "month": "MAy",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Najeeb Khan",
+        "location": "Line 04 Mixing",
+        "description": "Dough trolley Oil leaking, poses tripping.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1387,
+      "row": {
+        "sourceRow": 1387,
+        "sNo": "1384",
+        "date": "2025-07-25",
+        "month": "July",
+        "originatedDepartment": "PRD",
+        "originatorName": "Ali Raza Aran",
+        "location": "L-6 Mixer",
+        "description": "Floor is damaged causing slip and fall hazard",
+        "responsibleDepartment": "ADM",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1512,
+      "row": {
+        "sourceRow": 1512,
+        "sNo": "1509",
+        "date": "2025-05-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Shahid Hussain",
+        "location": "Compressor Room",
+        "description": "Workers were observed working without proper PPE's, Provide them Suitable PPE'S to prevent injuries",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1600,
+      "row": {
+        "sourceRow": 1600,
+        "sNo": "1597",
+        "date": "2025-08-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Ahsan",
+        "location": "L-7 Oven",
+        "description": "Improper house keeping on project site was observed it is possing trip and fall hazard for personnel, Proper house keeping is required.",
+        "responsibleDepartment": "Projects",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1601,
+      "row": {
+        "sourceRow": 1601,
+        "sNo": "1598",
+        "date": "2025-08-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Ahsan",
+        "location": "L-7 Oven",
+        "description": "Improper house keeping on project site was observed it is possing trip and fall hazard for personnel, Proper house keeping is required.",
+        "responsibleDepartment": "Projects",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1715,
+      "row": {
+        "sourceRow": 1715,
+        "sNo": "1712",
+        "date": "2025-12-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Shahid Hussain",
+        "location": "Compressor Room",
+        "description": "workers were observed working without proper gloves, possing a risk of hand cuts and burns,Provide them suitable gloves for better work performance.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1732,
+      "row": {
+        "sourceRow": 1732,
+        "sNo": "1729",
+        "date": "2025-12-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Ikhlaque Ahmed",
+        "location": "OLD LPG",
+        "description": "Workers were observed working without proper PPE's, Provide them Suitable PPE'S to prevent injuries",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1735,
+      "row": {
+        "sourceRow": 1735,
+        "sNo": "1732",
+        "date": "2025-12-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Mutahar Mustafa",
+        "location": "Cake Plant",
+        "description": "Workers were observed working without proper PPE's, Provide them Suitable PPE'S to prevent injuries",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1750,
+      "row": {
+        "sourceRow": 1750,
+        "sNo": "1747",
+        "date": "2025-12-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Masroor",
+        "location": "Cake Plant",
+        "description": "Open electrical panels were found possing electrical shock and fire hazard. Requiring immidiate clouser.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1752,
+      "row": {
+        "sourceRow": 1752,
+        "sNo": "1749",
+        "date": "2025-12-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Rehan",
+        "location": "FGS",
+        "description": "Dust can get into workers eyes while grinding, Safety shield is requiered for workers to use while doing such work.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1756,
+      "row": {
+        "sourceRow": 1756,
+        "sNo": "1753",
+        "date": "2025-12-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Hasnain Ali",
+        "location": "Near Gate-3",
+        "description": "During welding proccess the cumbustible material can get on fire due to sparks, cumbustible and flameable material should be 35 feet away from hot work area.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1759,
+      "row": {
+        "sourceRow": 1759,
+        "sNo": "1756",
+        "date": "2025-12-08",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Hasnain Ali",
+        "location": "Near Gate-3",
+        "description": "Material was seen on the edges creating risk of falling on the personnel,Proper barricade the area to prevent injuries.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1801,
+      "row": {
+        "sourceRow": 1801,
+        "sNo": "1798",
+        "date": "2025-08-13",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Masroor",
+        "location": "Cake Plant",
+        "description": "Electrical wire were seen on ground possing risk of tripping and electric shock, Immidiate removal of wire is required.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1821,
+      "row": {
+        "sourceRow": 1821,
+        "sNo": "1818",
+        "date": "2025-08-14",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Ikhlaque Ahmed",
+        "location": "OLD LPG",
+        "description": "Electrical board was placed where curing the walls with water creating a electrocution and fire hazard, All electrical connections should be done away from the water.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1853,
+      "row": {
+        "sourceRow": 1853,
+        "sNo": "1850",
+        "date": "2025-08-15",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Masroor",
+        "location": "Cake Plant",
+        "description": "Electrical wire were seen on ground possing risk of tripping and electric shock, Immidiate removal of wire is required.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 1854,
+      "row": {
+        "sourceRow": 1854,
+        "sNo": "1851",
+        "date": "2025-08-15",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Masroor",
+        "location": "Cake Plant",
+        "description": "Electrical wire were seen on ground possing risk of tripping and electric shock, Immidiate removal of wire is required.",
+        "responsibleDepartment": "Projects",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2107,
+      "row": {
+        "sourceRow": 2107,
+        "sNo": "2104",
+        "date": "2025-08-24",
+        "month": "August",
+        "originatedDepartment": "HSE",
+        "originatorName": "Sheryar",
+        "location": "ESD Workshop",
+        "description": "Unauthorised access in workshop without PPE, serious actions are required.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2326,
+      "row": {
+        "sourceRow": 2326,
+        "sNo": "2323",
+        "date": "2025-10-09",
+        "month": "September",
+        "originatedDepartment": "Stores",
+        "originatorName": "Ghazi Khan",
+        "location": "RMS",
+        "description": "Improper housekeeping causing trip and fall hazard,Securing of place needed.",
+        "responsibleDepartment": "Stores",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2401,
+      "row": {
+        "sourceRow": 2401,
+        "sNo": "2398",
+        "date": "2025-09-14",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "Mansoor Ahmed",
+        "location": "L-11 RMS",
+        "description": "Damaged floor observed creating risk of trip fall hazard , repairence is needed.",
+        "responsibleDepartment": "ADM",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2418,
+      "row": {
+        "sourceRow": 2418,
+        "sNo": "2415",
+        "date": "2025-09-15",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "Sajjad Ali",
+        "location": "Mixing Area",
+        "description": "Damaged floor observed creating risk of trip fall hazard , repairence is needed.",
+        "responsibleDepartment": "ADM",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2426,
+      "row": {
+        "sourceRow": 2426,
+        "sNo": "2423",
+        "date": "2025-09-15",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "Sajjad Ali",
+        "location": "L-1,2 oven",
+        "description": "The furnance plate is dislocated and need maintainance otherwire there is risk of fire.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2445,
+      "row": {
+        "sourceRow": 2445,
+        "sNo": "2442",
+        "date": "2025-09-17",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "Abdullah",
+        "location": "L-11 pack",
+        "description": "Improper housekeeping causing trip and fall hazard,Securing of place needed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2448,
+      "row": {
+        "sourceRow": 2448,
+        "sNo": "2445",
+        "date": "2025-09-17",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "Abdullah",
+        "location": "L-11 pack",
+        "description": "Improper housekeeping causing trip and fall hazard,Securing of place needed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2449,
+      "row": {
+        "sourceRow": 2449,
+        "sNo": "2446",
+        "date": "2025-09-17",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "Abdullah",
+        "location": "L-11 pack",
+        "description": "Improper housekeeping causing trip and fall hazard,Securing of place needed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2450,
+      "row": {
+        "sourceRow": 2450,
+        "sNo": "2447",
+        "date": "2025-09-17",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "Abdullah",
+        "location": "L-11 pack",
+        "description": "Improper housekeeping causing trip and fall hazard,Securing of place needed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2482,
+      "row": {
+        "sourceRow": 2482,
+        "sNo": "2479",
+        "date": "2025-09-19",
+        "month": "September",
+        "originatedDepartment": "Stores",
+        "originatorName": "Liaquat Ali",
+        "location": "ESDS",
+        "description": "Workers work without ppe creating risk of eye and hand cuts ,BBS is required.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2500,
+      "row": {
+        "sourceRow": 2500,
+        "sNo": "2497",
+        "date": "2025-09-19",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "M. Irfanullah Khan",
+        "location": "L-4 pack",
+        "description": "Interlocking was found bypassed creating a risk of hand injury and pinch point hazard proper interlocking is needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2524,
+      "row": {
+        "sourceRow": 2524,
+        "sNo": "2521",
+        "date": "2025-09-20",
+        "month": "September",
+        "originatedDepartment": "Stores",
+        "originatorName": "Liaquat Ali",
+        "location": "ESDS",
+        "description": "Metal sheet on floor was damaged causing tripping hazard immidiate rectification is needed.",
+        "responsibleDepartment": "ADM",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2547,
+      "row": {
+        "sourceRow": 2547,
+        "sNo": "2544",
+        "date": "2025-09-21",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "M. Irfanullah Khan",
+        "location": "L-7 pack",
+        "description": "Interlocking was found bypassed creating a risk of hand injury and pinch point hazard proper interlocking is needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2553,
+      "row": {
+        "sourceRow": 2553,
+        "sNo": "2550",
+        "date": "2025-09-21",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "M. Irfanullah Khan",
+        "location": "L-5 pack",
+        "description": "Interlocking was found bypassed creating a risk of hand injury and pinch point hazard proper interlocking is needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2628,
+      "row": {
+        "sourceRow": 2628,
+        "sNo": "2625",
+        "date": "2025-09-27",
+        "month": "September",
+        "originatedDepartment": "PRD",
+        "originatorName": "Danish Ali",
+        "location": "L-9 oven",
+        "description": "Cooling system of electrical db is not working causing heat in db install proper cooling system to avoid delays.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2749,
+      "row": {
+        "sourceRow": 2749,
+        "sNo": "2746",
+        "date": "2025-05-10",
+        "month": "October",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "L-8B pack",
+        "description": "Interlocking was found bypassed creating a risk of hand injury and pinch point hazard proper interlocking is needed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2755,
+      "row": {
+        "sourceRow": 2755,
+        "sNo": "2752",
+        "date": "2025-06-10",
+        "month": "October",
+        "originatedDepartment": "HSE",
+        "originatorName": "Yaseen",
+        "location": "RMS-1",
+        "description": "Missing cover and exposed moving parts that can cause injuries to workers proper guarding is needed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "Machine Guarding Projects",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2948,
+      "row": {
+        "sourceRow": 2948,
+        "sNo": "2945",
+        "date": "2025-10-16",
+        "month": "October",
+        "originatedDepartment": "PRD",
+        "originatorName": "Hadi Hassan",
+        "location": "L-4 Oven",
+        "description": "Trubulace motor unit leaking heat cloed by install a Ahu duct mader of foam it can catch fire.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 2949,
+      "row": {
+        "sourceRow": 2949,
+        "sNo": "2946",
+        "date": "2025-10-16",
+        "month": "October",
+        "originatedDepartment": "PRD",
+        "originatorName": "Imran Gull",
+        "location": "L-4 cutting",
+        "description": "The motor of washing trollies has gear unguarded.",
+        "responsibleDepartment": "ESD",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3096,
+      "row": {
+        "sourceRow": 3096,
+        "sNo": "3093",
+        "date": "2025-10-24",
+        "month": "October",
+        "originatedDepartment": "ADM",
+        "originatorName": "Umar",
+        "location": "Packaging line 7",
+        "description": "A nearly missed incident was observed that during production operations Flexon conveyor collapsed due to chain broken on the packing line #7 walkway. Fortunately, no injury was reported. Needs to conduct a thorough investigation to identify the root cause.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3097,
+      "row": {
+        "sourceRow": 3097,
+        "sNo": "3094",
+        "date": "2025-10-24",
+        "month": "October",
+        "originatedDepartment": "ADM",
+        "originatorName": "Umar",
+        "location": "Packaging line 9",
+        "description": "It was noticed that the packaging conveyor line-9 got stuck during operation. As a result the biscuit products accumulated on the conveyor surface, causing a temporary blockage and disruption in the packaging process.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3098,
+      "row": {
+        "sourceRow": 3098,
+        "sNo": "3095",
+        "date": "2025-10-24",
+        "month": "October",
+        "originatedDepartment": "ADM",
+        "originatorName": "Umar",
+        "location": "Brown sugar grinding",
+        "description": "It has been noticed that one of the colleagues attempted to fix the brown sugar grinding machine while standing directly on the brown sugar tray without using the shoe cover which is a serious food safety hazard, violation and risk of contamination.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3231,
+      "row": {
+        "sourceRow": 3231,
+        "sNo": "3228",
+        "date": "2025-10-28",
+        "month": "October",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Abdul Aziz",
+        "location": "Line 04",
+        "description": "No proper pathway for crossing across the machine, workers go under and over the conveyor. Proper pathway should be installed.",
+        "responsibleDepartment": "PRD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3232,
+      "row": {
+        "sourceRow": 3232,
+        "sNo": "3229",
+        "date": "2025-10-28",
+        "month": "October",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "Syed Shakir Shah",
+        "location": "Line 05 Cutting",
+        "description": "Floor is damaged from multiple locations, poses tripping hazard to workers.",
+        "responsibleDepartment": "ADM",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3236,
+      "row": {
+        "sourceRow": 3236,
+        "sNo": "3233",
+        "date": "2025-10-28",
+        "month": "October",
+        "originatedDepartment": "QC/FS/NPD",
+        "originatorName": "M Azeem",
+        "location": "Line 02 Cutting",
+        "description": "Dough lifter door is damage, Dough trolley may fall on someone and cause serious injury.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "DOne",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3274,
+      "row": {
+        "sourceRow": 3274,
+        "sNo": "3271",
+        "date": "2025-02-11",
+        "month": "November",
+        "originatedDepartment": "PRD",
+        "originatorName": "Ali Raza Khokhar",
+        "location": "ESD Workshop",
+        "description": "Workers were observed doing hot work without any safety precausions or PPE's, creating risk of injuries. Immidiate safety compliance needed to prevent injuries.",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3281,
+      "row": {
+        "sourceRow": 3281,
+        "sNo": "3278",
+        "date": "2025-02-11",
+        "month": "November",
+        "originatedDepartment": "ADM",
+        "originatorName": "Umar",
+        "location": "Packaging Line-9",
+        "description": "It was noticed that colleagues were consuming and sharing chalia within the operational zone of Packaging line-9. Which is a serious food safety violation.",
+        "responsibleDepartment": "ADM",
+        "severity": "low",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3295,
+      "row": {
+        "sourceRow": 3295,
+        "sNo": "3292",
+        "date": "2025-02-11",
+        "month": "November",
+        "originatedDepartment": "PRD",
+        "originatorName": "M. Irfanullah Khan",
+        "location": "L-3 Pack",
+        "description": "Limit switch found faulty in packing machine creating a risk of hand intervention and severe injuries, immidiate rectification is needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3296,
+      "row": {
+        "sourceRow": 3296,
+        "sNo": "3293",
+        "date": "2025-02-11",
+        "month": "November",
+        "originatedDepartment": "PRD",
+        "originatorName": "M. Irfanullah Khan",
+        "location": "L-7 Pack",
+        "description": "Limit switch found faulty in packing machine creating a risk of hand intervention and severe injuries, immidiate rectification is needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3298,
+      "row": {
+        "sourceRow": 3298,
+        "sNo": "3295",
+        "date": "2025-02-11",
+        "month": "November",
+        "originatedDepartment": "PRD",
+        "originatorName": "M. Irfanullah Khan",
+        "location": "L-4 Pack",
+        "description": "Limit switch found faulty in packing machine creating a risk of hand intervention and severe injuries, immidiate rectification is needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3299,
+      "row": {
+        "sourceRow": 3299,
+        "sNo": "3296",
+        "date": "2025-02-11",
+        "month": "November",
+        "originatedDepartment": "PRD",
+        "originatorName": "M. Irfanullah Khan",
+        "location": "L-4 Pack",
+        "description": "Limit switch found faulty in packing machine creating a risk of hand intervention and severe injuries, immidiate rectification is needed.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3360,
+      "row": {
+        "sourceRow": 3360,
+        "sNo": "3357",
+        "date": "2025-10-11",
+        "month": "November",
+        "originatedDepartment": "ADM",
+        "originatorName": "Umar",
+        "location": "Workshop",
+        "description": "During routine monitoring it was noticed during operational hours that the colleague from the packaging who is not trained or authorized was found working on the cutting machine in the workshop.This unsafe act is a serious violation of HSE as unprofessional and unauthorized use of the cutting machine can lead to severe accidents.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3401,
+      "row": {
+        "sourceRow": 3401,
+        "sNo": "3398",
+        "date": "2025-11-14",
+        "month": "November",
+        "originatedDepartment": "ADM",
+        "originatorName": "Umar",
+        "location": "Boy Entrance Area",
+        "description": "It has been noticed that the contamination control devices including the shoe cleaner( accessive dust and mud accumulated) and sanitizer unit installed at boys entrance are currently not working.There might be a contamination risk in the production area, which can affect the product safety ,food safety standards.",
+        "responsibleDepartment": "QC/FS/NPD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3405,
+      "row": {
+        "sourceRow": 3405,
+        "sNo": "3402",
+        "date": "2025-11-15",
+        "month": "November",
+        "originatedDepartment": "PRD",
+        "originatorName": "Sanaullah Solangi",
+        "location": "Oven Area",
+        "description": "Exposed Wiring Observed creating a risk of electric shock, securing of these cables is needed",
+        "responsibleDepartment": "ESD",
+        "severity": "high",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3443,
+      "row": {
+        "sourceRow": 3443,
+        "sNo": "3440",
+        "date": "2025-11-17",
+        "month": "November",
+        "originatedDepartment": "PRD",
+        "originatorName": "Sanaullah Solangi",
+        "location": "Oven Area",
+        "description": "AHU is installed at man height creating a risk of head collision and injury, relocation of AHU is required.",
+        "responsibleDepartment": "ESD",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Pending",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3714,
+      "row": {
+        "sourceRow": 3714,
+        "sNo": "3711",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Abbas Mehdi",
+        "location": "Compressor Room",
+        "description": "Pipes were observed in walkway, They are creating a trip and fall hazard. Proper hopuose keeping is required",
+        "responsibleDepartment": "Projects",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3715,
+      "row": {
+        "sourceRow": 3715,
+        "sNo": "3712",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Hasnain Ali",
+        "location": "Near Gate-3",
+        "description": "Poor housekeeping is noticed creating a hazard of tripping and falling also the blockage of pathway, Proper walkway is required to ensure easiness for workers.",
+        "responsibleDepartment": "Projects",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3716,
+      "row": {
+        "sourceRow": 3716,
+        "sNo": "3713",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Hasnain Ali",
+        "location": "Near Gate-3",
+        "description": "Project site was observed without barrication Allowing access to any 3rd person to enter on project site, Install proper barrication to prevent such hazard.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3717,
+      "row": {
+        "sourceRow": 3717,
+        "sNo": "3714",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Hasnain Ali",
+        "location": "Near Gate-3",
+        "description": "Dust can get into workers eyes while grinding, Safety shield is requiered for workers to use while doing such work.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3718,
+      "row": {
+        "sourceRow": 3718,
+        "sNo": "3715",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Mutahar Mustafa",
+        "location": "Cake Plant",
+        "description": "The machine is placed unsafely and not properly secured posing a risk of tripping and falling, Proper securing or moving of machine to safe place is required",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3719,
+      "row": {
+        "sourceRow": 3719,
+        "sNo": "3716",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Mutahar Mustafa",
+        "location": "Cake Plant",
+        "description": "Improper house keeping on project site was observed it is possing trip and fall hazard for personnel, Proper house keeping is required.",
+        "responsibleDepartment": "Projects",
+        "severity": "low",
+        "unsafe": "Condition",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3720,
+      "row": {
+        "sourceRow": 3720,
+        "sNo": "3717",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Mutahar Mustafa",
+        "location": "Cake Plant",
+        "description": "Worker was observed working on height without hooking safety harness belt which can cayse falling hazard from height, BBS and Height training required on site workers.",
+        "responsibleDepartment": "Projects",
+        "severity": "low",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3727,
+      "row": {
+        "sourceRow": 3727,
+        "sNo": "3724",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Abbas Mehdi",
+        "location": "Near Gate-3",
+        "description": "workers were observed working without proper gloves, possing a risk of hand cuts and burns,Provide them suitable gloves for better work performance.",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    },
+    {
+      "sourceRow": 3728,
+      "row": {
+        "sourceRow": 3728,
+        "sNo": "3725",
+        "date": "2025-02-12",
+        "month": "December",
+        "originatedDepartment": "HSE",
+        "originatorName": "Abbas Mehdi",
+        "location": "Near Gate-3",
+        "description": "A worker was observed working without helmet on site working area he can get injured by hitting his head. Mandatory PPE is required while working on site",
+        "responsibleDepartment": "Projects",
+        "severity": "medium",
+        "unsafe": "Act",
+        "sourceStatus": "Done",
+        "remarks": "",
+        "type": ""
+      }
+    }
+  ],
+  "remainingDatabaseRows": 0,
+  "activeImported": 3887,
+  "totalImported": 3887,
+  "importedRows": 0,
+  "generatedAt": "2026-08-11T06:14:50.546Z"
+}

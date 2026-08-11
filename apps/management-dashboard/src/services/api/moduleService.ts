@@ -49,7 +49,7 @@ const categoryToApi = (value: unknown) => {
 };
 const statusFromApi = (value: unknown) => ({
   draft: 'Pending', reported: 'Open', submitted: 'Open', under_review: 'Pending',
-  under_investigation: 'Pending', corrective_action: 'Work in Progress', closed: 'Closed',
+  under_investigation: 'Pending', corrective_action: 'Work in Progress', resolved: 'Closed', closed: 'Closed',
 }[String(value || '').toLowerCase()] || value);
 const severityFromApi = (value: unknown) => {
   const text = String(value || '');
