@@ -35,7 +35,7 @@ export const useModuleData = (schemaId: string) => {
 
   const createRecord = async (record: any) => {
     if (createInFlight.current) {
-      return { success: false, message: 'A save is already in progress.' };
+      return { success: false, alreadyInProgress: true, message: 'A save is already in progress.' };
     }
     createInFlight.current = true;
     try {

@@ -544,7 +544,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         setIsAddModalOpen(false);
         setSavedModalOpen(true);
         window.dispatchEvent(new CustomEvent('dashboard-refresh'));
-      } else {
+      } else if (!result.alreadyInProgress) {
         setValidationError(result.message || 'The server did not confirm that the record was saved.');
         document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
       }
