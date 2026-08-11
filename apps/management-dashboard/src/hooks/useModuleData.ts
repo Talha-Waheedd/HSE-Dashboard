@@ -1,6 +1,14 @@
 import { useState, useCallback } from 'react';
 import { moduleService } from '../services/api/moduleService';
 
+const apiErrorMessage = (err: any) => {
+  const response = err?.response?.data;
+  const details = Array.isArray(response?.errors)
+    ? response.errors.map((item: any) => item.message || item.field).filter(Boolean).join(' ')
+    : '';
+  return details || response?.message || err?.message || 'Request failed';
+};
+
 export const useModuleData = (schemaId: string) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,7 +80,7 @@ export const useModuleData = (schemaId: string) => {
       }
       return { success: false, message: response.message };
     } catch (err: any) {
-      return { success: false, message: err.response?.data?.message || err.message };
+      return { success: false, message: apiErrorMessage(err) };
     }
   };
 

@@ -48,6 +48,7 @@ const statusToApi = (value: unknown, schemaId: string) => {
 };
 
 const severityToApi = (value: unknown) => String(value || '').trim().toLowerCase() || undefined;
+const isUuid = (value: unknown) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
 const categoryToApi = (value: unknown) => {
   const text = String(value || '').trim().toLowerCase();
   const known = ['physical', 'chemical', 'biological', 'ergonomic', 'electrical', 'fire', 'environmental', 'behavioral', 'other'];
@@ -179,9 +180,14 @@ export const moduleService = {
       payload = {
         ...payload,
         plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b', // CBL Plant Alpha
+        // Form options currently use department codes (such as HSE / PRD),
+        // whereas the relational API field accepts only a department UUID.
+        // Keep the selected code in metadata and omit the invalid FK value.
+        departmentId: isUuid(payload.department_id) ? payload.department_id : undefined,
         category: categoryToApi(payload.hazard_category_id),
         severityLevel: severityToApi(payload.risk_rating_id || 'low'),
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
+        reportedAt: payload.date || undefined,
         status: statusToApi(payload.status_id || 'Open', schemaId),
       };
     } else if (schemaId === 'near-miss') {
