@@ -10,13 +10,16 @@ const { uploadAttachmentSchema } = require('./attachment.schema');
 const { PERMISSIONS } = require('../../shared/constants/permissions');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { ApiError } = require('../../shared/utils/index');
 
 // Configure multer for file uploads
+const uploadDirectory = path.resolve(process.cwd(), 'public', 'uploads');
+fs.mkdirSync(uploadDirectory, { recursive: true });
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // In a real app, ensure this directory exists
-    cb(null, 'public/uploads/');
+    cb(null, uploadDirectory);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

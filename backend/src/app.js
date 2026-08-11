@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
@@ -52,7 +53,7 @@ app.use(
 app.use(globalRateLimiter);
 
 // ─── Static Files ─────────────────────────────────────────────────────────────
-app.use('/public', express.static('public'));
+app.use('/public', express.static(path.resolve(process.cwd(), 'public')));
 
 // ─── API Documentation ────────────────────────────────────────────────────────
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
