@@ -5,12 +5,28 @@ const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { Department, Hazard } = require('../../database/models');
 const { Op } = require('sequelize');
 
+// Coalesce duplicate requests while a browser retry or double-click is still
+// in flight. The frontend also disables Save Record, but the API must remain
+// safe when two identical requests arrive concurrently.
+const inFlightCreates = new Map();
+
 /**
  * Report a new hazard
  */
 const createHazard = asyncHandler(async (req, res) => {
-  const hazard = await hazardService.createHazard(req.body, req.user.id);
-  res.status(201).json(ApiResponse.success(hazard, 'Hazard reported successfully', 201));
+  const requestKey = String(req.get('Idempotency-Key') || '').trim();
+  const cacheKey = requestKey ? `${req.user.id}:${requestKey}` : null;
+  let operation = cacheKey ? inFlightCreates.get(cacheKey) : null;
+  if (!operation) {
+    operation = hazardService.createHazard(req.body, req.user.id);
+    if (cacheKey) inFlightCreates.set(cacheKey, operation);
+  }
+  try {
+    const hazard = await operation;
+    res.status(201).json(ApiResponse.success(hazard, 'Hazard reported successfully', 201));
+  } finally {
+    if (cacheKey && inFlightCreates.get(cacheKey) === operation) inFlightCreates.delete(cacheKey);
+  }
 });
 
 /**

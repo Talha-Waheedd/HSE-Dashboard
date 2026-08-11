@@ -173,8 +173,13 @@ export const moduleService = {
 
   create: async (schemaId: string, record: any): Promise<ApiResponse<any>> => {
     const endpoint = getEndpoint(schemaId);
-    const metadata = { ...record };
-    let payload = { ...record, metadata };
+    const idempotencyKey = String(record?.__idempotencyKey || '').trim() ||
+      (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `hazard-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    const { __idempotencyKey: _ignoredIdempotencyKey, ...formRecord } = record || {};
+    const metadata = { ...formRecord };
+    let payload = { ...formRecord, metadata };
 
     if (schemaId === 'hazard-reporting') {
       payload = {
@@ -237,7 +242,9 @@ export const moduleService = {
       };
     }
 
-    const response = await apiClient.post(endpoint, payload);
+    const response = await apiClient.post(endpoint, payload, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    });
     notifyDashboardRefresh();
     return response.data;
   },

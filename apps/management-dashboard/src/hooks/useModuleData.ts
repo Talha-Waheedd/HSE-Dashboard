@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { moduleService } from '../services/api/moduleService';
 
 const apiErrorMessage = (err: any) => {
@@ -13,6 +13,7 @@ export const useModuleData = (schemaId: string) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const createInFlight = useRef(false);
 
   const fetchAll = useCallback(async (params?: Record<string, unknown>) => {
     if (!schemaId) return;
@@ -33,6 +34,10 @@ export const useModuleData = (schemaId: string) => {
   }, [schemaId]);
 
   const createRecord = async (record: any) => {
+    if (createInFlight.current) {
+      return { success: false, message: 'A save is already in progress.' };
+    }
+    createInFlight.current = true;
     try {
       const response = await moduleService.create(schemaId, record);
       if (response.success) {
@@ -82,6 +87,8 @@ export const useModuleData = (schemaId: string) => {
       return { success: false, message: response.message };
     } catch (err: any) {
       return { success: false, message: apiErrorMessage(err) };
+    } finally {
+      createInFlight.current = false;
     }
   };
 

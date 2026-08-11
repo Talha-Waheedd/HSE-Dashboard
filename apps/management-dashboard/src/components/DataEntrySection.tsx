@@ -434,6 +434,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState<any>({});
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [statusHistoryModal, setStatusHistoryModal] = useState<{ isOpen: boolean; record: any | null }>({ isOpen: false, record: null });
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
@@ -518,6 +520,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
     setValidationError(null);
     const dataToSave = applyComputes(formData, schema, entries);
     const err = validateFormData(dataToSave);
@@ -526,17 +529,27 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    const result = await createRecord(dataToSave);
-    if (result.success) {
-      // Reload from the database using the current filter set. This prevents
-      // false-success UI state and keeps the newest persisted row at the top.
-      await fetchAll(filters as unknown as Record<string, unknown>);
-      setFormData({});
-      setIsAddModalOpen(false);
-      window.dispatchEvent(new CustomEvent('dashboard-refresh'));
-    } else {
-      setValidationError(result.message || 'Failed to save record. Please check your data.');
-      document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsSaving(true);
+    const idempotencyKey = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `form-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    try {
+      const result = await createRecord({ ...dataToSave, __idempotencyKey: idempotencyKey });
+      if (result.success && result.data?.id) {
+        // Reload only after the API has confirmed a committed row. The API
+        // sorts hazards by createdAt DESC, so the new row is first when the
+        // active filters include its date/department.
+        await fetchAll(filters as unknown as Record<string, unknown>);
+        setFormData({});
+        setIsAddModalOpen(false);
+        setSavedModalOpen(true);
+        window.dispatchEvent(new CustomEvent('dashboard-refresh'));
+      } else {
+        setValidationError(result.message || 'The server did not confirm that the record was saved.');
+        document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1005,10 +1018,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               <button
                 type="submit"
                 form="module-form"
+                disabled={isSaving}
                 className="h-9 px-5 text-[13px] font-medium rounded-md bg-[#CB0017] text-white hover:bg-[#A8001A] inline-flex items-center gap-1.5"
               >
-                <Save className="h-3.5 w-3.5" />
-                {editingId ? 'Save Changes' : 'Save Record'}
+                <Save className={`h-3.5 w-3.5 ${isSaving ? 'animate-pulse' : ''}`} />
+                {isSaving ? 'Saving…' : editingId ? 'Save Changes' : 'Save Record'}
               </button>
             </div>
           </div>
@@ -1016,6 +1030,21 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       </div>
     );
   };
+
+  const renderSavedModal = () => schema.id === 'hazard-reporting' && savedModalOpen ? (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="saved-title">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-2xl">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#DCFCE7] text-[#15803D]">
+          <CheckCircle2 className="h-10 w-10" aria-hidden="true" />
+        </div>
+        <h2 id="saved-title" className="mt-4 text-xl font-bold text-[#166534]">Saved</h2>
+        <p className="mt-2 text-sm text-[#64748B]">The Hazard Reporting record was saved successfully.</p>
+        <button type="button" autoFocus onClick={() => setSavedModalOpen(false)} className="mt-6 rounded-md bg-[#CB0017] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#A8001A]">
+          Done
+        </button>
+      </div>
+    </div>
+  ) : null;
 
   const entityName = schema.title.replace('Reporting', '').trim();
 
@@ -1751,6 +1780,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         </div>
       </div>
       {isAddModalOpen && renderAddEditModal()}
+      {renderSavedModal()}
       {editingId && renderAddEditModal()}
     </Layout>
   );
