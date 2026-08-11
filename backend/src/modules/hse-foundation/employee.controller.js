@@ -43,8 +43,11 @@ const updateEmployee = asyncHandler(async (req, res) => {
  * Get employee by human-readable Employee ID
  */
 const getEmployeeByEmpId = asyncHandler(async (req, res) => {
-  const employee = await employeeService.getEmployeeByEmpId(req.params.empId);
-  res.status(200).json(ApiResponse.success(employee, 'Employee retrieved successfully'));
+  const employee = await employeeService.findEmployeeByEmpId(req.params.empId);
+  res.status(200).json(ApiResponse.success(
+    employee,
+    employee ? 'Employee retrieved successfully' : 'No employee found for this ID',
+  ));
 });
 
 module.exports = {

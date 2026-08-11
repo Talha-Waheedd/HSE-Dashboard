@@ -74,6 +74,14 @@ class EmployeeService {
   }
 
   /**
+   * Lookup used by form auto-fill. A missing ID is an expected result while a
+   * user is typing, so it should not be surfaced as an operational 404.
+   */
+  async findEmployeeByEmpId(empId) {
+    return employeeRepository.getByEmployeeIdDetails(empId);
+  }
+
+  /**
    * Update employee profile
    */
   async updateEmployee(id, updateData) {
