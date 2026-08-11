@@ -250,7 +250,11 @@ export const Dashboard = () => {
   const { leadingMetricsDetail, laggingMetricsDetail } = useDashboardMetrics(rawData);
 
   // ===== KPI Computations (unchanged business logic) =====
-  const useAggregateStats    = Boolean(dashboardStats && filters.department === 'All' && filters.status === 'All');
+  // The aggregate endpoint applies the same year, date, department, and
+  // status filters as the dashboard. Always use it for KPI cards; falling
+  // back to the module page total can reintroduce an unfiltered/paginated
+  // Hazard Reporting count and make Hazard Spotting disagree with the API.
+  const useAggregateStats    = Boolean(dashboardStats);
   const totalIncidents       = useAggregateStats ? dashboardStats.incidents?.total : incidents.length;
   const ltiCases             = useAggregateStats ? dashboardStats.incidents?.LTI ?? 0 : incidents.filter(i => i.incident_category_id === 'LTI').length;
   const firstAidCases        = useAggregateStats ? dashboardStats.incidents?.['First Aid'] ?? 0 : incidents.filter(i => i.incident_category_id === 'First Aid').length;
