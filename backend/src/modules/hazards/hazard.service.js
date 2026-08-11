@@ -3,6 +3,7 @@
 const hazardRepository = require('../../repositories/hazard.repository');
 const plantRepository = require('../../repositories/plant.repository');
 const employeeRepository = require('../../repositories/employee.repository');
+const { sequelize } = require('../../database/connection');
 const HazardStatus = require('../../shared/enums/HazardStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
@@ -69,7 +70,21 @@ class HazardService {
     // Business logic: only drafts or submitted allowed on creation.
     if (![HazardStatus.DRAFT, HazardStatus.SUBMITTED].includes(data.status)) data.status = HazardStatus.DRAFT;
 
-    return hazardRepository.create(data);
+    // Do not report success until the insert transaction has committed and the
+    // row can be read back with its generated database ID and associations.
+    const created = await sequelize.transaction(async (transaction) => {
+      const record = await hazardRepository.create(data, { transaction });
+      if (!record?.id) {
+        throw ApiError.internal('Hazard record was not persisted.');
+      }
+      return record;
+    });
+
+    const persisted = await hazardRepository.getDetails(created.id);
+    if (!persisted) {
+      throw ApiError.internal('Hazard record could not be read after commit.');
+    }
+    return persisted;
   }
 
   /**

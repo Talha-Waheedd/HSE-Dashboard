@@ -36,8 +36,9 @@ export const useModuleData = (schemaId: string) => {
     try {
       const response = await moduleService.create(schemaId, record);
       if (response.success) {
-        setData(prev => [...prev, response.data]);
-        return { success: true };
+        // The caller refetches with its active filters after a confirmed API
+        // response; do not optimistically append an unmapped/stale object.
+        return { success: true, data: response.data };
       }
       return { success: false, message: response.message };
     } catch (err: any) {

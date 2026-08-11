@@ -528,6 +528,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
     const result = await createRecord(dataToSave);
     if (result.success) {
+      // Reload from the database using the current filter set. This prevents
+      // false-success UI state and keeps the newest persisted row at the top.
+      await fetchAll(filters as unknown as Record<string, unknown>);
       setFormData({});
       setIsAddModalOpen(false);
       window.dispatchEvent(new CustomEvent('dashboard-refresh'));
