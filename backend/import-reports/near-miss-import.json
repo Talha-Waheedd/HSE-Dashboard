@@ -1,0 +1,632 @@
+{
+  "source": "C:/Users/PMLS/Downloads/Near Miss Records.xlsx",
+  "sourceRows": 123,
+  "successful": 0,
+  "skipped": 0,
+  "duplicates": 121,
+  "failed": 2,
+  "warnings": 0,
+  "rows": [
+    {
+      "row": 3,
+      "result": "duplicate",
+      "fingerprint": "6656c8d004e3f4124b3707e247904a4fbbb86bb818c8a2135c631669970dc2c3"
+    },
+    {
+      "row": 4,
+      "result": "duplicate",
+      "fingerprint": "c303cbb98b08d823531009d138e00b572e04a731f3f2e4292dbe91a20d8d3770"
+    },
+    {
+      "row": 5,
+      "result": "duplicate",
+      "fingerprint": "4aac3db0f37a91ca11eddca7235f97fa19e22fa55e28f78ae8243ff0e6266c48"
+    },
+    {
+      "row": 6,
+      "result": "duplicate",
+      "fingerprint": "0c5383fe98b5e8ee0110fe4bacdfec858a3b65242e5bf45ddbaf227b7a19e7f1"
+    },
+    {
+      "row": 7,
+      "result": "duplicate",
+      "fingerprint": "53f0cc2927e910e6344162d34975e01feac512a4c71af61bf4edab4b0c8750db"
+    },
+    {
+      "row": 8,
+      "result": "duplicate",
+      "fingerprint": "86765678515bd2a7b301e98c1048ee1fd1d1e8156ca0782ba5bdcae53703d2ec"
+    },
+    {
+      "row": 9,
+      "result": "duplicate",
+      "fingerprint": "77f31f105791cd325d62f71f86035f1628e9fe5531358b5552a95e6a6db429b5"
+    },
+    {
+      "row": 10,
+      "result": "duplicate",
+      "fingerprint": "20a8b17eaf98729829379c99c3929f430c6dece0ececc24b58a6ceb1e254c93d"
+    },
+    {
+      "row": 11,
+      "result": "duplicate",
+      "fingerprint": "de5822cc7f162f98dbd1ee8d0062016fe5b47252e89ebaf2809f97b8864fc066"
+    },
+    {
+      "row": 12,
+      "result": "duplicate",
+      "fingerprint": "b246e64af7d5596d7d2a62951baaaf992473371c39565719b42a6f6469f1938a"
+    },
+    {
+      "row": 13,
+      "result": "failed",
+      "issues": [
+        "Invalid or missing date in column C",
+        "Department 'Stores' not mapped to a department UUID"
+      ]
+    },
+    {
+      "row": 14,
+      "result": "duplicate",
+      "fingerprint": "da9929137e3e3617bdc70a44e5f7b81852f6c0daa4bb1c9b2705f84250e346e8"
+    },
+    {
+      "row": 15,
+      "result": "duplicate",
+      "fingerprint": "befaa34f60fd03cd9425e4d267aa7b64a73ce33026ae5c6b8ed5cec34b86f1d0"
+    },
+    {
+      "row": 16,
+      "result": "duplicate",
+      "fingerprint": "7d9ec06a55e5e9c7dec500511eb430f3b48d1ebc2734e09f924ec9fbfdd6e12c"
+    },
+    {
+      "row": 17,
+      "result": "duplicate",
+      "fingerprint": "7df85f20a3432692b5518499ac8c5c1dd8d6913e45c413bae5fe197afd1eecf9"
+    },
+    {
+      "row": 18,
+      "result": "duplicate",
+      "fingerprint": "5f141bef379aff6dd249c9e87265ccee2590a39d3343c4932a6602de8b68e483"
+    },
+    {
+      "row": 19,
+      "result": "duplicate",
+      "fingerprint": "a355177800f59f4faa14eddb38f1e83bae387c2db7dabbfa2b80076b057b9017"
+    },
+    {
+      "row": 20,
+      "result": "duplicate",
+      "fingerprint": "99f33c667b4d211f5c09cce99f495aa963e0cffe0f9a54d9cae86968af0737e8"
+    },
+    {
+      "row": 21,
+      "result": "duplicate",
+      "fingerprint": "80890f41319dda69c206b2e57338e4c7ec362266cf6e4d7356b224a8210cc7f4"
+    },
+    {
+      "row": 22,
+      "result": "duplicate",
+      "fingerprint": "7033337fe86c03f122318c2aae87d9082f1cc3f392e62f36668b04cb16774572"
+    },
+    {
+      "row": 23,
+      "result": "duplicate",
+      "fingerprint": "61a7de8bbc34062f4517c0f85f34854e997e60c74ef2af8fe3a22820f55eb8c8"
+    },
+    {
+      "row": 24,
+      "result": "duplicate",
+      "fingerprint": "b7096b0e8e2863da43abaf2851b750a87bc0e3f6683a30f7f9f9271495cf89df"
+    },
+    {
+      "row": 25,
+      "result": "duplicate",
+      "fingerprint": "d70f154a076a111f44c8c618b2c91f39d6e1e7a17167bad3b8aa451aeab49490"
+    },
+    {
+      "row": 26,
+      "result": "duplicate",
+      "fingerprint": "fd3d64f62de929d578de846326f710059e0486a549dab89b76321c5ce90cb358"
+    },
+    {
+      "row": 27,
+      "result": "duplicate",
+      "fingerprint": "79634ad09061ca528c8fdd341a77c8f1bc1bc0d66cf06311cea8a9c8ab54c4e0"
+    },
+    {
+      "row": 28,
+      "result": "duplicate",
+      "fingerprint": "e24e1a2adc3913702afd2d11bf2af3a4b9576e13221ea7d7dcd99002902b4137"
+    },
+    {
+      "row": 29,
+      "result": "duplicate",
+      "fingerprint": "f1b06ba67860cd13e94cbc46f20cdcd9ebd81b28520803c9934f3af77a0a181b"
+    },
+    {
+      "row": 30,
+      "result": "duplicate",
+      "fingerprint": "b58a2e8de8201fde566ae03fec3377ea1938dae9d34ff8b03f65cbd7f43bf420"
+    },
+    {
+      "row": 31,
+      "result": "duplicate",
+      "fingerprint": "e1779d7df8e744232eefa4a0a2d2e578e2eb698f36807cd76adfdaff579bdf7d"
+    },
+    {
+      "row": 32,
+      "result": "duplicate",
+      "fingerprint": "49dcff1ee981276f8c89b263a5ca3f590712f931aba688a5c34b7eb5e09b3ab0"
+    },
+    {
+      "row": 33,
+      "result": "duplicate",
+      "fingerprint": "5f17f717e9378fb75cf511e82dda280ec0dcede308313943ea6da6bf0665d2ad"
+    },
+    {
+      "row": 34,
+      "result": "duplicate",
+      "fingerprint": "1e935fcc4155edc5112fb608afb0f96ba1317a30a20e9b684b86131452e46fe4"
+    },
+    {
+      "row": 35,
+      "result": "duplicate",
+      "fingerprint": "b0f0fae32620c58b0f96cfe66059baf84b7390cc215aac266432a29367b83734"
+    },
+    {
+      "row": 36,
+      "result": "duplicate",
+      "fingerprint": "0cf0b15987658f0d8452ad3ab2cf0afa37fe077389011e8a8b5457b7f75735dc"
+    },
+    {
+      "row": 37,
+      "result": "duplicate",
+      "fingerprint": "47cfa8b89f3470d3cdf2602109d8fc9a77a5c99956562539ac7637491e7cdcc2"
+    },
+    {
+      "row": 38,
+      "result": "duplicate",
+      "fingerprint": "4804fbb16b0a109dd2650836daad8224108993a8f1076dd6537ac20715d77420"
+    },
+    {
+      "row": 39,
+      "result": "duplicate",
+      "fingerprint": "b47c67cae70dbec1f8f36098da31dac0d1c941287d48c65d428cfc8b4dbfc2f7"
+    },
+    {
+      "row": 40,
+      "result": "duplicate",
+      "fingerprint": "77da1f87bee362b25405b36d87a07726689833628ced738b58aecf2176eda817"
+    },
+    {
+      "row": 41,
+      "result": "duplicate",
+      "fingerprint": "8b955d37c4821908399c54bb196e5667a8fd8a38954ca554f03a6938a1ea5161"
+    },
+    {
+      "row": 42,
+      "result": "duplicate",
+      "fingerprint": "a48d4fe258d3cda7f9142538785e1d3c5987a29499fdb760cca3bab93bff4656"
+    },
+    {
+      "row": 43,
+      "result": "duplicate",
+      "fingerprint": "cf8b955ebe2e2199b4f4b11e895d4091065c93d1de213f2934538a4d40539e10"
+    },
+    {
+      "row": 44,
+      "result": "duplicate",
+      "fingerprint": "f433821e227a2bdf39a983af6d828f6c43e1705d1e7d9ad6bb87dcba27ef1fe0"
+    },
+    {
+      "row": 45,
+      "result": "duplicate",
+      "fingerprint": "7e4f1094284af719799e74b21bf66b1d4d10de788b09929ccb086ae45d90a8a3"
+    },
+    {
+      "row": 46,
+      "result": "duplicate",
+      "fingerprint": "112666a6368dd78e8b165ee440732e5980c431e8fea1916757feed20fac2424c"
+    },
+    {
+      "row": 47,
+      "result": "duplicate",
+      "fingerprint": "abf8036752701f0712e13618b20008e9c9dbfbd18eb847f116398d338b1dc589"
+    },
+    {
+      "row": 48,
+      "result": "duplicate",
+      "fingerprint": "a05a53e1540e7dca2a9acbfefe5824e2a58bd02659a9096ab0e830f1e242565d"
+    },
+    {
+      "row": 49,
+      "result": "duplicate",
+      "fingerprint": "20acf959b17d9e0335700f197a8de71daad6f52e6ed3e9a49c3c6c3faa0d17f6"
+    },
+    {
+      "row": 50,
+      "result": "duplicate",
+      "fingerprint": "79ed1882b2b9ae9a3353a35b03c1ae3ecbe2f243225c8197f687d8328f7938df"
+    },
+    {
+      "row": 51,
+      "result": "duplicate",
+      "fingerprint": "aacc0720ce0093d56e8d8b9e0c958b74e2d6ff980a19131bbc5c988c6323e55e"
+    },
+    {
+      "row": 52,
+      "result": "duplicate",
+      "fingerprint": "0cb2ed3917ea5db8024d1d5c08335b29736365d1375b6c27c38718eded6a73dd"
+    },
+    {
+      "row": 53,
+      "result": "duplicate",
+      "fingerprint": "df8c032ece170cda42c2c9899c58fcd01a448cc4c4eab58642cc7a51e560ed6a"
+    },
+    {
+      "row": 54,
+      "result": "duplicate",
+      "fingerprint": "5ad915a22f2d2efc7a1f5627e4397e7e7c7de65df1346451c18ffb6e75072a60"
+    },
+    {
+      "row": 55,
+      "result": "duplicate",
+      "fingerprint": "fbc093fdf820b4c7b921b4fce7cb768120f665bcb05f7a4c24c63821573ec3a1"
+    },
+    {
+      "row": 56,
+      "result": "duplicate",
+      "fingerprint": "03f30ad88758627513a9d056fa7ef3d9c38632c9ef9355052ff5cb65299a1d5a"
+    },
+    {
+      "row": 57,
+      "result": "duplicate",
+      "fingerprint": "aeb081acb6b2f7b74b5e5ed96d04db50e57507652ff454985ae0b8f5e9b12624"
+    },
+    {
+      "row": 58,
+      "result": "duplicate",
+      "fingerprint": "21969bd12a6cb7ac1ac5ed2ffa79e30345428cb591311be797a9f54344b32f05"
+    },
+    {
+      "row": 59,
+      "result": "duplicate",
+      "fingerprint": "c9f07a816cc3282043c2970331954ee0a05f23594118c620517a06c8829f30cb"
+    },
+    {
+      "row": 60,
+      "result": "duplicate",
+      "fingerprint": "d649967ebb7bdbf27f8e27d4d39a25e7964eccdf3e3ae2ec412836a577713a04"
+    },
+    {
+      "row": 61,
+      "result": "duplicate",
+      "fingerprint": "36a156f8488c07bda949ff7761efa297b6298ab538b5f2c1117e5ac4d7a82fa4"
+    },
+    {
+      "row": 62,
+      "result": "duplicate",
+      "fingerprint": "713352c98ef4068a4c4cbed7e04b669140ed4b5a0f750e57a8da65b883119c33"
+    },
+    {
+      "row": 63,
+      "result": "duplicate",
+      "fingerprint": "35f7fedf17cf0266a1c4776948664968aecb4a1db46d140f5d8fdd7a678e1d12"
+    },
+    {
+      "row": 64,
+      "result": "duplicate",
+      "fingerprint": "1291a754fdf971aa3c4b1adde7a6f4ade4e192bf51293e514e530cee702298db"
+    },
+    {
+      "row": 65,
+      "result": "duplicate",
+      "fingerprint": "b79f95bc894b17a88b902e8da625c7c7cb97facf76c0c320083e8fcab0dc2c6f"
+    },
+    {
+      "row": 66,
+      "result": "duplicate",
+      "fingerprint": "17aaabd8d53291f11b0113bb0f4b9f194764329a5ae6465d957eee96c66c6db2"
+    },
+    {
+      "row": 67,
+      "result": "duplicate",
+      "fingerprint": "71b7a16a7d08b7728f4ee6d6a3b3e2efdd5736e0a86136400590c96dd5b0923e"
+    },
+    {
+      "row": 68,
+      "result": "duplicate",
+      "fingerprint": "edf0c2ddca321131770a4b2fa6592e3f464f5853189e22f1acfc3bee9d3ef0d2"
+    },
+    {
+      "row": 69,
+      "result": "duplicate",
+      "fingerprint": "bb66a76f289003f32be3f21712c131c8a59c4eb62804ad7421e452d2a89ef20b"
+    },
+    {
+      "row": 70,
+      "result": "duplicate",
+      "fingerprint": "388ab4b6e55a9df5cfd8a4b1d2b9120ac854a1b601c6118bd0b09ff3a61317a0"
+    },
+    {
+      "row": 71,
+      "result": "duplicate",
+      "fingerprint": "ad7acf6c215b89dcaa050453ca02a3d5854027d5979d257b3106fe252f9d3f1c"
+    },
+    {
+      "row": 72,
+      "result": "duplicate",
+      "fingerprint": "da8a59d10dd302274a224216eb42ddb665599ca656b03f1c647c56e5b9304712"
+    },
+    {
+      "row": 73,
+      "result": "duplicate",
+      "fingerprint": "4e15d3a892342a29d0dba88f85a691245006ec77c16bd1e447be2d41dca95586"
+    },
+    {
+      "row": 74,
+      "result": "duplicate",
+      "fingerprint": "8278fe7631cc855159bb4f7338490fae768a0d164c7b829268a1280aa94e6146"
+    },
+    {
+      "row": 75,
+      "result": "duplicate",
+      "fingerprint": "ffc12678c5c2aa0d12edfc69b239f073732c2261b531cb5a48008b3b0628abae"
+    },
+    {
+      "row": 76,
+      "result": "duplicate",
+      "fingerprint": "b9f1d6c1ce9e8fea413dd802e28ff0986fbb7c4ebac3e55758df21d38d109a48"
+    },
+    {
+      "row": 77,
+      "result": "duplicate",
+      "fingerprint": "cee1ef33fddd173c6dbe35e8a3753f904875c867f84d79e14d5c84d7112d31d1"
+    },
+    {
+      "row": 78,
+      "result": "duplicate",
+      "fingerprint": "71d08718a7d52d69b25de7cb75dc76a1a337c4fea1ba3eb7839cb13d421e8137"
+    },
+    {
+      "row": 79,
+      "result": "duplicate",
+      "fingerprint": "42d2732d2c0f41d0c6abeb54232308f487777fd21136a019ba088b74f525320a"
+    },
+    {
+      "row": 80,
+      "result": "duplicate",
+      "fingerprint": "76aec05d2f45d9de775d80bf0eef66598a73aaac10c3abd6fa72fe9b221b4bf2"
+    },
+    {
+      "row": 81,
+      "result": "duplicate",
+      "fingerprint": "21a2c885bff7b737b48769304aa01d93817c6ca440af3b4ddfc2eb3a7b2b8c88"
+    },
+    {
+      "row": 82,
+      "result": "duplicate",
+      "fingerprint": "aec8a7de5922172144d34523c676fc64472b29519f21bac087a6cedc2079f3da"
+    },
+    {
+      "row": 83,
+      "result": "duplicate",
+      "fingerprint": "e420fce0b7a61b2666c3eb569aed64e8a636d292d6f36128a16b387fdaf2769f"
+    },
+    {
+      "row": 84,
+      "result": "duplicate",
+      "fingerprint": "b40045c0ee3751959985cedf3a4b7286ed1f14f998007bfe9b043fb1b14970cd"
+    },
+    {
+      "row": 85,
+      "result": "duplicate",
+      "fingerprint": "f504c1964dea138188637d9d5d4d0a1750808e48676dbed66aa240b5e1008d62"
+    },
+    {
+      "row": 86,
+      "result": "duplicate",
+      "fingerprint": "05ec96330c150ebd065f1efc686676b18bd0df1a34f7a412e148185f3198128c"
+    },
+    {
+      "row": 87,
+      "result": "duplicate",
+      "fingerprint": "66f6e711b2255179d29e91aeaf33d79ba3e4e9caaeff7bb840c9c3423c35b55b"
+    },
+    {
+      "row": 88,
+      "result": "duplicate",
+      "fingerprint": "9c329874080d92369c013f89a50a7dee00408ed919660cf442673104f0ab2d0d"
+    },
+    {
+      "row": 89,
+      "result": "duplicate",
+      "fingerprint": "6096c427aa4cb190dc9f16ddf5442e9a37ee1145a2a627b7426ad7017c0209e7"
+    },
+    {
+      "row": 90,
+      "result": "duplicate",
+      "fingerprint": "e33300651f768823179ba509379f20a66dcf4428ab1bfc922ba90a89f03e13eb"
+    },
+    {
+      "row": 91,
+      "result": "duplicate",
+      "fingerprint": "13dc3654d6d12a2710bd7aff6572d93f6d405a46fcf8653b0ca8d69b14fd2319"
+    },
+    {
+      "row": 92,
+      "result": "duplicate",
+      "fingerprint": "5d0ebec8050767c10ce3675fa4e58b63d4b11fe85747286b25fe0e80610f928d"
+    },
+    {
+      "row": 93,
+      "result": "duplicate",
+      "fingerprint": "586b470f4bd946e53114c0a52ee0959c86cb090a898ae15e3081fe145211978c"
+    },
+    {
+      "row": 94,
+      "result": "duplicate",
+      "fingerprint": "453246641a6b9508f7ef44e3ac3e9d7cb6c27ae5b2aa58e67dcc3d9e251b7c78"
+    },
+    {
+      "row": 95,
+      "result": "duplicate",
+      "fingerprint": "dce7f3e219e7d6fa3abfb32652de537698d0faf378834002192a582a3089e6f4"
+    },
+    {
+      "row": 96,
+      "result": "duplicate",
+      "fingerprint": "e46003fbb6f893b51bba575bea07757a360ae784d5e1ac6dc05b589d399fc9c2"
+    },
+    {
+      "row": 97,
+      "result": "duplicate",
+      "fingerprint": "abe04bf992ff7d12b2588f9fedd5e77881e79b4262f83404a04e202e328ce62e"
+    },
+    {
+      "row": 98,
+      "result": "duplicate",
+      "fingerprint": "8594f2b17ba86ace874c9651acb05e74ec34c8a7cb862491b449116f8f462741"
+    },
+    {
+      "row": 99,
+      "result": "duplicate",
+      "fingerprint": "48ffa4de2134327bf3b59c8681bebede7fb93389acc0ab0ec375a8e7bdb1ff5b"
+    },
+    {
+      "row": 100,
+      "result": "duplicate",
+      "fingerprint": "5d15786adc284422afa1cff2de440e609e2e40b88b834db5d109c75ad5f0aa34"
+    },
+    {
+      "row": 101,
+      "result": "duplicate",
+      "fingerprint": "d9627454c0c4ebb152d2a34fb3b1f29d13f0ff11a9e6d42f6c8091026d8f6d68"
+    },
+    {
+      "row": 102,
+      "result": "duplicate",
+      "fingerprint": "1a2b15d8350a4d0e099230dea6067abeae36d6fd1d7b5b5e8e4ced8316a5d476"
+    },
+    {
+      "row": 103,
+      "result": "duplicate",
+      "fingerprint": "c3b3aa6cea32c73f8c1e9e353a69d34391cc58d893f7434ef27cb65323525601"
+    },
+    {
+      "row": 104,
+      "result": "duplicate",
+      "fingerprint": "3fa2755c352455aab545f3e6babd67cda614402a53d2ce4c6fa63cf87642c0c3"
+    },
+    {
+      "row": 105,
+      "result": "duplicate",
+      "fingerprint": "d996340195f6ef85e4da47539d308b0522d33cf52890531e97fe873556ad1f3c"
+    },
+    {
+      "row": 106,
+      "result": "duplicate",
+      "fingerprint": "6720e9e22c70a316c5a1ab447479f3c2fbbb50ed6203a449a960ebb42cb68212"
+    },
+    {
+      "row": 107,
+      "result": "duplicate",
+      "fingerprint": "a7c5d9805282a2b0268309d728218d6e801ddb22314a5956c6ab5130f8b40046"
+    },
+    {
+      "row": 108,
+      "result": "duplicate",
+      "fingerprint": "51e3b90a2d0db04f61468a7f877de18dcc6581ee5a3271ff5a5573d15b17caeb"
+    },
+    {
+      "row": 109,
+      "result": "duplicate",
+      "fingerprint": "b40685b6e99537981ea53f8e84730f770e509bedfc9db9607d1ff79fe719c701"
+    },
+    {
+      "row": 110,
+      "result": "duplicate",
+      "fingerprint": "04740d33612ba72323422dd3276e8064da27c2f2f009320b09959ca2d5f20846"
+    },
+    {
+      "row": 111,
+      "result": "duplicate",
+      "fingerprint": "c5da310db25b5c84ae96894053cc3b5ce8a3a2a1656af454c236f264bbe1606a"
+    },
+    {
+      "row": 112,
+      "result": "duplicate",
+      "fingerprint": "a6813126655dec536e2c4f403511bcc33ca36f771abf817c6af857c4cf40426a"
+    },
+    {
+      "row": 113,
+      "result": "duplicate",
+      "fingerprint": "9fd4f2e6c861a85164af1f8f1602c70adc4d353ac2b336959093f77f1d84c2af"
+    },
+    {
+      "row": 114,
+      "result": "duplicate",
+      "fingerprint": "8f3f4402691b53d1d0eff9988d7eb0e7320875cafb7fd1c54191fab9b8829ae6"
+    },
+    {
+      "row": 115,
+      "result": "duplicate",
+      "fingerprint": "dc1a6ffcb437368829e42fe461f9062b26906e625dee54b94a725892b98be9f6"
+    },
+    {
+      "row": 116,
+      "result": "duplicate",
+      "fingerprint": "5a31c676949163f4d4ed15a22c9f2ad53cbe374b9e6b4f7f0390c17c370203be"
+    },
+    {
+      "row": 117,
+      "result": "duplicate",
+      "fingerprint": "b15118a2cac98ae1c81c2d588131c0e261d05d7b657c1fae0edaaf1b737562b3"
+    },
+    {
+      "row": 118,
+      "result": "duplicate",
+      "fingerprint": "636dc809c42746fbbc6274dc7961f0019e49f612beb8ddcaea1a538ee620c5e7"
+    },
+    {
+      "row": 119,
+      "result": "duplicate",
+      "fingerprint": "ea92832b5068552ed329f0f37bd32c8b9df26ca2c45d290c5038ea61ddbdeee3"
+    },
+    {
+      "row": 120,
+      "result": "duplicate",
+      "fingerprint": "60bc0e6e66ac15e91f5f6cb45cc78c4bde515a3e833a59290815d51ec4fa5098"
+    },
+    {
+      "row": 121,
+      "result": "duplicate",
+      "fingerprint": "b41364e4913c64271272096fd0fb9b23d12c2b3b53cf8f0bd2958ece2b84301b"
+    },
+    {
+      "row": 122,
+      "result": "duplicate",
+      "fingerprint": "74e88a0ebb9629ce6b48b65ddcac307a81b72867006bc9de8b45317622b7ffd6"
+    },
+    {
+      "row": 123,
+      "result": "duplicate",
+      "fingerprint": "a4237c44224f6158839ff219cd51ef0f7d898b476767939163a42a5b3db83ed0"
+    },
+    {
+      "row": 124,
+      "result": "duplicate",
+      "fingerprint": "b61751b2a6da8901ab2308dc544a7909b5a114d468bb436bfd3acfed919689a0"
+    },
+    {
+      "row": 125,
+      "result": "failed",
+      "issues": [
+        "Invalid or missing date in column C",
+        "Department 'Stores' not mapped to a department UUID"
+      ]
+    }
+  ]
+}
