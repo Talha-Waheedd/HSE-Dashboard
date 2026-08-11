@@ -27,6 +27,8 @@ export const LocationCombobox = ({
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
     if (!open) setQuery(value);
@@ -37,6 +39,7 @@ export const LocationCombobox = ({
     let current = true;
     const timer = window.setTimeout(async () => {
       setLoading(true);
+      setErrorMessage(null);
       try {
         const response = await apiClient.get('/locations', {
           params: { q: query, isActive: true, limit: PAGE_SIZE, offset: page * PAGE_SIZE },
@@ -47,8 +50,7 @@ export const LocationCombobox = ({
         setActiveIndex(-1);
       } catch (error) {
         if (current) {
-          setOptions([]);
-          setTotal(0);
+          setErrorMessage('Locations could not be loaded. Please try again.');
         }
         console.error('Locations could not be loaded:', error);
       } finally {
@@ -59,7 +61,17 @@ export const LocationCombobox = ({
       current = false;
       window.clearTimeout(timer);
     };
-  }, [open, page, query]);
+  }, [open, page, query, refreshToken]);
+
+  useEffect(() => {
+    const refresh = () => setRefreshToken(token => token + 1);
+    window.addEventListener('locations-refresh', refresh);
+    const interval = window.setInterval(refresh, 30000);
+    return () => {
+      window.removeEventListener('locations-refresh', refresh);
+      window.clearInterval(interval);
+    };
+  }, []);
 
   const select = (location: LocationOption) => {
     onChange(location.name);
@@ -112,7 +124,8 @@ export const LocationCombobox = ({
         <div className="absolute z-40 mt-1 w-full overflow-hidden rounded-md border border-[#E1E4E8] bg-white shadow-lg">
           <ul id={listboxId} role="listbox" aria-label={`${label} search results`} className="max-h-60 overflow-y-auto py-1">
             {loading && options.length === 0 ? <li className="px-3 py-3 text-[13px] text-[#6B7280]">Loading locations…</li> : null}
-            {!loading && options.length === 0 ? <li className="px-3 py-3 text-[13px] text-[#6B7280]">No locations found</li> : null}
+            {!loading && errorMessage ? <li className="flex items-center justify-between gap-2 px-3 py-3 text-[13px] text-[#B42318]"><span>{errorMessage}</span><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => setRefreshToken(token => token + 1)} className="rounded border border-[#F1C5C9] px-2 py-1 text-[11px] font-semibold text-[#CB0017] hover:bg-[#FFF5F6]">Retry</button></li> : null}
+            {!loading && !errorMessage && options.length === 0 ? <li className="px-3 py-3 text-[13px] text-[#6B7280]">No locations found</li> : null}
             {options.map((location, index) => (
               <li key={location.id} id={`${listboxId}-option-${index}`} role="option" aria-selected={location.name === value} onMouseDown={event => event.preventDefault()} onClick={() => select(location)} className={`flex cursor-pointer items-center justify-between gap-3 px-3 py-2 text-[13px] ${index === activeIndex ? 'bg-[#FFF1F3]' : 'hover:bg-[#F9FAFB]'}`}>
                 <span className="min-w-0"><span className="block truncate font-medium text-[#1A1818]">{location.name}</span>{location.code && <span className="block truncate text-[11px] text-[#6B7280]">{location.code}</span>}</span>

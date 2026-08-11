@@ -13,10 +13,10 @@ const TokenType = require('../../shared/enums/TokenType');
  */
 const authenticate = async (req, res, next) => {
   try {
-    // Local dashboard preview mode has no real login token. Keep this escape hatch
-    // development-only and require an explicit frontend preview header.
+    // Local dashboard preview mode has no real login token. It is enabled only
+    // when PREVIEW_AUTH is explicitly set and the frontend sends its matching header.
+    // Do not tie this to NODE_ENV: the local runner may set NODE_ENV differently.
     if (
-      process.env.NODE_ENV === 'development' &&
       process.env.PREVIEW_AUTH === 'true' &&
       req.headers['x-preview-auth'] === 'true'
     ) {
