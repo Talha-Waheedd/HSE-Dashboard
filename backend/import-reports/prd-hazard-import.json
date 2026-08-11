@@ -1,0 +1,62 @@
+{
+  "source": "C:/Users/PMLS/Documents/PRD.xlsx",
+  "sourceRows": 13,
+  "successful": 13,
+  "duplicates": 0,
+  "failed": 0,
+  "warnings": 0,
+  "rows": [
+    {
+      "row": 1,
+      "result": "imported"
+    },
+    {
+      "row": 2,
+      "result": "imported"
+    },
+    {
+      "row": 3,
+      "result": "imported"
+    },
+    {
+      "row": 4,
+      "result": "imported"
+    },
+    {
+      "row": 5,
+      "result": "imported"
+    },
+    {
+      "row": 6,
+      "result": "imported"
+    },
+    {
+      "row": 7,
+      "result": "imported"
+    },
+    {
+      "row": 8,
+      "result": "imported"
+    },
+    {
+      "row": 9,
+      "result": "imported"
+    },
+    {
+      "row": 10,
+      "result": "imported"
+    },
+    {
+      "row": 11,
+      "result": "imported"
+    },
+    {
+      "row": 12,
+      "result": "imported"
+    },
+    {
+      "row": 13,
+      "result": "imported"
+    }
+  ]
+}
