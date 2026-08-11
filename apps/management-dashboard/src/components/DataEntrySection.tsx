@@ -23,6 +23,7 @@ import { DepartmentStatusBar } from './DepartmentStatusBar';
 import { MyPendingWidget } from './MyPendingWidget';
 import { uploadClient } from '../../../../packages/api/src/uploadClient';
 import { apiClient } from '@cbl/api';
+import { LocationCombobox } from './LocationCombobox';
 
 interface DataEntrySectionProps {
   schema: SectionConfig;
@@ -446,40 +447,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [closeHazardData, setCloseHazardData] = useState({ closingProof: '', closingRemarks: '' });
   const [reviewData, setReviewData] = useState({ remarks: '', reason: '' });
-  const [locationOptions, setLocationOptions] = useState<string[]>([]);
   const PAGE_SIZE = 15;
 
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
   const routeCategory = schema.id === 'incident-log' ? searchParams.get('category') : null;
-
-  useEffect(() => {
-    let active = true;
-    const loadLocations = async () => {
-      try {
-        const response = await apiClient.get('/locations', {
-          params: { isActive: true, limit: 5000, offset: 0 },
-        });
-        const rows = Array.isArray(response.data?.data) ? response.data.data : [];
-        if (active) {
-          setLocationOptions(
-            rows
-              .map((item: { name?: string }) => String(item.name ?? '').trim())
-              .filter(Boolean),
-          );
-        }
-      } catch (error) {
-        // Keep the last options visible if a background refresh fails.
-        console.error('Locations could not be loaded:', error);
-      }
-    };
-
-    loadLocations();
-    window.addEventListener('locations-refresh', loadLocations);
-    return () => {
-      active = false;
-      window.removeEventListener('locations-refresh', loadLocations);
-    };
-  }, []);
 
   useEffect(() => { fetchAll(filters as unknown as Record<string, unknown>); }, [schema.id, fetchAll, filters]);
   useEffect(() => {
@@ -756,21 +727,17 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
 
     if (col.key === 'location') {
-      const currentValue = String(value ?? '').trim();
-      const options = Array.from(new Set([...locationOptions, currentValue].filter(Boolean)))
-        .sort((left, right) => left.localeCompare(right));
       return (
-        <select
+        <LocationCombobox
           name={col.key}
+          label={col.label}
           value={value ?? ''}
-          onChange={e => handleInputChange(e, isEdit)}
-          className={FIELD_BASE}
+          onChange={nextValue => handleInputChange({
+            target: { name: col.key, value: nextValue },
+          } as React.ChangeEvent<HTMLInputElement>, isEdit)}
           required={col.required}
           disabled={col.readonly}
-        >
-          <option value="">Select location...</option>
-          {options.map(option => <option key={option} value={option}>{option}</option>)}
-        </select>
+        />
       );
     }
 
