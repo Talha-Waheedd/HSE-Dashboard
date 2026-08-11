@@ -68,7 +68,14 @@ class DashboardService {
       if (!includeDepartmentField) delete where.departmentId;
       if (fromDate || toDate) {
         andConditions.push(fallbackCreatedAt
-          ? { [Op.or]: [{ [dateField]: dateRange }, { createdAt: dateRange }] }
+          ? {
+            [Op.or]: [
+              { [dateField]: dateRange },
+              // Imported records have an import-time createdAt. Only use it
+              // when the actual event date is genuinely unavailable.
+              { [Op.and]: [{ [dateField]: { [Op.is]: null } }, { createdAt: dateRange }] },
+            ],
+          }
           : { [dateField]: dateRange });
       }
       if (andConditions.length) where[Op.and] = andConditions;

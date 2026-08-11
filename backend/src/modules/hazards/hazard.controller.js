@@ -2,6 +2,8 @@
 
 const hazardService = require('./hazard.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
+const { Department, Hazard } = require('../../database/models');
+const { Op } = require('sequelize');
 
 /**
  * Report a new hazard
@@ -39,6 +41,29 @@ const getAllHazards = asyncHandler(async (req, res) => {
     options.where.status = statusMap[req.query.status] || req.query.status;
   }
   if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
+
+  const year = req.query.year && req.query.year !== 'All' ? String(req.query.year) : null;
+  const fromDate = req.query.fromDate || (year ? `${year}-01-01` : null);
+  const toDate = req.query.toDate
+    ? (String(req.query.toDate).length === 10 ? `${req.query.toDate} 23:59:59` : req.query.toDate)
+    : (year ? `${year}-12-31 23:59:59` : null);
+  if (fromDate || toDate) {
+    options.where.reportedAt = {};
+    if (fromDate) options.where.reportedAt[Op.gte] = fromDate;
+    if (toDate) options.where.reportedAt[Op.lte] = toDate;
+  }
+
+  if (req.query.department && req.query.department !== 'All') {
+    const department = await Department.findOne({
+      where: { [Op.or]: [{ code: req.query.department }, { name: req.query.department }] },
+      attributes: ['id'],
+    });
+    options.where[Op.and] = [{ [Op.or]: [
+      ...(department?.id ? [{ departmentId: department.id }] : []),
+      Hazard.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.originated_department')) = ${Hazard.sequelize.escape(req.query.department)}`),
+    ] }];
+    delete options.where.departmentId;
+  }
 
   const result = await hazardService.getAllHazards(options);
   res.status(200).json(ApiResponse.success(result.rows, 'Hazards retrieved successfully', {
