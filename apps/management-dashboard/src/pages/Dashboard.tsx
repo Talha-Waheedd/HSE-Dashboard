@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -155,6 +155,8 @@ export const Dashboard = () => {
   const [capas,      setCapas]      = useState<any[]>([]);
   const [training,   setTraining]   = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const requestSequence = useRef(0);
+  const hasLoadedDashboard = useRef(false);
 
   const [rawData, setRawData] = useState<DashboardRawData>({
     hazards: [], nearMisses: [], incidents: [], capas: [],
@@ -163,13 +165,16 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      setDashboardStats(null);
+      const requestId = ++requestSequence.current;
+      // Keep the last successful dashboard visible while polling in the
+      // background. A transient request failure must never turn valid counts
+      // into zeroes or blank cards.
+      if (!hasLoadedDashboard.current) setLoading(true);
       try {
         const safeModuleRequest = (schemaId: string) =>
           moduleService.getAll(schemaId, { page: 1, limit: schemaId === 'hazard-reporting' ? 10000 : 1000, ...filters }).catch((error) => {
             console.error(`Dashboard ${schemaId} request failed:`, error);
-            return { data: [], meta: { total: 0 } };
+            return null;
           });
 
         const [statsResponse, hRes, nmRes, incRes, capRes, trRes, insRes, audRes] = await Promise.all([
@@ -189,7 +194,10 @@ export const Dashboard = () => {
         ]);
         const drRes = { data: [] };
         const legRes = { data: [] };
-        setDashboardStats(statsResponse?.data?.data ?? null);
+
+        // Ignore results from an older polling cycle that completed after a
+        // newer request. This prevents count flicker from out-of-order APIs.
+        if (requestId !== requestSequence.current) return;
 
         const applyFilters = (data: any[]) => {
           let f = [...data];
@@ -206,31 +214,35 @@ export const Dashboard = () => {
           return f;
         };
 
-        const filteredHazards = applyFilters(hRes.data);
-        setHazards(filteredHazards);
-        setHazardTotal(hRes.meta?.total ?? filteredHazards.length);
-        setNearMisses(applyFilters(nmRes.data));
-        setIncidents(applyFilters(incRes.data));
-        setCapas(applyFilters(capRes.data));
-        setTraining(applyFilters(trRes.data));
+        const filteredHazards = hRes ? applyFilters(hRes.data) : null;
+        if (statsResponse?.data?.data) setDashboardStats(statsResponse.data.data);
+        if (hRes) {
+          setHazards(filteredHazards!);
+          setHazardTotal(hRes.meta?.total ?? filteredHazards!.length);
+        }
+        if (nmRes) setNearMisses(applyFilters(nmRes.data));
+        if (incRes) setIncidents(applyFilters(incRes.data));
+        if (capRes) setCapas(applyFilters(capRes.data));
+        if (trRes) setTraining(applyFilters(trRes.data));
 
-        setRawData({
-          hazards:      applyFilters(hRes.data),
-          nearMisses:   applyFilters(nmRes.data),
-          incidents:    applyFilters(incRes.data),
-          capas:        applyFilters(capRes.data),
-          training:     applyFilters(trRes.data),
-          inspections:  applyFilters(insRes.data),
-          audits:       applyFilters(audRes.data),
-          aggregate:    statsResponse?.data?.data ?? undefined,
+        setRawData(previous => ({
+          ...previous,
+          hazards:      hRes ? filteredHazards! : previous.hazards,
+          nearMisses:   nmRes ? applyFilters(nmRes.data) : previous.nearMisses,
+          incidents:    incRes ? applyFilters(incRes.data) : previous.incidents,
+          capas:        capRes ? applyFilters(capRes.data) : previous.capas,
+          training:     trRes ? applyFilters(trRes.data) : previous.training,
+          inspections:  insRes ? applyFilters(insRes.data) : previous.inspections,
+          audits:       audRes ? applyFilters(audRes.data) : previous.audits,
+          aggregate:    statsResponse?.data?.data ?? previous.aggregate,
           drills:       applyFilters(drRes.data),
           legal:        applyFilters(legRes.data),
-          totalOrgManhours: 0,
-        });
+        }));
+        hasLoadedDashboard.current = true;
       } catch (err) {
         console.error('Dashboard fetch error:', err);
       } finally {
-        setLoading(false);
+        if (requestId === requestSequence.current) setLoading(false);
       }
     };
     fetchData();
