@@ -19,7 +19,7 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const [filters, setFilters] = useState<Filters>({
-    year: '2026',
+    year: 'All',
     auditType: 'All',
     department: 'All',
     status: 'All',

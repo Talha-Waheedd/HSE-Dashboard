@@ -38,14 +38,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const hasActiveFilters =
     (filters.department !== '' && filters.department !== 'All') ||
     (filters.status !== '' && filters.status !== 'All') ||
-    (filters.year !== '' && filters.year !== '2026') ||
+    (filters.year !== '' && filters.year !== 'All') ||
     filters.fromDate !== '' ||
     filters.toDate !== '';
 
   const clearFilters = () => {
     setFilter('department', 'All');
     setFilter('status', 'All');
-    setFilter('year', '2026');
+    setFilter('year', 'All');
     setFilter('fromDate', '');
     setFilter('toDate', '');
   };

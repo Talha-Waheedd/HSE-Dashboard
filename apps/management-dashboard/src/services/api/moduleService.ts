@@ -75,7 +75,11 @@ const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? 
 export const moduleService = {
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
     const endpoint = getEndpoint(schemaId);
-    const response = await apiClient.get(endpoint, { params });
+    const requestParams = { ...(params || {}) };
+    if (schemaId === 'hazard-reporting' && requestParams.status && requestParams.status !== 'All') {
+      requestParams.status = statusToApi(requestParams.status, schemaId);
+    }
+    const response = await apiClient.get(endpoint, { params: requestParams });
     const payload = response.data;
     let rawData = Array.isArray(payload?.data) ? payload.data : payload?.data?.rows || [];
 
@@ -93,7 +97,7 @@ export const moduleService = {
         description: item.metadata?.description || item.description || item.title,
         date: item.metadata?.date || item.reportedAt || item.reported_at || item.createdAt || item.created_at || new Date().toISOString(),
         status_id: item.metadata?.status_id || statusFromApi(item.status),
-        department_id: item.metadata?.department_id || item.departmentId || item.department_id,
+        department_id: item.metadata?.originated_department || item.metadata?.department_id || item.departmentId || item.department_id,
       }));
     } else if (schemaId === 'near-miss') {
       rawData = rawData.map((item: any) => ({

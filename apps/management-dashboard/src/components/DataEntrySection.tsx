@@ -390,6 +390,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const routeCategory = schema.id === 'incident-log' ? searchParams.get('category') : null;
 
   useEffect(() => { fetchAll(filters as unknown as Record<string, unknown>); }, [schema.id, fetchAll, filters]);
+  useEffect(() => {
+    const refresh = () => fetchAll(filters as unknown as Record<string, unknown>);
+    window.addEventListener('dashboard-refresh', refresh);
+    return () => window.removeEventListener('dashboard-refresh', refresh);
+  }, [fetchAll, filters]);
   useEffect(() => { setCurrentPage(1); }, [filters, searchQuery, schema.id]);
   useEffect(() => {
     if (schema.id === 'incident-log' && routeCategory) setSearchQuery(routeCategory);

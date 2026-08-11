@@ -15,6 +15,7 @@ class DashboardService {
    */
   async getHseStats(query = {}) {
     const filter = {};
+    let departmentPredicate = null;
     if (query.plantId) filter.plantId = query.plantId;
 
     if (query.department && query.department !== 'All') {
@@ -23,13 +24,24 @@ class DashboardService {
         attributes: ['id'],
       });
       filter.departmentId = department?.id || '__no_matching_department__';
+      departmentPredicate = {
+        [Op.or]: [
+          ...(department?.id ? [{ departmentId: department.id }] : []),
+          // Sequelize's nested fn() builder drops the quotes around MySQL's
+          // JSON path. Use a bound/escaped literal so imported source
+          // department labels can be filtered without producing invalid SQL.
+          Hazard.sequelize.literal(
+            `JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.originated_department')) = ${Hazard.sequelize.escape(query.department)}`,
+          ),
+        ],
+      };
     }
 
     const statusMap = {
       Open: ['reported', 'submitted'],
       Pending: ['draft', 'under_investigation', 'under_review'],
       'Work in Progress': ['corrective_action'],
-      Closed: ['closed'],
+      Closed: ['closed', 'resolved'],
     };
     if (query.status && query.status !== 'All') {
       filter.status = statusMap[query.status] || query.status;
@@ -45,14 +57,21 @@ class DashboardService {
     const dateRange = {};
     if (fromDate) dateRange[Op.gte] = fromDate;
     if (toDate) dateRange[Op.lte] = toDate;
-    const whereFor = (dateField, fallbackCreatedAt = false) => {
+    const whereFor = (dateField, fallbackCreatedAt = false, includeHazardDepartmentMetadata = false, includeDepartmentField = true) => {
       const where = { ...filter };
       delete where.status;
-      if (fromDate || toDate) {
-        where[Op.or] = fallbackCreatedAt
-          ? [{ [dateField]: dateRange }, { createdAt: dateRange }]
-          : { [dateField]: dateRange };
+      const andConditions = [];
+      if (includeHazardDepartmentMetadata && departmentPredicate) {
+        delete where.departmentId;
+        andConditions.push(departmentPredicate);
       }
+      if (!includeDepartmentField) delete where.departmentId;
+      if (fromDate || toDate) {
+        andConditions.push(fallbackCreatedAt
+          ? { [Op.or]: [{ [dateField]: dateRange }, { createdAt: dateRange }] }
+          : { [dateField]: dateRange });
+      }
+      if (andConditions.length) where[Op.and] = andConditions;
       return where;
     };
     const withStatus = (where, statuses = filter.status) => {
@@ -70,17 +89,20 @@ class DashboardService {
       audits,
       inspections,
     ] = await Promise.all([
-      hazardRepository.countByStatus(withStatus(whereFor('reportedAt', true))),
+      hazardRepository.countByStatus(withStatus(whereFor('reportedAt', true, true))),
       Hazard.findAll({
         attributes: ['severityLevel', [Hazard.sequelize.fn('COUNT', 'id'), 'count']],
-        where: withStatus(whereFor('reportedAt', true)),
+        where: withStatus(whereFor('reportedAt', true, true)),
         group: ['severityLevel'],
         raw: true,
       }),
       // NearMissRepo doesn't have a specific count method yet, but we can use count
       nearMissRepository.model.count({ where: withStatus(whereFor('reportedAt', true)) }),
       incidentRepository.countByTypeAndStatus(withStatus(whereFor('incidentDate'))),
-      correctiveActionRepository.countByStatus(withStatus(whereFor('dueDate', true))),
+      // Corrective actions are polymorphic and currently have no department_id
+      // column; filtering them by that field causes the entire dashboard query
+      // to fail. Their source record carries the department relationship.
+      correctiveActionRepository.countByStatus(withStatus(whereFor('dueDate', true, false, false))),
       TrainingSession.count({ where: withStatus(whereFor('scheduledDate', true)) }),
       HseAudit.count({ where: withStatus(whereFor('scheduledDate', true)) }),
       Inspection.count({ where: withStatus(whereFor('scheduledDate', true)) }),

@@ -25,7 +25,19 @@ const getAllHazards = asyncHandler(async (req, res) => {
   };
   
   if (req.query.plantId) options.where.plantId = req.query.plantId;
-  if (req.query.status && req.query.status !== 'All') options.where.status = req.query.status;
+  if (req.query.status && req.query.status !== 'All') {
+    const statusMap = {
+      Open: ['reported', 'submitted'],
+      Pending: ['draft', 'under_review'],
+      'Work in Progress': ['under_review'],
+      Closed: ['closed', 'resolved'],
+      Cancelled: ['closed'],
+      submitted: ['submitted', 'reported'],
+      under_review: ['under_review', 'draft'],
+      closed: ['closed', 'resolved'],
+    };
+    options.where.status = statusMap[req.query.status] || req.query.status;
+  }
   if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
 
   const result = await hazardService.getAllHazards(options);
