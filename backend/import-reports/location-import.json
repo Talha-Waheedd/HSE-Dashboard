@@ -1,0 +1,574 @@
+{
+  "source": "C:/Users/PMLS/Downloads/Locations.xlsx",
+  "sourceRows": 113,
+  "successful": 113,
+  "duplicates": 0,
+  "failed": 0,
+  "rows": [
+    {
+      "row": 2,
+      "result": "imported",
+      "name": "Oil Tank Room 1 (B-62 Building)"
+    },
+    {
+      "row": 3,
+      "result": "imported",
+      "name": "Oil Tank Room 2 (B-62 Building)"
+    },
+    {
+      "row": 4,
+      "result": "imported",
+      "name": "Oil Tank Room 3 (B-62 Building)"
+    },
+    {
+      "row": 5,
+      "result": "imported",
+      "name": "Oil Tank Room 4 (B-86 L-11))"
+    },
+    {
+      "row": 6,
+      "result": "imported",
+      "name": "Ammonia Shortnening Plant"
+    },
+    {
+      "row": 7,
+      "result": "imported",
+      "name": "HT/LT Room"
+    },
+    {
+      "row": 8,
+      "result": "imported",
+      "name": "UPS Rooms"
+    },
+    {
+      "row": 9,
+      "result": "imported",
+      "name": "Compressor Rooms"
+    },
+    {
+      "row": 10,
+      "result": "imported",
+      "name": "Sub-Station (Cake Plant)"
+    },
+    {
+      "row": 11,
+      "result": "imported",
+      "name": "Chiller Room – Ground Floor"
+    },
+    {
+      "row": 12,
+      "result": "imported",
+      "name": "Chiller Room – First Floor"
+    },
+    {
+      "row": 13,
+      "result": "imported",
+      "name": "Cooling Tower"
+    },
+    {
+      "row": 14,
+      "result": "imported",
+      "name": "Diesel Storage Area"
+    },
+    {
+      "row": 15,
+      "result": "imported",
+      "name": "PMS Warehouse"
+    },
+    {
+      "row": 16,
+      "result": "imported",
+      "name": "FGS Warehouse"
+    },
+    {
+      "row": 17,
+      "result": "imported",
+      "name": "Brown Sugar Storage Area"
+    },
+    {
+      "row": 18,
+      "result": "imported",
+      "name": "Boys Canteen Roof"
+    },
+    {
+      "row": 19,
+      "result": "imported",
+      "name": "RMS Roof"
+    },
+    {
+      "row": 20,
+      "result": "imported",
+      "name": "Admin Block Roof"
+    },
+    {
+      "row": 21,
+      "result": "imported",
+      "name": "Oven Roof"
+    },
+    {
+      "row": 22,
+      "result": "imported",
+      "name": "Ovens – Non-Operational Areas"
+    },
+    {
+      "row": 23,
+      "result": "imported",
+      "name": "Gate-2 Gallery"
+    },
+    {
+      "row": 24,
+      "result": "imported",
+      "name": "Cold Storage Areas"
+    },
+    {
+      "row": 25,
+      "result": "imported",
+      "name": "LPG Storage Area"
+    },
+    {
+      "row": 26,
+      "result": "imported",
+      "name": "Line-1 Packing"
+    },
+    {
+      "row": 27,
+      "result": "imported",
+      "name": "Line-2 Packing"
+    },
+    {
+      "row": 28,
+      "result": "imported",
+      "name": "Line-3 Packing"
+    },
+    {
+      "row": 29,
+      "result": "imported",
+      "name": "Line-4 Packing"
+    },
+    {
+      "row": 30,
+      "result": "imported",
+      "name": "Line-5 Packing"
+    },
+    {
+      "row": 31,
+      "result": "imported",
+      "name": "Line-6 Packing"
+    },
+    {
+      "row": 32,
+      "result": "imported",
+      "name": "Line-7 Packing"
+    },
+    {
+      "row": 33,
+      "result": "imported",
+      "name": "Line-8 Packing"
+    },
+    {
+      "row": 34,
+      "result": "imported",
+      "name": "Line-9 Packing"
+    },
+    {
+      "row": 35,
+      "result": "imported",
+      "name": "Line-10 Packing"
+    },
+    {
+      "row": 36,
+      "result": "imported",
+      "name": "Line-11 Packing"
+    },
+    {
+      "row": 37,
+      "result": "imported",
+      "name": "Cake Plant Packing"
+    },
+    {
+      "row": 38,
+      "result": "imported",
+      "name": "Line-1 Mixing"
+    },
+    {
+      "row": 39,
+      "result": "imported",
+      "name": "Line-2 Mixing"
+    },
+    {
+      "row": 40,
+      "result": "imported",
+      "name": "Line-3 Mixing"
+    },
+    {
+      "row": 41,
+      "result": "imported",
+      "name": "Line-4 Mixing"
+    },
+    {
+      "row": 42,
+      "result": "imported",
+      "name": "Line-5 Mixing"
+    },
+    {
+      "row": 43,
+      "result": "imported",
+      "name": "Line-6 Mixing"
+    },
+    {
+      "row": 44,
+      "result": "imported",
+      "name": "Line-7 Mixing"
+    },
+    {
+      "row": 45,
+      "result": "imported",
+      "name": "Line-8 Mixing"
+    },
+    {
+      "row": 46,
+      "result": "imported",
+      "name": "Line-9 Mixing"
+    },
+    {
+      "row": 47,
+      "result": "imported",
+      "name": "Line-10 Mixing"
+    },
+    {
+      "row": 48,
+      "result": "imported",
+      "name": "Line-11 Mixing"
+    },
+    {
+      "row": 49,
+      "result": "imported",
+      "name": "Cake Plant Mixing"
+    },
+    {
+      "row": 50,
+      "result": "imported",
+      "name": "Cake Plant Chocolate Area"
+    },
+    {
+      "row": 51,
+      "result": "imported",
+      "name": "Line-1 Cutting"
+    },
+    {
+      "row": 52,
+      "result": "imported",
+      "name": "Line-2 Cuitting"
+    },
+    {
+      "row": 53,
+      "result": "imported",
+      "name": "Line-3 Cutting"
+    },
+    {
+      "row": 54,
+      "result": "imported",
+      "name": "Line-4 Cutting"
+    },
+    {
+      "row": 55,
+      "result": "imported",
+      "name": "Line-5 Cutting"
+    },
+    {
+      "row": 56,
+      "result": "imported",
+      "name": "Line-6 Cutting"
+    },
+    {
+      "row": 57,
+      "result": "imported",
+      "name": "Line-7 Cutting"
+    },
+    {
+      "row": 58,
+      "result": "imported",
+      "name": "Line-8 Cutting"
+    },
+    {
+      "row": 59,
+      "result": "imported",
+      "name": "Line-9 Cutting"
+    },
+    {
+      "row": 60,
+      "result": "imported",
+      "name": "Line-10 Cutting"
+    },
+    {
+      "row": 61,
+      "result": "imported",
+      "name": "Line-11 Cutting"
+    },
+    {
+      "row": 62,
+      "result": "imported",
+      "name": "Line-1 Oven"
+    },
+    {
+      "row": 63,
+      "result": "imported",
+      "name": "Line-2 Oven"
+    },
+    {
+      "row": 64,
+      "result": "imported",
+      "name": "Line-3 Oven"
+    },
+    {
+      "row": 65,
+      "result": "imported",
+      "name": "Line-4 Oven"
+    },
+    {
+      "row": 66,
+      "result": "imported",
+      "name": "Line-5 Oven"
+    },
+    {
+      "row": 67,
+      "result": "imported",
+      "name": "Line-6 Oven"
+    },
+    {
+      "row": 68,
+      "result": "imported",
+      "name": "Line-7 Oven"
+    },
+    {
+      "row": 69,
+      "result": "imported",
+      "name": "Line-8 Oven"
+    },
+    {
+      "row": 70,
+      "result": "imported",
+      "name": "Line-9 Oven"
+    },
+    {
+      "row": 71,
+      "result": "imported",
+      "name": "Line-10 Oven"
+    },
+    {
+      "row": 72,
+      "result": "imported",
+      "name": "Line-11 Oven"
+    },
+    {
+      "row": 73,
+      "result": "imported",
+      "name": "RMS Ground Floor"
+    },
+    {
+      "row": 74,
+      "result": "imported",
+      "name": "RMS First Floor"
+    },
+    {
+      "row": 75,
+      "result": "imported",
+      "name": "Admin Roof"
+    },
+    {
+      "row": 76,
+      "result": "imported",
+      "name": "Admin Block"
+    },
+    {
+      "row": 77,
+      "result": "imported",
+      "name": "Boys Canteen"
+    },
+    {
+      "row": 78,
+      "result": "imported",
+      "name": "Girls Canteen"
+    },
+    {
+      "row": 79,
+      "result": "imported",
+      "name": "Power House"
+    },
+    {
+      "row": 80,
+      "result": "imported",
+      "name": "Jaali Gate"
+    },
+    {
+      "row": 81,
+      "result": "imported",
+      "name": "Outside Jaali Gate"
+    },
+    {
+      "row": 82,
+      "result": "imported",
+      "name": "ESD Store"
+    },
+    {
+      "row": 83,
+      "result": "imported",
+      "name": "B-100 Warehouse"
+    },
+    {
+      "row": 84,
+      "result": "imported",
+      "name": "Gate-1"
+    },
+    {
+      "row": 85,
+      "result": "imported",
+      "name": "Gate-2"
+    },
+    {
+      "row": 86,
+      "result": "imported",
+      "name": "Gate-3"
+    },
+    {
+      "row": 87,
+      "result": "imported",
+      "name": "Gate-4"
+    },
+    {
+      "row": 88,
+      "result": "imported",
+      "name": "Gate-5"
+    },
+    {
+      "row": 89,
+      "result": "imported",
+      "name": "Silo Area"
+    },
+    {
+      "row": 90,
+      "result": "imported",
+      "name": "Oil Silos"
+    },
+    {
+      "row": 91,
+      "result": "imported",
+      "name": "ESD Inner Workshop"
+    },
+    {
+      "row": 92,
+      "result": "imported",
+      "name": "ESD Outer Workshop"
+    },
+    {
+      "row": 93,
+      "result": "imported",
+      "name": "Near DPM Office"
+    },
+    {
+      "row": 94,
+      "result": "imported",
+      "name": "Line-8A Creaming"
+    },
+    {
+      "row": 95,
+      "result": "imported",
+      "name": "Line-8A Cooling Tunnel"
+    },
+    {
+      "row": 96,
+      "result": "imported",
+      "name": "Line-8C Creaming"
+    },
+    {
+      "row": 97,
+      "result": "imported",
+      "name": "Line-8C Cooling Tunnel"
+    },
+    {
+      "row": 98,
+      "result": "imported",
+      "name": "Line-10A Creaming"
+    },
+    {
+      "row": 99,
+      "result": "imported",
+      "name": "Line-10A Cooling Tunnel"
+    },
+    {
+      "row": 100,
+      "result": "imported",
+      "name": "Line-10B Creaming"
+    },
+    {
+      "row": 101,
+      "result": "imported",
+      "name": "Line-10B Cooling Tunnel"
+    },
+    {
+      "row": 102,
+      "result": "imported",
+      "name": "Line-8 Multiplexer"
+    },
+    {
+      "row": 103,
+      "result": "imported",
+      "name": "Line-10 Multiplexer"
+    },
+    {
+      "row": 104,
+      "result": "imported",
+      "name": "Chocolate Plant"
+    },
+    {
+      "row": 105,
+      "result": "imported",
+      "name": "Chemical Room Ground Floor"
+    },
+    {
+      "row": 106,
+      "result": "imported",
+      "name": "Chemical Room First Floor"
+    },
+    {
+      "row": 107,
+      "result": "imported",
+      "name": "Chemical Room L-11"
+    },
+    {
+      "row": 108,
+      "result": "imported",
+      "name": "RMS Line-11"
+    },
+    {
+      "row": 109,
+      "result": "imported",
+      "name": "Pessenger Lift Admin Block"
+    },
+    {
+      "row": 110,
+      "result": "imported",
+      "name": "Pessenger Lift Prince Club House"
+    },
+    {
+      "row": 111,
+      "result": "imported",
+      "name": "Pessenger Lift 3 Bed Appartment"
+    },
+    {
+      "row": 112,
+      "result": "imported",
+      "name": "Export Room"
+    },
+    {
+      "row": 113,
+      "result": "imported",
+      "name": "QR Printer Workshop"
+    },
+    {
+      "row": 114,
+      "result": "imported",
+      "name": "Date/Time Printer Workshop"
+    }
+  ]
+}

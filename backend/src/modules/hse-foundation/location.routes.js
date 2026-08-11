@@ -1,0 +1,14 @@
+'use strict';
+const express = require('express');
+const router = express.Router();
+const controller = require('./location.controller');
+const { authenticate } = require('../../core/middleware/auth.middleware');
+const { validate } = require('../../core/middleware/validate.middleware');
+const { createLocationSchema, updateLocationSchema } = require('./location.schema');
+router.use(authenticate);
+router.get('/', controller.list);
+router.get('/:id', controller.get);
+router.post('/', validate(createLocationSchema), controller.create);
+router.put('/:id', validate(updateLocationSchema), controller.update);
+router.delete('/:id', controller.remove);
+module.exports = router;

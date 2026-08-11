@@ -12,6 +12,7 @@ const Notification = require('../modules/core/notification.model');
 const Plant = require('../modules/hse-foundation/plant.model');
 const Department = require('../modules/hse-foundation/department.model');
 const Employee = require('../modules/hse-foundation/employee.model');
+const Location = require('../modules/hse-foundation/location.model');
 
 // ─── HSE Reporting Models ─────────────────────────────────────────────────────
 const Hazard = require('../modules/hazards/hazard.model');
@@ -74,6 +75,8 @@ Notification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 // Plant ↔ Department
 Plant.hasMany(Department, { foreignKey: 'plantId', as: 'departments' });
 Department.belongsTo(Plant, { foreignKey: 'plantId', as: 'plant' });
+Plant.hasMany(Location, { foreignKey: 'plantId', as: 'locations' });
+Location.belongsTo(Plant, { foreignKey: 'plantId', as: 'plant' });
 
 // User ↔ Department (manager)
 User.hasMany(Department, { foreignKey: 'managerId', as: 'managedDepartments' });
@@ -214,7 +217,7 @@ module.exports = {
   // Core
   User, Role, Permission, Token, AuditLog, Notification,
   // HSE Foundation
-  Plant, Department, Employee,
+  Plant, Department, Employee, Location,
   // HSE Reporting
   Hazard, NearMiss, Incident, IncidentInjury,
   // HSE Training
