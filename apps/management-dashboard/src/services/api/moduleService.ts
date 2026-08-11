@@ -31,6 +31,9 @@ const statusToApi = (value: unknown, schemaId: string) => {
   if (schemaId === 'action-tracker') {
     return ({ Open: 'open', Pending: 'open', 'Work in Progress': 'in_progress', Closed: 'completed', Cancelled: 'cancelled' }[status] || status.toLowerCase().replaceAll(' ', '_'));
   }
+  if (schemaId === 'near-miss') {
+    return ({ Open: 'submitted', Pending: 'under_review', 'Work in Progress': 'under_review', Closed: 'closed', Cancelled: 'closed' }[status] || status.toLowerCase().replaceAll(' ', '_'));
+  }
   const common: Record<string, string> = {
     Open: schemaId === 'hazard-reporting' ? 'submitted' : 'reported',
     Pending: schemaId === 'hazard-reporting' ? 'under_review' : 'under_investigation',
@@ -76,7 +79,7 @@ export const moduleService = {
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
     const endpoint = getEndpoint(schemaId);
     const requestParams = { ...(params || {}) };
-    if (schemaId === 'hazard-reporting' && requestParams.status && requestParams.status !== 'All') {
+    if ((schemaId === 'hazard-reporting' || schemaId === 'near-miss') && requestParams.status && requestParams.status !== 'All') {
       requestParams.status = statusToApi(requestParams.status, schemaId);
     }
     const response = await apiClient.get(endpoint, { params: requestParams });
