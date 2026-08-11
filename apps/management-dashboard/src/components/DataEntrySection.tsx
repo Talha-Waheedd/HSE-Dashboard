@@ -13,6 +13,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus, Save, Trash2, Download, Edit2, X, History, ArrowUpDown,
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
+  ChevronsLeft, ChevronsRight,
   CheckCircle2, LayoutGrid, Filter, PanelRightOpen,
   Upload, Paperclip, FileText, Eye, CalendarDays, Clock,
 } from 'lucide-react';
@@ -41,6 +42,67 @@ const CARD =
 
 const STATUS_COLUMNS = new Set(['status_id', 'risk_rating_id', 'investigation_required']);
 const MAX_INCIDENT_ACTIONS = 15;
+
+const paginationItems = (currentPage: number, totalPages: number): Array<number | 'ellipsis-start' | 'ellipsis-end'> => {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  if (currentPage <= 4) return [1, 2, 3, 4, 5, 'ellipsis-end', totalPages];
+  if (currentPage >= totalPages - 3) return [1, 'ellipsis-start', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  return [1, 'ellipsis-start', currentPage - 1, currentPage, currentPage + 1, 'ellipsis-end', totalPages];
+};
+
+const PaginationControls = ({
+  currentPage,
+  totalPages,
+  startRecord,
+  endRecord,
+  totalRecords,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  startRecord: number;
+  endRecord: number;
+  totalRecords: number;
+  onPageChange: (page: number) => void;
+}) => {
+  const items = paginationItems(currentPage, totalPages);
+  const buttonClass = 'inline-flex h-8 min-w-8 items-center justify-center rounded-md border px-2 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CB0017]/35 disabled:cursor-not-allowed disabled:opacity-40';
+  const inactiveClass = 'border-[#E2E5E9] bg-white text-[#374151] hover:border-[#CB0017]/50 hover:bg-[#FFF7F8]';
+  const disabled = currentPage === 1;
+  const atEnd = currentPage === totalPages;
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-[#F0F0F0] bg-[#FAFAFA] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-xs text-[#6B7280]" aria-live="polite">
+        Showing <span className="font-semibold text-[#374151]">{startRecord}-{endRecord}</span> of{' '}
+        <span className="font-semibold text-[#374151]">{totalRecords}</span> records
+        <span className="mx-2 hidden text-[#D1D5DB] sm:inline">|</span>
+        <span className="block sm:inline">Page {currentPage} of {totalPages}</span>
+      </p>
+      <nav aria-label="Pagination" className="flex max-w-full items-center gap-1 overflow-x-auto pb-0.5">
+        <button type="button" aria-label="First page" title="First page" onClick={() => onPageChange(1)} disabled={disabled} className={`${buttonClass} ${inactiveClass}`}>
+          <ChevronsLeft className="h-4 w-4" />
+        </button>
+        <button type="button" aria-label="Previous page" title="Previous page" onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={disabled} className={`${buttonClass} ${inactiveClass}`}>
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        {items.map((item) => item === 'ellipsis-start' || item === 'ellipsis-end' ? (
+          <span key={item} aria-hidden="true" className="px-1 text-sm text-[#9CA3AF]">…</span>
+        ) : (
+          <button type="button" key={item} aria-label={`Page ${item}`} aria-current={item === currentPage ? 'page' : undefined} onClick={() => onPageChange(item)} className={`${buttonClass} ${item === currentPage ? 'border-[#CB0017] bg-[#CB0017] text-white shadow-sm' : inactiveClass}`}>
+            {item}
+          </button>
+        ))}
+        <button type="button" aria-label="Next page" title="Next page" onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={atEnd} className={`${buttonClass} ${inactiveClass}`}>
+          <ChevronRight className="h-4 w-4" />
+        </button>
+        <button type="button" aria-label="Last page" title="Last page" onClick={() => onPageChange(totalPages)} disabled={atEnd} className={`${buttonClass} ${inactiveClass}`}>
+          <ChevronsRight className="h-4 w-4" />
+        </button>
+      </nav>
+    </div>
+  );
+};
 
 type IncidentAction = {
   action: string;
@@ -1151,29 +1213,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           </div>
 
           {searchedEntries.length > 0 && (
-            <div className="flex items-center justify-between gap-4 border-t border-[#F0F0F0] bg-[#FAFAFA] px-4 py-3">
-              <p className="text-[12px] text-[#6B7280]">
-                Showing <span className="font-semibold text-[#374151]">{startRecord}-{endRecord}</span> of{' '}
-                <span className="font-semibold text-[#374151]">{searchedEntries.length}</span> records
-              </p>
-              <div className="flex items-center gap-1">
-                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-8 h-8 rounded border border-[#DEDEDE] bg-white disabled:opacity-40">
-                  <ChevronLeft className="h-4 w-4 mx-auto" />
-                </button>
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  const page = totalPages <= 5 ? i + 1 : Math.max(1, currentPage - 2) + i;
-                  if (page > totalPages) return null;
-                  return (
-                    <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 rounded border text-[13px] font-medium ${page === currentPage ? 'bg-[#CB0017] text-white border-[#CB0017]' : 'bg-white text-[#374151] border-[#DEDEDE]'}`}>
-                      {page}
-                    </button>
-                  );
-                })}
-                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="w-8 h-8 rounded border border-[#DEDEDE] bg-white disabled:opacity-40">
-                  <ChevronRight className="h-4 w-4 mx-auto" />
-                </button>
-              </div>
-            </div>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              startRecord={startRecord}
+              endRecord={endRecord}
+              totalRecords={searchedEntries.length}
+              onPageChange={setCurrentPage}
+            />
           )}
         </div>
       </div>
