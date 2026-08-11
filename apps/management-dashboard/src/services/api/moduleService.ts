@@ -188,7 +188,10 @@ export const moduleService = {
         severityLevel: severityToApi(payload.risk_rating_id || 'low'),
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
         reportedAt: payload.date || undefined,
-        status: statusToApi(payload.status_id || 'Open', schemaId),
+        // Accept both the form field name and the API field name.  This keeps
+        // saves reliable when an edit/import supplies `status` instead of
+        // `status_id`, while the backend still receives a canonical enum.
+        status: statusToApi(payload.status_id ?? payload.status ?? 'Open', schemaId),
       };
     } else if (schemaId === 'near-miss') {
       payload = {
