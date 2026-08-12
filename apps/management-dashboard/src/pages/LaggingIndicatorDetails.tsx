@@ -33,7 +33,7 @@ export const LaggingIndicatorDetails = ({ kind }: { kind: Kind }) => {
       setLoading(true);
       try {
         const [incidentResponse, employeeResponse] = await Promise.all([
-          moduleService.getAll('incident-log', { limit: 10000, offset: 0 }),
+          moduleService.getAll('incident-log', { limit: 10000, offset: 0, department: filters.department }),
           apiClient.get('/employees', { params: { limit: 10000, offset: 0 } }),
         ]);
         const employeePayload = employeeResponse.data;
@@ -49,11 +49,10 @@ export const LaggingIndicatorDetails = ({ kind }: { kind: Kind }) => {
     window.addEventListener('dashboard-refresh', refresh);
     const interval = window.setInterval(refresh, 30000);
     return () => { cancelled = true; window.removeEventListener('dashboard-refresh', refresh); window.clearInterval(interval); };
-  }, [kind]);
+  }, [kind, filters.department]);
 
   const filteredIncidents = useMemo(() => incidents.filter(row => {
     const date = dateOf(row);
-    if (filters.department !== 'All' && filters.department && String(row.department_id || row.departmentId || row.department?.id || '').toLowerCase() !== String(filters.department).toLowerCase()) return false;
     if (filters.year !== 'All' && filters.year && !date.startsWith(filters.year)) return false;
     if (filters.fromDate && date.slice(0, 10) < filters.fromDate) return false;
     if (filters.toDate && date.slice(0, 10) > filters.toDate) return false;

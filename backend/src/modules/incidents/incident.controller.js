@@ -2,6 +2,8 @@
 
 const incidentService = require('./incident.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
+const { Department, Incident } = require('../../database/models');
+const { Op } = require('sequelize');
 
 /**
  * Report a new incident
@@ -25,6 +27,19 @@ const getAllIncidents = asyncHandler(async (req, res) => {
   if (req.query.status) options.where.status = req.query.status;
   if (req.query.incidentType) options.where.incidentType = req.query.incidentType;
   if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
+  if (req.query.department && req.query.department !== 'All') {
+    const department = await Department.findOne({
+      where: { [Op.or]: [{ code: req.query.department }, { name: req.query.department }] },
+      attributes: ['id'],
+    });
+    options.where[Op.or] = department?.id
+      ? [
+        { departmentId: department.id },
+        Incident.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.department_id')) = ${Incident.sequelize.escape(req.query.department)}`),
+        Incident.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.department')) = ${Incident.sequelize.escape(req.query.department)}`),
+      ]
+      : [{ departmentId: '__no_matching_department__' }];
+  }
 
   const incidents = await incidentService.getAllIncidents(options);
   res.status(200).json(ApiResponse.success(incidents, 'Incidents retrieved successfully'));
