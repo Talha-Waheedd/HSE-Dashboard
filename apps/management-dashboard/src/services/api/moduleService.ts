@@ -195,7 +195,7 @@ export const moduleService = {
         // whereas the relational API field accepts only a department UUID.
         // Keep the selected code in metadata and omit the invalid FK value.
         departmentId: isUuid(payload.department_id) ? payload.department_id : undefined,
-        category: categoryToApi(payload.hazard_category_id),
+        category: categoryToApi(payload.hazard_category_id === 'Other' ? payload.hazard_category_id_other : payload.hazard_category_id),
         severityLevel: severityToApi(payload.risk_rating_id || 'low'),
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
         reportedAt: payload.date || undefined,
@@ -266,7 +266,7 @@ export const moduleService = {
     if (schemaId === 'hazard-reporting') {
       payload = {
         ...payload,
-        category: categoryToApi(payload.hazard_category_id),
+        category: categoryToApi(payload.hazard_category_id === 'Other' ? payload.hazard_category_id_other : payload.hazard_category_id),
         severityLevel: severityToApi(payload.risk_rating_id || 'low'),
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
         status: statusToApi(payload.status_id, schemaId),

@@ -13,7 +13,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus, Save, Trash2, Download, Edit2, X, History, ArrowUpDown,
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
-  ChevronsLeft, ChevronsRight,
+  ChevronsLeft, ChevronsRight, ChevronDown,
   CheckCircle2, LayoutGrid, Filter, PanelRightOpen,
   Upload, Paperclip, FileText, Eye, CalendarDays, Clock,
 } from 'lucide-react';
@@ -438,6 +438,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [isSaving, setIsSaving] = useState(false);
   const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
+  const [hazardCategoryQuery, setHazardCategoryQuery] = useState('');
+  const [hazardCategoryOpen, setHazardCategoryOpen] = useState(false);
   const [attachmentWarning, setAttachmentWarning] = useState<string | null>(null);
   const [statusHistoryModal, setStatusHistoryModal] = useState<{ isOpen: boolean; record: any | null }>({ isOpen: false, record: null });
   const [searchQuery, setSearchQuery] = useState('');
@@ -767,6 +769,59 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           required={col.required}
           disabled={col.readonly}
         />
+      );
+    }
+
+    if (schema.id === 'hazard-reporting' && col.key === 'hazard_category_id') {
+      const source = isEdit ? editFormData : formData;
+      const query = hazardCategoryQuery.trim().toLowerCase();
+      const options = (col.options || []).filter(option => option.toLowerCase().includes(query));
+      const choose = (nextValue: string) => {
+        handleInputChange({ target: { name: col.key, value: nextValue } } as any, isEdit);
+        setHazardCategoryQuery(nextValue === 'Other' ? '' : nextValue);
+        setHazardCategoryOpen(false);
+      };
+      return (
+        <div className="relative space-y-2">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
+            <input
+              type="text"
+              value={hazardCategoryQuery || (value === 'Other' ? '' : value ?? '')}
+              onFocus={() => setHazardCategoryOpen(true)}
+              onClick={() => setHazardCategoryOpen(true)}
+              onChange={event => {
+                setHazardCategoryQuery(event.target.value);
+                setHazardCategoryOpen(true);
+                handleInputChange({ target: { name: col.key, value: '' } } as any, isEdit);
+              }}
+              placeholder="Select or search hazard category..."
+              className={`${FIELD_BASE} pl-9 pr-9`}
+              required={col.required && !value}
+              aria-expanded={hazardCategoryOpen}
+              aria-autocomplete="list"
+            />
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
+          </div>
+          {hazardCategoryOpen && (
+            <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-lg border border-[#D6D6D6] bg-white py-1 shadow-lg">
+              {options.map(option => (
+                <button key={option} type="button" onMouseDown={event => event.preventDefault()} onClick={() => choose(option)} className="block w-full px-3 py-2 text-left text-[13px] hover:bg-[#FFF1F3]">
+                  {option}
+                </button>
+              ))}
+              {query && options.length === 0 && (
+                <button type="button" onMouseDown={event => event.preventDefault()} onClick={() => choose('Other')} className="block w-full px-3 py-2 text-left text-[13px] font-semibold text-[#CB0017] hover:bg-[#FFF1F3]">
+                  Other — use custom category
+                </button>
+              )}
+              {!query && options.length === 0 && <p className="px-3 py-2 text-[13px] text-[#64748B]">No categories found</p>}
+            </div>
+          )}
+          {value === 'Other' && (
+            <input type="text" name={`${col.key}_other`} value={source[`${col.key}_other`] ?? ''} onChange={event => handleInputChange(event, isEdit)} placeholder="Enter custom hazard category" className={FIELD_BASE} required />
+          )}
+        </div>
       );
     }
 
