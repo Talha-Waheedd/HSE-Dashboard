@@ -28,6 +28,7 @@ const envSchema = Joi.object({
 
   REDIS_HOST: Joi.string().default('localhost'),
   REDIS_PORT: Joi.number().default(6379),
+  REDIS_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
 
   MAIL_HOST: Joi.string().required(),
   MAIL_PORT: Joi.number().default(587),
@@ -77,6 +78,7 @@ const config = Object.freeze({
   },
 
   redis: {
+    enabled: envVars.REDIS_ENABLED,
     host: envVars.REDIS_HOST,
     port: envVars.REDIS_PORT,
     password: envVars.REDIS_PASSWORD || undefined,

@@ -2,11 +2,13 @@
 
 const IORedis = require('ioredis');
 const redisConfig = require('../../database/config/redis');
+const appConfig = require('../../database/config');
 const logger = require('../../shared/utils/logger');
 
 let client;
 
 const getClient = () => {
+  if (!appConfig.redis.enabled) return null;
   if (!client) {
     client = new IORedis({ ...redisConfig, lazyConnect: true });
     client.on('connect', () => logger.info('✅ Redis connected'));
@@ -22,6 +24,7 @@ class CacheService {
    * @returns {any} Parsed JSON value or null
    */
   async get(key) {
+    if (!appConfig.redis.enabled) return null;
     try {
       const value = await getClient().get(key);
       return value ? JSON.parse(value) : null;
@@ -39,6 +42,7 @@ class CacheService {
    * @param {number} ttlSeconds - Default 300 (5 min)
    */
   async set(key, value, ttlSeconds = 300) {
+    if (!appConfig.redis.enabled) return;
     try {
       await getClient().set(key, JSON.stringify(value), 'EX', ttlSeconds);
     } catch (err) {
@@ -50,6 +54,7 @@ class CacheService {
    * Delete a cached key.
    */
   async del(key) {
+    if (!appConfig.redis.enabled) return;
     try {
       await getClient().del(key);
     } catch (err) {
@@ -63,6 +68,7 @@ class CacheService {
    * on large keyspaces (KEYS is O(N) and holds the event loop).
    */
   async delPattern(pattern) {
+    if (!appConfig.redis.enabled) return;
     try {
       const redis = getClient();
       let cursor = '0';
