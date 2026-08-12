@@ -34,13 +34,18 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-// Response Interceptor: Handle Global Errors (e.g., 401 Unauthorized)
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+
+// Response Interceptor: Handle Global Errors (e.g., 401 Unauthorized, 5xx with backoff)
 apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error: AxiosError) => {
-    const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean } | undefined;
+    const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _retryCount?: number } | undefined;
+    
+    // 1. Handle 401 Unauthorized (Token Refresh)
     if (error.response?.status === 401 && original && !original._retry && refreshHandler) {
       original._retry = true;
       refreshing ??= refreshHandler().finally(() => { refreshing = null; });
@@ -50,6 +55,26 @@ apiClient.interceptors.response.use(
         return apiClient.request(original);
       }
     }
+
+    // 2. Handle Transient Errors with Exponential Backoff
+    // Retry on 5xx (server error), 429 (rate limit), or network error (no response)
+    const shouldRetry = original && (
+      !error.response || 
+      error.response.status >= 500 || 
+      error.response.status === 429
+    );
+
+    if (shouldRetry) {
+      original._retryCount = original._retryCount || 0;
+      if (original._retryCount < MAX_RETRIES) {
+        original._retryCount += 1;
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = RETRY_DELAY_MS * (2 ** (original._retryCount - 1));
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return apiClient.request(original);
+      }
+    }
+
     return Promise.reject(error);
   }
 );

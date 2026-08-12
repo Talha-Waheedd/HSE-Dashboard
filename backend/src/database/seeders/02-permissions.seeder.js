@@ -20,7 +20,7 @@ module.exports = {
       };
     });
 
-    await queryInterface.bulkInsert('permissions', permissionRows);
+    await queryInterface.bulkInsert('permissions', permissionRows, { ignoreDuplicates: true });
   },
 
   async down(queryInterface) {

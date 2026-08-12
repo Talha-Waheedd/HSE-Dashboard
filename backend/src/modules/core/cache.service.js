@@ -8,9 +8,9 @@ let client;
 
 const getClient = () => {
   if (!client) {
-    client = new IORedis(redisConfig);
+    client = new IORedis({ ...redisConfig, lazyConnect: true });
     client.on('connect', () => logger.info('✅ Redis connected'));
-    client.on('error', (err) => logger.error('Redis error:', err));
+    client.on('error', (err) => logger.warn('Redis error (non-fatal):', { message: err.message }));
   }
   return client;
 };
@@ -18,40 +18,69 @@ const getClient = () => {
 class CacheService {
   /**
    * Get a cached value by key.
+   * Returns null on cache miss or if Redis is unavailable (graceful degradation).
    * @returns {any} Parsed JSON value or null
    */
   async get(key) {
-    const value = await getClient().get(key);
-    return value ? JSON.parse(value) : null;
+    try {
+      const value = await getClient().get(key);
+      return value ? JSON.parse(value) : null;
+    } catch (err) {
+      logger.warn('CacheService.get failed — bypassing cache', { key, message: err.message });
+      return null;
+    }
   }
 
   /**
    * Set a cached value with optional TTL.
+   * Silently no-ops when Redis is unavailable.
    * @param {string} key
    * @param {any} value
    * @param {number} ttlSeconds - Default 300 (5 min)
    */
   async set(key, value, ttlSeconds = 300) {
-    await getClient().set(key, JSON.stringify(value), 'EX', ttlSeconds);
+    try {
+      await getClient().set(key, JSON.stringify(value), 'EX', ttlSeconds);
+    } catch (err) {
+      logger.warn('CacheService.set failed — bypassing cache', { key, message: err.message });
+    }
   }
 
   /**
    * Delete a cached key.
    */
   async del(key) {
-    await getClient().del(key);
+    try {
+      await getClient().del(key);
+    } catch (err) {
+      logger.warn('CacheService.del failed', { key, message: err.message });
+    }
   }
 
   /**
    * Delete all keys matching a pattern.
+   * Uses SCAN (cursor-based) instead of KEYS to avoid blocking the Redis server
+   * on large keyspaces (KEYS is O(N) and holds the event loop).
    */
   async delPattern(pattern) {
-    const keys = await getClient().keys(pattern);
-    if (keys.length > 0) await getClient().del(keys);
+    try {
+      const redis = getClient();
+      let cursor = '0';
+      do {
+        const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+        cursor = nextCursor;
+        if (keys.length > 0) {
+          await redis.del(keys);
+        }
+      } while (cursor !== '0');
+    } catch (err) {
+      logger.warn('CacheService.delPattern failed', { pattern, message: err.message });
+    }
   }
 
   /**
    * Wrap a function with cache-aside pattern.
+   * Falls through to the factory function if Redis is unavailable.
    */
   async remember(key, ttl, fn) {
     const cached = await this.get(key);

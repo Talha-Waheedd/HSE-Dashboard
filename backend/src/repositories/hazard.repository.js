@@ -30,8 +30,9 @@ class HazardRepository extends BaseRepository {
    * @returns {Promise<Array>}
    */
   async countByStatus(filterOptions = {}) {
+    const { col, fn } = this.model.sequelize;
     const query = {
-      attributes: ['status', [this.model.sequelize.fn('COUNT', 'id'), 'count']],
+      attributes: ['status', [fn('COUNT', col('id')), 'count']],
       group: ['status'],
       where: filterOptions,
       raw: true,

@@ -14,13 +14,14 @@ const TokenType = require('../../shared/enums/TokenType');
 const authenticate = async (req, res, next) => {
   try {
     // Local dashboard preview mode has no real login token. It is available
-    // only outside production and requires the frontend's explicit header.
+    // only in the 'development' environment and requires the frontend's
+    // explicit header. Using === 'development' (not !== 'production') ensures
+    // the bypass never activates when NODE_ENV is unset or set to 'staging'.
     if (
       req.headers['x-preview-auth'] === 'true' &&
-      process.env.NODE_ENV !== 'production'
+      process.env.NODE_ENV === 'development'
     ) {
       const previewUser = await userRepository.findByIdWithRole(process.env.PREVIEW_USER_ID);
-      // The preview header is only honored when explicitly enabled above.
       // Keep read-only dashboard/module requests available even if the local
       // seed user was removed or migrations have not restored its relations.
       // Write operations still receive the configured UUID for audit fields.
@@ -31,6 +32,7 @@ const authenticate = async (req, res, next) => {
       };
       return next();
     }
+
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

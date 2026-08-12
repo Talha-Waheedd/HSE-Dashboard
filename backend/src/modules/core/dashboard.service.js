@@ -1,19 +1,40 @@
 'use strict';
 
+const crypto = require('crypto');
 const hazardRepository = require('../../repositories/hazard.repository');
 const nearMissRepository = require('../../repositories/near-miss.repository');
 const incidentRepository = require('../../repositories/incident.repository');
 const correctiveActionRepository = require('../../repositories/corrective-action.repository');
-const { Hazard, TrainingSession, HseAudit, Inspection } = require('../../database/models');
-const { Department } = require('../../database/models');
+const { Hazard, TrainingSession, HseAudit, Inspection, Department } = require('../../database/models');
 const { Op } = require('sequelize');
+const cacheService = require('./cache.service');
+
+/** Deterministic cache key from filter query — safe for Redis key namespace. */
+const buildCacheKey = (query) => {
+  const sorted = Object.keys(query)
+    .sort()
+    .reduce((acc, k) => { acc[k] = query[k]; return acc; }, {});
+  const hash = crypto.createHash('sha1').update(JSON.stringify(sorted)).digest('hex').slice(0, 12);
+  return `dashboard:stats:${hash}`;
+};
 
 class DashboardService {
   /**
-   * Get overall HSE statistics for the dashboard
+   * Get overall HSE statistics for the dashboard.
+   * Results are cached for 60 s per unique filter combination to reduce DB load
+   * on the highest-traffic read endpoint.
    * @param {object} query - Optional dashboard filters
    */
   async getHseStats(query = {}) {
+    const cacheKey = buildCacheKey(query);
+    return cacheService.remember(cacheKey, 60, () => this._fetchHseStats(query));
+  }
+
+  /**
+   * Internal: execute the 8 parallel DB queries that back the dashboard.
+   * Called by getHseStats — do not call directly.
+   */
+  async _fetchHseStats(query = {}) {
     const filter = {};
     let departmentPredicate = null;
     if (query.plantId) filter.plantId = query.plantId;
@@ -57,6 +78,7 @@ class DashboardService {
     const dateRange = {};
     if (fromDate) dateRange[Op.gte] = fromDate;
     if (toDate) dateRange[Op.lte] = toDate;
+
     const whereFor = (dateField, fallbackCreatedAt = false, includeHazardDepartmentMetadata = false, includeDepartmentField = true) => {
       const where = { ...filter };
       delete where.status;
@@ -81,9 +103,13 @@ class DashboardService {
       if (andConditions.length) where[Op.and] = andConditions;
       return where;
     };
+
+    // Returns a NEW object — does NOT mutate the passed `where` argument.
+    // Previously this helper mutated `where` in place which caused subtle bugs
+    // when the same `where` object was reused across parallel queries.
     const withStatus = (where, statuses = filter.status) => {
-      if (statuses) where.status = statuses;
-      return where;
+      if (!statuses) return where;
+      return { ...where, status: statuses };
     };
 
     const [
@@ -98,12 +124,11 @@ class DashboardService {
     ] = await Promise.all([
       hazardRepository.countByStatus(withStatus(whereFor('reportedAt', true, true))),
       Hazard.findAll({
-        attributes: ['severityLevel', [Hazard.sequelize.fn('COUNT', 'id'), 'count']],
+        attributes: ['severityLevel', [Hazard.sequelize.fn('COUNT', Hazard.sequelize.col('id')), 'count']],
         where: withStatus(whereFor('reportedAt', true, true)),
         group: ['severityLevel'],
         raw: true,
       }),
-      // NearMissRepo doesn't have a specific count method yet, but we can use count
       nearMissRepository.model.count({ where: withStatus(whereFor('reportedAt', true)) }),
       incidentRepository.countByTypeAndStatus(withStatus(whereFor('incidentDate'))),
       // Corrective actions are polymorphic and currently have no department_id

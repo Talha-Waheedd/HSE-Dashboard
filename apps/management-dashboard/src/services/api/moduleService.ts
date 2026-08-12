@@ -1,5 +1,11 @@
 import { apiClient } from '@cbl/api';
 
+// Default plant UUID for the CBL LU Sukkur plant.
+// This is the primary plant seeded in the database. If your environment uses
+// a different plant UUID, set VITE_DEFAULT_PLANT_ID in your .env file.
+const DEFAULT_PLANT_ID: string =
+  import.meta.env.VITE_DEFAULT_PLANT_ID || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b';
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -184,7 +190,7 @@ export const moduleService = {
     if (schemaId === 'hazard-reporting') {
       payload = {
         ...payload,
-        plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b', // CBL Plant Alpha
+        plantId: payload.plantId || DEFAULT_PLANT_ID,
         // Form options currently use department codes (such as HSE / PRD),
         // whereas the relational API field accepts only a department UUID.
         // Keep the selected code in metadata and omit the invalid FK value.
@@ -201,7 +207,7 @@ export const moduleService = {
     } else if (schemaId === 'near-miss') {
       payload = {
         ...payload,
-        plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b',
+        plantId: payload.plantId || DEFAULT_PLANT_ID,
         title: payload.details ? payload.details.substring(0, 50) : 'Near Miss',
         description: payload.details || 'No details provided',
         severityLevel: payload.investigation_required === 'Yes' ? 'high' : 'low',
@@ -212,7 +218,7 @@ export const moduleService = {
     } else if (schemaId === 'incident-log') {
       payload = {
         ...payload,
-        plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b', // CBL Plant Alpha
+        plantId: payload.plantId || DEFAULT_PLANT_ID,
         title: payload.description ? payload.description.substring(0, 50) : 'Incident Log',
         description: payload.description || 'No description provided',
         incidentDate: payload.date || new Date().toISOString(),
@@ -228,7 +234,7 @@ export const moduleService = {
       const durationMinutes = Number(payload.duration_minutes) || undefined;
       payload = {
         ...payload,
-        plantId: payload.plantId || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b',
+        plantId: payload.plantId || DEFAULT_PLANT_ID,
         departmentId: payload.department_id,
         title: payload.topic || 'Training Session',
         trainingType: trainingTypeToApi(payload.training_type),
@@ -238,7 +244,10 @@ export const moduleService = {
         participantCount: participants,
         durationMinutes,
         manhours: Number(payload.manhours) || (participants && durationMinutes ? participants * durationMinutes / 60 : undefined),
-        status: 'completed',
+        // Use the form's status value; default to 'scheduled' (not 'completed')
+        // because most manually-entered training sessions are upcoming/planned,
+        // not already completed. The user can explicitly set Closed if done.
+        status: statusToApi(payload.status_id ?? payload.status ?? 'Pending', schemaId),
       };
     }
 

@@ -39,6 +39,20 @@ const errorMiddleware = (err, req, res, next) => {
     );
   }
 
+  if (err.name === 'SequelizeDatabaseError') {
+    logger.error(`[${requestId}] Database error:`, { message: err.message, parent: err.parent?.message });
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      ApiResponse.error('Database query failed. Please contact support.'),
+    );
+  }
+
+  if (err.name === 'SequelizeTimeoutError' || err.name === 'SequelizeConnectionError') {
+    logger.error(`[${requestId}] Database connection/timeout error:`, { message: err.message });
+    return res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json(
+      ApiResponse.error('Service temporarily unavailable due to database overload.'),
+    );
+  }
+
   // ─── Operational Errors (ApiError) ───────────────────────────────────────
   if (err instanceof ApiError && err.isOperational) {
     logger.warn(`[${requestId}] Operational error ${err.statusCode}: ${err.message}`);

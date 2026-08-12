@@ -31,8 +31,9 @@ class IncidentRepository extends BaseRepository {
    * @returns {Promise<Array>}
    */
   async countByTypeAndStatus(filterOptions = {}) {
+    const { col, fn } = this.model.sequelize;
     const query = {
-      attributes: ['incidentType', 'status', [this.model.sequelize.fn('COUNT', 'id'), 'count']],
+      attributes: ['incidentType', 'status', [fn('COUNT', col('id')), 'count']],
       group: ['incidentType', 'status'],
       where: filterOptions,
       raw: true,

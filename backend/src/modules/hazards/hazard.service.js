@@ -15,10 +15,10 @@ const normalizeStatus = (value) => {
   return Object.values(HazardStatus).includes(normalized) ? normalized : HazardStatus.DRAFT;
 };
 const bypassHazardValidation = () =>
-  process.env.NODE_ENV !== 'production' && process.env.BYPASS_HAZARD_VALIDATION === 'true';
+  process.env.NODE_ENV === 'development' && process.env.BYPASS_HAZARD_VALIDATION === 'true';
 
 const allowUnverifiedHazardEmployee = () =>
-  process.env.NODE_ENV !== 'production' &&
+  process.env.NODE_ENV === 'development' &&
   process.env.ALLOW_UNVERIFIED_HAZARD_EMPLOYEE === 'true';
 
 class HazardService {

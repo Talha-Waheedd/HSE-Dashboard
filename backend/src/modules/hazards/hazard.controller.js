@@ -16,18 +16,31 @@ const inFlightCreates = new Map();
 const createHazard = asyncHandler(async (req, res) => {
   const requestKey = String(req.get('Idempotency-Key') || '').trim();
   const cacheKey = requestKey ? `${req.user.id}:${requestKey}` : null;
+
+  // Re-use an in-flight promise for the same key (double-click / network retry).
+  // Important: a REJECTED promise must NOT be cached — evict it immediately so
+  // the caller can safely retry with the same idempotency key.
   let operation = cacheKey ? inFlightCreates.get(cacheKey) : null;
   if (!operation) {
     operation = hazardService.createHazard(req.body, req.user.id);
-    if (cacheKey) inFlightCreates.set(cacheKey, operation);
+    if (cacheKey) {
+      inFlightCreates.set(cacheKey, operation);
+      // Evict rejected promises right away so retries don't re-await failures.
+      operation.catch(() => {
+        if (inFlightCreates.get(cacheKey) === operation) inFlightCreates.delete(cacheKey);
+      });
+    }
   }
+
   try {
     const hazard = await operation;
     res.status(201).json(ApiResponse.success(hazard, 'Hazard reported successfully', 201));
   } finally {
+    // Always clean up after the awaiting caller is done with this operation.
     if (cacheKey && inFlightCreates.get(cacheKey) === operation) inFlightCreates.delete(cacheKey);
   }
 });
+
 
 /**
  * Get all hazards

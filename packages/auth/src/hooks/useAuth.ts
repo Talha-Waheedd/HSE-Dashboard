@@ -25,35 +25,41 @@ export const useAuth = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  configureTokenRefresh(async () => {
-    const refreshToken = tokenStore.getRefreshToken();
-    if (!refreshToken) return null;
-    const tokens = await authClient.refresh(refreshToken);
-    const currentUser = useAuthStore.getState().user;
-    if (currentUser) loginUser(currentUser, tokens.accessToken);
-    return tokens.accessToken;
-  });
+  // Register the token-refresh callback exactly once (or when loginUser changes).
+  // Placing this at the top of the hook body without useEffect meant it
+  // re-registered on every render, each time capturing a potentially stale
+  // loginUser closure — wasting allocations and causing subtle refresh bugs.
+  useEffect(() => {
+    configureTokenRefresh(async () => {
+      const refreshToken = tokenStore.getRefreshToken();
+      if (!refreshToken) return null;
+      const tokens = await authClient.refresh(refreshToken);
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) loginUser(currentUser, tokens.accessToken);
+      return tokens.accessToken;
+    });
+  }, [loginUser]);
 
-  // Handle redirect response natively
+  // Handle Microsoft redirect response — fires when the user returns from the
+  // Azure login redirect. Guards against loops with the error dependency.
   useEffect(() => {
     const handleRedirect = async () => {
       if (PREVIEW_BYPASS) return;
 
       if (inProgress === InteractionStatus.None && accounts.length > 0 && !isAuthenticated && !error) {
         setIsLoggingIn(true);
-        // We do NOT clear error here unless we explicitly retry, to prevent loops
         try {
           const account = accounts[0];
           const email = account.username;
           if (!email) {
             throw new Error("Could not retrieve email from Microsoft account");
           }
-          
+
           let msalToken: string | undefined = undefined;
           try {
             const tokenResponse = await instance.acquireTokenSilent({
               scopes: ["user.read"],
-              account: account
+              account: account,
             });
             msalToken = tokenResponse.idToken;
           } catch (e) {
@@ -72,7 +78,7 @@ export const useAuth = () => {
             ? backendUser.role?.name
             : backendUser.role;
           const rolePermissions = typeof backendUser.role === 'object'
-            ? backendUser.role?.permissions?.map((p) => p.key)
+            ? backendUser.role?.permissions?.map((p: any) => p.key)
             : undefined;
           const authUser = {
             id: backendUser.id.toString(),
@@ -82,13 +88,12 @@ export const useAuth = () => {
             roles: backendUser.roles,
             permissions: backendUser.permissions || rolePermissions || [],
             department_id: backendUser.department_id?.toString() || backendUser.departmentId?.toString(),
-            plant_id: backendUser.plant_id?.toString() || backendUser.plantId?.toString()
+            plant_id: backendUser.plant_id?.toString() || backendUser.plantId?.toString(),
           };
 
           loginUser(authUser, verifyResponse.tokens.accessToken);
         } catch (e: any) {
           console.error("Backend Verification Error:", e);
-          
           if (e.message?.includes("User not authorized")) {
             setError("Your Microsoft email is not registered in the system. Please contact the administrator.");
           } else {
@@ -111,11 +116,10 @@ export const useAuth = () => {
         loginUser(PREVIEW_USER);
         return;
       }
-
-      // NO POPUPS! Redirect the whole page
+      // Redirect (no popups) to avoid popup-blocker issues in enterprise browsers
       await instance.loginRedirect({
         scopes: ["user.read"],
-        prompt: "select_account"
+        prompt: "select_account",
       });
     } catch (e: any) {
       console.error("Login Error:", e);
@@ -129,7 +133,6 @@ export const useAuth = () => {
       clearAuth();
       return;
     }
-
     try {
       await authClient.logout();
     } catch (e) {
@@ -147,6 +150,6 @@ export const useAuth = () => {
     user,
     token,
     error,
-    hasRole
+    hasRole,
   };
 };

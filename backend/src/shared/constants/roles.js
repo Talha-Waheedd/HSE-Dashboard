@@ -2,6 +2,7 @@
 
 const ROLES = Object.freeze({
   SYSTEM_ADMINISTRATOR: 'System Administrator',
+  SUPER_ADMIN: 'Super Admin',
   HSE_MANAGER: 'HSE Manager',
   HSE_OFFICER: 'HSE Officer',
   DEPARTMENT_MANAGER: 'Department Manager',

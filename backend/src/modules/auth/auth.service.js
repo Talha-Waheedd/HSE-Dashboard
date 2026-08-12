@@ -10,6 +10,7 @@ const ApiError = require('../../shared/utils/ApiError');
 const TokenType = require('../../shared/enums/TokenType');
 const { MESSAGES } = require('../../shared/constants/messages');
 const { emitter, EVENTS } = require('../../core/events/emitter');
+const logger = require('../../shared/utils/logger');
 const jwt = require('jsonwebtoken');
 const jwksRsa = require('jwks-rsa');
 const config = require('../../database/config');
@@ -227,12 +228,56 @@ class AuthService {
   }
 
   /**
-   * Check if a user's email exists in the database.
-   * @param {string} email 
+   * Check if a user's email exists in the database (used by SSO flow).
+   * @param {string} email
    * @returns {object|null} The user object if found, otherwise null
    */
   async verifyEmailExists(email) {
     return userRepository.findOne({ email });
+  }
+
+  /**
+   * Complete SSO login: issue token pair, store refresh token, update last-login.
+   * Extracted from auth.controller to avoid inline require() anti-pattern and
+   * duplication of the same transaction/event logic already in login().
+   *
+   * @param {string} email - Verified email address from Microsoft SSO
+   * @param {object} meta  - { ip, userAgent }
+   * @returns {{ user: object, tokens: { accessToken, refreshToken } }}
+   */
+  async ssoLogin(email, meta = {}) {
+    const user = await this.verifyEmailExists(email);
+    if (!user || !user.status) {
+      return null; // Caller decides how to respond (404 / 401)
+    }
+
+    const tokens = generateTokenPair(user);
+
+    const transaction = await sequelize.transaction();
+    try {
+      await tokenRepository.revokeAllUserTokens(user.id, TokenType.REFRESH, transaction);
+      await tokenRepository.createRefreshToken(
+        {
+          token: tokens.refreshToken,
+          userId: user.id,
+          expiresAt: addDays(new Date(), 7),
+          ipAddress: meta.ip,
+          userAgent: meta.userAgent,
+        },
+        transaction,
+      );
+      await userRepository.updateLastLogin(user.id, transaction);
+      await transaction.commit();
+    } catch (err) {
+      await transaction.rollback();
+      logger.error('SSO login transaction failed', { email, err: err.message });
+      throw err;
+    }
+
+    emitter.emit(EVENTS.USER_LOGGED_IN, { userId: user.id, ...meta });
+
+    const userWithRole = await userRepository.findByIdWithRole(user.id);
+    return { user: userWithRole.toJSON(), tokens };
   }
 }
 

@@ -2,6 +2,7 @@
 
 const incidentRepository = require('../../repositories/incident.repository');
 const plantRepository = require('../../repositories/plant.repository');
+const { IncidentInjury } = require('../../database/models');
 const IncidentStatus = require('../../shared/enums/IncidentStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
@@ -45,36 +46,37 @@ class IncidentService {
       reportedBy: userId,
       createdBy: userId,
     };
-    
+
     if (![IncidentStatus.DRAFT, IncidentStatus.REPORTED].includes(persistedData.status)) {
       persistedData.status = IncidentStatus.DRAFT;
     }
 
-    // Generate incident number (e.g. INC-2026-0001)
-    const currentYear = new Date().getFullYear();
-    const count = await incidentRepository.model.count({
-      where: {
-        incidentDate: {
-          [sequelize.Sequelize.Op.gte]: `${currentYear}-01-01`,
-        },
-      },
-      paranoid: false, // Include deleted in the count to avoid duplicate numbers
-    });
-    
-    persistedData.incidentNumber = `INC-${currentYear}-${String(count + 1).padStart(4, '0')}`;
-
     const transaction = await sequelize.transaction();
     try {
+      // Generate incident number inside the transaction with a row-level lock
+      // to prevent duplicate INC-YYYY-XXXX numbers under concurrent creates.
+      const currentYear = new Date().getFullYear();
+      const [[{ cnt }]] = await sequelize.query(
+        `SELECT COUNT(*) AS cnt FROM incidents WHERE incident_date >= :startOfYear`,
+        {
+          replacements: { startOfYear: `${currentYear}-01-01` },
+          type: sequelize.QueryTypes.SELECT,
+          transaction,
+          lock: transaction.LOCK.UPDATE,
+        },
+      );
+      persistedData.incidentNumber = `INC-${currentYear}-${String(Number(cnt) + 1).padStart(4, '0')}`;
+
       // 1. Create incident
       const incident = await incidentRepository.create(persistedData, { transaction });
 
       // 2. Create injuries if provided
       if (persistedData.injuries && Array.isArray(persistedData.injuries) && persistedData.injuries.length > 0) {
-        const injuriesData = persistedData.injuries.map(injury => ({
+        const injuriesData = persistedData.injuries.map((injury) => ({
           ...injury,
           incidentId: incident.id,
         }));
-        await incidentRepository.model.sequelize.models.IncidentInjury.bulkCreate(injuriesData, { transaction });
+        await IncidentInjury.bulkCreate(injuriesData, { transaction });
       }
 
       await transaction.commit();

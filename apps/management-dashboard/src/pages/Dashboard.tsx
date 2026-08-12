@@ -247,7 +247,9 @@ export const Dashboard = () => {
     };
     fetchData();
 
-    const refreshInterval = window.setInterval(fetchData, 30000);
+    // Refresh every 5 minutes (300,000ms) rather than every 30 seconds to
+    // prevent overwhelming the database with 8 concurrent aggregate queries per client.
+    const refreshInterval = window.setInterval(fetchData, 300000);
 
     const handleRefresh = () => {
       fetchData();

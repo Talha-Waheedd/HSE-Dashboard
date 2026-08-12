@@ -13,21 +13,32 @@ export const useModuleData = (schemaId: string) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Guard: prevents duplicate saves from double-clicks or fast retries.
+  // Reset happens in createRecord's finally so it is always cleared after
+  // an attempt — previously it was only reset inside updateStatus which meant
+  // a standalone createRecord would permanently block future saves.
   const createInFlight = useRef(false);
 
   const fetchAll = useCallback(async (params?: Record<string, unknown>) => {
     if (!schemaId) return;
     setLoading(true);
     try {
-      const response = await moduleService.getAll(schemaId, { page: 1, limit: schemaId === 'hazard-reporting' ? 10000 : 1000, ...(params as Record<string, unknown>) });
+      const response = await moduleService.getAll(schemaId, {
+        page: 1,
+        limit: schemaId === 'hazard-reporting' ? 10000 : 1000,
+        ...(params as Record<string, unknown>),
+      });
       if (response.success) {
         setData(Array.isArray(response.data) ? response.data : []);
         setError(null);
       } else {
+        // Preserve existing data — a server-side error must not blank the table.
         setError(response.message);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch data');
+      // Preserve existing data on network/transient errors so the UI stays
+      // functional. The error banner notifies the user without erasing records.
+      setError(apiErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -48,6 +59,9 @@ export const useModuleData = (schemaId: string) => {
       return { success: false, message: response.message };
     } catch (err: any) {
       return { success: false, message: apiErrorMessage(err) };
+    } finally {
+      // Always release the guard — regardless of success or failure.
+      createInFlight.current = false;
     }
   };
 
@@ -55,7 +69,7 @@ export const useModuleData = (schemaId: string) => {
     try {
       const response = await moduleService.update(schemaId, id, updates);
       if (response.success) {
-        setData(prev => prev.map(item => recordId(item) === id ? response.data : item));
+        setData((prev) => prev.map((item) => (recordId(item) === id ? response.data : item)));
         return { success: true };
       }
       return { success: false, message: response.message };
@@ -68,7 +82,7 @@ export const useModuleData = (schemaId: string) => {
     try {
       const response = await moduleService.delete(schemaId, id);
       if (response.success) {
-        setData(prev => prev.filter(item => recordId(item) !== id));
+        setData((prev) => prev.filter((item) => recordId(item) !== id));
         return { success: true };
       }
       return { success: false, message: response.message };
@@ -87,8 +101,6 @@ export const useModuleData = (schemaId: string) => {
       return { success: false, message: response.message };
     } catch (err: any) {
       return { success: false, message: apiErrorMessage(err) };
-    } finally {
-      createInFlight.current = false;
     }
   };
 
@@ -99,13 +111,20 @@ export const useModuleData = (schemaId: string) => {
     fetchAll,
     createRecord,
     updateRecord,
-    deleteRecord
-    , updateStatus
+    deleteRecord,
+    updateStatus,
   };
 };
 
-const recordId = (record: any) => String(
-  record?.id ?? record?.hazard_id ?? record?.near_miss_id ?? record?.incident_id ??
-  record?.corrective_action_id ?? record?.training_session_id ?? record?.audit_id ??
-  record?.inspection_id ?? ''
-);
+const recordId = (record: any) =>
+  String(
+    record?.id ??
+      record?.hazard_id ??
+      record?.near_miss_id ??
+      record?.incident_id ??
+      record?.corrective_action_id ??
+      record?.training_session_id ??
+      record?.audit_id ??
+      record?.inspection_id ??
+      '',
+  );

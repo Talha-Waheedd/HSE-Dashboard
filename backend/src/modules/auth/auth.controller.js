@@ -5,7 +5,6 @@ const ApiResponse = require('../../shared/utils/ApiResponse');
 const asyncHandler = require('../../shared/utils/asyncHandler');
 const { HTTP_STATUS } = require('../../shared/constants/httpStatus');
 const { MESSAGES } = require('../../shared/constants/messages');
-const config = require('../../database/config');
 
 /**
  * @swagger
@@ -72,7 +71,7 @@ class AuthController {
    * /auth/verify-email:
    *   post:
    *     tags: [Auth]
-   *     summary: Verify if a Microsoft account email exists
+   *     summary: Verify a Microsoft SSO identity and issue a CBL session
    *     security: []
    *     requestBody:
    *       required: true
@@ -80,73 +79,45 @@ class AuthController {
    *         application/json:
    *           schema:
    *             type: object
-   *             required: [email]
+   *             required: [email, msalToken]
    *             properties:
-   *               email: { type: string, format: email, example: "user@example.com" }
+   *               email:     { type: string, format: email }
+   *               msalToken: { type: string }
    *     responses:
-   *       200: 
-   *         description: User authorized
-   *       404: 
-   *         description: User not authorized
+   *       200: { description: User authorized and session issued }
+   *       404: { description: User not registered in CBL system }
+   *
+   * All token-issuance logic lives in authService.ssoLogin() — this
+   * controller only validates the MSAL token, delegates, and shapes the response.
    */
   verifyEmailExists = asyncHandler(async (req, res) => {
     const { email, msalToken } = req.body;
+    const meta = { ip: req.ip, userAgent: req.headers['user-agent'] };
+
+    // 1. Cryptographically verify the MSAL id-token matches the claimed email.
     await authService.verifyMicrosoftToken(msalToken, email);
-    const user = await authService.verifyEmailExists(email);
 
-    if (user && user.status === true) {
-      const meta = { ip: req.ip, userAgent: req.headers['user-agent'] };
-      const { generateTokenPair } = require('../../shared/utils/tokenGenerator');
-      const tokenRepository = require('../../repositories/token.repository');
-      const { addDays } = require('../../shared/utils/dateHelper');
-      const TokenType = require('../../shared/enums/TokenType');
-      const { sequelize } = require('../../database/connection');
-      const { emitter, EVENTS } = require('../../core/events/emitter');
-      const userRepository = require('../../repositories/user.repository');
+    // 2. Delegate all session-creation logic to the service layer.
+    const result = await authService.ssoLogin(email, meta);
 
-      const tokens = generateTokenPair(user);
-      
-      const transaction = await sequelize.transaction();
-      try {
-        await tokenRepository.revokeAllUserTokens(user.id, TokenType.REFRESH, transaction);
-        await tokenRepository.createRefreshToken(
-          {
-            token: tokens.refreshToken,
-            userId: user.id,
-            expiresAt: addDays(new Date(), 7),
-            ipAddress: meta.ip,
-            userAgent: meta.userAgent,
-          },
-          transaction,
-        );
-        await userRepository.updateLastLogin(user.id, transaction);
-        await transaction.commit();
-        
-        emitter.emit(EVENTS.USER_LOGGED_IN, { userId: user.id, ...meta });
-      } catch (err) {
-        await transaction.rollback();
-        throw err;
-      }
-      
-      const userWithRole = await userRepository.findByIdWithRole(user.id);
-
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        message: 'User authorized and logged in via SSO',
-        data: { 
-          authorized: true, 
-          email,
-          user: userWithRole.toJSON(),
-          tokens
-        }
-      });
-    } else {
-      res.status(HTTP_STATUS.NOT_FOUND).json({
+    if (!result) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         message: 'User not authorized',
-        data: { authorized: false }
+        data: { authorized: false },
       });
     }
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: 'User authorized and logged in via SSO',
+      data: {
+        authorized: true,
+        email,
+        user: result.user,
+        tokens: result.tokens,
+      },
+    });
   });
 
   forgotPassword = asyncHandler(async (req, res) => {
