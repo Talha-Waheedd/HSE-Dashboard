@@ -37,8 +37,33 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'HSE MONITORING',
     items: [
-      { title: 'Hazard Reporting', href: '/hazard-reporting', Icon: AlertTriangle },
-      { title: 'Near Miss', href: '/near-miss', Icon: Target },
+      {
+        title: 'Leading Indicators', href: '/leading-lagging-indicators', Icon: Activity,
+        children: [
+          { title: 'Training', href: '/training-records', Icon: Users },
+          { title: 'Audits', href: '/audit-management', Icon: ClipboardList },
+          { title: 'Inspections', href: '/inspection-records', Icon: ClipboardList },
+          { title: 'Hazard Reporting', href: '/hazard-reporting', Icon: AlertTriangle },
+          { title: 'Near-Miss Reporting', href: '/near-miss', Icon: Target },
+          { title: 'Hazard Closing', href: '/leading-indicators/hazard-closing', Icon: CheckSquare },
+          { title: 'Incident Investigation', href: '/leading-indicators/incident-investigation', Icon: FileWarning },
+          { title: 'Emergency Drills', href: '/leading-indicators/emergency-drills', Icon: ShieldAlert },
+          { title: 'Action Plan Closure Tracker', href: '/leading-indicators/action-plan-closure', Icon: ClipboardList },
+        ],
+      },
+      {
+        title: 'Lagging Indicators', href: '/incident-log', Icon: FileWarning,
+        children: [
+          { title: 'First Aid Cases', href: '/incident-log?category=First%20Aid', Icon: Activity },
+          { title: 'Medical Treatment Cases', href: '/incident-log?category=MTC', Icon: FileWarning },
+          { title: 'Restricted Work Cases', href: '/incident-log?category=RWC', Icon: FileWarning },
+          { title: 'Lost-Time Injuries', href: '/incident-log?category=LTI', Icon: AlertTriangle },
+          { title: 'Fatalities', href: '/incident-log?category=Fatality', Icon: ShieldAlert },
+          { title: 'Fire', href: '/lagging-indicators/fire', Icon: Flame },
+          { title: 'LTIR', href: '/lagging-indicators/ltir', Icon: Activity },
+          { title: 'TRIR', href: '/lagging-indicators/trir', Icon: BarChart3 },
+        ],
+      },
       { title: 'Incident Log', href: '/incident-log', Icon: FileWarning },
     ],
   },
@@ -63,39 +88,6 @@ const NAV_GROUPS: NavGroup[] = [
       { title: 'Reports', href: '/reports', Icon: FileText },
       { title: 'Analytics', href: '/analytics', Icon: BarChart3 },
     ],
-  },
-  {
-    label: 'LEADING INDICATORS',
-    items: [{
-      title: 'Leading Indicators', href: '/leading-lagging-indicators', Icon: Activity,
-      children: [
-        { title: 'Training', href: '/training-records', Icon: Users },
-        { title: 'Audits', href: '/audit-management', Icon: ClipboardList },
-        { title: 'Inspections', href: '/inspection-records', Icon: ClipboardList },
-        { title: 'Hazard Reporting', href: '/hazard-reporting', Icon: AlertTriangle },
-        { title: 'Near-Miss Reporting', href: '/near-miss', Icon: Target },
-        { title: 'Hazard Closing', href: '/leading-indicators/hazard-closing', Icon: CheckSquare },
-        { title: 'Incident Investigation', href: '/leading-indicators/incident-investigation', Icon: FileWarning },
-        { title: 'Emergency Drills', href: '/leading-indicators/emergency-drills', Icon: ShieldAlert },
-        { title: 'Action Plan Closure Tracker', href: '/leading-indicators/action-plan-closure', Icon: ClipboardList },
-      ],
-    }],
-  },
-  {
-    label: 'LAGGING INDICATORS',
-    items: [{
-      title: 'Lagging Indicators', href: '/incident-log', Icon: FileWarning,
-      children: [
-        { title: 'First Aid Cases', href: '/incident-log?category=First%20Aid', Icon: Activity },
-        { title: 'Medical Treatment Cases', href: '/incident-log?category=MTC', Icon: FileWarning },
-        { title: 'Restricted Work Cases', href: '/incident-log?category=RWC', Icon: FileWarning },
-        { title: 'Lost-Time Injuries', href: '/incident-log?category=LTI', Icon: AlertTriangle },
-        { title: 'Fatalities', href: '/incident-log?category=Fatality', Icon: ShieldAlert },
-        { title: 'Fire', href: '/lagging-indicators/fire', Icon: Flame },
-        { title: 'LTIR', href: '/lagging-indicators/ltir', Icon: Activity },
-        { title: 'TRIR', href: '/lagging-indicators/trir', Icon: BarChart3 },
-      ],
-    }],
   },
 ];
 
