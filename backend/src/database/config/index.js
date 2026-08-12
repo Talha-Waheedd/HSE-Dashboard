@@ -114,7 +114,17 @@ const config = Object.freeze({
     dir: envVars.LOG_DIR || 'logs',
   },
 
-  allowedOrigins: envVars.ALLOWED_ORIGINS.split(',').map((o) => o.trim()),
+  // Keep the local development origins available even when a parent shell or
+  // process manager supplies a stale ALLOWED_ORIGINS value. Production still
+  // uses only the explicitly configured origins.
+  allowedOrigins: [
+    ...new Set([
+      ...envVars.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean),
+      ...(envVars.NODE_ENV === 'development'
+        ? ['http://localhost:5173', 'http://127.0.0.1:5173']
+        : []),
+    ]),
+  ],
   storageDriver: envVars.STORAGE_DRIVER,
   encryptionKey: envVars.ENCRYPTION_KEY,
   msal: {
