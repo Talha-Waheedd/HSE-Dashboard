@@ -21,11 +21,19 @@ const allowUnverifiedHazardEmployee = () =>
   process.env.NODE_ENV === 'development' &&
   process.env.ALLOW_UNVERIFIED_HAZARD_EMPLOYEE === 'true';
 
+const assertWordLimit = (value, label) => {
+  const count = String(value || '').trim() ? String(value).trim().split(/\s+/).length : 0;
+  if (count > 500) throw ApiError.badRequest(`${label} cannot exceed 500 words (${count}/500 words).`);
+};
+
 class HazardService {
   /**
    * Report a new hazard
    */
   async createHazard(data, userId) {
+    assertWordLimit(data.description, 'Hazard Details');
+    assertWordLimit(data.metadata?.corrective_action, 'Corrective Action');
+    assertWordLimit(data.metadata?.remarks, 'Remarks');
     if (bypassHazardValidation()) {
       const metadata = data.metadata && typeof data.metadata === 'object' ? data.metadata : {};
       // The database has mandatory columns and a status enum. Normalize every
@@ -110,6 +118,9 @@ class HazardService {
    */
   async updateHazard(id, updateData, userId) {
     const hazard = await this.getHazardById(id);
+    assertWordLimit(updateData.description, 'Hazard Details');
+    assertWordLimit(updateData.metadata?.corrective_action, 'Corrective Action');
+    assertWordLimit(updateData.metadata?.remarks, 'Remarks');
 
     // If changing plant, validate it
     if (updateData.plantId && updateData.plantId !== hazard.plantId) {

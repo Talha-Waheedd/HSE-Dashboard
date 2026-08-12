@@ -11,11 +11,14 @@ const createHazardSchema = Joi.object({
   category: Joi.string().valid(...Object.values(HazardCategory), 'other').required(),
   severityLevel: Joi.string().valid(...Object.values(SeverityLevel)).required(),
   title: Joi.string().max(255).required(),
-  description: Joi.string().required(),
+  description: Joi.string().custom((value, helpers) => value.trim() && value.trim().split(/\s+/).length <= 500 ? value : helpers.error('string.maxWords')).messages({ 'string.maxWords': 'Hazard Details cannot exceed 500 words.' }).required(),
   location: Joi.string().max(255).optional(),
   status: Joi.string().valid(HazardStatus.DRAFT, HazardStatus.SUBMITTED).default(HazardStatus.DRAFT).optional(),
   reportedAt: Joi.date().iso().optional(),
-  metadata: Joi.object().optional(),
+  metadata: Joi.object({
+    corrective_action: Joi.string().custom((value, helpers) => value.trim().split(/\s+/).length <= 500 ? value : helpers.error('string.maxWords')).messages({ 'string.maxWords': 'Corrective Action cannot exceed 500 words.' }).optional(),
+    remarks: Joi.string().custom((value, helpers) => value.trim().split(/\s+/).length <= 500 ? value : helpers.error('string.maxWords')).messages({ 'string.maxWords': 'Remarks cannot exceed 500 words.' }).optional(),
+  }).unknown(true).optional(),
 });
 
 const updateHazardSchema = Joi.object({
@@ -24,11 +27,14 @@ const updateHazardSchema = Joi.object({
   category: Joi.string().optional(),
   severityLevel: Joi.string().valid(...Object.values(SeverityLevel)).optional(),
   title: Joi.string().max(255).optional(),
-  description: Joi.string().optional(),
+  description: Joi.string().custom((value, helpers) => value.trim().split(/\s+/).length <= 500 ? value : helpers.error('string.maxWords')).messages({ 'string.maxWords': 'Hazard Details cannot exceed 500 words.' }).optional(),
   location: Joi.string().max(255).optional(),
   assignedTo: Joi.string().uuid().optional().allow(null),
   reportedAt: Joi.date().iso().optional(),
-  metadata: Joi.object().optional(),
+  metadata: Joi.object({
+    corrective_action: Joi.string().custom((value, helpers) => value.trim().split(/\s+/).length <= 500 ? value : helpers.error('string.maxWords')).messages({ 'string.maxWords': 'Corrective Action cannot exceed 500 words.' }).optional(),
+    remarks: Joi.string().custom((value, helpers) => value.trim().split(/\s+/).length <= 500 ? value : helpers.error('string.maxWords')).messages({ 'string.maxWords': 'Remarks cannot exceed 500 words.' }).optional(),
+  }).unknown(true).optional(),
 }).min(1);
 
 const updateHazardStatusSchema = Joi.object({

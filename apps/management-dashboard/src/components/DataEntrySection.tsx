@@ -479,7 +479,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const validateFormData = (data: any): string | null => {
-    if (schema.id === 'hazard-reporting' && bypassHazardValidation) return null;
+    if (schema.id === 'hazard-reporting') {
+      const wordCount = (value: unknown) => String(value || '').trim() ? String(value).trim().split(/\s+/).length : 0;
+      for (const [key, label] of [['description', 'Hazard Details'], ['corrective_action', 'Corrective Action'], ['remarks', 'Remarks']] as const) {
+        const count = wordCount(data[key]);
+        if (count > 500) return `${label} cannot exceed 500 words (${count}/500 words).`;
+      }
+      if (bypassHazardValidation) return null;
+    }
     // Check required fields dynamically
     for (const col of schema.columns) {
       if (col.required && !col.hideFromForm) {
@@ -849,7 +856,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
     if (col.type === 'textarea') {
       return (
-        <textarea name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={TEXTAREA_BASE} rows={4} required={col.required} readOnly={col.readonly} />
+        <div>
+          <textarea name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={TEXTAREA_BASE} rows={4} required={col.required} readOnly={col.readonly} />
+          {schema.id === 'hazard-reporting' && ['description', 'corrective_action', 'remarks'].includes(col.key) && <p className={`mt-1 text-[11px] ${String(value || '').trim().split(/\s+/).filter(Boolean).length > 500 ? 'text-[#B91C1C]' : 'text-[#64748B]'}`}>{String(value || '').trim().split(/\s+/).filter(Boolean).length}/500 words</p>}
+        </div>
       );
     }
 
