@@ -5,6 +5,7 @@ const userRepository = require('../../repositories/user.repository');
 const ApiError = require('../../shared/utils/ApiError');
 const { MESSAGES } = require('../../shared/constants/messages');
 const TokenType = require('../../shared/enums/TokenType');
+const { ROLES } = require('../../shared/constants/roles');
 
 /**
  * JWT Authentication Middleware.
@@ -25,10 +26,24 @@ const authenticate = async (req, res, next) => {
       // Keep read-only dashboard/module requests available even if the local
       // seed user was removed or migrations have not restored its relations.
       // Write operations still receive the configured UUID for audit fields.
-      req.user = previewUser || {
+      req.user = previewUser ? {
+        ...previewUser.toJSON(),
+        role: {
+          ...(previewUser.role?.toJSON?.() || previewUser.role || {}),
+          // Explicit local preview mode is intentionally treated as the
+          // administrator preview identity, independent of stale role seed
+          // data. This branch is never active outside development.
+          name: ROLES.SYSTEM_ADMINISTRATOR,
+          displayName: ROLES.SYSTEM_ADMINISTRATOR,
+        },
+      } : {
         id: process.env.PREVIEW_USER_ID,
         status: true,
-        role: { name: 'super_admin', displayName: 'System Administrator' },
+        // Match the canonical seeded role name used by the RBAC middleware.
+        // The previous `super_admin` fallback was not in SUPERUSER_ROLES and
+        // caused every preview request to return 403 when the user row was
+        // unavailable.
+        role: { name: ROLES.SYSTEM_ADMINISTRATOR, displayName: ROLES.SYSTEM_ADMINISTRATOR, permissions: [] },
       };
       return next();
     }
