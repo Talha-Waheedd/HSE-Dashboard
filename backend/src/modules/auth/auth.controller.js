@@ -86,9 +86,6 @@ class AuthController {
    *     responses:
    *       200: { description: User authorized and session issued }
    *       404: { description: User not registered in CBL system }
-   *
-   * All token-issuance logic lives in authService.ssoLogin(). This controller
-   * only validates the MSAL token, delegates, and shapes the response.
    */
   verifyEmailExists = asyncHandler(async (req, res) => {
     const { email, msalToken } = req.body;
