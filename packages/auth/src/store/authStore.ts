@@ -13,6 +13,9 @@ export interface User {
   plant_id?: string;
 }
 
+const normalizeRole = (role: string) => role.trim().toLowerCase().replace(/[_-]+/g, " ");
+const isAdministrator = (role?: string) => ["administrator", "system administrator", "super admin"].includes(normalizeRole(role || ""));
+
 interface AuthState {
   token: string | null;
   user: User | null;
@@ -53,10 +56,16 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       hasRole: (role: string) => {
         const user = get().user;
         if (!user || !user.role) return false;
-        return user.role.toLowerCase() === role.toLowerCase();
+        return normalizeRole(user.role) === normalizeRole(role)
+          || (isAdministrator(user.role) && ["administrator", "industry", "system administrator", "super admin"].includes(normalizeRole(role)));
       },
 
-      hasPermission: (permission: string) => Boolean(
-        get().user?.permissions?.some((item) => item.toLowerCase() === permission.toLowerCase())
-      ),
+      // Administrator inherits the complete Industry capability set while
+      // retaining its existing privileges. Backend middleware applies the
+      // same rule, so UI visibility cannot be used to bypass API security.
+      hasPermission: (permission: string) => {
+        const user = get().user;
+        if (user?.role && isAdministrator(user.role)) return true;
+        return Boolean(user?.permissions?.some((item) => item.toLowerCase() === permission.toLowerCase()));
+      },
     }));

@@ -1,6 +1,8 @@
 'use strict';
 
 const ROLES = Object.freeze({
+  ADMINISTRATOR: 'Administrator',
+  INDUSTRY: 'Industry',
   SYSTEM_ADMINISTRATOR: 'System Administrator',
   SUPER_ADMIN: 'Super Admin',
   HSE_MANAGER: 'HSE Manager',
@@ -11,4 +13,7 @@ const ROLES = Object.freeze({
   READ_ONLY: 'Read Only',
 });
 
-module.exports = { ROLES };
+const normalizeRoleName = (role) => String(role || '').trim().toLowerCase().replace(/[_-]+/g, ' ');
+const isAdministratorRole = (role) => ['administrator', 'system administrator', 'super admin'].includes(normalizeRoleName(role));
+
+module.exports = { ROLES, normalizeRoleName, isAdministratorRole };

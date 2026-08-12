@@ -2,11 +2,12 @@
 
 const ApiError = require('../../shared/utils/ApiError');
 const { MESSAGES } = require('../../shared/constants/messages');
-const { ROLES } = require('../../shared/constants/roles');
+const { ROLES, isAdministratorRole } = require('../../shared/constants/roles');
 
 // Roles that unconditionally bypass all permission checks.
 // Centralised here so there is one place to update when roles change.
 const SUPERUSER_ROLES = new Set([
+  ROLES.ADMINISTRATOR,
   ROLES.SYSTEM_ADMINISTRATOR,
   ROLES.SUPER_ADMIN,
 ]);
@@ -24,7 +25,7 @@ const requireRoles = (requiredRoles = []) => (req, res, next) => {
   if (!req.user) return next(ApiError.unauthorized());
 
   const userRoleName = req.user.role?.name;
-  if (SUPERUSER_ROLES.has(userRoleName)) return next();
+  if (SUPERUSER_ROLES.has(userRoleName) || isAdministratorRole(userRoleName)) return next();
 
   if (!requiredRoles.includes(userRoleName)) {
     return next(ApiError.forbidden(MESSAGES.FORBIDDEN));
@@ -45,7 +46,7 @@ const requirePermissions = (requiredPermissions = []) => (req, res, next) => {
   if (!req.user) return next(ApiError.unauthorized());
 
   const userRoleName = req.user.role?.name;
-  if (SUPERUSER_ROLES.has(userRoleName)) return next();
+  if (SUPERUSER_ROLES.has(userRoleName) || isAdministratorRole(userRoleName)) return next();
 
   const userPermissions = req.user.role?.permissions?.map((p) => p.key) || [];
   const hasAll = requiredPermissions.every((p) => userPermissions.includes(p));

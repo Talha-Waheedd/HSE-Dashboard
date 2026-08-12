@@ -62,7 +62,7 @@ export const Settings = () => {
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [overdueAlerts, setOverdueAlerts] = useState(true);
   const [density, setDensity] = useState('comfortable');
-  const isAdmin = hasRole('System Administrator') || ['super_admin', 'Super Admin'].includes(user?.role || '');
+  const isAdmin = hasRole('System Administrator') || hasRole('Administrator') || ['super_admin', 'Super Admin'].includes(user?.role || '');
   const role = user?.role || 'Viewer';
 
   return (

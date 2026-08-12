@@ -129,7 +129,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const activeNavGroups: NavGroup[] = [
     ...NAV_GROUPS,
-    ...(hasRole('System Administrator') ? [{
+    ...(hasRole('System Administrator') || hasRole('Administrator') ? [{
       label: 'ADMINISTRATION',
       items: [
         { title: 'Administrative Rights', href: '/master-management', Icon: Settings },

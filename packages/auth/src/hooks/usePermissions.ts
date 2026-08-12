@@ -4,7 +4,7 @@ export const usePermissions = () => {
   const { user, hasRole, hasPermission } = useAuthStore();
 
   // Roles exactly as defined by the user
-  const isSysAdmin = hasRole("System Administrator");
+  const isSysAdmin = hasRole("System Administrator") || hasRole("Administrator");
   const isHseManager = hasRole("HSE Manager");
   const isHseOfficer = hasRole("HSE Officer");
   const isDeptManager = hasRole("Department Manager");

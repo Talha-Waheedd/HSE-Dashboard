@@ -19,7 +19,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (requiredRoles.length > 0) {
-    const hasRequiredRole = requiredRoles.some((role) => hasRole(role));
+    const hasRequiredRole = requiredRoles.some((role) => hasRole(role))
+      || hasRole("Administrator");
     if (!hasRequiredRole) {
       return <div>Access Denied: Insufficient Permissions</div>;
     }
