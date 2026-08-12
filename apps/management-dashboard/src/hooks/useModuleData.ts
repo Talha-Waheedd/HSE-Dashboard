@@ -1,12 +1,16 @@
 import { useState, useCallback, useRef } from 'react';
 import { moduleService } from '../services/api/moduleService';
 
-const apiErrorMessage = (err: any) => {
+const apiErrorDetails = (err: any) => {
   const response = err?.response?.data;
+  const statusCode = err?.response?.status;
+  const requestUrl = err?.config?.baseURL && err?.config?.url ? `${err.config.baseURL}${err.config.url}` : err?.config?.url;
   const details = Array.isArray(response?.errors)
     ? response.errors.map((item: any) => item.message || item.field).filter(Boolean).join(' ')
     : '';
-  return details || response?.message || err?.message || 'Request failed';
+  if (!err?.response) return { errorType: 'network', errorTitle: 'Unable to connect to the server', message: `Unable to connect to the server. Request: ${requestUrl || 'Hazard Reporting API'}. Verify that the backend is running on port 5000.`, requestUrl, statusCode: undefined };
+  const errorType = statusCode === 401 || statusCode === 403 ? 'auth' : statusCode === 400 || statusCode === 422 ? 'validation' : 'server';
+  return { errorType, errorTitle: errorType === 'auth' ? 'Authentication Error' : errorType === 'validation' ? 'Validation Error' : 'Request Failed', message: details || response?.message || err?.message || 'Request failed', requestUrl, statusCode };
 };
 
 export const useModuleData = (schemaId: string) => {
@@ -38,7 +42,7 @@ export const useModuleData = (schemaId: string) => {
     } catch (err: any) {
       // Preserve existing data on network/transient errors so the UI stays
       // functional. The error banner notifies the user without erasing records.
-      setError(apiErrorMessage(err));
+      setError(apiErrorDetails(err).message);
     } finally {
       setLoading(false);
     }
@@ -58,7 +62,7 @@ export const useModuleData = (schemaId: string) => {
       }
       return { success: false, message: response.message };
     } catch (err: any) {
-      return { success: false, message: apiErrorMessage(err) };
+      return { success: false, ...apiErrorDetails(err) };
     } finally {
       // Always release the guard — regardless of success or failure.
       createInFlight.current = false;
@@ -100,7 +104,7 @@ export const useModuleData = (schemaId: string) => {
       }
       return { success: false, message: response.message };
     } catch (err: any) {
-      return { success: false, message: apiErrorMessage(err) };
+      return { success: false, ...apiErrorDetails(err) };
     }
   };
 

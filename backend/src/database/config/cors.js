@@ -15,7 +15,7 @@ module.exports = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-Refresh-Token', 'X-Preview-Auth'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-Refresh-Token', 'X-Preview-Auth', 'Idempotency-Key'],
   exposedHeaders: ['X-Request-ID', 'X-Total-Count', 'X-Total-Pages'],
   maxAge: 86400, // 24h preflight cache
 };

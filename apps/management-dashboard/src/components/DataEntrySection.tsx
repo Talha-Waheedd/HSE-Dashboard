@@ -434,6 +434,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState<any>({});
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [errorTitle, setErrorTitle] = useState('Validation Error');
   const [isSaving, setIsSaving] = useState(false);
   const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
@@ -524,10 +525,12 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     e.preventDefault();
     if (isSaving) return;
     setValidationError(null);
+    setErrorTitle('Validation Error');
     const dataToSave = applyComputes(formData, schema, entries);
     const err = validateFormData(dataToSave);
     if (err) {
       setValidationError(err);
+      setErrorTitle('Validation Error');
       document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -560,6 +563,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         setSavedModalOpen(true);
         window.dispatchEvent(new CustomEvent('dashboard-refresh'));
       } else if (!result.alreadyInProgress) {
+        setErrorTitle((result as any).errorTitle || 'Request Failed');
         setValidationError(result.message || 'The server did not confirm that the record was saved.');
         document.getElementById('modal-scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -971,46 +975,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               <div className="flex items-start gap-3 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3">
                 <AlertTriangle className="h-4 w-4 mt-0.5 text-[#DC2626]" />
                 <div>
-                  <p className="text-[13px] font-semibold text-[#991B1B]">Validation Error</p>
+                  <p className="text-[13px] font-semibold text-[#991B1B]">{errorTitle}</p>
                   <p className="text-[12px] text-[#B91C1C] mt-0.5">{validationError}</p>
                 </div>
-              </div>
-            )}
-
-            {schema.id === 'hazard-reporting' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {[
-                  { title: 'Open', color: '#92400E', bg: '#FEF9EC' },
-                  { title: 'Assigned', color: '#1D4ED8', bg: '#EFF6FF' },
-                  { title: 'Submitted for Review', color: '#6D28D9', bg: '#F5F3FF' },
-                ].map(card => (
-                  <div key={card.title} className="rounded-xl border border-[#EDEDED] bg-white p-4">
-                    <p className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-semibold">{card.title}</p>
-                    <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[12px] font-semibold" style={{ backgroundColor: card.bg, color: card.color }}>
-                      <span className="h-2 w-2 rounded-full bg-current" />
-                      Mock status
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {schema.id === 'hazard-reporting' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {[
-                  { title: 'High Risk Hazard Assigned', detail: 'Assigned to Responsible Person queue.' },
-                  { title: 'Hazard Closed', detail: 'Review proof before closing.' },
-                  { title: 'Hazard Approved', detail: 'Approval badge is ready for the next workflow step.' },
-                ].map(card => (
-                  <button
-                    key={card.title}
-                    onClick={() => setSelectedRecordId(card.title)}
-                    className={`text-left rounded-xl border p-4 transition-colors ${selectedRecordId === card.title ? 'border-[#CB0017] bg-[#FFF7F7]' : 'border-[#EDEDED] bg-white hover:bg-[#FAFAFA]'}`}
-                  >
-                    <p className="text-[13px] font-semibold text-[#1A1818]">{card.title}</p>
-                    <p className="text-[12px] text-[#6B7280] mt-1">{card.detail}</p>
-                  </button>
-                ))}
               </div>
             )}
 
