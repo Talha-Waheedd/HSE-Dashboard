@@ -1061,7 +1061,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           ...(canAddData() ? [{
             label: `Add ${entityName}`,
             icon: <Plus />,
-            onClick: () => setIsAddModalOpen(true),
+            onClick: () => {
+              setFormData(schema.id === 'hazard-reporting' ? { status_id: 'Open' } : {});
+              setIsAddModalOpen(true);
+            },
             variant: 'primary' as const,
           }] : []),
         ]}
