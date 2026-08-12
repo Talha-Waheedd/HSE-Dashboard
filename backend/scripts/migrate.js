@@ -5,6 +5,15 @@ require('dotenv').config();
 const { sequelize } = require('../src/database/connection');
 const logger = require('../src/shared/utils/logger');
 
+const describeDatabaseError = (err) => ({
+  name: err?.name,
+  message: err?.message,
+  sqlMessage: err?.original?.sqlMessage || err?.parent?.sqlMessage,
+  code: err?.original?.code || err?.parent?.code,
+  errno: err?.original?.errno || err?.parent?.errno,
+  sql: err?.sql || err?.original?.sql || err?.parent?.sql,
+});
+
 const runMigrations = async () => {
   try {
     logger.info('Running database migrations...');
@@ -23,7 +32,7 @@ const runMigrations = async () => {
     logger.info(`Applied ${migrations.length} migration(s)`);
     process.exit(0);
   } catch (err) {
-    logger.error('Migration failed:', err);
+    logger.error(`Migration failed: ${JSON.stringify(describeDatabaseError(err))}`);
     process.exit(1);
   }
 };

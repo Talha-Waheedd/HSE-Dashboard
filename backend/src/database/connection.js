@@ -19,13 +19,5 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
   dialectOptions: config.dialectOptions || {},
 });
 
-// In development, automatically alter tables to match models
-// since the models and migrations are currently out of sync mid-refactor.
-if (env === 'development') {
-  sequelize.sync({ alter: true }).catch(err => {
-    logger.error('Failed to sync database:', err);
-  });
-}
-
 module.exports = { sequelize, Sequelize };
 

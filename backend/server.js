@@ -13,6 +13,15 @@ const config = require('./src/database/config');
 const PORT = config.port || 5000;
 const server = http.createServer(app);
 
+const describeDatabaseError = (err) => ({
+  name: err?.name,
+  message: err?.message,
+  sqlMessage: err?.original?.sqlMessage || err?.parent?.sqlMessage,
+  code: err?.original?.code || err?.parent?.code,
+  errno: err?.original?.errno || err?.parent?.errno,
+  sql: err?.sql || err?.original?.sql || err?.parent?.sql,
+});
+
 // ─── Socket.IO ───────────────────────────────────────────────────────────────
 const { initSockets } = require('./src/core/sockets');
 initSockets(server);
@@ -61,7 +70,7 @@ const bootstrap = async () => {
     initCron();
     logger.info('⏰ Cron jobs initialized');
   } catch (err) {
-    logger.error('❌ Failed to start server:', err);
+    logger.error(`❌ Failed to start server: ${JSON.stringify(describeDatabaseError(err))}`);
     process.exit(1);
   }
 };

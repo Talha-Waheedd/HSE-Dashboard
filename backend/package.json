@@ -7,6 +7,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "migrate": "node scripts/migrate.js",
+    "migrate:locations": "node scripts/migrate-locations.js",
     "seed": "node scripts/seed.js",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
     "db:fresh": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && node scripts/seed.js",
