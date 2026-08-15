@@ -6,6 +6,7 @@ import { FilterBar } from '../components/FilterBar';
 import { KpiTile } from '../components/KpiTile';
 import { useFilters } from '../context/FilterContext';
 import { moduleService } from '../services/api/moduleService';
+import { dashboardClient } from '@cbl/api';
 
 type IndicatorKind = 'hazard-closing' | 'incident-investigation' | 'emergency-drills' | 'action-plan-closure';
 type Row = Record<string, any>;
@@ -29,6 +30,7 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
   const { filters } = useFilters();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hazardSummary, setHazardSummary] = useState<{ total: number; closed: number } | null>(null);
   const config = titles[kind];
 
   useEffect(() => {
@@ -36,7 +38,10 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
     const load = async () => {
       setLoading(true);
       try {
-        const params = { limit: 10000, offset: 0 };
+        const params = { limit: 10000, offset: 0, year: filters.year, department: filters.department, fromDate: filters.fromDate, toDate: filters.toDate };
+        const overviewPromise = kind === 'hazard-closing'
+          ? dashboardClient.getOverview({ year: filters.year, department: filters.department, fromDate: filters.fromDate, toDate: filters.toDate })
+          : Promise.resolve(null);
         const response = kind === 'hazard-closing'
           ? await moduleService.getAll('hazard-reporting', params)
           : kind === 'incident-investigation'
@@ -44,7 +49,14 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
             : kind === 'emergency-drills'
               ? await moduleService.getAll('training-records', { ...params, trainingType: 'emergency_response' })
               : await moduleService.getAll('action-tracker', params);
-        if (!cancelled) setRows(response.data || []);
+        if (!cancelled) {
+          setRows(response.data || []);
+          if (overviewPromise) {
+            const overviewResponse = await overviewPromise;
+            const summary = overviewResponse?.data?.data?.summary?.hazards;
+            setHazardSummary(summary ? { total: Number(summary.total || 0), closed: Number(summary.closed || 0) } : null);
+          }
+        }
       } catch (error) {
         console.error(`${config.title} data fetch failed`, error);
         if (!cancelled) setRows([]);
@@ -57,7 +69,7 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
     window.addEventListener('dashboard-refresh', refresh);
     const interval = window.setInterval(refresh, 30000);
     return () => { cancelled = true; window.removeEventListener('dashboard-refresh', refresh); window.clearInterval(interval); };
-  }, [kind, config.title]);
+  }, [kind, config.title, filters.year, filters.department, filters.fromDate, filters.toDate]);
 
   const filteredRows = useMemo(() => rows.filter(row => {
     const date = dateOf(row);
@@ -68,9 +80,10 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
     return true;
   }), [rows, filters]);
 
-  const closed = filteredRows.filter(isClosed).length;
-  const pending = filteredRows.length - closed;
-  const closure = filteredRows.length ? Math.round((closed / filteredRows.length) * 100) : 0;
+  const total = kind === 'hazard-closing' && hazardSummary ? hazardSummary.total : filteredRows.length;
+  const closed = kind === 'hazard-closing' && hazardSummary ? hazardSummary.closed : filteredRows.filter(isClosed).length;
+  const pending = Math.max(0, total - closed);
+  const closure = total ? Math.round((closed / total) * 100) : 0;
   const headers = kind === 'hazard-closing' ? ['Date', 'Description', 'Department', 'Risk', 'Status']
     : kind === 'incident-investigation' ? ['Date', 'Description', 'Category', 'Severity', 'Investigation / Status']
       : kind === 'emergency-drills' ? ['Scheduled Date', 'Training', 'Department', 'Duration (min)', 'Status']
@@ -86,7 +99,7 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
 
   return <Layout><ContextHeader title={config.title} breadcrumbs={['Leading Indicators', config.title]} subtitle={config.subtitle}><FilterBar /></ContextHeader><main className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
     {loading ? <div className="flex min-h-[300px] items-center justify-center"><RefreshCw className="h-8 w-8 animate-spin text-[#CB0017]" /></div> : <>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><KpiTile label="Total Records" value={filteredRows.length} icon={<Activity />} accent="info" /><KpiTile label="Closed / Completed" value={closed} icon={<CheckCircle2 />} accent="success" /><KpiTile label="Pending / Open" value={pending} icon={<AlertTriangle />} accent={pending ? 'warning' : 'success'} /><KpiTile label="Closure Rate" value={`${closure}%`} icon={<ClipboardCheck />} accent={closure >= 80 ? 'success' : 'warning'} /></div>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><KpiTile label="Total Records" value={total} icon={<Activity />} accent="info" /><KpiTile label="Closed / Completed" value={closed} icon={<CheckCircle2 />} accent="success" /><KpiTile label="Pending / Open" value={pending} icon={<AlertTriangle />} accent={pending ? 'warning' : 'success'} /><KpiTile label="Closure Rate" value={`${closure}%`} icon={<ClipboardCheck />} accent={closure >= 80 ? 'success' : 'warning'} /></div>
       <Panel title={`${config.title} — Live Backend Records`}><div className="overflow-x-auto"><table className="min-w-[850px] w-full border-collapse text-sm"><thead><tr className="bg-[#4777BE] text-white">{headers.map(header => <th key={header} className="border border-[#1F2937] px-3 py-3 text-left">{header}</th>)}</tr></thead><tbody>{filteredRows.length ? filteredRows.map((row, index) => <tr key={row.id || index} className="odd:bg-white even:bg-[#F8FAFC]">{cells(row).map((cell, cellIndex) => <td key={`${row.id || index}-${cellIndex}`} className={`border border-[#CBD5E1] px-3 py-3 ${cellIndex === headers.length - 1 ? (isClosed(row) ? 'bg-[#C6E0B4] font-semibold' : 'bg-[#F8CBAD] font-semibold') : ''}`}>{String(cell)}</td>)}</tr>) : <tr><td colSpan={headers.length} className="border border-[#CBD5E1] px-4 py-10 text-center text-[#6B7280]">No records match the selected filters.</td></tr>}</tbody></table></div></Panel>
     </>}
   </main></Layout>;

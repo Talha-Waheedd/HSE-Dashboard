@@ -23,13 +23,27 @@ const filtersFor = (query, dateColumn, departmentColumn = 'department_id', inclu
     replacements.department = query.department;
   }
   if (query.severity && query.severity !== 'All' && severityColumn) { clauses.push(`${severityColumn} = :severity`); replacements.severity = String(query.severity).toLowerCase(); }
-  if (query.status && query.status !== 'All') { clauses.push('status = :status'); replacements.status = String(query.status).toLowerCase().replaceAll(' ', '_'); }
+  if (query.status && query.status !== 'All') {
+    const statusGroups = {
+      Open: ['open', 'reported', 'submitted', 'scheduled'],
+      Pending: ['draft', 'under_review', 'under_investigation', 'pending', 'planned'],
+      'Work in Progress': ['corrective_action', 'in_progress'],
+      Closed: ['closed', 'resolved', 'completed', 'verified', 'approved'],
+      Cancelled: ['cancelled'],
+    };
+    const label = String(query.status).trim();
+    const values = statusGroups[label] || [label.toLowerCase().replaceAll(' ', '_')];
+    const placeholders = values.map((_, index) => `:status${index}`).join(', ');
+    clauses.push(`status IN (${placeholders})`);
+    values.forEach((value, index) => { replacements[`status${index}`] = value; });
+  }
   if (from) { clauses.push(`${dateColumn} >= :fromDate`); replacements.fromDate = from; }
   if (to) { clauses.push(`${dateColumn} <= :toDate`); replacements.toDate = to; }
   return { where: clauses.join(' AND '), replacements };
 };
 
 const rows = async (sql, replacements) => sequelize.query(sql, { replacements, type: QueryTypes.SELECT });
+const qualifyWhere = (where, alias, columns) => columns.reduce((sql, column) => sql.replace(new RegExp(`\\b${column}\\b(?![0-9])`, 'g'), `${alias}.${column}`), where);
 const number = value => Number(value || 0);
 
 class OverviewService {
@@ -77,12 +91,12 @@ class OverviewService {
         rows(`SELECT id, description, incident_date date, department_id, status FROM incidents WHERE ${incident.where} ORDER BY created_at DESC LIMIT 5`, incident.replacements),
         rows(`SELECT COALESCE(d.code, d.name, CAST(i.department_id AS CHAR), 'Unassigned') department, COUNT(*) total
           FROM incidents i LEFT JOIN departments d ON d.id = i.department_id
-          WHERE ${incident.where.replaceAll('department_id', 'i.department_id').replaceAll('incident_date', 'i.incident_date').replaceAll('deleted_at', 'i.deleted_at').replaceAll('status', 'i.status').replaceAll('severity_level', 'i.severity_level')}
+          WHERE ${qualifyWhere(incident.where, 'i', ['department_id', 'incident_date', 'deleted_at', 'status', 'severity_level'])}
           GROUP BY department ORDER BY total DESC LIMIT 10`, incident.replacements),
         rows(`SELECT COALESCE(d.code, d.name, CAST(t.department_id AS CHAR), 'Unassigned') department,
           COALESCE(SUM(COALESCE(t.manhours, t.participant_count * t.duration_minutes / 60, 0)), 0) manhours
           FROM training_sessions t LEFT JOIN departments d ON d.id = t.department_id
-          WHERE ${training.where.replaceAll('department_id', 't.department_id').replaceAll('scheduled_date', 't.scheduled_date').replaceAll('deleted_at', 't.deleted_at').replaceAll('status', 't.status')}
+          WHERE ${qualifyWhere(training.where, 't', ['department_id', 'scheduled_date', 'deleted_at', 'status'])}
           GROUP BY department ORDER BY manhours DESC LIMIT 10`, training.replacements),
       ]);
 

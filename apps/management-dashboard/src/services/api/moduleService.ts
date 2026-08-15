@@ -124,7 +124,9 @@ export const moduleService = {
         hazard_category_id: item.metadata?.hazard_category_id || item.category || item.hazard_category_id,
         risk_rating_id: item.metadata?.risk_rating_id || severityFromApi(item.severityLevel || item.severity_level),
         description: item.metadata?.description || item.description || item.title,
-        date: item.metadata?.date || item.reportedAt || item.reported_at || item.createdAt || item.created_at || new Date().toISOString(),
+        // `reportedAt` is the authoritative hazard observation date. Imported
+        // metadata can contain legacy display dates and must not override it.
+        date: item.reportedAt || item.reported_at || item.metadata?.date || item.createdAt || item.created_at || new Date().toISOString(),
         status_id: item.metadata?.status_id || statusFromApi(item.status),
         department_id: item.metadata?.originated_department || item.metadata?.department_id || item.departmentId || item.department_id,
       }));
