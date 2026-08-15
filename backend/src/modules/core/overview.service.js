@@ -18,7 +18,7 @@ const filtersFor = (query, dateColumn, departmentColumn = 'department_id', inclu
   if (query.plantId && query.plantId !== 'All') { clauses.push('plant_id = :plantId'); replacements.plantId = query.plantId; }
   if (query.location && query.location !== 'All' && locationColumn) { clauses.push(`${locationColumn} = :location`); replacements.location = query.location; }
   if (query.department && query.department !== 'All' && departmentColumn) {
-    const metadataPredicates = includeMetadata ? " OR JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.department')) = :department OR JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.department_id')) = :department" : '';
+    const metadataPredicates = includeMetadata ? " OR JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.originated_department')) = :department" : '';
     clauses.push(`(${departmentColumn} = :department OR ${departmentColumn} = (SELECT id FROM departments WHERE code = :department OR name = :department LIMIT 1)${metadataPredicates})`);
     replacements.department = query.department;
   }
