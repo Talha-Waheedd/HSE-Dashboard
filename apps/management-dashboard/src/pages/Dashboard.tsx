@@ -19,7 +19,6 @@ import {
   CheckCircle, XCircle, Info, RefreshCw,
   ChevronUp, ChevronDown,
 } from 'lucide-react';
-import { moduleService }        from '../services/api/moduleService';
 import { dashboardClient }      from '@cbl/api';
 import { CHART_COLORS, PIE_COLORS } from '../config/constants';
 import { useDashboardMetrics, type DashboardRawData, type MetricItem } from '../hooks/useDashboardMetrics';
@@ -150,11 +149,11 @@ export const Dashboard = () => {
 
   const [hazards,    setHazards]    = useState<any[]>([]);
   const [hazardTotal, setHazardTotal] = useState(0);
-  const [nearMisses, setNearMisses] = useState<any[]>([]);
   const [incidents,  setIncidents]  = useState<any[]>([]);
   const [capas,      setCapas]      = useState<any[]>([]);
   const [training,   setTraining]   = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [dashboardOverview, setDashboardOverview] = useState<any>(null);
   const requestSequence = useRef(0);
   const hasLoadedDashboard = useRef(false);
 
@@ -171,73 +170,30 @@ export const Dashboard = () => {
       // into zeroes or blank cards.
       if (!hasLoadedDashboard.current) setLoading(true);
       try {
-        const safeModuleRequest = (schemaId: string) =>
-          moduleService.getAll(schemaId, { page: 1, limit: schemaId === 'hazard-reporting' ? 10000 : 1000, ...filters }).catch((error) => {
-            console.error(`Dashboard ${schemaId} request failed:`, error);
-            return null;
-          });
-
-        const [statsResponse, hRes, nmRes, incRes, capRes, trRes, insRes, audRes] = await Promise.all([
-          dashboardClient.getStats(filters as unknown as Record<string, unknown>).catch((error) => {
-            console.error('Dashboard aggregate stats request failed:', error);
-            return null;
-          }),
-          // Aggregate stats drive headline totals; this larger page keeps charts
-          // and category breakdowns complete for the current dashboard dataset.
-          safeModuleRequest('hazard-reporting'),
-          safeModuleRequest('near-miss'),
-          safeModuleRequest('incident-log'),
-          safeModuleRequest('action-tracker'),
-          safeModuleRequest('training-records'),
-          safeModuleRequest('inspection-records'),
-          safeModuleRequest('audit-management'),
-        ]);
-        const drRes = { data: [] };
-        const legRes = { data: [] };
+        const response = await dashboardClient.getOverview(filters as unknown as Record<string, unknown>);
+        if (requestId !== requestSequence.current) return;
+        const overview = response.data?.data;
+        if (!overview) throw new Error('Dashboard overview returned no data');
+        const summary = overview.summary || {};
+        const stats = {
+          hazards: { total: summary.hazards?.total || 0, Open: summary.hazards?.open || 0, Closed: summary.hazards?.closed || 0, severity: summary.hazards?.severity || {} },
+          nearMisses: { total: summary.nearMisses?.total || 0 },
+          incidents: { total: summary.incidents?.total || 0, LTI: summary.incidents?.lti || 0, RWC: summary.incidents?.rwc || 0, MTC: summary.incidents?.mtc || 0, 'First Aid': summary.incidents?.firstAid || 0, Fatality: summary.incidents?.fatalities || 0 },
+          training: { total: summary.training?.total || 0, manhours: summary.training?.manhours || 0 },
+          correctiveActions: { total: summary.correctiveActions?.total || 0, Open: summary.correctiveActions?.open || 0, Closed: summary.correctiveActions?.closed || 0 },
+          audits: { total: summary.assurance?.audits || 0 }, inspections: { total: summary.assurance?.inspections || 0 },
+        };
+        const recent = overview.recent || {};
+        const hazardRows = recent.hazards || []; const nearMissRows = recent.nearMisses || []; const incidentRows = recent.incidents || [];
+        setDashboardOverview(overview);
+        setDashboardStats(stats);
+        setHazards(hazardRows); setHazardTotal(summary.hazards?.total || 0);
+        setIncidents(incidentRows);
+        setCapas([]); setTraining([]);
 
         // Ignore results from an older polling cycle that completed after a
         // newer request. This prevents count flicker from out-of-order APIs.
-        if (requestId !== requestSequence.current) return;
-
-        const applyFilters = (data: any[]) => {
-          let f = [...data];
-          if (filters.department && filters.department !== 'All')
-            f = f.filter(d => d.department_id === filters.department);
-          if (filters.status && filters.status !== 'All')
-            f = f.filter(d => d.status_id === filters.status);
-          if (filters.year && filters.year !== 'All')
-            f = f.filter(d => d.date?.startsWith(filters.year) || d.target_date?.startsWith(filters.year) || d.createdAt?.startsWith(filters.year));
-          if (filters.fromDate)
-            f = f.filter(d => { const dt = d.date || d.target_date || d.createdAt; return dt && dt >= filters.fromDate; });
-          if (filters.toDate)
-            f = f.filter(d => { const dt = d.date || d.target_date || d.createdAt; return dt && dt <= filters.toDate; });
-          return f;
-        };
-
-        const filteredHazards = hRes ? applyFilters(hRes.data) : null;
-        if (statsResponse?.data?.data) setDashboardStats(statsResponse.data.data);
-        if (hRes) {
-          setHazards(filteredHazards!);
-          setHazardTotal(hRes.meta?.total ?? filteredHazards!.length);
-        }
-        if (nmRes) setNearMisses(applyFilters(nmRes.data));
-        if (incRes) setIncidents(applyFilters(incRes.data));
-        if (capRes) setCapas(applyFilters(capRes.data));
-        if (trRes) setTraining(applyFilters(trRes.data));
-
-        setRawData(previous => ({
-          ...previous,
-          hazards:      hRes ? filteredHazards! : previous.hazards,
-          nearMisses:   nmRes ? applyFilters(nmRes.data) : previous.nearMisses,
-          incidents:    incRes ? applyFilters(incRes.data) : previous.incidents,
-          capas:        capRes ? applyFilters(capRes.data) : previous.capas,
-          training:     trRes ? applyFilters(trRes.data) : previous.training,
-          inspections:  insRes ? applyFilters(insRes.data) : previous.inspections,
-          audits:       audRes ? applyFilters(audRes.data) : previous.audits,
-          aggregate:    statsResponse?.data?.data ?? previous.aggregate,
-          drills:       applyFilters(drRes.data),
-          legal:        applyFilters(legRes.data),
-        }));
+        setRawData(previous => ({ ...previous, hazards: hazardRows, nearMisses: nearMissRows, incidents: incidentRows, capas: [], training: [], inspections: [], audits: [], aggregate: stats }));
         hasLoadedDashboard.current = true;
       } catch (err) {
         console.error('Dashboard fetch error:', err);
@@ -247,8 +203,7 @@ export const Dashboard = () => {
     };
     fetchData();
 
-    // Refresh every 5 minutes (300,000ms) rather than every 30 seconds to
-    // prevent overwhelming the database with 8 concurrent aggregate queries per client.
+     // Refresh the compact aggregate snapshot every 5 minutes.
     const refreshInterval = window.setInterval(fetchData, 300000);
 
     const handleRefresh = () => {
@@ -280,7 +235,7 @@ export const Dashboard = () => {
     : hazards.filter(h => ['High', 'Critical'].includes(h.risk_rating_id)).length;
 
   const totalTrainingSessions  = useAggregateStats ? dashboardStats.training?.total ?? 0 : training.length;
-  const totalTrainingManhours  = Math.round(training.reduce((sum, t) => sum + (Number(t.manhours) || 0), 0));
+  const totalTrainingManhours  = useAggregateStats ? Number(dashboardStats.training?.manhours || 0) : Math.round(training.reduce((sum, t) => sum + (Number(t.manhours) || 0), 0));
 
   const totalOpenCapas   = useAggregateStats && dashboardStats.correctiveActions
     ? ['Open', 'Pending', 'Work in Progress'].reduce((sum, status) => sum + (Number(dashboardStats.correctiveActions[status]) || 0), 0)
@@ -288,25 +243,22 @@ export const Dashboard = () => {
   const totalClosedCapas = useAggregateStats && dashboardStats.correctiveActions
     ? (Number(dashboardStats.correctiveActions.Closed) || 0) + (Number(dashboardStats.correctiveActions.Close) || 0)
     : capas.filter(c => c.status_id === 'Close' || c.status_id === 'Closed').length;
-  const overdueCapas     = capas.filter(c => {
-    if (['Close','Closed'].includes(c.status_id)) return false;
-    if (!c.due_date) return false;
-    return new Date(c.due_date) < new Date();
-  }).length;
+  const overdueCapas     = Number(dashboardOverview?.summary?.correctiveActions?.overdue || 0);
   const totalCapas       = useAggregateStats ? dashboardStats.correctiveActions?.total ?? 0 : capas.length;
   const closureRateCAPA  = totalCapas > 0 ? Math.round((totalClosedCapas / totalCapas) * 100) : 0;
 
   // ===== Chart Data (unchanged) =====
   const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const trendData = [];
+  const overviewTrend = dashboardOverview?.charts?.monthly || {};
   for (let i = 5; i >= 0; i--) {
     const d = new Date(); d.setMonth(d.getMonth() - i);
-    const m = d.getMonth(), y = d.getFullYear();
+     const m = d.getMonth();
     trendData.push({
       name: monthNames[m],
-      Incidents:    incidents.filter(x => { const dt = new Date(x.date); return dt.getMonth()===m && dt.getFullYear()===y; }).length,
-      Hazards:      hazards.filter(x => { const dt = new Date(x.date); return dt.getMonth()===m && dt.getFullYear()===y; }).length,
-      'Near Misses': nearMisses.filter(x => { const dt = new Date(x.date); return dt.getMonth()===m && dt.getFullYear()===y; }).length,
+       Incidents:    Number(overviewTrend.incidents?.[m + 1] || 0),
+       Hazards:      Number(overviewTrend.hazards?.[m + 1] || 0),
+       'Near Misses': Number(overviewTrend.nearMisses?.[m + 1] || 0),
     });
   }
 
@@ -320,21 +272,15 @@ export const Dashboard = () => {
     incidents.reduce((acc, c) => { if (c.department_id) acc[c.department_id] = (acc[c.department_id]||0)+1; return acc; }, {} as Record<string,number>)
   ).map(([name, count]) => ({ name, count: Number(count) })).sort((a,b)=>b.count-a.count).slice(0,7);
 
-  const hazCatData = Object.entries(
-    hazards.reduce((acc, c) => { if (c.hazard_category_id) acc[c.hazard_category_id] = (acc[c.hazard_category_id]||0)+1; return acc; }, {} as Record<string,number>)
-  ).map(([name, count]) => ({ name, count: Number(count) })).sort((a,b)=>b.count-a.count).slice(0,6);
+  const hazCatData = Object.entries(dashboardOverview?.charts?.hazards || {}).map(([name, count]) => ({ name, count: Number(count) })).sort((a,b)=>b.count-a.count).slice(0,6);
 
   const trDeptData = Object.entries(
     training.reduce((acc, c) => { if (c.department_id) acc[c.department_id] = (acc[c.department_id]||0)+(Number(c.manhours)||0); return acc; }, {} as Record<string,number>)
   ).map(([name, count]) => ({ name, count: Math.round(Number(count)) })).sort((a,b)=>b.count-a.count).slice(0,7);
 
-  const incCatData = Object.entries(
-    incidents.reduce((acc, c) => { if (c.incident_category_id) acc[c.incident_category_id]=(acc[c.incident_category_id]||0)+1; return acc; }, {} as Record<string,number>)
-  ).map(([name, value]) => ({ name, value }));
+  const incCatData = Object.entries(dashboardOverview?.summary?.incidents?.byType || {}).map(([name, value]) => ({ name, value }));
 
-  const riskData = Object.entries(
-    hazards.reduce((acc, c) => { if (c.risk_rating_id) acc[c.risk_rating_id]=(acc[c.risk_rating_id]||0)+1; return acc; }, {} as Record<string,number>)
-  ).map(([name, value]) => ({ name, value }));
+  const riskData = Object.entries(dashboardOverview?.charts?.hazardSeverity || {}).map(([name, value]) => ({ name, value }));
 
   if (loading) {
     return (

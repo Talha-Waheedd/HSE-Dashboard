@@ -23,6 +23,7 @@ const correctiveActionRoutes = require('../actions/corrective-action.routes');
 const attachmentRoutes = require('../actions/attachment.routes');
 const dashboardRoutes = require('./dashboard.routes');
 const reportRoutes = require('./report.routes');
+const analyticsRoutes = require('./analytics.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -44,5 +45,6 @@ router.use('/corrective-actions', correctiveActionRoutes);
 router.use('/attachments', attachmentRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
+router.use('/analytics', analyticsRoutes);
 
 module.exports = router;

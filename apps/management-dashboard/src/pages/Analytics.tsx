@@ -6,7 +6,7 @@ import { ContextHeader } from '../components/ContextHeader';
 import { FilterBar } from '../components/FilterBar';
 import { KpiTile } from '../components/KpiTile';
 import { useFilters } from '../context/FilterContext';
-import { moduleService } from '../services/api/moduleService';
+import { dashboardClient } from '@cbl/api';
 import { CHART_COLORS } from '../config/constants';
 
 type RecordSet = { hazards: any[]; incidents: any[]; nearMisses: any[]; trainings: any[]; audits: any[]; inspections: any[]; capas: any[] };
@@ -55,6 +55,7 @@ export const Analytics = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [sourceErrors, setSourceErrors] = useState<string[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [overview, setOverview] = useState<any>(null);
   const [view, setView] = useState<'summary' | 'pyramid'>('summary');
   const [activeTab, setActiveTab] = useState<'kpi' | 'department' | 'training' | 'assurance'>('kpi');
 
@@ -66,27 +67,16 @@ export const Analytics = () => {
       const currentRequestId = ++requestId;
       setRefreshing(true);
       try {
-        const allRecordsParams = { limit: 10000, offset: 0 };
-        const results = await Promise.allSettled([
-          moduleService.getAll('hazard-reporting', allRecordsParams), moduleService.getAll('incident-log', allRecordsParams), moduleService.getAll('near-miss', allRecordsParams),
-          moduleService.getAll('training-records', allRecordsParams), moduleService.getAll('audit-management', allRecordsParams), moduleService.getAll('inspection-records', allRecordsParams), moduleService.getAll('action-tracker', allRecordsParams),
-        ]);
-        const dataAt = (index: number) => results[index].status === 'fulfilled' ? results[index].value.data || [] : [];
-        const failed = results
-          .map((result, index) => result.status === 'rejected' ? sourceNames[index] : null)
-          .filter((name): name is string => Boolean(name));
+        const response = await dashboardClient.getAnalyticsOverview(filters as unknown as Record<string, unknown>);
+        const data = response.data?.data;
+        if (!data) throw new Error('Analytics overview returned no data');
+        const failed: string[] = [];
         if (!cancelled && currentRequestId === requestId) {
           // Keep the last successful source data during partial failures. A
           // transient API error must never make valid analytics disappear or
           // turn a count into zero during a background refresh.
-          setRecords(previous => {
-            const next = { ...previous };
-            const keys: (keyof RecordSet)[] = ['hazards', 'incidents', 'nearMisses', 'trainings', 'audits', 'inspections', 'capas'];
-            results.forEach((result, index) => {
-              if (result.status === 'fulfilled') next[keys[index]] = dataAt(index);
-            });
-            return next;
-          });
+          setOverview(data);
+          setRecords(previous => previous);
           setSourceErrors(failed);
           setLastUpdated(new Date());
           setLoading(false);
@@ -107,7 +97,16 @@ export const Analytics = () => {
     window.addEventListener('dashboard-refresh', refresh);
     const interval = window.setInterval(refresh, 30000);
     return () => { cancelled = true; window.removeEventListener('dashboard-refresh', refresh); window.clearInterval(interval); };
-  }, []);
+  }, [filters]);
+
+  const overviewCounts = {
+    hazards: Number(overview?.summary?.hazards?.total || 0),
+    nearMisses: Number(overview?.summary?.nearMisses?.total || 0),
+    trainings: Number(overview?.summary?.training?.total || 0),
+    audits: Number(overview?.summary?.audits || 0),
+    inspections: Number(overview?.summary?.inspections || 0),
+    actions: Number(overview?.summary?.actions?.total || 0),
+  };
 
   const applyFilters = (items: any[]) => items.filter(item => {
     const date = dateOf(item);
@@ -126,21 +125,24 @@ export const Analytics = () => {
   const metrics = useMemo(() => {
     const incidents = current.incidents;
     const hazards = current.hazards;
-    const fatal = countCategories(incidents, ['fatal']);
-    const lti = countCategories(incidents, ['lost time', 'lti']);
-    const rwc = countCategories(incidents, ['restricted', 'rwc']);
-    const mtc = countCategories(incidents, ['medical treatment', 'mtc']);
-    const firstAid = countCategories(incidents, ['first aid']);
-    const majorFire = countCategories(incidents, ['major fire']);
-    const minorFire = countCategories(incidents, ['minor fire']);
-    const closedHazards = hazards.filter(item => ['closed', 'close', 'resolved', 'completed', 'verified', 'approved'].includes(statusOf(item))).length;
-    const closure = hazards.length ? Math.round((closedHazards / hazards.length) * 100) : 0;
-    const unsafeActs = hazards.filter(item => String(item.unsafe_type || item.category || '').toLowerCase().includes('unsafe act')).length;
+    const summary = overview?.summary;
+    const incidentSummary = summary?.incidents;
+    const fatal = Number(incidentSummary?.byType?.fatality || incidentSummary?.fatalities || countCategories(incidents, ['fatal']));
+    const lti = Number(incidentSummary?.byType?.lti || incidentSummary?.lti || countCategories(incidents, ['lost time', 'lti']));
+    const rwc = Number(incidentSummary?.byType?.rwc || incidentSummary?.rwc || countCategories(incidents, ['restricted', 'rwc']));
+    const mtc = Number(incidentSummary?.byType?.mtc || incidentSummary?.mtc || countCategories(incidents, ['medical treatment', 'mtc']));
+    const firstAid = Number(incidentSummary?.byType?.first_aid || incidentSummary?.firstAid || countCategories(incidents, ['first aid']));
+    const majorFire = Number(incidentSummary?.byType?.major_fire || countCategories(incidents, ['major fire']));
+    const minorFire = Number(incidentSummary?.byType?.minor_fire || countCategories(incidents, ['minor fire']));
+    const closedHazards = Number(summary?.hazards?.closed || hazards.filter(item => ['closed', 'close', 'resolved', 'completed', 'verified', 'approved'].includes(statusOf(item))).length);
+    const hazardTotal = Number(summary?.hazards?.total || hazards.length);
+    const closure = hazardTotal ? Math.round((closedHazards / hazardTotal) * 100) : 0;
+    const unsafeActs = Number(overview?.summary?.hazards?.byCategory?.['unsafe act'] || overview?.summary?.hazards?.byCategory?.['unsafe acts'] || hazards.filter(item => String(item.unsafe_type || item.category || '').toLowerCase().includes('unsafe act')).length);
     const incidentActions = current.capas.filter(item => String(item.source || item.module_source || '').toLowerCase().includes('incident'));
     const closedActions = incidentActions.filter(item => ['closed', 'close', 'resolved', 'completed', 'verified', 'approved'].includes(statusOf(item))).length;
-    const actionClosure = incidentActions.length ? Math.round((closedActions / incidentActions.length) * 100) : 0;
+    const actionClosure = Number(overview?.summary?.actions?.total) ? Math.round((Number(overview.summary.actions.completed || 0) / Number(overview.summary.actions.total)) * 100) : (incidentActions.length ? Math.round((closedActions / incidentActions.length) * 100) : 0);
     return { fatal, lti, rwc, mtc, firstAid, majorFire, minorFire, closure, unsafeActs, actionClosure, recordable: lti + rwc + mtc + majorFire + minorFire };
-  }, [current]);
+  }, [current, overview]);
 
   const leadingRows: IndicatorRow[] = [
     { label: 'Monthly HSE Improvement Initiatives', unit: '', key: 'initiatives', remark: 'Tracked through the relevant HSE modules.' },
@@ -156,7 +158,7 @@ export const Analytics = () => {
     { label: 'Legal Compliance', unit: '%', key: 'legal', remark: 'No legal-compliance API source is currently configured.' },
   ];
 
-  const valueFor = (key: string) => ({ hazards: current.hazards.length, nearMisses: current.nearMisses.length, unsafeActs: metrics.unsafeActs, closure: metrics.closure, training: Math.round(current.trainings.reduce((sum, item) => sum + trainingManhours(item), 0)), assurance: current.audits.length + current.inspections.length, actionClosure: metrics.actionClosure, capaClosure: current.capas.length ? Math.round((current.capas.filter(item => ['closed', 'close', 'completed', 'verified', 'approved'].includes(statusOf(item))).length / current.capas.length) * 100) : 0, initiatives: '—', drills: '—', legal: '—' }[key] ?? '—');
+  const valueFor = (key: string) => ({ hazards: overview?.summary?.hazards?.total ?? current.hazards.length, nearMisses: overview?.summary?.nearMisses?.total ?? current.nearMisses.length, unsafeActs: metrics.unsafeActs, closure: metrics.closure, training: overview?.summary?.training?.manhours ?? Math.round(current.trainings.reduce((sum, item) => sum + trainingManhours(item), 0)), assurance: (overview?.summary?.audits || 0) + (overview?.summary?.inspections || 0) || current.audits.length + current.inspections.length, actionClosure: metrics.actionClosure, capaClosure: overview?.summary?.actions?.total ? Math.round((Number(overview.summary.actions.completed || 0) / Number(overview.summary.actions.total)) * 100) : (current.capas.length ? Math.round((current.capas.filter(item => ['closed', 'close', 'completed', 'verified', 'approved'].includes(statusOf(item))).length / current.capas.length) * 100) : 0), initiatives: '—', drills: '—', legal: '—' }[key] ?? '—');
   const laggingRows: IndicatorRow[] = [
     { label: 'Fatal Incidents', unit: 'No', key: 'fatal', target: 0, remark: 'Zero fatalities target.' },
     { label: 'LTI', unit: 'No', key: 'lti', target: 0, remark: 'Lost-time injury count.' },
@@ -189,8 +191,9 @@ export const Analytics = () => {
     const date = new Date(); date.setMonth(date.getMonth() - (5 - index));
     const month = date.getMonth(); const year = date.getFullYear();
     const inMonth = (items: any[]) => items.filter(item => { const value = new Date(item.date || item.incidentDate || item.reportedAt || item.createdAt || ''); return value.getMonth() === month && value.getFullYear() === year; }).length;
-    return { name: date.toLocaleString('default', { month: 'short' }), Hazards: inMonth(current.hazards), Incidents: inMonth(current.incidents), 'Near Misses': inMonth(current.nearMisses) };
-  }), [current]);
+    const monthKey = String(month + 1);
+    return { name: date.toLocaleString('default', { month: 'short' }), Hazards: Number(overview?.charts?.hazardsByMonth?.[monthKey] || inMonth(current.hazards)), Incidents: Number(overview?.charts?.incidentsByMonth?.[monthKey] || inMonth(current.incidents)), 'Near Misses': Number(overview?.charts?.nearMissesByMonth?.[monthKey] || inMonth(current.nearMisses)) };
+  }), [current, overview]);
 
   const incidentSummary = useMemo(() => {
     const year = filters.year === 'All' ? String(new Date().getFullYear()) : filters.year;
@@ -374,8 +377,8 @@ export const Analytics = () => {
       { title: <>Incident<br />Action Items<br />Closing Status</>, actual: metrics.actionClosure, target: 90, unit: '%', targetText: 'TARGET = 90%', color: '#4472C4' },
       { title: <>Hazards<br />Closing Status</>, actual: metrics.closure, target: 90, unit: '%', targetText: 'TARGET = 90%', color: '#4472C4' },
       { title: <>HSE Trainings</>, actual: trainingHours, target: 15000, unit: '', targetText: 'TARGET = 1250 MHRS PER MONTH', color: '#4472C4' },
-      { title: <>Near miss</>, actual: current.nearMisses.length, target: 22, unit: '', targetText: 'TARGET = 22 PER MONTH', color: '#4472C4' },
-      { title: <>Hazard Spotting {filters.year}</>, actual: current.hazards.length, target: 250, unit: '', targetText: 'TARGET = 250 PER MONTH', color: '#4472C4' },
+      { title: <>Near miss</>, actual: overviewCounts.nearMisses, target: 22, unit: '', targetText: 'TARGET = 22 PER MONTH', color: '#4472C4' },
+      { title: <>Hazard Spotting {filters.year}</>, actual: overviewCounts.hazards, target: 250, unit: '', targetText: 'TARGET = 250 PER MONTH', color: '#4472C4' },
     ];
     const renderCard = (card: typeof cards[number]) => <div className="flex min-h-[300px] flex-col border border-[#B7B7B7] bg-white p-4"><h3 className="min-h-[72px] text-center text-[22px] font-bold leading-tight text-[#111827]">{card.title}</h3><div className="h-[210px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Actual', value: card.actual }, { name: 'Target', value: card.target }]} dataKey="value" outerRadius="64%" label={({ value }) => `${value}${card.unit}`}>{[card.color, '#ED7D31'].map(fill => <Cell key={fill} fill={fill} />)}</Pie><Legend verticalAlign="bottom" iconType="square" /></PieChart></ResponsiveContainer></div><p className="mt-auto text-center text-[14px] font-bold text-[#D00000]">{card.targetText}</p></div>;
     return <Panel title={`HSE Performance — ${incidentSummary.monthName} ${filters.year === 'All' ? new Date().getFullYear() : filters.year}`}><div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">{renderCard(cards[0])}{renderCard(cards[1])}<div className="space-y-5">{renderCard(cards[2])}{renderCard(cards[3])}</div>{renderCard(cards[4])}</div></Panel>;
@@ -653,8 +656,8 @@ export const Analytics = () => {
           <>
             <Panel title={`Safety Pyramid — YTD ${filters.year}`}>
               <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(440px,1fr)_minmax(360px,.8fr)]">
-                <div className="flex min-h-[520px] items-center justify-center bg-[#FCFCFC] p-4"><div className="flex w-full max-w-[520px] flex-col items-center gap-1 text-center font-bold text-white"><div className="w-[24%] bg-[#EF1111] px-3 py-5 text-sm">{metrics.fatal}<br /><span className="text-[11px]">Fatality</span></div><div className="w-[42%] bg-[#FF6B00] px-3 py-6 text-sm">{metrics.lti + metrics.rwc + metrics.mtc}<br /><span className="text-[11px]">Serious / Recordable Injury</span></div><div className="w-[62%] bg-[#5B9BD5] px-3 py-8 text-sm">{metrics.recordable}<br /><span className="text-[11px]">LTI, RWC, MTC, Fire</span></div><div className="w-[82%] bg-[#FFC000] px-3 py-9 text-sm">{current.nearMisses.length + metrics.firstAid}<br /><span className="text-[11px]">Near Misses, First Aids, Minor Incidents</span></div><div className="w-full bg-[#00B050] px-3 py-10 text-sm">{current.hazards.length + metrics.unsafeActs}<br /><span className="text-[11px]">Unsafe Conditions & Unsafe Acts</span></div></div></div>
-                <div className="space-y-4"><div className="rounded-xl bg-[#FFF2CC] p-6 text-center text-[18px] font-semibold leading-8 text-[#1F2937]">It is better to report and learn from near misses, minor incidents, and hazards before serious losses occur.</div><div className="grid gap-3"><KpiTile label="Hazards" value={current.hazards.length} icon={<AlertTriangle />} accent="success" /><KpiTile label="Near Misses" value={current.nearMisses.length} icon={<Target />} accent="warning" /><KpiTile label="Recordable Incidents" value={metrics.recordable} icon={<FileText />} accent={metrics.recordable > 0 ? 'danger' : 'success'} /></div></div>
+                <div className="flex min-h-[520px] items-center justify-center bg-[#FCFCFC] p-4"><div className="flex w-full max-w-[520px] flex-col items-center gap-1 text-center font-bold text-white"><div className="w-[24%] bg-[#EF1111] px-3 py-5 text-sm">{metrics.fatal}<br /><span className="text-[11px]">Fatality</span></div><div className="w-[42%] bg-[#FF6B00] px-3 py-6 text-sm">{metrics.lti + metrics.rwc + metrics.mtc}<br /><span className="text-[11px]">Serious / Recordable Injury</span></div><div className="w-[62%] bg-[#5B9BD5] px-3 py-8 text-sm">{metrics.recordable}<br /><span className="text-[11px]">LTI, RWC, MTC, Fire</span></div><div className="w-[82%] bg-[#FFC000] px-3 py-9 text-sm">{overviewCounts.nearMisses + metrics.firstAid}<br /><span className="text-[11px]">Near Misses, First Aids, Minor Incidents</span></div><div className="w-full bg-[#00B050] px-3 py-10 text-sm">{overviewCounts.hazards + metrics.unsafeActs}<br /><span className="text-[11px]">Unsafe Conditions & Unsafe Acts</span></div></div></div>
+                <div className="space-y-4"><div className="rounded-xl bg-[#FFF2CC] p-6 text-center text-[18px] font-semibold leading-8 text-[#1F2937]">It is better to report and learn from near misses, minor incidents, and hazards before serious losses occur.</div><div className="grid gap-3"><KpiTile label="Hazards" value={overviewCounts.hazards} icon={<AlertTriangle />} accent="success" /><KpiTile label="Near Misses" value={overviewCounts.nearMisses} icon={<Target />} accent="warning" /><KpiTile label="Recordable Incidents" value={metrics.recordable} icon={<FileText />} accent={metrics.recordable > 0 ? 'danger' : 'success'} /></div></div>
               </div>
             </Panel>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Safety Events Trend"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.success} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.warning} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Pyramid Category Comparison"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><BarChart data={[{ name: 'Hazards', value: current.hazards.length }, { name: 'Near Miss', value: current.nearMisses.length }, { name: 'Recordable', value: metrics.recordable }, { name: 'Fatality', value: metrics.fatal }]}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="value" fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></Panel></div>
@@ -667,7 +670,7 @@ export const Analytics = () => {
           <>{renderLegalComplianceSummary()}{renderLegalActionItemsSummary()}{renderAuditsInspectionsSummary()}{renderSpecialistAuditsSummary()}</>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-6"><KpiTile label="Hazards" value={current.hazards.length} icon={<AlertTriangle />} accent="warning" /><KpiTile label="Near Misses" value={current.nearMisses.length} icon={<Target />} accent="info" /><KpiTile label="Fatalities" value={metrics.fatal} icon={<ShieldAlert />} accent={metrics.fatal ? 'danger' : 'success'} /><KpiTile label="LTI" value={metrics.lti} icon={<FileText />} accent={metrics.lti ? 'danger' : 'success'} /><KpiTile label="Training" value={current.trainings.length} icon={<Users />} accent="success" /><KpiTile label="Audits / Inspections" value={current.audits.length + current.inspections.length} icon={<ClipboardCheck />} accent="info" /></div>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-6"><KpiTile label="Hazards" value={overviewCounts.hazards} icon={<AlertTriangle />} accent="warning" /><KpiTile label="Near Misses" value={overviewCounts.nearMisses} icon={<Target />} accent="info" /><KpiTile label="Fatalities" value={metrics.fatal} icon={<ShieldAlert />} accent={metrics.fatal ? 'danger' : 'success'} /><KpiTile label="LTI" value={metrics.lti} icon={<FileText />} accent={metrics.lti ? 'danger' : 'success'} /><KpiTile label="Training" value={overviewCounts.trainings} icon={<Users />} accent="success" /><KpiTile label="Audits / Inspections" value={overviewCounts.audits + overviewCounts.inspections} icon={<ClipboardCheck />} accent="info" /></div>
             {renderScorecard('Lagging Indicators', laggingRows, true)}
             {renderScorecard('Leading Indicators', leadingRows)}
             {renderDepartmentalTable()}
