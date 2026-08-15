@@ -13,9 +13,15 @@ type RecordSet = { hazards: any[]; incidents: any[]; nearMisses: any[]; training
 type IndicatorRow = { label: string; unit: string; key: string; target?: number; remark: string; category?: string };
 
 const emptyRecords: RecordSet = { hazards: [], incidents: [], nearMisses: [], trainings: [], audits: [], inspections: [], capas: [] };
-const yearOf = (record: any) => dateOf(record).slice(0, 4);
+const yearOf = (record: any) => {
+  const value = dateOf(record);
+  const isoYear = value.match(/^(\d{4})/);
+  if (isoYear) return isoYear[1];
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? '' : String(parsed.getFullYear());
+};
 const dateOf = (record: any) => String(record.date || record.incidentDate || record.incident_date || record.reportedAt || record.reported_at || record.scheduledDate || record.scheduled_date || record.dueDate || record.due_date || record.createdAt || record.created_at || '');
-const departmentOf = (record: any) => String(record.department_id || record.departmentId || record.department?.id || record.department?.code || record.department?.name || '').toLowerCase();
+const departmentOf = (record: any) => String(record.department_code || record.department_name || record.department?.code || record.department?.name || record.department_id || record.departmentId || record.department?.id || '').toLowerCase();
 const statusOf = (record: any) => String(record.status_id || record.status || record.statusId || '').toLowerCase();
 const trainingManhours = (record: any) => Number(record.manhours || record.total_manhours || record.hours || ((Number(record.durationMinutes || record.duration_minutes) || 0) / 60)) || 0;
 const categoryOf = (record: any) => String(record.incident_category_id || record.incidentType || record.category || '').toLowerCase().replaceAll('_', ' ').trim();
@@ -46,15 +52,19 @@ export const Analytics = () => {
   const { filters } = useFilters();
   const [records, setRecords] = useState<RecordSet>(emptyRecords);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [sourceErrors, setSourceErrors] = useState<string[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [view, setView] = useState<'summary' | 'pyramid'>('summary');
   const [activeTab, setActiveTab] = useState<'kpi' | 'department' | 'training' | 'assurance'>('kpi');
 
   useEffect(() => {
     let cancelled = false;
     let requestId = 0;
+    const sourceNames: string[] = ['hazards', 'incidents', 'near misses', 'training', 'audits', 'inspections', 'actions'];
     const load = async () => {
       const currentRequestId = ++requestId;
-      setLoading(true);
+      setRefreshing(true);
       try {
         const allRecordsParams = { limit: 10000, offset: 0 };
         const results = await Promise.allSettled([
@@ -62,14 +72,34 @@ export const Analytics = () => {
           moduleService.getAll('training-records', allRecordsParams), moduleService.getAll('audit-management', allRecordsParams), moduleService.getAll('inspection-records', allRecordsParams), moduleService.getAll('action-tracker', allRecordsParams),
         ]);
         const dataAt = (index: number) => results[index].status === 'fulfilled' ? results[index].value.data || [] : [];
-        const failed = results.filter(result => result.status === 'rejected');
-        if (failed.length) console.warn(`Analytics loaded with ${failed.length} unavailable data source(s).`);
-        if (!cancelled && currentRequestId === requestId) setRecords({ hazards: dataAt(0), incidents: dataAt(1), nearMisses: dataAt(2), trainings: dataAt(3), audits: dataAt(4), inspections: dataAt(5), capas: dataAt(6) });
+        const failed = results
+          .map((result, index) => result.status === 'rejected' ? sourceNames[index] : null)
+          .filter((name): name is string => Boolean(name));
+        if (!cancelled && currentRequestId === requestId) {
+          // Keep the last successful source data during partial failures. A
+          // transient API error must never make valid analytics disappear or
+          // turn a count into zero during a background refresh.
+          setRecords(previous => {
+            const next = { ...previous };
+            const keys: (keyof RecordSet)[] = ['hazards', 'incidents', 'nearMisses', 'trainings', 'audits', 'inspections', 'capas'];
+            results.forEach((result, index) => {
+              if (result.status === 'fulfilled') next[keys[index]] = dataAt(index);
+            });
+            return next;
+          });
+          setSourceErrors(failed);
+          setLastUpdated(new Date());
+          setLoading(false);
+        }
       } catch (error) {
         console.error('Analytics data fetch failed', error);
-        if (!cancelled && currentRequestId === requestId) setRecords(emptyRecords);
+        // Preserve the last successful snapshot on a complete refresh error.
+        if (!cancelled && currentRequestId === requestId) {
+          setSourceErrors([...sourceNames]);
+          setLoading(false);
+        }
       } finally {
-        if (!cancelled && currentRequestId === requestId) setLoading(false);
+        if (!cancelled && currentRequestId === requestId) setRefreshing(false);
       }
     };
     load();
@@ -139,7 +169,13 @@ export const Analytics = () => {
   ];
   const laggingValue = (key: string) => ({ fatal: metrics.fatal, lti: metrics.lti, ltir: '—', rwcMtc: metrics.rwc + metrics.mtc, trir: '—', firstAid: metrics.firstAid, majorFire: metrics.majorFire, minorFire: metrics.minorFire }[key] ?? '—');
 
-  const yearValue = (items: any[], key: string, year: string) => {
+  const yearValue = (key: string, year: string) => {
+    const items = key === 'hazards' || key === 'unsafeActs' || key === 'closure' ? records.hazards
+      : key === 'nearMisses' ? records.nearMisses
+        : key === 'training' ? records.trainings
+          : key === 'assurance' ? [...records.audits, ...records.inspections]
+            : key === 'capaClosure' || key === 'actionClosure' ? records.capas
+              : records.incidents;
     const yearItems = items.filter(item => yearOf(item) === year);
     if (key === 'hazards') return yearItems.length;
     if (key === 'nearMisses') return yearItems.length;
@@ -153,8 +189,8 @@ export const Analytics = () => {
     const date = new Date(); date.setMonth(date.getMonth() - (5 - index));
     const month = date.getMonth(); const year = date.getFullYear();
     const inMonth = (items: any[]) => items.filter(item => { const value = new Date(item.date || item.incidentDate || item.reportedAt || item.createdAt || ''); return value.getMonth() === month && value.getFullYear() === year; }).length;
-    return { name: date.toLocaleString('default', { month: 'short' }), Hazards: inMonth(records.hazards), Incidents: inMonth(records.incidents), 'Near Misses': inMonth(records.nearMisses) };
-  }), [records]);
+    return { name: date.toLocaleString('default', { month: 'short' }), Hazards: inMonth(current.hazards), Incidents: inMonth(current.incidents), 'Near Misses': inMonth(current.nearMisses) };
+  }), [current]);
 
   const incidentSummary = useMemo(() => {
     const year = filters.year === 'All' ? String(new Date().getFullYear()) : filters.year;
@@ -205,14 +241,17 @@ export const Analytics = () => {
     ];
     const totalMonth = rows.reduce((sum, row) => sum + Number(row[1]), 0);
     const totalYtd = rows.reduce((sum, row) => sum + Number(row[2]), 0);
+    // TRIR requires total workers, working days, and daily hours. Those
+    // inputs are not persisted by any current analytics API, so do not show a
+    // fabricated zero. The dedicated TRIR page owns that calculation.
     const trirTarget = 0.14;
-    const trirYtd = 0;
+    const trirYtd: number | null = null;
     return (
       <Panel title={`Summary of Incidents YTD ${incidentSummary.year} (${incidentSummary.monthName})`}>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(300px,.7fr)_minmax(600px,1.3fr)]">
           <div className="flex min-h-[300px] flex-col items-center justify-center border border-[#C7C7C7] p-4">
             <h3 className="text-center text-[16px] font-bold text-[#1F2937]">Total Recordable Injury Rate YTD<br />({incidentSummary.monthName}-{incidentSummary.year})</h3>
-            <div className="mt-3 h-[190px] w-full"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Target', value: trirTarget }, { name: 'YTD TRIR', value: trirYtd }]} dataKey="value" innerRadius={0} outerRadius={78} label={({ value }) => Number(value).toFixed(2)}><Cell fill="#5B9BD5" /><Cell fill="#ED7D31" /></Pie><Legend verticalAlign="bottom" iconType="square" /></PieChart></ResponsiveContainer></div>
+            {trirYtd === null ? <p className="mt-8 text-center text-sm text-[#6B7280]">YTD TRIR is unavailable until worker-hours inputs are provided.</p> : <div className="mt-3 h-[190px] w-full"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={[{ name: 'Target', value: trirTarget }, { name: 'YTD TRIR', value: trirYtd }]} dataKey="value" innerRadius={0} outerRadius={78} label={({ value }) => Number(value).toFixed(2)}><Cell fill="#5B9BD5" /><Cell fill="#ED7D31" /></Pie><Legend verticalAlign="bottom" iconType="square" /></PieChart></ResponsiveContainer></div>}
           </div>
           <div className="overflow-x-auto"><table className="min-w-[480px] w-full border-collapse text-[13px]"><thead><tr className="bg-[#AEBBCD] text-[25px] font-bold"><th className="border border-[#1F2937] px-3 py-2 text-left">INCIDENT</th><th className="border border-[#1F2937] px-3 py-2">{incidentSummary.monthName.slice(0, 3)}</th><th className="border border-[#1F2937] px-3 py-2">YTD</th></tr></thead><tbody>{rows.map(row => <tr key={String(row[0])}><td className="border border-[#1F2937] px-3 py-2 font-medium">{row[0]}</td><td className="border border-[#1F2937] px-3 py-2 text-center">{String(row[1]).padStart(2, '0')}</td><td className="border border-[#1F2937] px-3 py-2 text-center">{String(row[2]).padStart(2, '0')}</td></tr>)}<tr className="bg-[#C6E0B4] font-bold"><td className="border border-[#1F2937] px-3 py-2 text-right">TOTAL</td><td className="border border-[#1F2937] px-3 py-2 text-center">{totalMonth}</td><td className="border border-[#1F2937] px-3 py-2 text-center">{totalYtd}</td></tr></tbody></table></div>
         </div>
@@ -399,10 +438,7 @@ export const Analytics = () => {
   };
 
   const renderTrainingAwarenessSummary = () => {
-    const trainingRecords = records.trainings.filter(item => {
-      const value = String(item.department_id || item.departmentId || item.department?.code || item.department?.name || '').toLowerCase();
-      return !value || value.includes('hse') || value.includes('training') || value.includes('all');
-    });
+    const trainingRecords = current.trainings;
     const hoursForYear = (year: number) => Math.round(trainingRecords.filter(item => yearOf(item) === String(year)).reduce((sum, item) => sum + trainingManhours(item), 0));
     const totalHours = Math.round(current.trainings.reduce((sum, item) => sum + trainingManhours(item), 0));
     const topics = [
@@ -454,26 +490,33 @@ export const Analytics = () => {
   };
 
   const renderLegalComplianceSummary = () => {
+    const certificates: string[][] = [];
+    const nocs: string[][] = [];
     const assuranceRecords = [...current.audits, ...current.inspections];
     const closed = assuranceRecords.filter(item => ['closed', 'close', 'completed', 'complete', 'verified', 'approved'].includes(String(item.status_id || item.status || item.statusId || '').toLowerCase())).length;
     const compliance = assuranceRecords.length ? Math.round((closed / assuranceRecords.length) * 100) : 0;
-    const radarData = ['General Environment', 'Air', 'Water', 'Waste', 'Chemicals', 'Hazardous Materials', 'General Safety', 'Technical Safety', 'Emergency Preparedness', 'Occupational Health', 'HR Related', 'Miscellaneous Laws'].map((subject, index) => ({ subject, value: Math.min(100, Math.max(0, compliance + [4, 2, -3, 0, 5, -2, 3, 1, -4, 2, 0, 4][index])) }));
-    const certificates = [
+    const legalAreas = ['General Environment', 'Air', 'Water', 'Waste', 'Chemicals', 'Hazardous Materials', 'General Safety', 'Technical Safety', 'Emergency Preparedness', 'Occupational Health', 'HR Related', 'Miscellaneous Laws'];
+    const radarData = legalAreas.map(subject => {
+      const related = assuranceRecords.filter(item => String(item.auditType || item.audit_type || item.inspectionType || item.inspection_type || item.category || item.description || '').toLowerCase().includes(subject.toLowerCase()));
+      const scope = related.length ? related : assuranceRecords;
+      const closedInScope = scope.filter(item => ['closed', 'close', 'completed', 'complete', 'verified', 'approved'].includes(String(item.status_id || item.status || item.statusId || '').toLowerCase())).length;
+      return { subject, value: scope.length ? Math.round((closedInScope / scope.length) * 100) : 0 };
+    });
+    const legacyCertificates = [
       ['Civil Defense Certificate', 'Validity-31ˢᵗ Dec-2026', '🛡️'],
       ['LPG Storage Tanks Inspection Certificate', 'Validity-31ˢᵗ Dec-2026', '🛢️'],
     ];
-    const nocs = [
+    const legacyNocs = [
       ['SEPA NoC FMP', 'Validity-4ᵗʰ Jan-2027'], ['SEPA NoC HSMP', 'Validity-17-April-2026'], ['SEPA IEE Cake Plant', ''], ['Cake Plant-Operational NOC-In Progress', ''], ['SEPA Quarterly Env Monitoring', 'Submitted regularly'],
     ];
-    const legalAreas = ['General Environment', 'Air', 'Water', 'Waste', 'Chemicals', 'Hazardous Materials', 'General Safety', 'Technical Safety', 'Emergency Preparedness', 'Occupational Health', 'HR Related', 'Miscellaneous Laws'];
     return <Panel title="Assurance — Legal Compliance" className="border-[#2F65AD]">
       <div className="space-y-6">
         <div className="flex items-center gap-4 border-b border-dashed border-[#64748B] pb-4"><img src="/logo.svg" alt="LU" className="h-14 w-auto" /><h2 className="text-2xl font-bold text-[#111827] sm:text-3xl">Legal Compliance</h2><img src="/image.png" alt="CBL" className="ml-auto h-14 w-14 object-contain" /></div>
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[220px_1fr]">
           <div className="flex items-center bg-[#2F65AD] px-4 py-5 text-xl font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]">Legal Licenses</div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">{certificates.map(([name, validity, icon]) => <div key={name} className="flex flex-col items-center text-center"><div className="flex h-28 w-28 items-center justify-center border border-[#374151] bg-[#F8FAFC] text-5xl">{icon}</div><p className="mt-2 text-sm font-medium">{name}<br />{validity}</p></div>)}</div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">{certificates.concat(legacyCertificates.length ? [] : []).map(([name, validity, icon]) => <div key={name} className="flex flex-col items-center text-center"><div className="flex h-28 w-28 items-center justify-center border border-[#374151] bg-[#F8FAFC] text-5xl">{icon}</div><p className="mt-2 text-sm font-medium">{name}<br />{validity}</p></div>)}</div>
         </div>
-        <div className="border-t border-dashed border-[#64748B] pt-5"><div className="grid grid-cols-1 gap-5 xl:grid-cols-[220px_1fr]"><div className="flex items-center bg-[#6593A6] px-4 py-5 text-xl font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]">Legal NoCs</div><div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">{nocs.map(([name, validity], index) => <div key={name} className="text-center"><div className="mx-auto flex h-24 w-24 items-center justify-center border border-[#374151] bg-[#F8FAFC] text-4xl text-[#1F5B40]">{index === 0 ? '☘' : '✦'}</div><p className="mt-2 text-sm font-medium">{name}<br />{validity}</p></div>)}</div></div></div>
+        <div className="border-t border-dashed border-[#64748B] pt-5"><div className="grid grid-cols-1 gap-5 xl:grid-cols-[220px_1fr]"><div className="flex items-center bg-[#6593A6] px-4 py-5 text-xl font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]">Legal NoCs</div><div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">{nocs.concat(legacyNocs.length ? [] : []).map(([name, validity], index) => <div key={name} className="text-center"><div className="mx-auto flex h-24 w-24 items-center justify-center border border-[#374151] bg-[#F8FAFC] text-4xl text-[#1F5B40]">{index === 0 ? '☘' : '✦'}</div><p className="mt-2 text-sm font-medium">{name}<br />{validity}</p></div>)}</div></div></div>
         <div className="grid grid-cols-1 items-center gap-6 xl:grid-cols-[220px_minmax(300px,1fr)_minmax(360px,.9fr)]"><div className="flex min-h-20 items-center bg-[#8CCB4B] px-4 text-xl font-bold text-white [clip-path:polygon(0_0,86%_0,100%_50%,86%_100%,0_100%)]">Legal Register Compliance</div><div className="rounded-2xl border-2 border-[#155E3A] p-4 text-base leading-7">Overall compliance is <strong>{compliance}%</strong> based on {assuranceRecords.length} live assurance records, with {closed} closed or verified.</div><div className="h-[360px] min-w-0"><ResponsiveContainer width="100%" height="100%"><RadarChart data={radarData} outerRadius="68%"><PolarGrid /><PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fontWeight: 600 }} /><PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 9 }} /><Radar name="Compliance" dataKey="value" stroke="#1473C9" fill="#1473C9" fillOpacity={0.2} strokeWidth={3} /></RadarChart></ResponsiveContainer></div></div>
         <div className="grid grid-cols-2 gap-3 text-center text-xs font-semibold sm:grid-cols-4">{legalAreas.slice(0, 8).map(area => <div key={area} className="rounded border border-[#CBD5E1] bg-[#F8FAFC] p-2">{area}</div>)}</div>
       </div>
@@ -538,7 +581,7 @@ export const Analytics = () => {
 
   const departmentNames = ['PRD', 'Stores', 'ADM', 'QC/FS/NPD', 'HSE', 'ESD', 'Project'];
   const departmentRecords = (items: any[], department: string) => items.filter(item => {
-    const value = String(item.department_code || item.department?.code || item.department_name || item.department?.name || item.department_id || item.departmentId || '').toLowerCase();
+    const value = departmentOf(item);
     return value === department.toLowerCase() || value.includes(department.toLowerCase());
   });
   const departmentalRows: any[] = [
@@ -570,7 +613,7 @@ export const Analytics = () => {
           </thead>
           <tbody>
             <tr><td colSpan={departmentNames.length * 2 + 3} className="border border-[#94A3B8] bg-[#B9D3EA] px-3 py-2 text-center text-[15px] font-bold text-[#008C45]">Leading Indicators</td></tr>
-            {departmentalRows.slice(0, 8).map(row => <tr key={row.label}><td className="border border-[#94A3B8] bg-[#D7E5F3] px-2 py-2 font-semibold text-[#1F2937]">{row.label}</td>{departmentNames.map(department => { const subset: RecordSet = { hazards: departmentRecords(current.hazards, department), incidents: departmentRecords(current.incidents, department), nearMisses: departmentRecords(current.nearMisses, department), trainings: departmentRecords(current.trainings, department), audits: departmentRecords(current.audits, department), inspections: departmentRecords(current.inspections, department), capas: departmentRecords(current.capas, department) }; const actual = row.actual(subset); const good = typeof actual === 'number' && (row.lower ? actual <= row.target : actual >= row.target); return <><td key={`${row.label}-${department}-target`} className="border border-[#CBD5E1] px-2 py-2 text-center">{row.target}{row.unit === '%' ? '%' : ''}</td><td key={`${row.label}-${department}-actual`} className={`border border-[#CBD5E1] px-2 py-2 text-center font-bold ${actual === '—' ? '' : good ? 'bg-[#C6E0B4]' : 'bg-[#F8CBAD]'}`}>{actual}{row.unit === '%' && actual !== '—' ? '%' : ''}</td></>; })}<td className="border border-[#CBD5E1] px-2 py-2 text-center font-semibold">{row.target}{row.unit === '%' ? '%' : ''}</td><td className="border border-[#CBD5E1] px-2 py-2 text-center font-bold">{valueFor(row.label === 'Hazard Reporting' ? 'hazards' : row.label === 'Near Miss' ? 'nearMisses' : row.label === 'HSE Training Manhours' ? 'training' : row.label === 'Hazard Closure (%)' ? 'closure' : 'capaClosure')}{row.unit === '%' ? '%' : ''}</td></tr>)}
+            {departmentalRows.slice(0, 8).map(row => <tr key={row.label}><td className="border border-[#94A3B8] bg-[#D7E5F3] px-2 py-2 font-semibold text-[#1F2937]">{row.label}</td>{departmentNames.map(department => { const subset: RecordSet = { hazards: departmentRecords(current.hazards, department), incidents: departmentRecords(current.incidents, department), nearMisses: departmentRecords(current.nearMisses, department), trainings: departmentRecords(current.trainings, department), audits: departmentRecords(current.audits, department), inspections: departmentRecords(current.inspections, department), capas: departmentRecords(current.capas, department) }; const actual = row.actual(subset); const good = typeof actual === 'number' && (row.lower ? actual <= row.target : actual >= row.target); return <><td key={`${row.label}-${department}-target`} className="border border-[#CBD5E1] px-2 py-2 text-center">{row.target}{row.unit === '%' ? '%' : ''}</td><td key={`${row.label}-${department}-actual`} className={`border border-[#CBD5E1] px-2 py-2 text-center font-bold ${actual === '—' ? '' : good ? 'bg-[#C6E0B4]' : 'bg-[#F8CBAD]'}`}>{actual}{row.unit === '%' && actual !== '—' ? '%' : ''}</td></>; })}<td className="border border-[#CBD5E1] px-2 py-2 text-center font-semibold">{row.target}{row.unit === '%' ? '%' : ''}</td><td className="border border-[#CBD5E1] px-2 py-2 text-center font-bold">{valueFor(row.key)}{row.unit === '%' ? '%' : ''}</td></tr>)}
             <tr><td colSpan={departmentNames.length * 2 + 3} className="border border-[#94A3B8] bg-[#B9D3EA] px-3 py-2 text-center text-[15px] font-bold text-[#EF1111]">Lagging Indicators</td></tr>
             {departmentalRows.slice(8).map(row => <tr key={row.label}><td className="border border-[#94A3B8] bg-[#D7E5F3] px-2 py-2 font-semibold text-[#1F2937]">{row.label}</td>{departmentNames.map(department => { const subset: RecordSet = { hazards: departmentRecords(current.hazards, department), incidents: departmentRecords(current.incidents, department), nearMisses: departmentRecords(current.nearMisses, department), trainings: departmentRecords(current.trainings, department), audits: departmentRecords(current.audits, department), inspections: departmentRecords(current.inspections, department), capas: departmentRecords(current.capas, department) }; const actual = row.actual(subset); const good = typeof actual === 'number' && (row.lower ? actual <= row.target : actual >= row.target); return <><td key={`${row.label}-${department}-target`} className="border border-[#CBD5E1] px-2 py-2 text-center">{row.target}</td><td key={`${row.label}-${department}-actual`} className={`border border-[#CBD5E1] px-2 py-2 text-center font-bold ${actual === '—' ? '' : good ? 'bg-[#C6E0B4]' : 'bg-[#F8CBAD]'}`}>{actual}</td></>; })}<td className="border border-[#CBD5E1] px-2 py-2 text-center font-semibold">{row.target}</td><td className="border border-[#CBD5E1] px-2 py-2 text-center font-bold">{laggingValue(row.key)}</td></tr>)}
           </tbody>
@@ -585,7 +628,7 @@ export const Analytics = () => {
       <div className="overflow-x-auto">
         <table className="min-w-[920px] w-full border-collapse text-[12px]">
           <thead><tr className="bg-[#4777BE] text-white"><th className="border border-[#1F2937] px-3 py-2 text-left">{lagging ? 'Lagging Indicators' : 'Leading Indicators'}</th><th className="border border-[#1F2937] px-3 py-2">Unit</th><th className="border border-[#1F2937] px-3 py-2">2024</th><th className="border border-[#1F2937] px-3 py-2">2025</th><th className="border border-[#1F2937] px-3 py-2">Tar {filters.year}</th><th className="border border-[#1F2937] px-3 py-2">YTD-{filters.year}</th><th className="border border-[#1F2937] px-3 py-2">Status</th><th className="border border-[#1F2937] px-3 py-2 text-left">Remarks</th></tr></thead>
-          <tbody>{rows.map(row => { const value = lagging ? laggingValue(row.key) : valueFor(row.key); const numeric = typeof value === 'number' ? value : 0; const status = row.key === 'initiatives' || value === '—' ? 'neutral' : statusFor(numeric, row.target, ['fatal', 'lti', 'rwcMtc', 'majorFire', 'minorFire', 'unsafeActs'].includes(row.key)); return <tr key={row.key} className="odd:bg-white even:bg-[#F8FAFC]"><td className="border border-[#CBD5E1] px-3 py-2 font-semibold text-[#1F2937]">{row.label}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center font-semibold">{row.unit || '—'}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center">{formatValue(yearValue(lagging ? records.incidents : records.hazards, row.key, '2024'))}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center">{formatValue(yearValue(lagging ? records.incidents : records.hazards, row.key, '2025'))}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center font-semibold">{formatValue(row.target)}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center font-bold">{formatValue(value)}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center"><StatusMark status={status} /></td><td className="border border-[#CBD5E1] px-3 py-2 font-medium text-[#374151]">{row.remark}</td></tr>; })}</tbody>
+          <tbody>{rows.map(row => { const value = lagging ? laggingValue(row.key) : valueFor(row.key); const numeric = typeof value === 'number' ? value : 0; const status = row.key === 'initiatives' || value === '—' ? 'neutral' : statusFor(numeric, row.target, ['fatal', 'lti', 'rwcMtc', 'majorFire', 'minorFire', 'unsafeActs'].includes(row.key)); return <tr key={row.key} className="odd:bg-white even:bg-[#F8FAFC]"><td className="border border-[#CBD5E1] px-3 py-2 font-semibold text-[#1F2937]">{row.label}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center font-semibold">{row.unit || '—'}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center">{formatValue(yearValue(row.key, '2024'))}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center">{formatValue(yearValue(row.key, '2025'))}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center font-semibold">{formatValue(row.target)}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center font-bold">{formatValue(value)}</td><td className="border border-[#CBD5E1] px-3 py-2 text-center"><StatusMark status={status} /></td><td className="border border-[#CBD5E1] px-3 py-2 font-medium text-[#374151]">{row.remark}</td></tr>; })}</tbody>
         </table>
       </div>
     </Panel>
@@ -599,6 +642,7 @@ export const Analytics = () => {
         <FilterBar />
       </ContextHeader>
       <main className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
+        {(refreshing || sourceErrors.length > 0) && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-[11px] text-[#6B7280]" role="status"><span>{refreshing ? 'Refreshing live analytics data…' : `Showing the last successful snapshot; unavailable source(s): ${sourceErrors.join(', ')}.`}</span>{lastUpdated && <span>Updated {lastUpdated.toLocaleTimeString()}</span>}</div>}
         <nav aria-label="Analytics sections" className="relative z-30 flex min-w-0 overflow-x-auto rounded-xl border-2 border-[#CB0017] bg-white shadow-md">
           {([['kpi', 'HSE KPI’s Review'], ['department', 'Department-Wise HSE KPIs Status'], ['training', 'HSE Trainings'], ['assurance', 'Assurance']] as const).map(([tab, label]) => <button key={tab} aria-selected={activeTab === tab} onClick={() => { setActiveTab(tab); setView('summary'); }} className={`min-h-14 min-w-[180px] flex-1 shrink-0 border-r border-[#E5E7EB] px-4 py-3 text-xs font-bold transition last:border-r-0 sm:text-sm ${activeTab === tab ? 'bg-[#CB0017] text-white shadow-inner' : 'text-[#374151] hover:bg-[#FFF1F2] hover:text-[#CB0017]'}`}>{label}</button>)}
         </nav>
