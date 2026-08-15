@@ -27,7 +27,10 @@ const filtersFor = (query, dateColumn, departmentColumn = 'department_id', inclu
     const statusGroups = {
       Open: ['open', 'reported', 'submitted', 'scheduled'],
       Pending: ['draft', 'under_review', 'under_investigation', 'pending', 'planned'],
-      'Work in Progress': ['corrective_action', 'in_progress'],
+      // Hazard list APIs treat under_review as the in-progress state. Keep it
+      // here as well so the Hazard Closing cards and table use identical
+      // status semantics.
+      'Work in Progress': ['under_review', 'corrective_action', 'in_progress'],
       Closed: ['closed', 'resolved', 'completed', 'verified', 'approved'],
       Cancelled: ['cancelled'],
     };

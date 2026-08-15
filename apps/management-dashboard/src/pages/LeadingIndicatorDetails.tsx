@@ -38,9 +38,9 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
     const load = async () => {
       setLoading(true);
       try {
-        const params = { limit: 10000, offset: 0, year: filters.year, department: filters.department, fromDate: filters.fromDate, toDate: filters.toDate };
+        const params = { limit: 10000, offset: 0, year: filters.year, department: filters.department, status: filters.status, fromDate: filters.fromDate, toDate: filters.toDate };
         const overviewPromise = kind === 'hazard-closing'
-          ? dashboardClient.getOverview({ year: filters.year, department: filters.department, fromDate: filters.fromDate, toDate: filters.toDate })
+          ? dashboardClient.getOverview({ year: filters.year, department: filters.department, status: filters.status, fromDate: filters.fromDate, toDate: filters.toDate })
           : Promise.resolve(null);
         const response = kind === 'hazard-closing'
           ? await moduleService.getAll('hazard-reporting', params)
@@ -69,7 +69,7 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
     window.addEventListener('dashboard-refresh', refresh);
     const interval = window.setInterval(refresh, 30000);
     return () => { cancelled = true; window.removeEventListener('dashboard-refresh', refresh); window.clearInterval(interval); };
-  }, [kind, config.title, filters.year, filters.department, filters.fromDate, filters.toDate]);
+  }, [kind, config.title, filters.year, filters.department, filters.status, filters.fromDate, filters.toDate]);
 
   const filteredRows = useMemo(() => rows.filter(row => {
     const date = dateOf(row);
