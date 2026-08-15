@@ -43,7 +43,7 @@ class OverviewService {
       const actions = filtersFor(query, 'due_date', null, false, 'priority', null);
       const assurance = filtersFor(query, 'scheduled_date', 'department_id', false, null, null);
 
-      const [hazardRows, incidentRows, nearMissRows, trainingRows, actionRows, assuranceRows, trendRows, hazardDimensionRows, recentIncidentRows] = await Promise.all([
+      const [hazardRows, incidentRows, nearMissRows, trainingRows, actionRows, assuranceRows, trendRows, hazardDimensionRows, recentIncidentRows, incidentDepartmentRows, trainingDepartmentRows] = await Promise.all([
         rows(`SELECT COUNT(*) total,
           SUM(status IN ('draft','reported','submitted','under_review','corrective_action')) open_count,
           SUM(status IN ('closed','resolved')) closed_count,
@@ -65,7 +65,8 @@ class OverviewService {
           FROM training_sessions WHERE ${training.where}`, training.replacements),
         rows(`SELECT COUNT(*) total,
           SUM(status IN ('open','in_progress','pending','planned')) open_count,
-          SUM(status IN ('completed','closed','verified')) closed_count
+          SUM(status IN ('completed','closed','verified')) closed_count,
+          SUM(due_date < CURRENT_DATE AND status NOT IN ('completed','closed','verified')) overdue_count
           FROM corrective_actions WHERE ${actions.where}`, actions.replacements),
         rows(`SELECT 'audits' source, COUNT(*) total FROM audits WHERE ${assurance.where}
           UNION ALL SELECT 'inspections' source, COUNT(*) total FROM inspections WHERE ${assurance.where}`, assurance.replacements),
@@ -74,6 +75,15 @@ class OverviewService {
           UNION ALL SELECT 'nearMisses' source, MONTH(reported_at) month, COUNT(*) total FROM near_misses WHERE ${nearMiss.where} GROUP BY month`, { ...hazard.replacements, ...incident.replacements, ...nearMiss.replacements }),
         rows(`SELECT LOWER(category) category, LOWER(severity_level) severity, COUNT(*) total FROM hazards WHERE ${hazard.where} GROUP BY category, severity`, hazard.replacements),
         rows(`SELECT id, description, incident_date date, department_id, status FROM incidents WHERE ${incident.where} ORDER BY created_at DESC LIMIT 5`, incident.replacements),
+        rows(`SELECT COALESCE(d.code, d.name, CAST(i.department_id AS CHAR), 'Unassigned') department, COUNT(*) total
+          FROM incidents i LEFT JOIN departments d ON d.id = i.department_id
+          WHERE ${incident.where.replaceAll('department_id', 'i.department_id').replaceAll('incident_date', 'i.incident_date').replaceAll('deleted_at', 'i.deleted_at').replaceAll('status', 'i.status').replaceAll('severity_level', 'i.severity_level')}
+          GROUP BY department ORDER BY total DESC LIMIT 10`, incident.replacements),
+        rows(`SELECT COALESCE(d.code, d.name, CAST(t.department_id AS CHAR), 'Unassigned') department,
+          COALESCE(SUM(COALESCE(t.manhours, t.participant_count * t.duration_minutes / 60, 0)), 0) manhours
+          FROM training_sessions t LEFT JOIN departments d ON d.id = t.department_id
+          WHERE ${training.where.replaceAll('department_id', 't.department_id').replaceAll('scheduled_date', 't.scheduled_date').replaceAll('deleted_at', 't.deleted_at').replaceAll('status', 't.status')}
+          GROUP BY department ORDER BY manhours DESC LIMIT 10`, training.replacements),
       ]);
 
       const h = hazardRows[0] || {}; const i = incidentRows[0] || {}; const n = nearMissRows[0] || {};
@@ -88,12 +98,12 @@ class OverviewService {
           nearMisses: { total: number(n.total), closed: number(n.closed_count) },
           incidents: { total: number(i.total), fatalities: number(i.fatalities), lti: number(i.lti), rwc: number(i.rwc), mtc: number(i.mtc), firstAid: number(i.first_aid), fire: number(i.fire), byType: { fatality: number(i.fatalities), lti: number(i.lti), rwc: number(i.rwc), mtc: number(i.mtc), first_aid: number(i.first_aid), fire: number(i.fire) } },
           training: { total: number(t.total), manhours: number(t.manhours) },
-          correctiveActions: { total: number(a.total), open: number(a.open_count), closed: number(a.closed_count) },
+          correctiveActions: { total: number(a.total), open: number(a.open_count), closed: number(a.closed_count), overdue: number(a.overdue_count) },
           assurance: { audits: number(audits), inspections: number(inspections) },
         },
         leadingIndicators: { hazards: number(h.total), nearMisses: number(n.total), trainingManhours: number(t.manhours), audits: number(audits), inspections: number(inspections), hazardClosure: number(h.total) ? Math.round((number(h.closed_count) / number(h.total)) * 100) : 0, actionClosure: number(a.total) ? Math.round((number(a.closed_count) / number(a.total)) * 100) : 0 },
         laggingIndicators: { fatalities: number(i.fatalities), lti: number(i.lti), rwc: number(i.rwc), mtc: number(i.mtc), firstAid: number(i.first_aid), fire: number(i.fire) },
-        departmentStatistics: [],
+        departmentStatistics: { incidents: incidentDepartmentRows.map(row => ({ department: row.department, total: number(row.total) })), training: trainingDepartmentRows.map(row => ({ department: row.department, manhours: Math.round(number(row.manhours)) })) },
         charts: { hazards: dimensions.byCategory, hazardSeverity: dimensions.bySeverity, monthly: trend },
         recent: { incidents: recentIncidentRows, hazards: [], nearMisses: [] },
       };

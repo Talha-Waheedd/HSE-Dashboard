@@ -268,15 +268,17 @@ export const Dashboard = () => {
     { name: 'Overdue',        value: overdueCapas },
   ];
 
-  const incDeptData = Object.entries(
-    incidents.reduce((acc, c) => { if (c.department_id) acc[c.department_id] = (acc[c.department_id]||0)+1; return acc; }, {} as Record<string,number>)
-  ).map(([name, count]) => ({ name, count: Number(count) })).sort((a,b)=>b.count-a.count).slice(0,7);
+  const incDeptData = (dashboardOverview?.departmentStatistics?.incidents || []).map((row: any) => ({
+    name: row.department || row.departmentName || 'Unassigned',
+    count: Number(row.total || row.count || 0),
+  })).sort((a: any, b: any) => b.count - a.count).slice(0, 7);
 
   const hazCatData = Object.entries(dashboardOverview?.charts?.hazards || {}).map(([name, count]) => ({ name, count: Number(count) })).sort((a,b)=>b.count-a.count).slice(0,6);
 
-  const trDeptData = Object.entries(
-    training.reduce((acc, c) => { if (c.department_id) acc[c.department_id] = (acc[c.department_id]||0)+(Number(c.manhours)||0); return acc; }, {} as Record<string,number>)
-  ).map(([name, count]) => ({ name, count: Math.round(Number(count)) })).sort((a,b)=>b.count-a.count).slice(0,7);
+  const trDeptData = (dashboardOverview?.departmentStatistics?.training || []).map((row: any) => ({
+    name: row.department || row.departmentName || 'Unassigned',
+    count: Math.round(Number(row.manhours || row.count || 0)),
+  })).sort((a: any, b: any) => b.count - a.count).slice(0, 7);
 
   const incCatData = Object.entries(dashboardOverview?.summary?.incidents?.byType || {}).map(([name, value]) => ({ name, value }));
 
@@ -473,7 +475,7 @@ export const Dashboard = () => {
           <Panel className="lg:col-span-2 p-5">
             <SectionHeader title="CAPA Status Distribution" onViewAll={() => navigate('/action-tracker')} />
             <div className="h-[240px] flex items-center justify-center">
-              {capas.length > 0 ? (
+              {totalCapas > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
