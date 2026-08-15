@@ -19,6 +19,7 @@ import { useTheme } from '../context/ThemeContext';
 
 // Nav group structure — grouped like SAP Fiori left navigation
 type NavItem = {
+  id?: string;
   title: string;
   href: string;
   Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
@@ -52,7 +53,7 @@ const NAV_GROUPS: NavGroup[] = [
         ],
       },
       {
-        title: 'Lagging Indicators', href: '/incident-log', Icon: FileWarning,
+        id: 'lagging-indicators', title: 'Lagging Indicators', href: '/incident-log', Icon: FileWarning,
         children: [
           { title: 'First Aid Cases', href: '/incident-log?category=First%20Aid', Icon: Activity },
           { title: 'Medical Treatment Cases', href: '/incident-log?category=MTC', Icon: FileWarning },
@@ -64,7 +65,7 @@ const NAV_GROUPS: NavGroup[] = [
           { title: 'TRIR', href: '/lagging-indicators/trir', Icon: BarChart3 },
         ],
       },
-      { title: 'Incident Log', href: '/incident-log', Icon: FileWarning },
+      { id: 'incident-log', title: 'Incident Log', href: '/incident-log', Icon: FileWarning },
     ],
   },
   {
@@ -143,7 +144,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     const activeParents: Record<string, boolean> = {};
     activeNavGroups.forEach(group => group.items.forEach(item => {
       if (item.children?.some(child => hasActiveChild(child, location.pathname, location.search))) {
-        activeParents[item.href] = true;
+        activeParents[item.id || `${item.title}:${item.href}`] = true;
       }
     }));
     setExpandedNavItems(previous => ({ ...previous, ...activeParents }));
@@ -158,7 +159,8 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     const hasChildren = Boolean(item.children?.length);
     const isActive = getIsActive(location.pathname, item.href, location.search);
     const isBranchActive = hasActiveChild(item, location.pathname, location.search);
-    const isExpanded = expandedNavItems[item.href] ?? isBranchActive;
+    const navKey = item.id || `${item.title}:${item.href}`;
+    const isExpanded = expandedNavItems[navKey] ?? isBranchActive;
     const baseClass = `relative flex items-center gap-3 rounded-md text-[13px] font-medium transition-all duration-150 ${collapsed ? 'justify-center px-2 py-2.5' : depth > 0 ? 'px-3 py-1.5 ml-3' : 'px-3 py-2'}`;
     const baseStyle = {
       color: isActive || (hasChildren && isBranchActive) ? '#FFFFFF' : 'var(--sidebar-text, rgba(255,255,255,0.85))',
@@ -166,11 +168,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-      <React.Fragment key={item.href}>
+      <React.Fragment key={navKey}>
         {hasChildren ? (
           <button
             type="button"
-            onClick={() => toggleNavItem(item.href)}
+            onClick={() => toggleNavItem(navKey)}
             className={`${baseClass} w-full`}
             style={baseStyle}
             title={collapsed ? item.title : undefined}
