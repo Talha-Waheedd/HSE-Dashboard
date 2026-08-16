@@ -454,6 +454,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [closeHazardData, setCloseHazardData] = useState({ closingProof: '', closingRemarks: '' });
   const [reviewData, setReviewData] = useState({ remarks: '', reason: '' });
+  const [hazardStep, setHazardStep] = useState(1);
+  const [hazardAutosavedAt, setHazardAutosavedAt] = useState<Date | null>(null);
   const PAGE_SIZE = 15;
 
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
@@ -469,6 +471,18 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   useEffect(() => {
     if (schema.id === 'incident-log' && routeCategory) setSearchQuery(routeCategory);
   }, [schema.id, routeCategory]);
+  useEffect(() => {
+    if (schema.id !== 'hazard-reporting' || !isAddModalOpen || editingId || !Object.keys(formData).length) return;
+    const timer = window.setTimeout(() => {
+      try {
+        sessionStorage.setItem('hse-hazard-report-draft', JSON.stringify(formData));
+        setHazardAutosavedAt(new Date());
+      } catch {
+        // Draft persistence is an enhancement; it must never interrupt entry.
+      }
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [schema.id, isAddModalOpen, editingId, formData]);
 
   const applyComputes = (data: any, currentSchema: SectionConfig, allEntries: any[]) => {
     const nextData = { ...data };
@@ -530,12 +544,12 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, statusOverride?: string) => {
+    e?.preventDefault();
     if (isSaving) return;
     setValidationError(null);
     setErrorTitle('Validation Error');
-    const dataToSave = applyComputes(formData, schema, entries);
+    const dataToSave = applyComputes({ ...formData, ...(statusOverride ? { status_id: statusOverride } : {}) }, schema, entries);
     const err = validateFormData(dataToSave);
     if (err) {
       setValidationError(err);
@@ -1014,7 +1028,107 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     );
   };
 
+  const renderHazardAddEditModal = () => {
+    const formSource = editingId ? editFormData : formData;
+    const requiredFields = schema.columns.filter(col => col.required && !col.hideFromForm && shouldShowConditionalField(schema.id, col.key, formSource));
+    const completedFields = requiredFields.filter(col => String(formSource[col.key] ?? '').trim() !== '').length;
+    const completion = requiredFields.length ? Math.round((completedFields / requiredFields.length) * 100) : 0;
+    const closeForm = () => {
+      setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null);
+      setPendingFiles({}); setFormData({}); setEditFormData({}); setHazardStep(1); setHazardAutosavedAt(null);
+    };
+    const steps = [
+      { number: 1, label: 'Basic Information', description: 'Who, when and where' },
+      { number: 2, label: 'Hazard Details', description: 'Classification and impact' },
+      { number: 3, label: 'Corrective Action', description: 'Ownership and follow-up' },
+      { number: 4, label: 'Review', description: 'Confirm and submit' },
+    ];
+    const scrollToStep = (step: number) => {
+      setHazardStep(step);
+      document.getElementById(`hazard-step-${step}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    const status = formSource.status_id || 'Open';
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F7]" role="dialog" aria-modal="true" aria-labelledby="hazard-form-title">
+        <header className="shrink-0 border-b border-[#E5E7EB] bg-white px-5 py-4 sm:px-8">
+          <div className="mx-auto flex max-w-[1500px] items-start justify-between gap-4">
+            <div className="flex min-w-0 items-start gap-4">
+              <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#FFF4D6] sm:flex">
+                <img src="/image.png" alt="Continental Biscuits" className="h-9 w-9 object-contain" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-[#64748B]">Leading Indicators <span className="mx-1 text-[#CBD5E1]">/</span> Hazard Reporting</p>
+                <h2 id="hazard-form-title" className="mt-1 text-xl font-bold tracking-tight text-[#161616] sm:text-2xl">Report a Hazard</h2>
+                <p className="mt-1 text-[13px] text-[#64748B]">Capture, assign and track workplace hazards</p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-start gap-4">
+              <div className="hidden items-center gap-2 text-right sm:flex">
+                <CheckCircle2 className="h-5 w-5 text-[#16A34A]" />
+                <div><p className="text-[12px] font-semibold text-[#374151]">Draft autosaved</p><p className="text-[11px] text-[#94A3B8]">{hazardAutosavedAt ? 'Just now' : 'Waiting for changes'}</p></div>
+              </div>
+              <button type="button" onClick={closeForm} aria-label="Close hazard report" className="rounded-md p-1.5 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#161616] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CB0017]/30"><X className="h-5 w-5" /></button>
+            </div>
+          </div>
+        </header>
+
+        <nav className="shrink-0 overflow-x-auto border-b border-[#E5E7EB] bg-white px-5 py-3 sm:px-8" aria-label="Hazard report steps">
+          <div className="mx-auto flex min-w-[650px] max-w-[1200px] items-center">
+            {steps.map((step, index) => (
+              <React.Fragment key={step.number}>
+                <button type="button" onClick={() => scrollToStep(step.number)} aria-current={hazardStep === step.number ? 'step' : undefined} className={`flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CB0017]/30 ${hazardStep === step.number ? 'text-[#CB0017]' : 'text-[#64748B] hover:text-[#374151]'}`}>
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${hazardStep === step.number ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-[#CBD5E1] bg-white text-[#475569]'}`}>{step.number}</span>
+                  <span className="hidden sm:block"><span className="block text-[13px] font-semibold">{step.label}</span><span className="block text-[10px] text-[#94A3B8]">{step.description}</span></span>
+                </button>
+                {index < steps.length - 1 && <div className="mx-2 h-px min-w-8 flex-1 bg-[#E2E8F0]" />}
+              </React.Fragment>
+            ))}
+          </div>
+        </nav>
+
+        <div id="modal-scroll-area" className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-8">
+          <div className="mx-auto grid max-w-[1500px] grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
+            <main className="space-y-5">
+              {validationError && <div className="flex items-start gap-3 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3" role="alert"><AlertTriangle className="mt-0.5 h-4 w-4 text-[#DC2626]" /><div><p className="text-[13px] font-semibold text-[#991B1B]">{errorTitle}</p><p className="mt-0.5 text-[12px] text-[#B91C1C]">{validationError}</p></div></div>}
+              {attachmentWarning && <div className="rounded-xl border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-[12px] text-[#9A3412]" role="status">{attachmentWarning}</div>}
+              <form id="hazard-module-form" onSubmit={handleSubmit} className="space-y-5">
+                {sectionGroups.map((section, index) => {
+                  const step = section.title === 'Basic Information' ? 1 : section.title === 'Hazard Details' ? 2 : 3;
+                  const sectionId = section.title === 'Basic Information' || section.title === 'Hazard Details' || (step === 3 && !sectionGroups.slice(0, index).some(item => !['Basic Information', 'Hazard Details'].includes(item.title))) ? `hazard-step-${step}` : `hazard-section-${index}`;
+                  return <div id={sectionId} key={section.title} className="scroll-mt-5">{renderFormSection(section.title, section.columns)}</div>;
+                })}
+              </form>
+              <section id="hazard-step-4" className="scroll-mt-5 rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+                <div className="flex items-center gap-3"><div className="h-5 w-1 rounded-full bg-[#CB0017]" /><div><h3 className="text-[15px] font-semibold text-[#161616]">Review</h3><p className="mt-1 text-[12px] text-[#64748B]">Review the report before saving it to the HSE system.</p></div></div>
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {[['Status', status], ['Department', formSource.department_id || 'Not selected'], ['Location', formSource.location || 'Not selected'], ['Hazard Category', formSource.hazard_category_id || 'Not selected'], ['Risk Level', formSource.risk_rating_id || 'Not selected'], ['Evidence', Object.keys(pendingFiles).length ? `${Object.keys(pendingFiles).length} file queued` : 'None attached']].map(([label, value]) => <div key={label} className="rounded-lg bg-[#FAFAFA] px-3 py-2"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">{label}</p><p className="mt-1 truncate text-[13px] font-medium text-[#374151]">{value}</p></div>)}
+                </div>
+              </section>
+            </main>
+
+            <aside className="xl:sticky xl:top-5">
+              <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
+                <div className="flex items-center gap-3"><div className="h-5 w-1 rounded-full bg-[#CB0017]" /><h3 className="text-[16px] font-semibold text-[#161616]">Report Summary</h3></div>
+                <div className="mt-5"><p className="text-[12px] font-semibold text-[#475569]">Status</p><span className="mt-2 inline-flex items-center gap-2 rounded-md border border-[#F4D7A1] bg-[#FFF7E6] px-3 py-1.5 text-[13px] font-medium text-[#92400E]"><span className="h-2 w-2 rounded-full bg-[#D97706]" />{status}</span></div>
+                <div className="mt-6"><div className="flex items-center justify-between text-[12px] font-semibold text-[#475569]"><span>Completion</span><span>{completion}% complete</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E5E7EB]"><div className="h-full rounded-full bg-[#CB0017] transition-all" style={{ width: `${completion}%` }} /></div></div>
+                <div className="mt-6 divide-y divide-[#F1F5F9]">
+                  {steps.map(step => <button type="button" key={step.number} onClick={() => scrollToStep(step.number)} className={`flex w-full items-center gap-3 py-3 text-left text-[13px] ${hazardStep === step.number ? 'font-semibold text-[#CB0017]' : 'text-[#64748B] hover:text-[#374151]'}`}><span className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs ${hazardStep === step.number ? 'border-[#CB0017] bg-[#FFF1F3]' : 'border-[#CBD5E1]'}`}>{step.number}</span><span>{step.label}</span><ArrowRight className="ml-auto h-4 w-4" /></button>)}
+                </div>
+                <div className="mt-5 rounded-lg bg-[#FFF9E8] p-3 text-[11px] leading-relaxed text-[#92400E]">All reports are handled in accordance with HSE policies and procedures.</div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <footer className="shrink-0 border-t border-[#E5E7EB] bg-white px-4 py-3 sm:px-8">
+          <div className="mx-auto flex max-w-[1500px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-[11px] text-[#64748B]">Fields marked with <span className="font-semibold text-[#CB0017]">*</span> are required</p><div className="flex flex-col-reverse gap-2 sm:flex-row"><button type="button" onClick={() => handleSubmit(undefined, 'Draft')} disabled={isSaving} className="h-10 rounded-md border border-[#CBD5E1] bg-white px-4 text-[13px] font-semibold text-[#475569] hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50"><Save className="mr-2 inline h-4 w-4" />Save as Draft</button><button type="button" onClick={closeForm} className="h-10 rounded-md border border-[#CBD5E1] bg-white px-5 text-[13px] font-semibold text-[#475569] hover:bg-[#F8FAFC]">Cancel</button><button type="submit" form="hazard-module-form" disabled={isSaving} className="h-10 rounded-md bg-[#CB0017] px-5 text-[13px] font-semibold text-white shadow-sm hover:bg-[#A8001A] disabled:cursor-not-allowed disabled:opacity-60"><Save className={`mr-2 inline h-4 w-4 ${isSaving ? 'animate-pulse' : ''}`} />{isSaving ? 'Saving…' : 'Save & Continue'}<ArrowRight className="ml-2 inline h-4 w-4" /></button></div></div>
+        </footer>
+      </div>
+    );
+  };
+
   const renderAddEditModal = () => {
+    if (schema.id === 'hazard-reporting') return renderHazardAddEditModal();
     const formSource = editingId ? editFormData : formData;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
@@ -1128,6 +1242,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             icon: <Plus />,
             onClick: () => {
               setFormData(schema.id === 'hazard-reporting' ? { status_id: 'Open' } : {});
+              if (schema.id === 'hazard-reporting') {
+                setHazardStep(1);
+                setHazardAutosavedAt(null);
+              }
               setIsAddModalOpen(true);
             },
             variant: 'primary' as const,
