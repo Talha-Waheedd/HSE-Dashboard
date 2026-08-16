@@ -32,14 +32,14 @@ const LoginPage = () => {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
 
-      <Card className="w-full max-w-md glass border-border shadow-xl z-10">
-        <CardHeader className="space-y-2 text-center pb-6">
+      <Card className="w-full max-w-md glass border-border bg-black text-white shadow-xl z-10">
+        <CardHeader className="space-y-2 bg-black text-center pb-6 text-white">
           <div className="mx-auto mb-4 flex justify-center">
             <img src="/logo.svg" alt="Continental Biscuits Limited" className="h-20 w-auto drop-shadow-md" />
           </div>
-          <CardTitle className="text-2xl text-foreground tracking-tight font-bold">HSE Management System</CardTitle>
+          <CardTitle className="text-2xl text-white tracking-tight font-bold">HSE Management System</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-black text-white">
           {error && (
             <div className="mb-4 p-3 bg-danger/10 text-danger text-sm rounded-md border border-danger/20 text-center">
               {error}
