@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapPin } from 'lucide-react';
 
 // ============================================================
@@ -16,6 +16,8 @@ interface PlantPhotoCardProps {
   onClick?: () => void;
   className?: string;
   aspectRatio?: 'video' | 'square' | 'wide';
+  alt?: string;
+  fallbackImageUrl?: string;
 }
 
 export const PlantPhotoCard: React.FC<PlantPhotoCardProps> = ({
@@ -27,7 +29,10 @@ export const PlantPhotoCard: React.FC<PlantPhotoCardProps> = ({
   onClick,
   className = '',
   aspectRatio = 'video',
+  alt,
+  fallbackImageUrl = '/image.png',
 }) => {
+  const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   const aspectClass =
     aspectRatio === 'video' ? 'aspect-video' :
     aspectRatio === 'square' ? 'aspect-square' :
@@ -42,8 +47,13 @@ export const PlantPhotoCard: React.FC<PlantPhotoCardProps> = ({
     >
       {/* Background image */}
       <img
-        src={imageUrl}
-        alt={title}
+        src={currentImageUrl}
+        alt={alt || `${title} safety location`}
+        loading="lazy"
+        decoding="async"
+        onError={() => {
+          if (currentImageUrl !== fallbackImageUrl) setCurrentImageUrl(fallbackImageUrl);
+        }}
         className="absolute inset-0 w-full h-full object-cover"
       />
 

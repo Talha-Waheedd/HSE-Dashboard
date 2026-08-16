@@ -23,6 +23,26 @@ import { dashboardClient }      from '@cbl/api';
 import { CHART_COLORS, PIE_COLORS } from '../config/constants';
 import { useDashboardMetrics, type DashboardRawData, type MetricItem } from '../hooks/useDashboardMetrics';
 
+const LOCATION_CARD_CONFIG = [
+  {
+    id: 'lu-sukkur-plant',
+    imageUrl: '/plant_image_21_1200x800.webp',
+    title: 'LU Sukkur Plant',
+    subtitle: 'Operational Excellence & Safety Compliance',
+    location: 'Sukkur Plant Operations',
+    alt: 'LU Sukkur Plant industrial facility',
+    route: '/hazard-reporting',
+  },
+  {
+    id: 'asset-safety-mapping',
+    imageUrl: '/inspector-reviews-power-plant-safety-checklist-using-laptop-near-dam-inspector-reviews-power-plant-safety-checklist-using-laptop-456123604.webp',
+    title: 'Asset Safety Mapping',
+    subtitle: 'Real-time Hazard Tracking Grid',
+    badge: 'REPORT INCIDENT',
+    alt: 'Safety inspector reviewing a power plant checklist',
+    route: '/incident-log',
+  },
+] as const;
 
 // ===== Enterprise Chart Tooltip =====
 const EnterpriseTooltip = ({ active, payload, label }: any) => {
