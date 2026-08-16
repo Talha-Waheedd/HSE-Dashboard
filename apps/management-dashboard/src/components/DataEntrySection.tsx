@@ -472,10 +472,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (schema.id === 'incident-log' && routeCategory) setSearchQuery(routeCategory);
   }, [schema.id, routeCategory]);
   useEffect(() => {
-    if (schema.id !== 'hazard-reporting' || !isAddModalOpen || editingId || !Object.keys(formData).length) return;
+    if (!['hazard-reporting', 'incident-log', 'near-miss'].includes(schema.id) || !isAddModalOpen || editingId || !Object.keys(formData).length) return;
     const timer = window.setTimeout(() => {
       try {
-        sessionStorage.setItem('hse-hazard-report-draft', JSON.stringify(formData));
+        sessionStorage.setItem(`hse-${schema.id}-draft`, JSON.stringify(formData));
         setHazardAutosavedAt(new Date());
       } catch {
         // Draft persistence is an enhancement; it must never interrupt entry.
@@ -549,7 +549,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (isSaving) return;
     setValidationError(null);
     setErrorTitle('Validation Error');
-    const dataToSave = applyComputes({ ...formData, ...(statusOverride ? { status_id: statusOverride } : {}) }, schema, entries);
+    const statusKey = schema.id === 'near-miss' ? 'status' : 'status_id';
+    const dataToSave = applyComputes({ ...formData, ...(statusOverride ? { [statusKey]: statusOverride } : {}) }, schema, entries);
     const err = validateFormData(dataToSave);
     if (err) {
       setValidationError(err);
@@ -582,6 +583,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         await fetchAll(filters as unknown as Record<string, unknown>);
         setFormData({});
         setPendingFiles({});
+        try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ }
         setIsAddModalOpen(false);
         setSavedModalOpen(true);
         window.dispatchEvent(new CustomEvent('dashboard-refresh'));
@@ -1036,6 +1038,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     const closeForm = () => {
       setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null);
       setPendingFiles({}); setFormData({}); setEditFormData({}); setHazardStep(1); setHazardAutosavedAt(null);
+      try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ }
     };
     const steps = [
       { number: 1, label: 'Basic Information', description: 'Who, when and where' },
@@ -1127,7 +1130,32 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     );
   };
 
+  const renderWorkflowAddEditModal = () => {
+    const formSource = editingId ? editFormData : formData;
+    const requiredFields = schema.columns.filter(col => col.required && !col.hideFromForm && shouldShowConditionalField(schema.id, col.key, formSource));
+    const completed = requiredFields.filter(col => String(formSource[col.key] ?? '').trim() !== '').length;
+    const completion = requiredFields.length ? Math.round((completed / requiredFields.length) * 100) : 0;
+    const steps = [
+      { number: 1, label: 'Basic Information', match: ['Basic Information'] },
+      { number: 2, label: schema.id === 'near-miss' ? 'Near Miss Details' : 'Incident Details', match: schema.id === 'near-miss' ? ['Near Miss Details'] : ['Incident Details'] },
+      { number: 3, label: schema.id === 'near-miss' ? 'Corrective Action' : 'Investigation & Actions', match: schema.id === 'near-miss' ? ['Corrective Actions', 'Investigation'] : ['Investigation', 'Actions', 'Assignment'] },
+      { number: 4, label: 'Review', match: [] },
+    ];
+    const closeForm = () => { setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null); setPendingFiles({}); setFormData({}); setEditFormData({}); setHazardStep(1); setHazardAutosavedAt(null); try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ } };
+    const scrollToStep = (step: number) => { setHazardStep(step); document.getElementById(`${schema.id}-workflow-step-${step}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    const status = formSource.status_id || formSource.status || 'Open';
+    const summaryFields = schema.columns.filter(col => !col.hideFromForm && ['department_id', 'location', 'incident_category_id', 'risk_rating_id', 'reported_by', 'emp_id'].includes(col.key));
+    return <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F7]" role="dialog" aria-modal="true" aria-labelledby={`${schema.id}-workflow-title`}>
+      <header className="shrink-0 border-b border-[#E5E7EB] bg-white px-5 py-4 sm:px-8"><div className="mx-auto flex max-w-[1500px] items-start justify-between gap-4"><div className="flex min-w-0 items-start gap-4"><div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#FFF4D6] sm:flex"><img src="/image.png" alt="Continental Biscuits" className="h-9 w-9 object-contain" /></div><div><p className="text-[11px] font-semibold text-[#64748B]">Leading Indicators <span className="mx-1 text-[#CBD5E1]">/</span> {schema.title}</p><h2 id={`${schema.id}-workflow-title`} className="mt-1 text-xl font-bold tracking-tight text-[#161616] sm:text-2xl">{schema.title}</h2><p className="mt-1 text-[13px] text-[#64748B]">Capture, review and track workplace safety records</p></div></div><div className="flex items-start gap-4"><div className="hidden items-center gap-2 text-right sm:flex"><CheckCircle2 className="h-5 w-5 text-[#16A34A]" /><div><p className="text-[12px] font-semibold text-[#374151]">Draft autosaved</p><p className="text-[11px] text-[#94A3B8]">{hazardAutosavedAt ? 'Just now' : 'Waiting for changes'}</p></div></div><button type="button" onClick={closeForm} aria-label={`Close ${schema.title}`} className="rounded-md p-1.5 text-[#64748B] hover:bg-[#F1F5F9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CB0017]/30"><X className="h-5 w-5" /></button></div></div></header>
+      <nav className="shrink-0 overflow-x-auto border-b border-[#E5E7EB] bg-white px-5 py-3 sm:px-8" aria-label={`${schema.title} steps`}><div className="mx-auto flex min-w-[620px] max-w-[1200px] items-center">{steps.map((step, index) => <React.Fragment key={step.number}><button type="button" onClick={() => scrollToStep(step.number)} aria-current={hazardStep === step.number ? 'step' : undefined} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-left ${hazardStep === step.number ? 'text-[#CB0017]' : 'text-[#64748B] hover:text-[#374151]'}`}><span className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold ${hazardStep === step.number ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-[#CBD5E1]'}`}>{step.number}</span><span className="hidden text-[13px] font-semibold sm:block">{step.label}</span></button>{index < steps.length - 1 && <div className="mx-2 h-px min-w-8 flex-1 bg-[#E2E8F0]" />}</React.Fragment>)}</div></nav>
+      <div id="modal-scroll-area" className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-8"><div className="mx-auto grid max-w-[1500px] grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_330px]"><main className="space-y-5">{validationError && <div className="flex items-start gap-3 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3" role="alert"><AlertTriangle className="mt-0.5 h-4 w-4 text-[#DC2626]" /><div><p className="text-[13px] font-semibold text-[#991B1B]">{errorTitle}</p><p className="mt-0.5 text-[12px] text-[#B91C1C]">{validationError}</p></div></div>}{attachmentWarning && <div className="rounded-xl border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-[12px] text-[#9A3412]" role="status">{attachmentWarning}</div>}<form id={`${schema.id}-workflow-form`} onSubmit={handleSubmit} className="space-y-5">{sectionGroups.map((section, index) => { const step = steps.find(item => item.match.includes(section.title))?.number || 3; const isFirstForStep = !sectionGroups.slice(0, index).some(previous => (steps.find(item => item.match.includes(previous.title))?.number || 3) === step); const sectionId = isFirstForStep ? `${schema.id}-workflow-step-${step}` : `${schema.id}-workflow-section-${index}`; return <div key={section.title} id={sectionId} className="scroll-mt-5">{renderFormSection(section.title, section.columns)}</div>; })}</form><section id={`${schema.id}-workflow-step-4`} className="scroll-mt-5 rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><div className="h-5 w-1 rounded-full bg-[#CB0017]" /><div><h3 className="text-[15px] font-semibold text-[#161616]">Review</h3><p className="mt-1 text-[12px] text-[#64748B]">Confirm the entered record before saving it.</p></div></div><div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"><div className="rounded-lg bg-[#FAFAFA] px-3 py-2"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">Status</p><p className="mt-1 text-[13px] font-medium text-[#374151]">{status}</p></div>{summaryFields.slice(0, 5).map(field => <div key={field.key} className="rounded-lg bg-[#FAFAFA] px-3 py-2"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">{field.label}</p><p className="mt-1 truncate text-[13px] font-medium text-[#374151]">{formSource[field.key] || 'Not selected'}</p></div>)}</div></section></main><aside className="xl:sticky xl:top-5"><div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><div className="h-5 w-1 rounded-full bg-[#CB0017]" /><h3 className="text-[16px] font-semibold text-[#161616]">Report Summary</h3></div><div className="mt-5"><p className="text-[12px] font-semibold text-[#475569]">Status</p><span className="mt-2 inline-flex items-center gap-2 rounded-md border border-[#F4D7A1] bg-[#FFF7E6] px-3 py-1.5 text-[13px] font-medium text-[#92400E]"><span className="h-2 w-2 rounded-full bg-[#D97706]" />{status}</span></div><div className="mt-6"><div className="flex items-center justify-between text-[12px] font-semibold text-[#475569]"><span>Completion</span><span>{completion}% complete</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E5E7EB]"><div className="h-full rounded-full bg-[#CB0017] transition-all" style={{ width: `${completion}%` }} /></div></div><div className="mt-6 divide-y divide-[#F1F5F9]">{steps.map(step => <button type="button" key={step.number} onClick={() => scrollToStep(step.number)} className={`flex w-full items-center gap-3 py-3 text-left text-[13px] ${hazardStep === step.number ? 'font-semibold text-[#CB0017]' : 'text-[#64748B] hover:text-[#374151]'}`}><span className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs ${hazardStep === step.number ? 'border-[#CB0017] bg-[#FFF1F3]' : 'border-[#CBD5E1]'}`}>{step.number}</span><span>{step.label}</span><ArrowRight className="ml-auto h-4 w-4" /></button>)}</div><div className="mt-5 rounded-lg bg-[#FFF9E8] p-3 text-[11px] leading-relaxed text-[#92400E]">All records are handled in accordance with HSE policies and procedures.</div></div></aside></div></div>
+      <footer className="shrink-0 border-t border-[#E5E7EB] bg-white px-4 py-3 sm:px-8"><div className="mx-auto flex max-w-[1500px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-[11px] text-[#64748B]">Fields marked with <span className="font-semibold text-[#CB0017]">*</span> are required</p><div className="flex flex-col-reverse gap-2 sm:flex-row"><button type="button" onClick={() => handleSubmit(undefined, 'Draft')} disabled={isSaving} className="h-10 rounded-md border border-[#CBD5E1] bg-white px-4 text-[13px] font-semibold text-[#475569] disabled:opacity-50"><Save className="mr-2 inline h-4 w-4" />Save as Draft</button><button type="button" onClick={closeForm} className="h-10 rounded-md border border-[#CBD5E1] bg-white px-5 text-[13px] font-semibold text-[#475569]">Cancel</button><button type="submit" form={`${schema.id}-workflow-form`} disabled={isSaving} className="h-10 rounded-md bg-[#CB0017] px-5 text-[13px] font-semibold text-white hover:bg-[#A8001A] disabled:opacity-60"><Save className="mr-2 inline h-4 w-4" />{isSaving ? 'Saving…' : 'Save & Continue'}<ArrowRight className="ml-2 inline h-4 w-4" /></button></div></div></footer>
+    </div>;
+  };
+
   const renderAddEditModal = () => {
+    if (schema.id === 'hazard-reporting') return renderHazardAddEditModal();
+    if (schema.id === 'incident-log' || schema.id === 'near-miss') return renderWorkflowAddEditModal();
     if (schema.id === 'hazard-reporting') return renderHazardAddEditModal();
     const formSource = editingId ? editFormData : formData;
     return (
@@ -1241,8 +1269,18 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             label: `Add ${entityName}`,
             icon: <Plus />,
             onClick: () => {
-              setFormData(schema.id === 'hazard-reporting' ? { status_id: 'Open' } : {});
+              const defaultForm = schema.id === 'hazard-reporting' ? { status_id: 'Open' } : schema.id === 'near-miss' ? { status: 'Open' } : {};
+              let recoveredForm = defaultForm;
+              try {
+                const savedDraft = sessionStorage.getItem(`hse-${schema.id}-draft`);
+                if (savedDraft) recoveredForm = { ...defaultForm, ...JSON.parse(savedDraft) };
+              } catch { /* ignore malformed or unavailable draft storage */ }
+              setFormData(recoveredForm);
               if (schema.id === 'hazard-reporting') {
+                setHazardStep(1);
+                setHazardAutosavedAt(null);
+              }
+              if (schema.id === 'incident-log' || schema.id === 'near-miss') {
                 setHazardStep(1);
                 setHazardAutosavedAt(null);
               }
