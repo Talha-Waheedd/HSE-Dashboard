@@ -61,11 +61,13 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.status(HTTP_STATUS.OK).json(
-    ApiResponse.success('Server is healthy', {
+    ApiResponse.success({
+      status: 'ok',
+      message: 'Server is healthy',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
       env: process.env.NODE_ENV,
-    }),
+    }, 'Health check succeeded'),
   );
 });
 

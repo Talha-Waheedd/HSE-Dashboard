@@ -105,16 +105,12 @@ class AuthController {
       });
     }
 
-    return res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: 'User authorized and logged in via SSO',
-      data: {
+    return res.status(HTTP_STATUS.OK).json(ApiResponse.success({
         authorized: true,
         email,
         user: result.user,
         tokens: result.tokens,
-      },
-    });
+      }, 'User authorized and logged in via SSO'));
   });
 
   forgotPassword = asyncHandler(async (req, res) => {

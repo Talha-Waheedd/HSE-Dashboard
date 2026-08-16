@@ -25,7 +25,11 @@ class ApiResponse {
    * @param {object|null} meta
    */
   static success(data = null, message = 'Success', meta = null) {
-    return new ApiResponse(true, message, data, meta);
+    // Older controllers passed the HTTP status (201) as the third argument.
+    // HTTP status is already set on the Express response and must never leak
+    // into the API metadata contract.
+    const normalizedMeta = typeof meta === 'number' ? null : meta;
+    return new ApiResponse(true, message, data, normalizedMeta);
   }
 
   /**

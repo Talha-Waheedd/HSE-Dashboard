@@ -3,7 +3,7 @@
 require('dotenv').config({ path: '.env.test' });
 
 // Silence logger in tests
-jest.mock('./src/utils/logger', () => ({
+jest.mock('../src/shared/utils/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
@@ -14,7 +14,7 @@ jest.mock('./src/utils/logger', () => ({
 afterAll(async () => {
   // Close DB connection after all tests
   try {
-    const { sequelize } = require('./src/database/connection');
+    const { sequelize } = require('../src/database/connection');
     await sequelize.close();
   } catch {
     // ignore

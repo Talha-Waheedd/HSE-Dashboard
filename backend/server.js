@@ -12,6 +12,9 @@ const config = require('./src/database/config');
 
 const PORT = config.port || 5000;
 const server = http.createServer(app);
+server.requestTimeout = 120000;
+server.headersTimeout = 125000;
+server.keepAliveTimeout = 65000;
 
 const describeDatabaseError = (err) => ({
   name: err?.name,

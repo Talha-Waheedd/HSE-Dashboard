@@ -26,6 +26,7 @@ router.get(
 
 router.get(
   '/plant/:plantId',
+  requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
   departmentController.getDepartmentsByPlant
 );
 

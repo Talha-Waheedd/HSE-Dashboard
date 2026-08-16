@@ -52,17 +52,14 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    // Roll back only indexes/columns introduced by this reconciliation. The
-    // original locations table and its records remain intact.
+    // Roll back only indexes. Columns are intentionally retained because this
+    // migration cannot know whether they predated it, and removing them could
+    // destroy imported location data or break the current model.
     const indexes = await queryInterface.showIndex('locations');
     const hasIndex = (name) => indexes.some((index) => index.name === name);
     if (hasIndex('locations_plant_active_idx')) await queryInterface.removeIndex('locations', 'locations_plant_active_idx');
     if (hasIndex('locations_code_unique')) await queryInterface.removeIndex('locations', 'locations_code_unique');
     if (hasIndex('locations_normalized_name_unique')) await queryInterface.removeIndex('locations', 'locations_normalized_name_unique');
 
-    const table = await queryInterface.describeTable('locations');
-    if (table.code) await queryInterface.removeColumn('locations', 'code');
-    // Do not remove normalized_name on rollback because it may predate this
-    // migration and is required by the current Location model.
   },
 };

@@ -13,7 +13,7 @@ router.use(authenticate);
 
 router.post(
   '/',
-  requirePermissions([PERMISSIONS.HSE_REPORT_HAZARD]), // Using same permission as hazard reporting
+  requirePermissions([PERMISSIONS.NEAR_MISS_CREATE]),
   validate(createNearMissSchema),
   nearMissController.createNearMiss
 );

@@ -39,6 +39,9 @@ const envSchema = Joi.object({
   ALLOWED_ORIGINS: Joi.string().default('http://localhost:3000'),
   STORAGE_DRIVER: Joi.string().valid('local', 's3').default('local'),
   ENCRYPTION_KEY: Joi.string().length(32).optional(),
+  PREVIEW_AUTH: Joi.boolean().truthy('true').falsy('false').default(false),
+  ALLOW_UNVERIFIED_HAZARD_EMPLOYEE: Joi.boolean().truthy('true').falsy('false').default(false),
+  BYPASS_HAZARD_VALIDATION: Joi.boolean().truthy('true').falsy('false').default(false),
   MSAL_CLIENT_ID: Joi.string().optional(),
   MSAL_TENANT_ID: Joi.string().optional(),
 }).unknown(true);
@@ -47,6 +50,17 @@ const { error, value: envVars } = envSchema.validate(process.env, { abortEarly: 
 
 if (error && process.env.NODE_ENV !== 'test') {
   throw new Error(`Config validation error:\n${error.details.map((d) => d.message).join('\n')}`);
+}
+
+if (envVars.NODE_ENV === 'production') {
+  const unsafeDevelopmentFlags = ['PREVIEW_AUTH', 'ALLOW_UNVERIFIED_HAZARD_EMPLOYEE', 'BYPASS_HAZARD_VALIDATION']
+    .filter((key) => envVars[key] === true);
+  if (unsafeDevelopmentFlags.length) {
+    throw new Error(`Unsafe development flags enabled in production: ${unsafeDevelopmentFlags.join(', ')}`);
+  }
+  if (!envVars.ENCRYPTION_KEY) {
+    throw new Error('ENCRYPTION_KEY is required in production and must be exactly 32 characters.');
+  }
 }
 
 const config = Object.freeze({
