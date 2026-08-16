@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Activity, AlertTriangle, CheckCircle2, ClipboardCheck, RefreshCw } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
@@ -31,14 +31,19 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [hazardSummary, setHazardSummary] = useState<{ total: number; closed: number } | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({ totalRecords: 0, totalPages: 1, pageSize: 10 });
+  const requestSequence = useRef(0);
   const config = titles[kind];
 
   useEffect(() => {
+    const requestId = ++requestSequence.current;
     let cancelled = false;
     const load = async () => {
       setLoading(true);
       try {
-        const params = { limit: 10000, offset: 0, year: filters.year, department: filters.department, status: filters.status, fromDate: filters.fromDate, toDate: filters.toDate };
+        const isHazardClosing = kind === 'hazard-closing';
+        const params = { ...(isHazardClosing ? { page: currentPage, limit: 10 } : { page: 1, limit: 1000 }), year: filters.year, department: filters.department, status: filters.status, fromDate: filters.fromDate, toDate: filters.toDate };
         const overviewPromise = kind === 'hazard-closing'
           ? dashboardClient.getOverview({ year: filters.year, department: filters.department, status: filters.status, fromDate: filters.fromDate, toDate: filters.toDate })
           : Promise.resolve(null);
@@ -49,19 +54,24 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
             : kind === 'emergency-drills'
               ? await moduleService.getAll('training-records', { ...params, trainingType: 'emergency_response' })
               : await moduleService.getAll('action-tracker', params);
-        if (!cancelled) {
+        if (!cancelled && requestId === requestSequence.current) {
           setRows(response.data || []);
+          if (isHazardClosing) {
+            const meta = response.meta || {};
+            setPagination({ totalRecords: Number(meta.totalRecords ?? meta.total ?? 0), totalPages: Number(meta.totalPages ?? 1), pageSize: Number(meta.pageSize ?? meta.limit ?? 10) });
+          }
           if (overviewPromise) {
             const overviewResponse = await overviewPromise;
+            if (cancelled || requestId !== requestSequence.current) return;
             const summary = overviewResponse?.data?.data?.summary?.hazards;
             setHazardSummary(summary ? { total: Number(summary.total || 0), closed: Number(summary.closed || 0) } : null);
           }
         }
       } catch (error) {
         console.error(`${config.title} data fetch failed`, error);
-        if (!cancelled) setRows([]);
+        if (!cancelled && requestId === requestSequence.current) setRows([]);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && requestId === requestSequence.current) setLoading(false);
       }
     };
     load();
@@ -69,16 +79,20 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
     window.addEventListener('dashboard-refresh', refresh);
     const interval = window.setInterval(refresh, 30000);
     return () => { cancelled = true; window.removeEventListener('dashboard-refresh', refresh); window.clearInterval(interval); };
-  }, [kind, config.title, filters.year, filters.department, filters.status, filters.fromDate, filters.toDate]);
+  }, [kind, config.title, currentPage, filters.year, filters.department, filters.status, filters.fromDate, filters.toDate]);
 
-  const filteredRows = useMemo(() => rows.filter(row => {
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [kind, filters.year, filters.department, filters.status, filters.fromDate, filters.toDate]);
+
+  const filteredRows = useMemo(() => kind === 'hazard-closing' ? rows : rows.filter(row => {
     const date = dateOf(row);
     if (filters.department !== 'All' && filters.department && departmentOf(row) !== String(filters.department).toLowerCase()) return false;
     if (filters.year !== 'All' && filters.year && !date.startsWith(filters.year)) return false;
     if (filters.fromDate && date.slice(0, 10) < filters.fromDate) return false;
     if (filters.toDate && date.slice(0, 10) > filters.toDate) return false;
     return true;
-  }), [rows, filters]);
+  }), [kind, rows, filters]);
 
   const total = kind === 'hazard-closing' && hazardSummary ? hazardSummary.total : filteredRows.length;
   const closed = kind === 'hazard-closing' && hazardSummary ? hazardSummary.closed : filteredRows.filter(isClosed).length;
@@ -97,10 +111,19 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
           ? [dateOf(row), row.title || row.trainingType || 'Emergency Response', row.department?.name || row.department_id || '—', row.durationMinutes || row.duration_minutes || '—', row.status || 'Scheduled']
           : [dateOf(row), row.title || row.description || '—', row.sourceType || row.source || '—', row.priority || row.severity || '—', row.status || row.status_id || 'Open'];
 
+  const pageItems = useMemo(() => {
+    const totalPages = pagination.totalPages;
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1) as Array<number | 'ellipsis-start' | 'ellipsis-end'>;
+    if (currentPage <= 4) return [1, 2, 3, 4, 5, 'ellipsis-end', totalPages] as Array<number | 'ellipsis-start' | 'ellipsis-end'>;
+    if (currentPage >= totalPages - 3) return [1, 'ellipsis-start', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages] as Array<number | 'ellipsis-start' | 'ellipsis-end'>;
+    return [1, 'ellipsis-start', currentPage - 1, currentPage, currentPage + 1, 'ellipsis-end', totalPages] as Array<number | 'ellipsis-start' | 'ellipsis-end'>;
+  }, [currentPage, pagination.totalPages]);
+
   return <Layout><ContextHeader title={config.title} breadcrumbs={['Leading Indicators', config.title]} subtitle={config.subtitle}><FilterBar /></ContextHeader><main className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
     {loading ? <div className="flex min-h-[300px] items-center justify-center"><RefreshCw className="h-8 w-8 animate-spin text-[#CB0017]" /></div> : <>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><KpiTile label="Total Records" value={total} icon={<Activity />} accent="info" /><KpiTile label="Closed / Completed" value={closed} icon={<CheckCircle2 />} accent="success" /><KpiTile label="Pending / Open" value={pending} icon={<AlertTriangle />} accent={pending ? 'warning' : 'success'} /><KpiTile label="Closure Rate" value={`${closure}%`} icon={<ClipboardCheck />} accent={closure >= 80 ? 'success' : 'warning'} /></div>
       <Panel title={`${config.title} — Live Backend Records`}><div className="overflow-x-auto"><table className="min-w-[850px] w-full border-collapse text-sm"><thead><tr className="bg-[#4777BE] text-white">{headers.map(header => <th key={header} className="border border-[#1F2937] px-3 py-3 text-left">{header}</th>)}</tr></thead><tbody>{filteredRows.length ? filteredRows.map((row, index) => <tr key={row.id || index} className="odd:bg-white even:bg-[#F8FAFC]">{cells(row).map((cell, cellIndex) => <td key={`${row.id || index}-${cellIndex}`} className={`border border-[#CBD5E1] px-3 py-3 ${cellIndex === headers.length - 1 ? (isClosed(row) ? 'bg-[#C6E0B4] font-semibold' : 'bg-[#F8CBAD] font-semibold') : ''}`}>{String(cell)}</td>)}</tr>) : <tr><td colSpan={headers.length} className="border border-[#CBD5E1] px-4 py-10 text-center text-[#6B7280]">No records match the selected filters.</td></tr>}</tbody></table></div></Panel>
+      {kind === 'hazard-closing' && <div className="flex flex-col gap-3 border-t border-[#E5E7EB] pt-4 text-sm sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-[#64748B]">Page {currentPage} of {pagination.totalPages} <span className="mx-1 text-[#CBD5E1]">•</span> {pagination.totalRecords} total records</p><div className="flex items-center gap-1" aria-label="Hazard closing pagination"><button type="button" onClick={() => setCurrentPage(page => Math.max(1, page - 1))} disabled={currentPage === 1 || loading} className="rounded-md border border-[#D1D5DB] px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#FFF7F8] disabled:cursor-not-allowed disabled:opacity-40">Previous</button>{pageItems.map(item => item === 'ellipsis-start' || item === 'ellipsis-end' ? <span key={item} className="px-1.5 text-[#94A3B8]">…</span> : <button type="button" key={item} onClick={() => setCurrentPage(item)} aria-current={item === currentPage ? 'page' : undefined} disabled={loading} className={`h-8 min-w-8 rounded-md border px-2 text-xs font-semibold ${item === currentPage ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-[#D1D5DB] bg-white text-[#374151] hover:bg-[#FFF7F8]'}`}>{item}</button>)}<button type="button" onClick={() => setCurrentPage(page => Math.min(pagination.totalPages, page + 1))} disabled={currentPage === pagination.totalPages || loading} className="rounded-md border border-[#D1D5DB] px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#FFF7F8] disabled:cursor-not-allowed disabled:opacity-40">Next</button></div></div>}
     </>}
   </main></Layout>;
 };

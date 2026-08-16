@@ -46,13 +46,19 @@ const createHazard = asyncHandler(async (req, res) => {
  * Get all hazards
  */
 const getAllHazards = asyncHandler(async (req, res) => {
+  const parsedPage = Number.parseInt(String(req.query.page ?? '1'), 10);
+  const parsedLimit = Number.parseInt(String(req.query.limit ?? '10'), 10);
+  const page = Number.isInteger(parsedPage) && parsedPage > 0 ? Math.min(parsedPage, 1000000) : 1;
+  const limit = Number.isInteger(parsedLimit) && parsedLimit > 0 ? Math.min(parsedLimit, 10000) : 10;
+  const parsedOffset = Number.parseInt(String(req.query.offset ?? '0'), 10);
+  const offset = req.query.page !== undefined
+    ? (page - 1) * limit
+    : (Number.isInteger(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0);
   const options = {
-    limit: parseInt(req.query.limit, 10) || 10,
-    offset: req.query.offset !== undefined
-      ? parseInt(req.query.offset, 10) || 0
-      : ((parseInt(req.query.page, 10) || 1) - 1) * (parseInt(req.query.limit, 10) || 10),
+    limit,
+    offset,
     where: {},
-    order: [['createdAt', 'DESC']],
+    order: [['createdAt', 'DESC'], ['id', 'DESC']],
   };
   
   if (req.query.plantId) options.where.plantId = req.query.plantId;
@@ -95,12 +101,22 @@ const getAllHazards = asyncHandler(async (req, res) => {
   }
 
   const result = await hazardService.getAllHazards(options);
-  res.status(200).json(ApiResponse.success(result.rows, 'Hazards retrieved successfully', {
-    page: Math.floor(options.offset / options.limit) + 1,
+  const currentPage = Math.floor(options.offset / options.limit) + 1;
+  const totalPages = Math.ceil(result.count / options.limit);
+  const meta = {
+    page: currentPage,
+    currentPage,
     limit: options.limit,
+    pageSize: options.limit,
     total: result.count,
-    totalPages: Math.ceil(result.count / options.limit),
-  }));
+    totalRecords: result.count,
+    totalPages,
+  };
+  const response = ApiResponse.success(result.rows, 'Hazards retrieved successfully', meta);
+  // Keep the existing array in `data` for CRUD/list consumers while exposing
+  // an explicit record-list contract for server-paginated clients.
+  response.records = result.rows;
+  res.status(200).json(response);
 });
 
 /**
