@@ -87,9 +87,9 @@ class OverviewService {
           FROM corrective_actions WHERE ${actions.where}`, actions.replacements),
         rows(`SELECT 'audits' source, COUNT(*) total FROM audits WHERE ${assurance.where}
           UNION ALL SELECT 'inspections' source, COUNT(*) total FROM inspections WHERE ${assurance.where}`, assurance.replacements),
-        rows(`SELECT 'hazards' source, MONTH(reported_at) month, COUNT(*) total FROM hazards WHERE ${hazard.where} GROUP BY month
-          UNION ALL SELECT 'incidents' source, MONTH(incident_date) month, COUNT(*) total FROM incidents WHERE ${incident.where} GROUP BY month
-          UNION ALL SELECT 'nearMisses' source, MONTH(reported_at) month, COUNT(*) total FROM near_misses WHERE ${nearMiss.where} GROUP BY month`, { ...hazard.replacements, ...incident.replacements, ...nearMiss.replacements }),
+        rows(`SELECT 'hazards' source, YEAR(reported_at) year, MONTH(reported_at) month, COUNT(*) total FROM hazards WHERE ${hazard.where} GROUP BY YEAR(reported_at), MONTH(reported_at)
+          UNION ALL SELECT 'incidents' source, YEAR(incident_date) year, MONTH(incident_date) month, COUNT(*) total FROM incidents WHERE ${incident.where} GROUP BY YEAR(incident_date), MONTH(incident_date)
+          UNION ALL SELECT 'nearMisses' source, YEAR(reported_at) year, MONTH(reported_at) month, COUNT(*) total FROM near_misses WHERE ${nearMiss.where} GROUP BY YEAR(reported_at), MONTH(reported_at)`, { ...hazard.replacements, ...incident.replacements, ...nearMiss.replacements }),
         rows(`SELECT LOWER(category) category, LOWER(severity_level) severity, COUNT(*) total FROM hazards WHERE ${hazard.where} GROUP BY category, severity`, hazard.replacements),
         rows(`SELECT id, description, incident_date date, department_id, status FROM incidents WHERE ${incident.where} ORDER BY created_at DESC LIMIT 5`, incident.replacements),
         rows(`SELECT COALESCE(d.code, d.name, CAST(i.department_id AS CHAR), 'Unassigned') department, COUNT(*) total
@@ -107,7 +107,11 @@ class OverviewService {
       const t = trainingRows[0] || {}; const a = actionRows[0] || {};
       const audits = assuranceRows.find(row => row.source === 'audits')?.total || 0;
       const inspections = assuranceRows.find(row => row.source === 'inspections')?.total || 0;
-      const trend = trendRows.reduce((out, row) => { out[row.source] ||= {}; out[row.source][row.month] = number(row.total); return out; }, {});
+      const trend = trendRows.reduce((out, row) => {
+        out[row.source] ||= {};
+        out[row.source][`${row.year}-${String(row.month).padStart(2, '0')}`] = number(row.total);
+        return out;
+      }, {});
       const dimensions = hazardDimensionRows.reduce((out, row) => { out.byCategory[row.category || 'other'] = (out.byCategory[row.category || 'other'] || 0) + number(row.total); out.bySeverity[row.severity || 'unknown'] = (out.bySeverity[row.severity || 'unknown'] || 0) + number(row.total); return out; }, { byCategory: {}, bySeverity: {} });
       return {
         summary: {

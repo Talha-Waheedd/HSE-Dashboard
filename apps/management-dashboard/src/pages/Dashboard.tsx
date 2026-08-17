@@ -269,16 +269,22 @@ export const Dashboard = () => {
 
   // ===== Chart Data (unchanged) =====
   const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const trendData = [];
+  const trendData: Array<{ name: string; Incidents: number; Hazards: number; 'Near Misses': number }> = [];
   const overviewTrend = dashboardOverview?.charts?.monthly || {};
+  const selectedYear = filters.year && filters.year !== 'All' ? Number(filters.year) : new Date().getFullYear();
+  const endDate = filters.toDate
+    ? new Date(`${filters.toDate}T12:00:00`)
+    : filters.year && filters.year !== 'All'
+      ? new Date(Math.min(new Date().getTime(), new Date(selectedYear, 11, 31, 12).getTime()))
+      : new Date();
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(); d.setMonth(d.getMonth() - i);
-     const m = d.getMonth();
+    const d = new Date(endDate.getFullYear(), endDate.getMonth() - i, 1);
+    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     trendData.push({
-      name: monthNames[m],
-       Incidents:    Number(overviewTrend.incidents?.[m + 1] || 0),
-       Hazards:      Number(overviewTrend.hazards?.[m + 1] || 0),
-       'Near Misses': Number(overviewTrend.nearMisses?.[m + 1] || 0),
+      name: monthNames[d.getMonth()],
+      Incidents: Number(overviewTrend.incidents?.[monthKey] || 0),
+      Hazards: Number(overviewTrend.hazards?.[monthKey] || 0),
+      'Near Misses': Number(overviewTrend.nearMisses?.[monthKey] || 0),
     });
   }
 
