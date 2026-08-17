@@ -160,15 +160,18 @@ export const moduleService = {
         ...item,
         date: item.metadata?.date || item.scheduledDate || item.scheduled_date || item.dueDate || item.due_date || item.createdAt || item.created_at,
         department_id: item.metadata?.department_id || item.departmentId || item.department_id || item.department?.id,
-        department_name: item.metadata?.department_name || item.department?.name,
+        department_name: item.metadata?.department_name || item.departmentName || item.department?.name,
         department_code: item.metadata?.department_code || item.department?.code,
         status_id: item.metadata?.status_id || statusFromApi(item.status),
         source: item.metadata?.source || item.sourceType || item.source_type,
         training_type: item.metadata?.training_type || item.trainingType || item.training_type,
+        training_type_label: item.trainingTypeLabel || String(item.trainingType || item.training_type || '').split('_').map((part: string) => part ? part.charAt(0).toUpperCase() + part.slice(1) : '').join(' '),
         trainer: item.metadata?.trainer || item.trainerName || item.trainer_name || item.trainer?.name,
         topic: item.metadata?.topic || item.title,
-        participants: item.metadata?.participants || item.participantCount || item.participant_count || item.maxAttendees || item.max_attendees,
-        manhours: item.metadata?.manhours ?? item.manhours ?? item.total_manhours ?? ((Number(item.participantCount ?? item.participant_count ?? item.maxAttendees ?? item.max_attendees) || 0) * ((Number(item.durationMinutes ?? item.duration_minutes) || 0) / 60)),
+        participants: item.metadata?.participants ?? item.participantCount ?? item.participant_count ?? item.maxAttendees ?? item.max_attendees,
+        duration_minutes: item.metadata?.duration_minutes ?? item.durationMinutes ?? item.duration_minutes ?? null,
+        manhours: item.metadata?.manhours ?? item.manhours ?? item.total_manhours ?? (item.participantCount != null && item.durationMinutes != null ? Number(item.participantCount) * Number(item.durationMinutes) / 60 : null),
+        manhours_warning: item.manhoursWarning || (item.participantCount == null || item.durationMinutes == null ? 'Participants and duration are required to calculate manhours.' : null),
       }));
     }
 

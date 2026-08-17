@@ -58,20 +58,22 @@ module.exports.toCsv = (rows) => {
 };
 
 module.exports.sendCsvExport = async (res, Model, options, filename) => {
+  const { serializeRow, ...queryOptions } = options || {};
   res.set({ 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="${filename}"` });
   res.write('\uFEFF');
   let offset = 0;
   let keys = null;
   while (true) {
-    const batch = await Model.findAll({ ...options, raw: true, limit: 500, offset });
+    const batch = await Model.findAll({ ...queryOptions, raw: true, nest: Boolean(queryOptions.nest), limit: 500, offset });
     if (!batch.length) break;
+    const outputBatch = serializeRow ? batch.map(serializeRow) : batch;
     if (!keys) {
-      keys = [...new Set(batch.flatMap((row) => Object.keys(row)))];
+      keys = [...new Set(outputBatch.flatMap((row) => Object.keys(row)))];
       const quote = (value) => `"${String(value == null ? '' : value).replace(/"/g, '""')}"`;
       res.write(`${keys.map(quote).join(',')}\n`);
     }
     const quote = (value) => `"${String(value == null ? '' : typeof value === 'object' ? JSON.stringify(value) : value).replace(/"/g, '""')}"`;
-    for (const row of batch) res.write(`${keys.map((key) => quote(row[key])).join(',')}\n`);
+    for (const row of outputBatch) res.write(`${keys.map((key) => quote(row[key])).join(',')}\n`);
     offset += batch.length;
     if (batch.length < 500) break;
   }

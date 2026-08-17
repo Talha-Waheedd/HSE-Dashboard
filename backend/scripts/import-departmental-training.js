@@ -98,8 +98,14 @@ async function main() {
       }
       const fingerprint = crypto.createHash('sha256').update([date, normalized(departmentName), normalized(item.trainer), normalized(item.venue), normalized(item.topic), participants, duration].join('|')).digest('hex');
       if (known.has(fingerprint)) { report.duplicates += 1; report.rows.push({ sheet: item.sheet, row: item.row, result: 'duplicate' }); continue; }
-      const suppliedManhours = Number(item.manhours); const manhours = Number.isFinite(suppliedManhours) && suppliedManhours > 0 ? suppliedManhours : participants * duration / 60;
-      await db.query('INSERT INTO training_sessions (id, plant_id, department_id, title, description, training_type, status, trainer_id, trainer_name, scheduled_date, duration_minutes, venue, max_attendees, participant_count, manhours, notes, source_fingerprint, created_by, updated_by, created_at, updated_at) VALUES (UUID(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW())', [plant.id, departmentId, item.topic.slice(0, 255), item.topic, classify(item.topic), 'completed', USER_ID, item.trainer.slice(0, 255), date, Math.round(duration), item.venue.slice(0, 255) || null, Math.round(participants), Math.round(participants), manhours.toFixed(2), `Imported from ${item.sheet} 2026 departmental training log`, fingerprint, USER_ID, USER_ID]);
+      if (!Number.isFinite(participants) || participants <= 0 || !Number.isFinite(duration) || duration <= 0) {
+        report.failed += 1;
+        report.rows.push({ sheet: item.sheet, row: item.row, result: 'warning', reason: 'Participants and duration are required to calculate manhours.' });
+        continue;
+      }
+      const manhours = participants * duration / 60;
+      const venue = String(item.venue || '').trim();
+      await db.query('INSERT INTO training_sessions (id, plant_id, department_id, title, description, training_type, status, trainer_id, trainer_name, scheduled_date, duration_minutes, venue, max_attendees, participant_count, manhours, notes, source_fingerprint, created_by, updated_by, created_at, updated_at) VALUES (UUID(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW())', [plant.id, departmentId, item.topic.slice(0, 255), item.topic, classify(item.topic), 'completed', USER_ID, item.trainer.slice(0, 255), date, Math.round(duration), venue.slice(0, 255) || null, Math.round(participants), Math.round(participants), manhours.toFixed(2), `Imported from ${item.sheet} 2026 departmental training log`, fingerprint, USER_ID, USER_ID]);
       known.add(fingerprint); report.successful += 1; report.rows.push({ sheet: item.sheet, row: item.row, result: 'imported', date, department: departmentName, manhours: Number(manhours.toFixed(2)) });
     }
     await db.commit();

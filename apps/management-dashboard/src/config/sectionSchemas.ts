@@ -190,8 +190,9 @@ export const trainingRecordsSchema: SectionConfig = {
       readonly: true,
       section: 'Summary',
       compute: (data: any) => {
-        const p = parseFloat(data.participants) || 0;
-        const d = parseFloat(data.duration_minutes) || 0;
+        const p = parseFloat(data.participants);
+        const d = parseFloat(data.duration_minutes);
+        if (!Number.isFinite(p) || !Number.isFinite(d)) return '';
         return (p * (d / 60)).toFixed(2);
       }
     },

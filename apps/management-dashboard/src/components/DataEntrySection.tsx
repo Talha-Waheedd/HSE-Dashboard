@@ -802,6 +802,15 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (column.type === 'datetime') return formatDateTimeLocal(value);
     return value === undefined || value === null || value === '' ? '—' : String(value);
   };
+  const displayTableValue = (entry: any, column: ColumnSchema) => {
+    if (schema.id !== 'training-records') return entry[column.key];
+    if (column.key === 'department_id') return entry.department_name || entry.departmentName || entry.department_code || entry.department_id || entry.departmentId;
+    if (column.key === 'training_type') return entry.training_type_label || entry.trainingTypeLabel || String(entry.training_type || entry.trainingType || '').split('_').map((part: string) => part ? part[0].toUpperCase() + part.slice(1) : '').join(' ');
+    if (column.key === 'participants') return entry.participants ?? entry.participantCount ?? entry.participant_count;
+    if (column.key === 'duration_minutes') return entry.duration_minutes ?? entry.durationMinutes;
+    if (column.key === 'manhours') return entry.manhours_warning ? `${entry.manhours ?? '—'} (warning)` : entry.manhours;
+    return entry[column.key];
+  };
   const sectionGroups = moduleSections(schema);
   const exportCSV = async () => {
     try {
@@ -1463,7 +1472,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                         </td>
                         {visibleColumns.map(col => (
                           <td key={col.key} style={{ paddingTop: density === 'compact' ? 8 : density === 'spacious' ? 16 : 10, paddingBottom: density === 'compact' ? 8 : density === 'spacious' ? 16 : 10 }}>
-                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className={`${col.type === 'date' || col.type === 'datetime' ? 'whitespace-nowrap ' : ''}text-[13px] text-[#1A1818]`}>{formatTableValue(col, entry[col.key])}</span>}
+                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className={`${col.type === 'date' || col.type === 'datetime' ? 'whitespace-nowrap ' : ''}text-[13px] text-[#1A1818]`}>{formatTableValue(col, displayTableValue(entry, col))}</span>}
                           </td>
                         ))}
                         <td className="text-center">
@@ -1763,7 +1772,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                         </td>
                         {visibleColumns.map(col => (
                           <td key={col.key}>
-                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className={`${col.type === 'date' || col.type === 'datetime' ? 'whitespace-nowrap ' : ''}text-[13px] text-[#1A1818]`}>{formatTableValue(col, entry[col.key])}</span>}
+                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className={`${col.type === 'date' || col.type === 'datetime' ? 'whitespace-nowrap ' : ''}text-[13px] text-[#1A1818]`}>{formatTableValue(col, displayTableValue(entry, col))}</span>}
                           </td>
                         ))}
                         <td className="text-center">

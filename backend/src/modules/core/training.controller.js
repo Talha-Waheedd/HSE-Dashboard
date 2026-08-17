@@ -7,6 +7,23 @@ const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExpor
 const { TrainingSession, Department } = require('../../database/models');
 
 const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
+const trainingTypeLabel = (value) => String(value || '').split('_').map((part) => part ? part.charAt(0).toUpperCase() + part.slice(1) : '').join(' ');
+const serializeTraining = (value) => {
+  const row = typeof value?.toJSON === 'function' ? value.toJSON() : value;
+  const participants = row.participantCount ?? row.participant_count;
+  const durationMinutes = row.durationMinutes ?? row.duration_minutes;
+  const hasInputs = participants !== null && participants !== undefined && durationMinutes !== null && durationMinutes !== undefined && Number.isFinite(Number(participants)) && Number.isFinite(Number(durationMinutes));
+  return {
+    ...row,
+    departmentId: row.departmentId ?? row.department_id ?? null,
+    departmentName: row.department?.name ?? null,
+    trainingTypeLabel: trainingTypeLabel(row.trainingType ?? row.training_type),
+    durationMinutes: durationMinutes ?? null,
+    participantCount: participants ?? null,
+    manhours: hasInputs ? (row.manhours ?? Number(participants) * Number(durationMinutes) / 60) : null,
+    manhoursWarning: !hasInputs ? 'Participants and duration are required to calculate manhours.' : null,
+  };
+};
 const buildTrainingWhere = async (query = {}) => {
   const where = {};
   const departmentValue = query.departmentId || query.department;
@@ -47,7 +64,7 @@ const buildTrainingWhere = async (query = {}) => {
  */
 const createSession = asyncHandler(async (req, res) => {
   const session = await trainingService.createSession(req.body, req.user.id);
-  res.status(201).json(ApiResponse.success(session, 'Training session created successfully', 201));
+  res.status(201).json(ApiResponse.success(serializeTraining(session), 'Training session created successfully', 201));
 });
 
 /**
@@ -59,7 +76,7 @@ const getAllSessions = asyncHandler(async (req, res) => {
   options.order = parseOrder(req.query, { date: 'scheduledDate', scheduledDate: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']);
 
   const sessions = await trainingService.getAllSessions(options);
-  res.status(200).json(ApiResponse.success(sessions.rows, 'Training sessions retrieved successfully', paginationMeta({ ...pagination, total: sessions.count })));
+  res.status(200).json(ApiResponse.success(sessions.rows.map(serializeTraining), 'Training sessions retrieved successfully', paginationMeta({ ...pagination, total: sessions.count })));
 });
 
 /**
@@ -67,11 +84,11 @@ const getAllSessions = asyncHandler(async (req, res) => {
  */
 const getSessionById = asyncHandler(async (req, res) => {
   const session = await trainingService.getSessionById(req.params.id);
-  res.status(200).json(ApiResponse.success(session, 'Training session retrieved successfully'));
+  res.status(200).json(ApiResponse.success(serializeTraining(session), 'Training session retrieved successfully'));
 });
 const exportSessions = asyncHandler(async (req, res) => {
   const where = await buildTrainingWhere(req.query);
-  await sendCsvExport(res, TrainingSession, { where, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']) }, `trainings-${new Date().toISOString().slice(0, 10)}.csv`);
+  await sendCsvExport(res, TrainingSession, { where, nest: true, include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }], serializeRow: serializeTraining, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']) }, `trainings-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 const getSummary = asyncHandler(async (req, res) => {
