@@ -16,7 +16,7 @@ import {
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
   ChevronsLeft, ChevronsRight, ChevronDown,
   CheckCircle2, LayoutGrid, Filter, PanelRightOpen,
-  Upload, Paperclip, FileText, Eye, CalendarDays, Clock,
+  Upload, Paperclip, FileText, CalendarDays, Clock,
 } from 'lucide-react';
 import { LinkedSourceBadge } from './LinkedSourceBadge';
 import { AvatarInitials } from './AvatarInitials';
@@ -452,6 +452,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const selectAllRef = useRef<HTMLInputElement>(null);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const [hazardSummary, setHazardSummary] = useState({ totalRecords: 0, assigned: 0, submittedForReview: 0, closedThisMonth: 0 });
+  const hazardSummaryRequest = useRef(0);
   const [showReviewPanel, setShowReviewPanel] = useState(false);
   const [showCloseHazard, setShowCloseHazard] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -472,12 +474,36 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     sortBy: sortConfig?.key || 'createdAt',
     sortOrder: sortConfig?.direction || 'desc',
   }), [filters, currentPage, searchQuery, sortConfig]);
-  useEffect(() => { fetchAll(listQuery); }, [schema.id, fetchAll, listQuery]);
+  const summaryQuery = useMemo(() => {
+    if (schema.id !== 'hazard-reporting') return null;
+    const { page: _page, limit: _limit, sortBy: _sortBy, sortOrder: _sortOrder, ...filtersOnly } = listQuery;
+    return filtersOnly;
+  }, [schema.id, listQuery]);
   useEffect(() => {
-    const refresh = () => fetchAll(listQuery);
+    const requestId = ++hazardSummaryRequest.current;
+    if (schema.id !== 'hazard-reporting' || !summaryQuery) {
+      void fetchAll(listQuery);
+      return;
+    }
+    void Promise.all([fetchAll(listQuery), moduleService.getHazardSummary(summaryQuery)])
+      .then(([, response]) => {
+        if (requestId === hazardSummaryRequest.current && response.success && response.data) setHazardSummary(response.data);
+      })
+      .catch(() => { /* table error state remains authoritative; retain last summary during transient failures */ });
+  }, [schema.id, fetchAll, listQuery, summaryQuery]);
+  useEffect(() => {
+    const refresh = () => {
+      void fetchAll(listQuery);
+      if (schema.id === 'hazard-reporting' && summaryQuery) {
+        const requestId = ++hazardSummaryRequest.current;
+        void moduleService.getHazardSummary(summaryQuery).then((response) => {
+          if (requestId === hazardSummaryRequest.current && response.success && response.data) setHazardSummary(response.data);
+        }).catch(() => undefined);
+      }
+    };
     window.addEventListener('dashboard-refresh', refresh);
     return () => window.removeEventListener('dashboard-refresh', refresh);
-  }, [fetchAll, listQuery]);
+  }, [fetchAll, listQuery, schema.id, summaryQuery]);
   useEffect(() => { setCurrentPage(1); }, [filters, searchQuery, schema.id]);
   useEffect(() => {
     if (schema.id === 'incident-log' && routeCategory) setSearchQuery(routeCategory);
@@ -1298,7 +1324,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       <ContextHeader
         title={schema.title}
         breadcrumbs={[schema.title]}
-        subtitle={`${filteredEntries.length} records available`}
+        subtitle={`${pagination.totalRecords.toLocaleString()} records available`}
         actions={[
           ...(canExportCSV() ? [{
             label: 'Export CSV',
@@ -1348,36 +1374,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       <div className="p-6 space-y-5">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {[
-            { title: `${entityName} Assigned`, value: '12', tone: 'warning' },
-            { title: 'Submitted for Review', value: '4', tone: 'neutral' },
-            { title: 'Closed This Month', value: '9', tone: 'success' },
+            { title: `${entityName} Assigned`, value: hazardSummary.assigned, tone: 'warning' },
+            { title: 'Submitted for Review', value: hazardSummary.submittedForReview, tone: 'neutral' },
+            { title: 'Closed This Month', value: hazardSummary.closedThisMonth, tone: 'success' },
           ].map(card => (
             <div key={card.title} className={`${CARD} p-4`}>
               <p className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-semibold">{card.title}</p>
               <p className="text-[24px] font-bold text-[#1A1818] mt-2">{card.value}</p>
             </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {[
-            { title: `High Risk ${entityName} Assigned`, detail: 'Click to highlight the corresponding record.' },
-            { title: `${entityName} Closed`, detail: 'Closing proof will be reviewed in the confirmation dialog.' },
-            { title: `${entityName} Approved`, detail: 'Mock approval workflow entry.' },
-          ].map(card => (
-            <button
-              key={card.title}
-              onClick={() => setSelectedRecordId(card.title)}
-              className={`text-left ${CARD} p-4 transition-all hover:shadow-[0_3px_14px_rgba(0,0,0,0.10)] ${selectedRecordId === card.title ? 'ring-2 ring-[#CB0017]/20 border-[#CB0017]/30' : ''}`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[14px] font-semibold text-[#1A1818]">{card.title}</p>
-                  <p className="text-[12px] text-[#6B7280] mt-1">{card.detail}</p>
-                </div>
-                <Eye className="h-4 w-4 text-[#9CA3AF]" />
-              </div>
-            </button>
           ))}
         </div>
 
@@ -1504,7 +1508,6 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                               </div>
                               <div className="rounded-lg border border-[#EDEDED] bg-white p-4">
                                 <p className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-semibold">Workflow</p>
-                                <p className="text-[13px] text-[#374151] mt-2">Mock row expansion for enterprise detail review.</p>
                               </div>
                             </div>
                           </td>
@@ -1579,7 +1582,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         </div>
       )}
 
-      <SlideOverPanel isOpen={showReviewPanel} onClose={() => setShowReviewPanel(false)} title="HSE Review" description="Mock review drawer for approvals, rejections, and reopen actions.">
+      <SlideOverPanel isOpen={showReviewPanel} onClose={() => setShowReviewPanel(false)} title="HSE Review" description="Review selected hazard records and apply the approved workflow action.">
         <div className="space-y-5">
           <div>
             <label className="block text-[12px] font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Remarks</label>
@@ -1792,7 +1795,6 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                               </div>
                               <div className="rounded-lg border border-[#EDEDED] bg-white p-4">
                                 <p className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-semibold">Workflow Notes</p>
-                                <p className="text-[13px] text-[#374151] mt-2">Mock expansion UI for enterprise detail review.</p>
                               </div>
                             </div>
                           </td>
@@ -1882,7 +1884,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         </div>
       )}
 
-      <SlideOverPanel isOpen={showReviewPanel} onClose={() => setShowReviewPanel(false)} title="HSE Review" description="Mock review drawer for approvals, rejections, and reopen actions.">
+      <SlideOverPanel isOpen={showReviewPanel} onClose={() => setShowReviewPanel(false)} title="HSE Review" description="Review selected records and apply the approved workflow action.">
         <div className="space-y-5">
           <div>
             <label className="block text-[12px] font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Remarks</label>

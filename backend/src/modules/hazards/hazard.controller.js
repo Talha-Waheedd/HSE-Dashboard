@@ -11,6 +11,38 @@ const { parseOrder, addTextSearch, sendCsvExport } = require('../../shared/utils
 // safe when two identical requests arrive concurrently.
 const inFlightCreates = new Map();
 
+const buildHazardWhere = async (query = {}) => {
+  const where = {};
+  if (query.plantId && query.plantId !== 'All') where.plantId = query.plantId;
+  if (query.status && query.status !== 'All') {
+    const statusMap = {
+      Open: ['reported', 'submitted'], Pending: ['draft', 'under_review'],
+      'Work in Progress': ['under_review'], Closed: ['closed', 'resolved'], Cancelled: ['closed'],
+      submitted: ['submitted', 'reported'], under_review: ['under_review', 'draft'], closed: ['closed', 'resolved'],
+    };
+    where.status = statusMap[query.status] || query.status;
+  }
+  if (query.severityLevel && query.severityLevel !== 'All') where.severityLevel = query.severityLevel;
+  addTextSearch(where, query.search, ['title', 'description'], Hazard);
+
+  const year = query.year && query.year !== 'All' ? String(query.year) : null;
+  const fromDate = query.fromDate || (year ? `${year}-01-01` : null);
+  const toDate = query.toDate
+    ? (String(query.toDate).length === 10 ? `${query.toDate} 23:59:59` : query.toDate)
+    : (year ? `${year}-12-31 23:59:59` : null);
+  if (fromDate || toDate) where.reportedAt = { ...(fromDate ? { [Op.gte]: fromDate } : {}), ...(toDate ? { [Op.lte]: toDate } : {}) };
+
+  if (query.department && query.department !== 'All') {
+    const department = await Department.findOne({ where: { [Op.or]: [{ code: query.department }, { name: query.department }] }, attributes: ['id'] });
+    where[Op.and] = [{ [Op.or]: [
+      ...(department?.id ? [{ departmentId: department.id }] : []),
+      Hazard.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.originated_department')) = ${Hazard.sequelize.escape(query.department)}`),
+    ] }];
+    delete where.departmentId;
+  }
+  return where;
+};
+
 /**
  * Report a new hazard
  */
@@ -48,54 +80,14 @@ const createHazard = asyncHandler(async (req, res) => {
  */
 const getAllHazards = asyncHandler(async (req, res) => {
   const { parsePagination, paginationMeta } = require('../../shared/utils/pagination');
-  const { page, limit, offset: parsedOffset } = parsePagination(req.query);
+  const { page, limit } = parsePagination(req.query);
   const offset = (page - 1) * limit;
   const options = {
     limit,
     offset,
-    where: {},
+    where: await buildHazardWhere(req.query),
     order: parseOrder(req.query, { date: 'reportedAt', reportedAt: 'reportedAt', createdAt: 'createdAt' }),
   };
-  
-  if (req.query.plantId) options.where.plantId = req.query.plantId;
-  if (req.query.status && req.query.status !== 'All') {
-    const statusMap = {
-      Open: ['reported', 'submitted'],
-      Pending: ['draft', 'under_review'],
-      'Work in Progress': ['under_review'],
-      Closed: ['closed', 'resolved'],
-      Cancelled: ['closed'],
-      submitted: ['submitted', 'reported'],
-      under_review: ['under_review', 'draft'],
-      closed: ['closed', 'resolved'],
-    };
-    options.where.status = statusMap[req.query.status] || req.query.status;
-  }
-  if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
-  addTextSearch(options.where, req.query.search, ['title', 'description'], Hazard);
-
-  const year = req.query.year && req.query.year !== 'All' ? String(req.query.year) : null;
-  const fromDate = req.query.fromDate || (year ? `${year}-01-01` : null);
-  const toDate = req.query.toDate
-    ? (String(req.query.toDate).length === 10 ? `${req.query.toDate} 23:59:59` : req.query.toDate)
-    : (year ? `${year}-12-31 23:59:59` : null);
-  if (fromDate || toDate) {
-    options.where.reportedAt = {};
-    if (fromDate) options.where.reportedAt[Op.gte] = fromDate;
-    if (toDate) options.where.reportedAt[Op.lte] = toDate;
-  }
-
-  if (req.query.department && req.query.department !== 'All') {
-    const department = await Department.findOne({
-      where: { [Op.or]: [{ code: req.query.department }, { name: req.query.department }] },
-      attributes: ['id'],
-    });
-    options.where[Op.and] = [{ [Op.or]: [
-      ...(department?.id ? [{ departmentId: department.id }] : []),
-      Hazard.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.originated_department')) = ${Hazard.sequelize.escape(req.query.department)}`),
-    ] }];
-    delete options.where.departmentId;
-  }
 
   const result = await hazardService.getAllHazards(options);
   const currentPage = Math.floor(options.offset / options.limit) + 1;
@@ -108,6 +100,22 @@ const getAllHazards = asyncHandler(async (req, res) => {
   res.status(200).json(response);
 });
 
+const getHazardSummary = asyncHandler(async (req, res) => {
+  const where = await buildHazardWhere(req.query);
+  const [summary] = await Hazard.findAll({
+    where,
+    raw: true,
+    attributes: [
+      [Hazard.sequelize.fn('COUNT', Hazard.sequelize.col('id')), 'totalRecords'],
+      [Hazard.sequelize.literal('SUM(CASE WHEN `assigned_to` IS NOT NULL THEN 1 ELSE 0 END)'), 'assigned'],
+      [Hazard.sequelize.literal("SUM(CASE WHEN `status` IN ('submitted','under_review') THEN 1 ELSE 0 END)"), 'submittedForReview'],
+      [Hazard.sequelize.literal("SUM(CASE WHEN `status` IN ('closed','resolved') AND `closed_at` IS NOT NULL AND `closed_at` >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND `closed_at` < DATE_ADD(DATE_FORMAT(CURRENT_DATE, '%Y-%m-01'), INTERVAL 1 MONTH) THEN 1 ELSE 0 END)"), 'closedThisMonth'],
+    ],
+  });
+  const data = Object.fromEntries(['totalRecords', 'assigned', 'submittedForReview', 'closedThisMonth'].map((key) => [key, Number(summary?.[key] || 0)]));
+  res.status(200).json(ApiResponse.success(data, 'Hazard summary retrieved successfully', { totalRecords: data.totalRecords }));
+});
+
 /**
  * Get hazard by ID
  */
@@ -117,11 +125,7 @@ const getHazardById = asyncHandler(async (req, res) => {
 });
 
 const exportHazards = asyncHandler(async (req, res) => {
-  const where = {};
-  if (req.query.plantId) where.plantId = req.query.plantId;
-  if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
-  if (req.query.severityLevel) where.severityLevel = req.query.severityLevel;
-  addTextSearch(where, req.query.search, ['title', 'description'], Hazard);
+  const where = await buildHazardWhere(req.query);
   await sendCsvExport(res, Hazard, { where, order: parseOrder(req.query, { date: 'reportedAt', createdAt: 'createdAt' }) }, `hazards-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
@@ -153,6 +157,7 @@ const deleteHazard = asyncHandler(async (req, res) => {
 module.exports = {
   createHazard,
   getAllHazards,
+  getHazardSummary,
   getHazardById,
   exportHazards,
   updateHazard,

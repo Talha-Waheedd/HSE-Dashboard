@@ -34,6 +34,12 @@ router.get(
 );
 
 router.get(
+  '/summary',
+  requirePermissions([PERMISSIONS.HSE_VIEW_REPORTS]),
+  hazardController.getHazardSummary
+);
+
+router.get(
   '/export',
   requirePermissions([PERMISSIONS.HSE_VIEW_REPORTS]),
   hazardController.exportHazards

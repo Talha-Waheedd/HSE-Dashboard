@@ -155,6 +155,11 @@ class HazardService {
     if (newStatus === HazardStatus.RESOLVED) {
       updateData.resolvedAt = new Date();
       updateData.resolvedBy = userId;
+      // Resolved is the business closure transition for this lifecycle. Use
+      // the transition time as the auditable closure time; never backfill
+      // historical rows with fabricated dates.
+      updateData.closedAt = new Date();
+      updateData.closedBy = userId;
     } else if (newStatus === HazardStatus.CLOSED) {
       updateData.closedAt = new Date();
       updateData.closedBy = userId;

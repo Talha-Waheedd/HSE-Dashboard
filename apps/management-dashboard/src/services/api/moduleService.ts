@@ -179,6 +179,15 @@ export const moduleService = {
     };
   },
 
+  getHazardSummary: async (params?: Record<string, unknown>): Promise<ApiResponse<{ totalRecords: number; assigned: number; submittedForReview: number; closedThisMonth: number }>> => {
+    const requestParams = { ...(params || {}) };
+    Object.entries(requestParams).forEach(([key, value]) => {
+      if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
+    });
+    const response = await apiClient.get('/hazards/summary', { params: requestParams });
+    return response.data;
+  },
+
   create: async (schemaId: string, record: any): Promise<ApiResponse<any>> => {
     const endpoint = getEndpoint(schemaId);
     const idempotencyKey = String(record?.__idempotencyKey || '').trim() ||
