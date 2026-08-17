@@ -23,6 +23,7 @@ import { DepartmentStatusBar } from './DepartmentStatusBar';
 import { MyPendingWidget } from './MyPendingWidget';
 import { uploadClient } from '../../../../packages/api/src/uploadClient';
 import { LocationCombobox } from './LocationCombobox';
+import { formatDateOnly, formatDateTimeLocal } from '../utils/dateFormat';
 
 interface DataEntrySectionProps {
   schema: SectionConfig;
@@ -752,6 +753,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const startRecord = sortedEntries.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const endRecord = Math.min(currentPage * PAGE_SIZE, sortedEntries.length);
   const visibleColumns = schema.columns.filter(col => !col.hideFromForm && col.type !== 'file');
+  const formatTableValue = (column: ColumnSchema, value: unknown) => {
+    if (column.type === 'date') return formatDateOnly(value);
+    if (column.type === 'datetime') return formatDateTimeLocal(value);
+    return value === undefined || value === null || value === '' ? '—' : String(value);
+  };
   const sectionGroups = moduleSections(schema);
   const exportCSV = async () => {
     try {
@@ -759,7 +765,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       const headers = cols.map(c => `"${c.label.replace(/"/g, '""')}"`).join(',');
       const rows = searchedEntries.map(entry => {
         return cols.map(c => {
-          let val = entry[c.key] ?? '';
+          let val = c.type === 'date'
+            ? formatDateOnly(entry[c.key])
+            : c.type === 'datetime'
+              ? formatDateTimeLocal(entry[c.key])
+              : (entry[c.key] ?? '');
           if (typeof val === 'object') val = JSON.stringify(val);
           return `"${String(val).replace(/"/g, '""')}"`;
         }).join(',');
@@ -1440,7 +1450,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                         </td>
                         {visibleColumns.map(col => (
                           <td key={col.key} style={{ paddingTop: density === 'compact' ? 8 : density === 'spacious' ? 16 : 10, paddingBottom: density === 'compact' ? 8 : density === 'spacious' ? 16 : 10 }}>
-                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className="text-[13px] text-[#1A1818]">{entry[col.key] ? String(entry[col.key]) : <span className="text-[#CCCCCC]">—</span>}</span>}
+                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className={`${col.type === 'date' || col.type === 'datetime' ? 'whitespace-nowrap ' : ''}text-[13px] text-[#1A1818]`}>{formatTableValue(col, entry[col.key])}</span>}
                           </td>
                         ))}
                         <td className="text-center">
@@ -1741,7 +1751,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                         </td>
                         {visibleColumns.map(col => (
                           <td key={col.key}>
-                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className="text-[13px] text-[#1A1818]">{entry[col.key] ? String(entry[col.key]) : <span className="text-[#CCCCCC]">—</span>}</span>}
+                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className={`${col.type === 'date' || col.type === 'datetime' ? 'whitespace-nowrap ' : ''}text-[13px] text-[#1A1818]`}>{formatTableValue(col, entry[col.key])}</span>}
                           </td>
                         ))}
                         <td className="text-center">
@@ -2003,7 +2013,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                   return (
                     <tr key={incident.id} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}>
                       <td className="font-semibold text-[#2C1810]">{incidentNumber}</td>
-                      <td>{date ? String(date).slice(0, 10) : '—'}</td>
+                      <td className="whitespace-nowrap">{formatDateOnly(date)}</td>
                       <td className="max-w-[260px] truncate" title={incident.description || ''}>{incident.description || '—'}</td>
                       <td>{incident.emp_id || '—'}</td>
                       <td>{department}</td>
