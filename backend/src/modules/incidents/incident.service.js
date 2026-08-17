@@ -56,7 +56,7 @@ class IncidentService {
       // Generate incident number inside the transaction with a row-level lock
       // to prevent duplicate INC-YYYY-XXXX numbers under concurrent creates.
       const currentYear = new Date().getFullYear();
-      const [[{ cnt }]] = await sequelize.query(
+      const [{ cnt }] = await sequelize.query(
         `SELECT COUNT(*) AS cnt FROM incidents WHERE incident_date >= :startOfYear`,
         {
           replacements: { startOfYear: `${currentYear}-01-01` },

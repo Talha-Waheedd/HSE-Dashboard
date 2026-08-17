@@ -91,6 +91,7 @@ const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? 
   status: ['Open', 'Planned', 'Closed'].includes(item?.status) ? item.status : 'Open',
   legacy: item?.legacy === true || (!item?.responsible_person && !item?.responsiblePerson && !item?.responsible_department && !item?.responsibleDepartment),
 })) : [];
+const normalizeCollection = (value: unknown) => Array.isArray(value) ? value : [];
 
 export const moduleService = {
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
@@ -247,6 +248,7 @@ export const moduleService = {
         immediateAction: payload.immediate_cause,
         rootCause: payload.root_cause,
         actions: normalizeIncidentActions(payload.actions),
+        attachments: normalizeCollection(payload.attachments),
         status: statusToApi(payload.status_id || 'Open', schemaId)
       };
     } else if (schemaId === 'training-records') {
@@ -312,6 +314,7 @@ export const moduleService = {
         immediateAction: payload.immediate_cause,
         rootCause: payload.root_cause,
         actions: normalizeIncidentActions(payload.actions),
+        attachments: normalizeCollection(payload.attachments),
         status: statusToApi(payload.status_id, schemaId)
       };
     } else if (schemaId === 'training-records') {
