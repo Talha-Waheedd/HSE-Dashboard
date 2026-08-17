@@ -7,6 +7,7 @@ import { KpiTile } from '../components/KpiTile';
 import { useFilters } from '../context/FilterContext';
 import { moduleService } from '../services/api/moduleService';
 import { dashboardClient } from '@cbl/api';
+import { formatDateOnly } from '../utils/dateFormat';
 
 type IndicatorKind = 'hazard-closing' | 'incident-investigation' | 'emergency-drills' | 'action-plan-closure';
 type Row = Record<string, any>;
@@ -18,7 +19,8 @@ const titles: Record<IndicatorKind, { title: string; subtitle: string }> = {
   'action-plan-closure': { title: 'Action Plan Closure Tracker', subtitle: 'Monitor corrective-action plans through completion and verification.' },
 };
 
-const dateOf = (row: Row) => String(row.date || row.incidentDate || row.scheduledDate || row.dueDate || row.createdAt || '');
+const rawDateOf = (row: Row) => row.date || row.incidentDate || row.incident_date || row.scheduledDate || row.scheduled_date || row.dueDate || row.due_date || row.createdAt || row.created_at;
+const dateOf = (row: Row) => formatDateOnly(rawDateOf(row));
 const statusOf = (row: Row) => String(row.status_id || row.status || row.statusId || 'Open').toLowerCase();
 const isClosed = (row: Row) => ['closed', 'close', 'resolved', 'completed', 'complete', 'verified', 'approved'].includes(statusOf(row));
 const departmentOf = (row: Row) => String(row.department_id || row.departmentId || row.department?.id || row.department?.code || row.department?.name || '').toLowerCase();
@@ -86,7 +88,7 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
   }, [kind, filters.year, filters.department, filters.status, filters.fromDate, filters.toDate]);
 
   const filteredRows = useMemo(() => kind === 'hazard-closing' ? rows : rows.filter(row => {
-    const date = dateOf(row);
+    const date = String(rawDateOf(row) || '').slice(0, 10);
     if (filters.department !== 'All' && filters.department && departmentOf(row) !== String(filters.department).toLowerCase()) return false;
     if (filters.year !== 'All' && filters.year && !date.startsWith(filters.year)) return false;
     if (filters.fromDate && date.slice(0, 10) < filters.fromDate) return false;

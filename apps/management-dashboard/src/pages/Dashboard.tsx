@@ -653,17 +653,21 @@ export const Dashboard = () => {
         {/* ============ ROW 6 — PLANT PHOTO CARDS (Stitch Dashboard) ============ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <PlantPhotoCard
-            imageUrl="/plant-sukkur.jpg"
+            imageUrl={LOCATION_CARD_CONFIG.find(card => card.id === 'lu-sukkur-plant')!.imageUrl}
             title="LU Sukkur Plant"
             subtitle="Operational Excellence & Safety Compliance"
             location="Sukkur Plant Operations"
+            alt="LU Sukkur Plant industrial facility"
+            fallbackImageUrl="/image.png"
             onClick={() => navigate('/hazard-reporting')}
           />
           <PlantPhotoCard
-            imageUrl="/plant-map.jpg"
+            imageUrl={LOCATION_CARD_CONFIG.find(card => card.id === 'asset-safety-mapping')!.imageUrl}
             title="Asset Safety Mapping"
             subtitle="Real-time Hazard Tracking Grid"
             badge="REPORT INCIDENT"
+            alt="Safety inspector reviewing a power plant checklist"
+            fallbackImageUrl="/image.png"
             onClick={() => navigate('/incident-log')}
           />
         </div>

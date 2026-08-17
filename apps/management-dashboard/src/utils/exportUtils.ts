@@ -1,5 +1,8 @@
 import { moduleService } from '../services/api/moduleService';
 import { ALL_SECTIONS } from '../config/sectionSchemas';
+import { formatDateOnly } from './dateFormat';
+
+const DATE_ONLY_FIELDS = new Set(['date', 'reported_at', 'reportedAt', 'incident_date', 'incidentDate', 'scheduled_date', 'scheduledDate', 'due_date', 'dueDate', 'target_date']);
 
 export const exportCSV = async (schemaId: string, filters: Record<string, any>, reportTitle?: string) => {
   try {
@@ -56,7 +59,9 @@ export const exportCSV = async (schemaId: string, filters: Record<string, any>, 
     // 3. Construct CSV
     for (const entry of data) {
       const row = schema.columns.map(col => {
-        let val = entry[col.key] || '';
+        let val = DATE_ONLY_FIELDS.has(col.key)
+          ? formatDateOnly(entry[col.key])
+          : (entry[col.key] || '');
         val = val.toString().replace(/"/g, '""');
         if (val.search(/("|,|\n)/g) >= 0) {
           val = `"${val}"`;

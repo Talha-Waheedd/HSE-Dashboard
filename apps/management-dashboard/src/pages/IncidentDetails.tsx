@@ -5,6 +5,7 @@ import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { apiClient } from '@cbl/api';
+import { formatDateOnly, formatDateTimeLocal } from '../utils/dateFormat';
 
 const valueOrDash = (value: unknown) => value === undefined || value === null || value === '' ? '—' : String(value);
 
@@ -98,7 +99,7 @@ export const IncidentDetails = () => {
                 </div>
                 <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2 lg:grid-cols-4 sm:p-6">
                   <DetailItem label="Incident category" value={field('incidentType', field('incident_category_id'))} />
-                  <DetailItem label="Incident date" value={field('incidentDate', field('date'))} />
+                  <DetailItem label="Incident date" value={formatDateOnly(field('incidentDate', field('date')))} />
                   <DetailItem label="Incident time" value={field('incidentTime', field('time'))} />
                   <DetailItem label="Location" value={field('location')} />
                 </div>
@@ -133,7 +134,7 @@ export const IncidentDetails = () => {
                     <DetailItem label="Responsible person" value={field('responsible_person')} />
                     <DetailItem label="Investigated by" value={field('investigatedBy', field('investigated_by'))} />
                     <DetailItem label="Investigation findings" value={field('investigationFindings', field('investigation_findings'))} />
-                    <DetailItem label="Created at" value={field('createdAt', field('created_at'))} />
+                    <DetailItem label="Created at" value={formatDateTimeLocal(field('createdAt', field('created_at')))} />
                   </div>
                 </section>
               </div>
