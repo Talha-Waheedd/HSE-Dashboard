@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
-import { moduleService } from '../services/api/moduleService';
+import { dashboardClient } from '@cbl/api';
 import { KpiTile } from '../components/KpiTile';
 import { CHART_COLORS, PIE_COLORS } from '../config/constants';
 import {
@@ -64,21 +64,13 @@ export const LeadingLaggingIndicators = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [hazardsRes, nearMissRes, incidentsRes, trainingRes, auditsRes, inspectionsRes] = await Promise.all([
-          moduleService.getAll('hazard-reporting'),
-          moduleService.getAll('near-miss'),
-          moduleService.getAll('incident-log'),
-          moduleService.getAll('training-records'),
-          moduleService.getAll('audit-management'),
-          moduleService.getAll('inspection-records'),
-        ]);
-
-        const hazards = hazardsRes.data || [];
-        const nearMisses = nearMissRes.data || [];
-        const incidents = incidentsRes.data || [];
-        const trainings = trainingRes.data || [];
-        const audits = auditsRes.data || [];
-        const inspections = inspectionsRes.data || [];
+        const response = await dashboardClient.getAnalyticsOverview();
+        const overview = response.data?.data;
+        if (!overview) throw new Error('Analytics overview returned no data');
+        const hazardSummary = overview.summary?.hazards || {};
+        const nearMissSummary = overview.summary?.nearMisses || {};
+        const incidentSummary = overview.summary?.incidents || {};
+        const trainingSummary = overview.summary?.training || {};
 
         let fatalities = 0;
         let lti = 0;
@@ -88,16 +80,14 @@ export const LeadingLaggingIndicators = () => {
         let majorFire = 0;
         let minorFire = 0;
 
-        incidents.forEach(inc => {
-          const cat = String(inc.incident_category_id || inc.incidentType || inc.category || '').toLowerCase().replaceAll('_', ' ');
-          if (cat.includes('fatal')) fatalities++;
-          else if (cat.includes('lost time') || cat === 'lti') lti++;
-          else if (cat.includes('restricted') || cat === 'rwc') rwc++;
-          else if (cat.includes('medical treatment') || cat === 'mtc') mtc++;
-          else if (cat.includes('first aid')) firstAid++;
-          else if (cat.includes('major fire')) majorFire++;
-          else if (cat.includes('minor fire')) minorFire++;
-        });
+        const byType = incidentSummary.byType || {};
+        fatalities = Number(byType.fatality || incidentSummary.fatalities || 0);
+        lti = Number(byType.lti || incidentSummary.lti || 0);
+        firstAid = Number(byType.first_aid || incidentSummary.firstAid || 0);
+        mtc = Number(byType.mtc || incidentSummary.mtc || 0);
+        rwc = Number(byType.rwc || incidentSummary.rwc || 0);
+        majorFire = Number(byType.major_fire || 0);
+        minorFire = Number(byType.minor_fire || 0);
 
         if (cancelled) return;
         setData({
@@ -108,11 +98,11 @@ export const LeadingLaggingIndicators = () => {
           rwc,
           majorFire,
           minorFire,
-          hazards: hazards.length,
-          nearMisses: nearMisses.length,
-          training: trainings.length,
-          audits: audits.length,
-          inspections: inspections.length,
+          hazards: Number(hazardSummary.total || 0),
+          nearMisses: Number(nearMissSummary.total || 0),
+          training: Number(trainingSummary.total || 0),
+          audits: Number(overview.summary?.audits || 0),
+          inspections: Number(overview.summary?.inspections || 0),
         });
       } catch (err) {
         console.error('Error fetching data for leading/lagging indicators:', err);

@@ -454,6 +454,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [hazardSummary, setHazardSummary] = useState({ totalRecords: 0, assigned: 0, submittedForReview: 0, closedThisMonth: 0 });
   const hazardSummaryRequest = useRef(0);
+  const [trainingSummary, setTrainingSummary] = useState({ totalRecords: 0, totalManhours: 0, pendingRecords: 0, completedRecords: 0, attendanceRate: null as number | null });
+  const trainingSummaryRequest = useRef(0);
   const [showReviewPanel, setShowReviewPanel] = useState(false);
   const [showCloseHazard, setShowCloseHazard] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -475,29 +477,36 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     sortOrder: sortConfig?.direction || 'desc',
   }), [filters, currentPage, searchQuery, sortConfig]);
   const summaryQuery = useMemo(() => {
-    if (schema.id !== 'hazard-reporting') return null;
+    if (!['hazard-reporting', 'training-records'].includes(schema.id)) return null;
     const { page: _page, limit: _limit, sortBy: _sortBy, sortOrder: _sortOrder, ...filtersOnly } = listQuery;
     return filtersOnly;
   }, [schema.id, listQuery]);
   useEffect(() => {
-    const requestId = ++hazardSummaryRequest.current;
-    if (schema.id !== 'hazard-reporting' || !summaryQuery) {
+    const requestId = schema.id === 'hazard-reporting' ? ++hazardSummaryRequest.current : ++trainingSummaryRequest.current;
+    if (!['hazard-reporting', 'training-records'].includes(schema.id) || !summaryQuery) {
       void fetchAll(listQuery);
       return;
     }
-    void Promise.all([fetchAll(listQuery), moduleService.getHazardSummary(summaryQuery)])
+    const summaryRequest = schema.id === 'hazard-reporting' ? moduleService.getHazardSummary(summaryQuery) : moduleService.getTrainingSummary(summaryQuery);
+    void Promise.all([fetchAll(listQuery), summaryRequest])
       .then(([, response]) => {
-        if (requestId === hazardSummaryRequest.current && response.success && response.data) setHazardSummary(response.data);
+        const current = schema.id === 'hazard-reporting' ? hazardSummaryRequest.current : trainingSummaryRequest.current;
+        if (requestId === current && response.success && response.data) {
+          if (schema.id === 'hazard-reporting') setHazardSummary(response.data);
+          else setTrainingSummary(response.data);
+        }
       })
       .catch(() => { /* table error state remains authoritative; retain last summary during transient failures */ });
   }, [schema.id, fetchAll, listQuery, summaryQuery]);
   useEffect(() => {
     const refresh = () => {
       void fetchAll(listQuery);
-      if (schema.id === 'hazard-reporting' && summaryQuery) {
-        const requestId = ++hazardSummaryRequest.current;
-        void moduleService.getHazardSummary(summaryQuery).then((response) => {
-          if (requestId === hazardSummaryRequest.current && response.success && response.data) setHazardSummary(response.data);
+      if (['hazard-reporting', 'training-records'].includes(schema.id) && summaryQuery) {
+        const requestId = schema.id === 'hazard-reporting' ? ++hazardSummaryRequest.current : ++trainingSummaryRequest.current;
+        const summaryRequest = schema.id === 'hazard-reporting' ? moduleService.getHazardSummary(summaryQuery) : moduleService.getTrainingSummary(summaryQuery);
+        void summaryRequest.then((response) => {
+          if (schema.id === 'hazard-reporting' && requestId === hazardSummaryRequest.current && response.success && response.data) setHazardSummary(response.data);
+          if (schema.id === 'training-records' && requestId === trainingSummaryRequest.current && response.success && response.data) setTrainingSummary(response.data);
         }).catch(() => undefined);
       }
     };
@@ -1648,7 +1657,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       <ContextHeader
         title={schema.title}
         breadcrumbs={[schema.title]}
-        subtitle={`${filteredEntries.length} records${searchQuery ? ` filtered by "${searchQuery}"` : ''}`}
+        subtitle={`${pagination.totalRecords.toLocaleString()} records${searchQuery ? ` filtered by "${searchQuery}"` : ''}`}
         actions={[
           ...(canExportCSV() ? [{
             label: 'Export CSV',
@@ -1676,10 +1685,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         {schema.id === 'training-records' && (
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
             {[
-              { label: 'Total Trainings', value: entries.length },
-              { label: 'Training Hours', value: Math.round(entries.reduce((sum, item) => sum + (Number(item.manhours) || 0), 0)) },
-              { label: 'Attendance %', value: '94%' },
-              { label: 'Pending Trainings', value: entries.filter(item => item.status_id !== 'Closed').length },
+              { label: 'Total Trainings', value: trainingSummary.totalRecords.toLocaleString() },
+              { label: 'Training Hours', value: Math.round(trainingSummary.totalManhours).toLocaleString() },
+              { label: 'Attendance %', value: trainingSummary.attendanceRate == null ? '—' : `${trainingSummary.attendanceRate}%` },
+              { label: 'Pending Trainings', value: trainingSummary.pendingRecords.toLocaleString() },
             ].map(card => (
               <div key={card.label} className={`${CARD} p-4`}>
                 <p className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-semibold">{card.label}</p>

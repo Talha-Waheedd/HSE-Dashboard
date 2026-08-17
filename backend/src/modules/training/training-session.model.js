@@ -71,7 +71,7 @@ const TrainingSession = sequelize.define('TrainingSession', {
   },
   participantCount: { type: DataTypes.INTEGER, allowNull: true },
   manhours: { type: DataTypes.DECIMAL(12, 2), allowNull: true },
-  sourceFingerprint: { type: DataTypes.STRING(64), allowNull: true, unique: true },
+  sourceFingerprint: { type: DataTypes.STRING(64), allowNull: true },
   notes: {
     type: DataTypes.TEXT,
     allowNull: true,

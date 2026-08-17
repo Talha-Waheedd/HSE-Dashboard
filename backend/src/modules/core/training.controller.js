@@ -4,7 +4,43 @@ const trainingService = require('./training.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { Op } = require('sequelize');
 const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
-const { TrainingSession } = require('../../database/models');
+const { TrainingSession, Department } = require('../../database/models');
+
+const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
+const buildTrainingWhere = async (query = {}) => {
+  const where = {};
+  const departmentValue = query.departmentId || query.department;
+  if (query.plantId && query.plantId !== 'All') where.plantId = query.plantId;
+  if (query.status && query.status !== 'All') where.status = query.status;
+  if (query.trainingType && query.trainingType !== 'All') where.trainingType = query.trainingType;
+  if (departmentValue && departmentValue !== 'All') {
+    const department = await Department.findOne({
+      where: { [Op.or]: [{ id: departmentValue }, { code: departmentValue }, { name: departmentValue }] },
+      attributes: ['id'],
+    });
+    where.departmentId = department ? department.id : '__no_matching_department__';
+  }
+  addTextSearch(where, query.search, ['title', 'description', 'trainer_name'], TrainingSession);
+  const year = /^\d{4}$/.test(String(query.year || '')) ? Number(query.year) : null;
+  const month = /^(?:[1-9]|1[0-2])$/.test(String(query.month || '')) ? Number(query.month) : null;
+  let start = isDate(query.fromDate) ? query.fromDate : (year ? `${year}-01-01` : null);
+  let end = isDate(query.toDate) ? query.toDate : (year ? `${year + 1}-01-01` : null);
+  if (month) {
+    const monthYear = year || new Date().getFullYear();
+    start = `${monthYear}-${String(month).padStart(2, '0')}-01`;
+    end = new Date(Date.UTC(monthYear, month, 1)).toISOString().slice(0, 10);
+  } else if (end && isDate(query.toDate)) {
+    const next = new Date(`${end}T00:00:00Z`);
+    next.setUTCDate(next.getUTCDate() + 1);
+    end = next.toISOString().slice(0, 10);
+  }
+  if (start || end) {
+    where.scheduledDate = {};
+    if (start) where.scheduledDate[Op.gte] = start;
+    if (end) where.scheduledDate[Op.lt] = end;
+  }
+  return where;
+};
 
 /**
  * Create a new training session
@@ -19,25 +55,8 @@ const createSession = asyncHandler(async (req, res) => {
  */
 const getAllSessions = asyncHandler(async (req, res) => {
   const pagination = parsePagination(req.query);
-  const options = {
-    ...pagination,
-    where: {},
-  };
-  
-  // Be defensive with shared frontend filters. "All" is a UI placeholder,
-  // not a valid database value and must not turn a populated table into zero
-  // results if a client sends it.
-  if (req.query.plantId && req.query.plantId !== 'All') options.where.plantId = req.query.plantId;
-  if (req.query.departmentId && req.query.departmentId !== 'All') options.where.departmentId = req.query.departmentId;
-  if (req.query.status && req.query.status !== 'All') options.where.status = req.query.status;
-  if (req.query.trainingType && req.query.trainingType !== 'All') options.where.trainingType = req.query.trainingType;
-  addTextSearch(options.where, req.query.search, ['title', 'description', 'trainer_name'], TrainingSession);
+  const options = { ...pagination, where: await buildTrainingWhere(req.query) };
   options.order = parseOrder(req.query, { date: 'scheduledDate', scheduledDate: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']);
-  if (req.query.year && /^\d{4}$/.test(req.query.year)) options.where.scheduledDate = { [Op.between]: [`${req.query.year}-01-01`, `${req.query.year}-12-31`] };
-  if (req.query.month && /^\d{1,2}$/.test(req.query.month)) {
-    const year = String(req.query.year || new Date().getFullYear()); const month = String(req.query.month).padStart(2, '0');
-    options.where.scheduledDate = { [Op.between]: [`${year}-${month}-01`, `${year}-${month}-31`] };
-  }
 
   const sessions = await trainingService.getAllSessions(options);
   res.status(200).json(ApiResponse.success(sessions.rows, 'Training sessions retrieved successfully', paginationMeta({ ...pagination, total: sessions.count })));
@@ -51,12 +70,13 @@ const getSessionById = asyncHandler(async (req, res) => {
   res.status(200).json(ApiResponse.success(session, 'Training session retrieved successfully'));
 });
 const exportSessions = asyncHandler(async (req, res) => {
-  const where = {};
-  if (req.query.plantId) where.plantId = req.query.plantId;
-  if (req.query.departmentId) where.departmentId = req.query.departmentId;
-  if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
-  addTextSearch(where, req.query.search, ['title', 'description', 'trainer_name'], TrainingSession);
+  const where = await buildTrainingWhere(req.query);
   await sendCsvExport(res, TrainingSession, { where, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']) }, `trainings-${new Date().toISOString().slice(0, 10)}.csv`);
+});
+
+const getSummary = asyncHandler(async (req, res) => {
+  const summary = await trainingService.getSummary(await buildTrainingWhere(req.query));
+  res.status(200).json(ApiResponse.success(summary, 'Training summary retrieved successfully'));
 });
 
 /**
@@ -95,6 +115,7 @@ module.exports = {
   createSession,
   getAllSessions,
   getSessionById,
+  getSummary,
   exportSessions,
   updateSession,
   deleteSession,

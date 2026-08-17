@@ -19,7 +19,7 @@ const createTrainingSchema = Joi.object({
   participantCount: Joi.number().integer().min(1).optional(),
   manhours: Joi.number().min(0).optional(),
   notes: Joi.string().optional(),
-  status: Joi.string().valid(TrainingStatus.SCHEDULED, TrainingStatus.IN_PROGRESS).default(TrainingStatus.SCHEDULED).optional(),
+  status: Joi.string().valid(...Object.values(TrainingStatus)).default(TrainingStatus.SCHEDULED).optional(),
 });
 
 const updateTrainingSchema = Joi.object({

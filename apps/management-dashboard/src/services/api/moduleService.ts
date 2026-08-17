@@ -167,7 +167,7 @@ export const moduleService = {
         trainer: item.metadata?.trainer || item.trainerName || item.trainer_name || item.trainer?.name,
         topic: item.metadata?.topic || item.title,
         participants: item.metadata?.participants || item.participantCount || item.participant_count || item.maxAttendees || item.max_attendees,
-        manhours: item.metadata?.manhours || item.manhours || item.total_manhours || ((Number(item.participantCount || item.participant_count || item.maxAttendees || item.max_attendees) || 0) * ((Number(item.durationMinutes || item.duration_minutes) || 0) / 60)),
+        manhours: item.metadata?.manhours ?? item.manhours ?? item.total_manhours ?? ((Number(item.participantCount ?? item.participant_count ?? item.maxAttendees ?? item.max_attendees) || 0) * ((Number(item.durationMinutes ?? item.duration_minutes) || 0) / 60)),
       }));
     }
 
@@ -185,6 +185,15 @@ export const moduleService = {
       if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
     });
     const response = await apiClient.get('/hazards/summary', { params: requestParams });
+    return response.data;
+  },
+
+  getTrainingSummary: async (params?: Record<string, unknown>): Promise<ApiResponse<any>> => {
+    const requestParams = { ...(params || {}) };
+    Object.entries(requestParams).forEach(([key, value]) => {
+      if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
+    });
+    const response = await apiClient.get('/trainings/summary', { params: requestParams });
     return response.data;
   },
 

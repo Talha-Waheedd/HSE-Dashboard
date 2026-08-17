@@ -21,7 +21,7 @@ class TrainingService {
     data.trainerId = userId; // In this design, the creator is the trainer (could be decoupled later)
     data.createdBy = userId;
     
-    if (![TrainingStatus.SCHEDULED, TrainingStatus.IN_PROGRESS].includes(data.status)) {
+    if (!Object.values(TrainingStatus).includes(data.status)) {
       data.status = TrainingStatus.SCHEDULED;
     }
 
@@ -32,7 +32,23 @@ class TrainingService {
    * Get all training sessions
    */
   async getAllSessions(options = {}) {
-    return trainingRepository.findAndCountAll({ ...options, include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }], distinct: true, order: [['scheduledDate', 'DESC'], ['createdAt', 'DESC']] });
+    const order = options.order || [['scheduledDate', 'DESC'], ['createdAt', 'DESC'], ['id', 'DESC']];
+    return trainingRepository.findAndCountAll({ ...options, include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }], distinct: true, order });
+  }
+
+  async getSummary(where = {}) {
+    const { fn, col, literal } = require('sequelize');
+    const row = await trainingRepository.model.findOne({
+      where, raw: true,
+      attributes: [
+        [fn('COUNT', col('id')), 'totalRecords'],
+        [literal("COALESCE(SUM(CASE WHEN status IN ('scheduled','in_progress') THEN 1 ELSE 0 END), 0)"), 'pendingRecords'],
+        [literal("COALESCE(SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END), 0)"), 'completedRecords'],
+        [literal('COALESCE(SUM(COALESCE(manhours, participant_count * duration_minutes / 60, 0)), 0)'), 'totalManhours'],
+      ],
+    });
+    const value = (key) => Number(row?.[key] || 0);
+    return { totalRecords: value('totalRecords'), totalManhours: value('totalManhours'), pendingRecords: value('pendingRecords'), completedRecords: value('completedRecords'), attendanceRate: null };
   }
 
   /**

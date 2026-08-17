@@ -31,6 +31,12 @@ router.get(
 );
 
 router.get(
+  '/summary',
+  requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
+  trainingController.getSummary
+);
+
+router.get(
   '/:id',
   requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
   trainingController.getSessionById
