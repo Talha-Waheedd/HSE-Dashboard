@@ -48,7 +48,7 @@ class EmployeeService {
    * Get all employees
    */
   async getAllEmployees(options = {}) {
-    return employeeRepository.findAll(options);
+    return employeeRepository.findAndCountAll(options);
   }
 
   /**

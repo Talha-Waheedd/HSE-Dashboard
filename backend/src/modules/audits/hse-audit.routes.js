@@ -25,6 +25,12 @@ router.get(
 );
 
 router.get(
+  '/export',
+  requirePermissions([PERMISSIONS.HSE_VIEW_REPORTS]),
+  hseAuditController.exportAudits
+);
+
+router.get(
   '/:id',
   requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
   hseAuditController.getAuditById

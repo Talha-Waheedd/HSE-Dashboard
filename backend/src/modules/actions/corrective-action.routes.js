@@ -25,6 +25,12 @@ router.get(
 );
 
 router.get(
+  '/export',
+  requirePermissions([PERMISSIONS.HSE_VIEW_REPORTS]),
+  correctiveActionController.exportActions
+);
+
+router.get(
   '/source/:sourceType/:sourceId',
   requirePermissions([PERMISSIONS.HSE_VIEW_REPORTS]),
   correctiveActionController.getActionsBySource

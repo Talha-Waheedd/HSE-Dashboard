@@ -2,6 +2,7 @@
 
 const departmentService = require('./department.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
+const { parsePagination, parseOrder, paginationMeta } = require('../../shared/utils/pagination');
 
 /**
  * Create a new department
@@ -15,13 +16,14 @@ const createDepartment = asyncHandler(async (req, res) => {
  * Get all departments
  */
 const getAllDepartments = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const options = {
-    limit: parseInt(req.query.limit, 10) || 10,
-    offset: parseInt(req.query.offset, 10) || 0,
+    ...pagination,
     where: req.query.isActive ? { isActive: req.query.isActive === 'true' } : {},
   };
-  const depts = await departmentService.getAllDepartments(options);
-  res.status(200).json(ApiResponse.success(depts, 'Departments retrieved successfully'));
+  options.order = parseOrder(req.query, { name: 'name', createdAt: 'createdAt' }, ['name', 'ASC']);
+  const result = await departmentService.getAllDepartments(options);
+  res.status(200).json(ApiResponse.success(result.rows, 'Departments retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
 });
 
 /**

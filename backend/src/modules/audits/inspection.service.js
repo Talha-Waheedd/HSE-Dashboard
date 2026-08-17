@@ -57,7 +57,7 @@ class InspectionService {
    * Get all inspections
    */
   async getAllInspections(options = {}) {
-    return inspectionRepository.findAll(options);
+    return inspectionRepository.findAndCountAll(options);
   }
 
   /**

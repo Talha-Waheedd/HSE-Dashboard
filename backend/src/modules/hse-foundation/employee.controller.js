@@ -2,6 +2,7 @@
 
 const employeeService = require('./employee.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
+const { parsePagination, parseOrder, paginationMeta } = require('../../shared/utils/pagination');
 
 /**
  * Create employee profile
@@ -15,12 +16,12 @@ const createEmployee = asyncHandler(async (req, res) => {
  * Get all employees
  */
 const getAllEmployees = asyncHandler(async (req, res) => {
-  const options = {
-    limit: parseInt(req.query.limit, 10) || 10,
-    offset: parseInt(req.query.offset, 10) || 0,
-  };
-  const employees = await employeeService.getAllEmployees(options);
-  res.status(200).json(ApiResponse.success(employees, 'Employees retrieved successfully'));
+  const pagination = parsePagination(req.query);
+  const options = { ...pagination, where: {} };
+  if (req.query.search) options.where = { empId: { [require('sequelize').Op.like]: `%${String(req.query.search).slice(0, 100)}%` } };
+  options.order = parseOrder(req.query, { createdAt: 'createdAt', empId: 'empId' });
+  const result = await employeeService.getAllEmployees(options);
+  res.status(200).json(ApiResponse.success(result.rows, 'Employees retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
 });
 
 /**

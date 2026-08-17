@@ -8,6 +8,7 @@ import { CenterModal } from './CenterModal';
 import type { SectionConfig, ColumnSchema } from '../config/sectionSchemas';
 import { usePermissions, useAuth } from '@cbl/auth';
 import { useModuleData } from '../hooks/useModuleData';
+import { moduleService } from '../services/api/moduleService';
 import { useFilters } from '../context/FilterContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -425,7 +426,7 @@ const ActionTrackerRoute = ({ schema }: { schema: SectionConfig }) => {
 export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { data: entries, loading, fetchAll, createRecord, updateRecord, deleteRecord } = useModuleData(schema.id);
+  const { data: entries, loading, fetchAll, createRecord, updateRecord, deleteRecord, pagination } = useModuleData(schema.id);
   const { user } = useAuth();
   const permissions = usePermissions();
   const { filters } = useFilters();
@@ -463,12 +464,20 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
   const routeCategory = schema.id === 'incident-log' ? searchParams.get('category') : null;
 
-  useEffect(() => { fetchAll(filters as unknown as Record<string, unknown>); }, [schema.id, fetchAll, filters]);
+  const listQuery = useMemo(() => ({
+    ...(filters as unknown as Record<string, unknown>),
+    page: currentPage,
+    limit: PAGE_SIZE,
+    search: searchQuery || undefined,
+    sortBy: sortConfig?.key || 'createdAt',
+    sortOrder: sortConfig?.direction || 'desc',
+  }), [filters, currentPage, searchQuery, sortConfig]);
+  useEffect(() => { fetchAll(listQuery); }, [schema.id, fetchAll, listQuery]);
   useEffect(() => {
-    const refresh = () => fetchAll(filters as unknown as Record<string, unknown>);
+    const refresh = () => fetchAll(listQuery);
     window.addEventListener('dashboard-refresh', refresh);
     return () => window.removeEventListener('dashboard-refresh', refresh);
-  }, [fetchAll, filters]);
+  }, [fetchAll, listQuery]);
   useEffect(() => { setCurrentPage(1); }, [filters, searchQuery, schema.id]);
   useEffect(() => {
     if (schema.id === 'incident-log' && routeCategory) setSearchQuery(routeCategory);
@@ -582,7 +591,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         // Reload only after the API has confirmed a committed row. The API
         // sorts hazards by createdAt DESC, so the new row is first when the
         // active filters include its date/department.
-        await fetchAll(filters as unknown as Record<string, unknown>);
+        await fetchAll({ ...(filters as unknown as Record<string, unknown>), page: 1, limit: PAGE_SIZE });
         setFormData({});
         setPendingFiles({});
         try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ }
@@ -718,8 +727,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     });
   }, [searchedEntries, sortConfig]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedEntries.length / PAGE_SIZE));
-  const pagedEntries = sortedEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const totalPages = Math.max(1, pagination.totalPages || Math.ceil(sortedEntries.length / PAGE_SIZE));
+  const pagedEntries = sortedEntries;
   const visibleEntryIds = pagedEntries.map(entry => String(entry.id)).filter(Boolean);
   const visibleSelectedCount = visibleEntryIds.filter(id => selectedRows[id]).length;
   const selectedCount = Object.values(selectedRows).filter(Boolean).length;
@@ -750,8 +759,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       return next;
     });
   };
-  const startRecord = sortedEntries.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endRecord = Math.min(currentPage * PAGE_SIZE, sortedEntries.length);
+  const startRecord = pagination.totalRecords === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endRecord = Math.min(currentPage * PAGE_SIZE, pagination.totalRecords || sortedEntries.length);
   const visibleColumns = schema.columns.filter(col => !col.hideFromForm && col.type !== 'file');
   const formatTableValue = (column: ColumnSchema, value: unknown) => {
     if (column.type === 'date') return formatDateOnly(value);
@@ -761,21 +770,12 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const sectionGroups = moduleSections(schema);
   const exportCSV = async () => {
     try {
-      const cols = schema.columns.filter(c => !c.hideFromForm);
-      const headers = cols.map(c => `"${c.label.replace(/"/g, '""')}"`).join(',');
-      const rows = searchedEntries.map(entry => {
-        return cols.map(c => {
-          let val = c.type === 'date'
-            ? formatDateOnly(entry[c.key])
-            : c.type === 'datetime'
-              ? formatDateTimeLocal(entry[c.key])
-              : (entry[c.key] ?? '');
-          if (typeof val === 'object') val = JSON.stringify(val);
-          return `"${String(val).replace(/"/g, '""')}"`;
-        }).join(',');
+      const blob = await moduleService.export(schema.id, {
+        ...(filters as unknown as Record<string, unknown>),
+        search: searchQuery || undefined,
+        sortBy: sortConfig?.key || 'createdAt',
+        sortOrder: sortConfig?.direction || 'desc',
       });
-      const csvContent = '\uFEFF' + [headers, ...rows].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = Object.assign(document.createElement('a'), { href: url, download: `${schema.id}_${new Date().toISOString().split('T')[0]}.csv`, style: { display: 'none' } });
       document.body.appendChild(a);

@@ -21,7 +21,7 @@ class PlantService {
    * Get all plants
    */
   async getAllPlants(options = {}) {
-    return plantRepository.findAll(options);
+    return plantRepository.findAndCountAll(options);
   }
 
   /**

@@ -4,6 +4,7 @@ const nearMissService = require('./near-miss.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { Department, NearMiss } = require('../../database/models');
 const { Op } = require('sequelize');
+const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
 
 /**
  * Report a new near miss
@@ -17,13 +18,11 @@ const createNearMiss = asyncHandler(async (req, res) => {
  * Get all near misses
  */
 const getAllNearMisses = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const options = {
-    limit: parseInt(req.query.limit, 10) || 10,
-    offset: req.query.offset !== undefined
-      ? parseInt(req.query.offset, 10) || 0
-      : ((parseInt(req.query.page, 10) || 1) - 1) * (parseInt(req.query.limit, 10) || 10),
+    ...pagination,
     where: {},
-    order: [['reportedAt', 'DESC']],
+    order: parseOrder(req.query, { date: 'reportedAt', reportedAt: 'reportedAt', createdAt: 'createdAt' }, ['reportedAt', 'DESC']),
   };
   
   if (req.query.plantId) options.where.plantId = req.query.plantId;
@@ -36,6 +35,7 @@ const getAllNearMisses = asyncHandler(async (req, res) => {
     }[req.query.status] || req.query.status);
   }
   if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
+  addTextSearch(options.where, req.query.search, ['title', 'description', 'near_miss_number'], NearMiss);
 
   const year = req.query.year && req.query.year !== 'All' ? String(req.query.year) : null;
   const fromDate = req.query.fromDate || (year ? `${year}-01-01` : null);
@@ -63,12 +63,7 @@ const getAllNearMisses = asyncHandler(async (req, res) => {
   }
 
   const result = await NearMiss.findAndCountAll(options);
-  res.status(200).json(ApiResponse.success(result.rows, 'Near misses retrieved successfully', {
-    page: Math.floor(options.offset / options.limit) + 1,
-    limit: options.limit,
-    total: result.count,
-    totalPages: Math.ceil(result.count / options.limit),
-  }));
+  res.status(200).json(ApiResponse.success(result.rows, 'Near misses retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
 });
 
 /**
@@ -77,6 +72,14 @@ const getAllNearMisses = asyncHandler(async (req, res) => {
 const getNearMissById = asyncHandler(async (req, res) => {
   const nearMiss = await nearMissService.getNearMissById(req.params.id);
   res.status(200).json(ApiResponse.success(nearMiss, 'Near miss retrieved successfully'));
+});
+const exportNearMisses = asyncHandler(async (req, res) => {
+  const where = {};
+  if (req.query.plantId) where.plantId = req.query.plantId;
+  if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
+  if (req.query.severityLevel) where.severityLevel = req.query.severityLevel;
+  addTextSearch(where, req.query.search, ['title', 'description', 'near_miss_number'], NearMiss);
+  await sendCsvExport(res, NearMiss, { where, order: parseOrder(req.query, { date: 'reportedAt', createdAt: 'createdAt' }, ['reportedAt', 'DESC']) }, `near-misses-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 /**
@@ -107,6 +110,7 @@ module.exports = {
   createNearMiss,
   getAllNearMisses,
   getNearMissById,
+  exportNearMisses,
   updateNearMiss,
   updateStatus,
   deleteNearMiss,

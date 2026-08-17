@@ -17,6 +17,8 @@ export const useModuleData = (schemaId: string) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 15, totalRecords: 0, totalPages: 1 });
+  const requestSequence = useRef(0);
   // Guard: prevents duplicate saves from double-clicks or fast retries.
   // Reset happens in createRecord's finally so it is always cleared after
   // an attempt — previously it was only reset inside updateStatus which meant
@@ -25,15 +27,18 @@ export const useModuleData = (schemaId: string) => {
 
   const fetchAll = useCallback(async (params?: Record<string, unknown>) => {
     if (!schemaId) return;
+    const requestId = ++requestSequence.current;
     setLoading(true);
     try {
       const response = await moduleService.getAll(schemaId, {
         page: 1,
-        limit: schemaId === 'hazard-reporting' ? 10000 : 1000,
+        limit: 15,
         ...(params as Record<string, unknown>),
       });
+      if (requestId !== requestSequence.current) return;
       if (response.success) {
         setData(Array.isArray(response.data) ? response.data : []);
+        if (response.meta) setPagination((previous) => ({ ...previous, ...response.meta }));
         setError(null);
       } else {
         // Preserve existing data — a server-side error must not blank the table.
@@ -42,9 +47,9 @@ export const useModuleData = (schemaId: string) => {
     } catch (err: any) {
       // Preserve existing data on network/transient errors so the UI stays
       // functional. The error banner notifies the user without erasing records.
-      setError(apiErrorDetails(err).message);
+      if (requestId === requestSequence.current) setError(apiErrorDetails(err).message);
     } finally {
-      setLoading(false);
+      if (requestId === requestSequence.current) setLoading(false);
     }
   }, [schemaId]);
 
@@ -110,6 +115,7 @@ export const useModuleData = (schemaId: string) => {
 
   return {
     data,
+    pagination,
     loading,
     error,
     fetchAll,

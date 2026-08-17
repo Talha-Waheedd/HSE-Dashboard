@@ -4,6 +4,7 @@ const incidentService = require('./incident.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { Department, Incident } = require('../../database/models');
 const { Op } = require('sequelize');
+const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
 
 /**
  * Report a new incident
@@ -17,9 +18,9 @@ const createIncident = asyncHandler(async (req, res) => {
  * Get all incidents
  */
 const getAllIncidents = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const options = {
-    limit: parseInt(req.query.limit, 10) || 10,
-    offset: parseInt(req.query.offset, 10) || 0,
+    ...pagination,
     where: {},
   };
   
@@ -27,6 +28,8 @@ const getAllIncidents = asyncHandler(async (req, res) => {
   if (req.query.status) options.where.status = req.query.status;
   if (req.query.incidentType) options.where.incidentType = req.query.incidentType;
   if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
+  addTextSearch(options.where, req.query.search, ['incident_number', 'title', 'description'], Incident);
+  options.order = parseOrder(req.query, { date: 'incidentDate', incidentDate: 'incidentDate', createdAt: 'createdAt' });
   if (req.query.department && req.query.department !== 'All') {
     const department = await Department.findOne({
       where: { [Op.or]: [{ code: req.query.department }, { name: req.query.department }] },
@@ -41,8 +44,8 @@ const getAllIncidents = asyncHandler(async (req, res) => {
       : [{ departmentId: '__no_matching_department__' }];
   }
 
-  const incidents = await incidentService.getAllIncidents(options);
-  res.status(200).json(ApiResponse.success(incidents, 'Incidents retrieved successfully'));
+  const result = await incidentService.getAllIncidents(options);
+  res.status(200).json(ApiResponse.success(result.rows, 'Incidents retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
 });
 
 /**
@@ -51,6 +54,14 @@ const getAllIncidents = asyncHandler(async (req, res) => {
 const getIncidentById = asyncHandler(async (req, res) => {
   const incident = await incidentService.getIncidentById(req.params.id);
   res.status(200).json(ApiResponse.success(incident, 'Incident retrieved successfully'));
+});
+const exportIncidents = asyncHandler(async (req, res) => {
+  const where = {};
+  if (req.query.plantId) where.plantId = req.query.plantId;
+  if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
+  if (req.query.severityLevel) where.severityLevel = req.query.severityLevel;
+  addTextSearch(where, req.query.search, ['incident_number', 'title', 'description'], Incident);
+  await sendCsvExport(res, Incident, { where, order: parseOrder(req.query, { date: 'incidentDate', createdAt: 'createdAt' }) }, `incidents-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 /**
@@ -81,6 +92,7 @@ module.exports = {
   createIncident,
   getAllIncidents,
   getIncidentById,
+  exportIncidents,
   updateIncident,
   updateStatus,
   deleteIncident,

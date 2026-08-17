@@ -57,7 +57,7 @@ class HseAuditService {
    * Get all audits
    */
   async getAllAudits(options = {}) {
-    return auditRepository.findAll(options);
+    return auditRepository.findAndCountAll(options);
   }
 
   /**

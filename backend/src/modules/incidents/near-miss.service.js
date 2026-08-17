@@ -29,7 +29,7 @@ class NearMissService {
    * Get all near misses
    */
   async getAllNearMisses(options = {}) {
-    return nearMissRepository.findAll(options);
+    return nearMissRepository.findAndCountAll(options);
   }
 
   /**

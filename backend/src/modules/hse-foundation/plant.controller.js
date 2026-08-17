@@ -2,6 +2,7 @@
 
 const plantService = require('./plant.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
+const { parsePagination, parseOrder, paginationMeta } = require('../../shared/utils/pagination');
 
 /**
  * Create a new plant
@@ -15,13 +16,14 @@ const createPlant = asyncHandler(async (req, res) => {
  * Get all plants
  */
 const getAllPlants = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const options = {
-    limit: parseInt(req.query.limit, 10) || 10,
-    offset: parseInt(req.query.offset, 10) || 0,
+    ...pagination,
     where: req.query.isActive ? { isActive: req.query.isActive === 'true' } : {},
   };
-  const plants = await plantService.getAllPlants(options);
-  res.status(200).json(ApiResponse.success(plants, 'Plants retrieved successfully'));
+  options.order = parseOrder(req.query, { name: 'name', createdAt: 'createdAt' }, ['name', 'ASC']);
+  const result = await plantService.getAllPlants(options);
+  res.status(200).json(ApiResponse.success(result.rows, 'Plants retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
 });
 
 /**

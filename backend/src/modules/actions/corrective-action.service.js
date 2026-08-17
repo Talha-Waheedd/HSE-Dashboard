@@ -36,7 +36,7 @@ class CorrectiveActionService {
    * Get all corrective actions
    */
   async getAllActions(options = {}) {
-    return correctiveActionRepository.findAll(options);
+    return correctiveActionRepository.findAndCountAll(options);
   }
 
   /**

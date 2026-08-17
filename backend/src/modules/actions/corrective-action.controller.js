@@ -2,6 +2,9 @@
 
 const correctiveActionService = require('./corrective-action.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
+const { Op } = require('sequelize');
+const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
+const { CorrectiveAction } = require('../../database/models');
 
 /**
  * Create a new corrective action
@@ -15,18 +18,23 @@ const createAction = asyncHandler(async (req, res) => {
  * Get all corrective actions
  */
 const getAllActions = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const options = {
-    limit: parseInt(req.query.limit, 10) || 10,
-    offset: parseInt(req.query.offset, 10) || 0,
+    ...pagination,
     where: {},
   };
   
   if (req.query.plantId) options.where.plantId = req.query.plantId;
   if (req.query.status) options.where.status = req.query.status;
   if (req.query.assignedTo) options.where.assignedTo = req.query.assignedTo;
+  const actionFrom = req.query.fromDate || (req.query.year && /^\d{4}$/.test(req.query.year) ? `${req.query.year}-01-01` : null);
+  const actionTo = req.query.toDate || (req.query.year && /^\d{4}$/.test(req.query.year) ? `${req.query.year}-12-31 23:59:59` : null);
+  if (actionFrom || actionTo) options.where.dueDate = { ...(actionFrom ? { [Op.gte]: actionFrom } : {}), ...(actionTo ? { [Op.lte]: actionTo } : {}) };
+  addTextSearch(options.where, req.query.search, ['title', 'description', 'action'], CorrectiveAction);
+  options.order = parseOrder(req.query, { dueDate: 'dueDate', createdAt: 'createdAt' });
 
-  const actions = await correctiveActionService.getAllActions(options);
-  res.status(200).json(ApiResponse.success(actions, 'Corrective actions retrieved successfully'));
+  const result = await correctiveActionService.getAllActions(options);
+  res.status(200).json(ApiResponse.success(result.rows, 'Corrective actions retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
 });
 
 /**
@@ -44,6 +52,14 @@ const getActionsBySource = asyncHandler(async (req, res) => {
 const getActionById = asyncHandler(async (req, res) => {
   const action = await correctiveActionService.getActionById(req.params.id);
   res.status(200).json(ApiResponse.success(action, 'Corrective action retrieved successfully'));
+});
+const exportActions = asyncHandler(async (req, res) => {
+  const where = {};
+  if (req.query.plantId) where.plantId = req.query.plantId;
+  if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
+  if (req.query.assignedTo) where.assignedTo = req.query.assignedTo;
+  addTextSearch(where, req.query.search, ['title', 'description', 'action'], CorrectiveAction);
+  await sendCsvExport(res, CorrectiveAction, { where, order: parseOrder(req.query, { dueDate: 'dueDate', createdAt: 'createdAt' }) }, `corrective-actions-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 /**
@@ -76,6 +92,7 @@ module.exports = {
   getAllActions,
   getActionsBySource,
   getActionById,
+  exportActions,
   updateAction,
   updateStatus,
   deleteAction,

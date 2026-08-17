@@ -22,7 +22,7 @@ class DepartmentService {
    * Get all departments with options
    */
   async getAllDepartments(options = {}) {
-    return departmentRepository.findAll(options);
+    return departmentRepository.findAndCountAll(options);
   }
 
   /**

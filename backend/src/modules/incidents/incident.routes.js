@@ -25,6 +25,12 @@ router.get(
 );
 
 router.get(
+  '/export',
+  requirePermissions([PERMISSIONS.HSE_VIEW_REPORTS]),
+  incidentController.exportIncidents
+);
+
+router.get(
   '/:id',
   requirePermissions([PERMISSIONS.HSE_VIEW_REPORTS]),
   incidentController.getIncidentById

@@ -9,8 +9,20 @@ const { v4: uuidv4 } = require('uuid');
  */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const transaction = await queryInterface.sequelize.transaction();
+      const transaction = await queryInterface.sequelize.transaction();
     try {
+      const [industryRows] = await queryInterface.sequelize.query(
+        `SELECT id FROM roles WHERE LOWER(name) IN ('industry', 'industry_role') LIMIT 1`,
+        { transaction },
+      );
+      // Older databases do not have the Industry role. Treat this additive
+      // permission migration as a no-op there rather than blocking all later
+      // migrations or creating a role that cannot inherit anything.
+      if (!industryRows[0]?.id) {
+        await transaction.commit();
+        return;
+      }
+
       const [administratorRows] = await queryInterface.sequelize.query(
         'SELECT id FROM roles WHERE name = :name LIMIT 1',
         { replacements: { name: 'Administrator' }, transaction },
@@ -30,14 +42,7 @@ module.exports = {
         }], { transaction });
       }
 
-      const [industryRows] = await queryInterface.sequelize.query(
-        'SELECT id FROM roles WHERE name = :name LIMIT 1',
-        { replacements: { name: 'Industry' }, transaction },
-      );
       const industryId = industryRows[0]?.id;
-      if (!industryId) {
-        throw new Error('Industry role not found; Administrator permissions were not changed.');
-      }
 
       // Copy only Industry's permission set. Existing Administrator grants
       // remain intact, so this never removes existing Administrator access.

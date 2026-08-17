@@ -3,6 +3,8 @@
 const trainingService = require('./training.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { Op } = require('sequelize');
+const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
+const { TrainingSession } = require('../../database/models');
 
 /**
  * Create a new training session
@@ -16,9 +18,9 @@ const createSession = asyncHandler(async (req, res) => {
  * Get all training sessions
  */
 const getAllSessions = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const options = {
-    limit: Math.min(parseInt(req.query.limit, 10) || 1000, 5000),
-    offset: Math.max(parseInt(req.query.offset, 10) || 0, 0),
+    ...pagination,
     where: {},
   };
   
@@ -29,6 +31,8 @@ const getAllSessions = asyncHandler(async (req, res) => {
   if (req.query.departmentId && req.query.departmentId !== 'All') options.where.departmentId = req.query.departmentId;
   if (req.query.status && req.query.status !== 'All') options.where.status = req.query.status;
   if (req.query.trainingType && req.query.trainingType !== 'All') options.where.trainingType = req.query.trainingType;
+  addTextSearch(options.where, req.query.search, ['title', 'description', 'trainer_name'], TrainingSession);
+  options.order = parseOrder(req.query, { date: 'scheduledDate', scheduledDate: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']);
   if (req.query.year && /^\d{4}$/.test(req.query.year)) options.where.scheduledDate = { [Op.between]: [`${req.query.year}-01-01`, `${req.query.year}-12-31`] };
   if (req.query.month && /^\d{1,2}$/.test(req.query.month)) {
     const year = String(req.query.year || new Date().getFullYear()); const month = String(req.query.month).padStart(2, '0');
@@ -36,7 +40,7 @@ const getAllSessions = asyncHandler(async (req, res) => {
   }
 
   const sessions = await trainingService.getAllSessions(options);
-  res.status(200).json(ApiResponse.success(sessions.rows, 'Training sessions retrieved successfully', { total: sessions.count, limit: options.limit, offset: options.offset }));
+  res.status(200).json(ApiResponse.success(sessions.rows, 'Training sessions retrieved successfully', paginationMeta({ ...pagination, total: sessions.count })));
 });
 
 /**
@@ -45,6 +49,14 @@ const getAllSessions = asyncHandler(async (req, res) => {
 const getSessionById = asyncHandler(async (req, res) => {
   const session = await trainingService.getSessionById(req.params.id);
   res.status(200).json(ApiResponse.success(session, 'Training session retrieved successfully'));
+});
+const exportSessions = asyncHandler(async (req, res) => {
+  const where = {};
+  if (req.query.plantId) where.plantId = req.query.plantId;
+  if (req.query.departmentId) where.departmentId = req.query.departmentId;
+  if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
+  addTextSearch(where, req.query.search, ['title', 'description', 'trainer_name'], TrainingSession);
+  await sendCsvExport(res, TrainingSession, { where, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']) }, `trainings-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 /**
@@ -83,6 +95,7 @@ module.exports = {
   createSession,
   getAllSessions,
   getSessionById,
+  exportSessions,
   updateSession,
   deleteSession,
   addAttendee,

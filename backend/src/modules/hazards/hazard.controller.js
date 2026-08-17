@@ -4,6 +4,7 @@ const hazardService = require('./hazard.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { Department, Hazard } = require('../../database/models');
 const { Op } = require('sequelize');
+const { parseOrder, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
 
 // Coalesce duplicate requests while a browser retry or double-click is still
 // in flight. The frontend also disables Save Record, but the API must remain
@@ -46,19 +47,14 @@ const createHazard = asyncHandler(async (req, res) => {
  * Get all hazards
  */
 const getAllHazards = asyncHandler(async (req, res) => {
-  const parsedPage = Number.parseInt(String(req.query.page ?? '1'), 10);
-  const parsedLimit = Number.parseInt(String(req.query.limit ?? '10'), 10);
-  const page = Number.isInteger(parsedPage) && parsedPage > 0 ? Math.min(parsedPage, 1000000) : 1;
-  const limit = Number.isInteger(parsedLimit) && parsedLimit > 0 ? Math.min(parsedLimit, 10000) : 10;
-  const parsedOffset = Number.parseInt(String(req.query.offset ?? '0'), 10);
-  const offset = req.query.page !== undefined
-    ? (page - 1) * limit
-    : (Number.isInteger(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0);
+  const { parsePagination, paginationMeta } = require('../../shared/utils/pagination');
+  const { page, limit, offset: parsedOffset } = parsePagination(req.query);
+  const offset = (page - 1) * limit;
   const options = {
     limit,
     offset,
     where: {},
-    order: [['createdAt', 'DESC'], ['id', 'DESC']],
+    order: parseOrder(req.query, { date: 'reportedAt', reportedAt: 'reportedAt', createdAt: 'createdAt' }),
   };
   
   if (req.query.plantId) options.where.plantId = req.query.plantId;
@@ -76,6 +72,7 @@ const getAllHazards = asyncHandler(async (req, res) => {
     options.where.status = statusMap[req.query.status] || req.query.status;
   }
   if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
+  addTextSearch(options.where, req.query.search, ['title', 'description'], Hazard);
 
   const year = req.query.year && req.query.year !== 'All' ? String(req.query.year) : null;
   const fromDate = req.query.fromDate || (year ? `${year}-01-01` : null);
@@ -103,15 +100,7 @@ const getAllHazards = asyncHandler(async (req, res) => {
   const result = await hazardService.getAllHazards(options);
   const currentPage = Math.floor(options.offset / options.limit) + 1;
   const totalPages = Math.ceil(result.count / options.limit);
-  const meta = {
-    page: currentPage,
-    currentPage,
-    limit: options.limit,
-    pageSize: options.limit,
-    total: result.count,
-    totalRecords: result.count,
-    totalPages,
-  };
+  const meta = { ...paginationMeta({ page: currentPage, limit: options.limit, total: result.count }), page: currentPage, limit: options.limit, total: result.count };
   const response = ApiResponse.success(result.rows, 'Hazards retrieved successfully', meta);
   // Keep the existing array in `data` for CRUD/list consumers while exposing
   // an explicit record-list contract for server-paginated clients.
@@ -125,6 +114,15 @@ const getAllHazards = asyncHandler(async (req, res) => {
 const getHazardById = asyncHandler(async (req, res) => {
   const hazard = await hazardService.getHazardById(req.params.id);
   res.status(200).json(ApiResponse.success(hazard, 'Hazard retrieved successfully'));
+});
+
+const exportHazards = asyncHandler(async (req, res) => {
+  const where = {};
+  if (req.query.plantId) where.plantId = req.query.plantId;
+  if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
+  if (req.query.severityLevel) where.severityLevel = req.query.severityLevel;
+  addTextSearch(where, req.query.search, ['title', 'description'], Hazard);
+  await sendCsvExport(res, Hazard, { where, order: parseOrder(req.query, { date: 'reportedAt', createdAt: 'createdAt' }) }, `hazards-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 /**
@@ -156,6 +154,7 @@ module.exports = {
   createHazard,
   getAllHazards,
   getHazardById,
+  exportHazards,
   updateHazard,
   updateStatus,
   deleteHazard,

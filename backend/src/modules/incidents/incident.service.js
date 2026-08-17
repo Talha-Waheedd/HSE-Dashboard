@@ -91,7 +91,7 @@ class IncidentService {
    * Get all incidents
    */
   async getAllIncidents(options = {}) {
-    return incidentRepository.findAll(options);
+    return incidentRepository.findAndCountAll(options);
   }
 
   /**
