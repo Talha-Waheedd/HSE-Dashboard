@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Layout } from './Layout';
 import { FilterBar } from './FilterBar';
 import { ContextHeader } from './ContextHeader';
@@ -447,6 +447,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [currentPage, setCurrentPage] = useState(1);
   const [density, setDensity] = useState<'comfortable' | 'compact' | 'spacious'>('comfortable');
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
+  const selectAllRef = useRef<HTMLInputElement>(null);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [showReviewPanel, setShowReviewPanel] = useState(false);
@@ -718,6 +719,36 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const totalPages = Math.max(1, Math.ceil(sortedEntries.length / PAGE_SIZE));
   const pagedEntries = sortedEntries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const visibleEntryIds = pagedEntries.map(entry => String(entry.id)).filter(Boolean);
+  const visibleSelectedCount = visibleEntryIds.filter(id => selectedRows[id]).length;
+  const selectedCount = Object.values(selectedRows).filter(Boolean).length;
+  const allVisibleSelected = visibleEntryIds.length > 0 && visibleSelectedCount === visibleEntryIds.length;
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = visibleSelectedCount > 0 && !allVisibleSelected;
+    }
+  }, [visibleSelectedCount, allVisibleSelected]);
+
+  useEffect(() => {
+    const validIds = new Set(entries.map(entry => String(entry.id)));
+    setSelectedRows(previous => {
+      const next = Object.fromEntries(Object.entries(previous).filter(([id, selected]) => selected && validIds.has(id)));
+      return Object.keys(next).length === Object.keys(previous).length ? previous : next;
+    });
+  }, [entries]);
+
+  const toggleVisibleSelection = () => {
+    setSelectedRows(previous => {
+      const next = { ...previous };
+      const shouldSelect = !allVisibleSelected;
+      visibleEntryIds.forEach(id => {
+        if (shouldSelect) next[id] = true;
+        else delete next[id];
+      });
+      return next;
+    });
+  };
   const startRecord = sortedEntries.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const endRecord = Math.min(currentPage * PAGE_SIZE, sortedEntries.length);
   const visibleColumns = schema.columns.filter(col => !col.hideFromForm && col.type !== 'file');
@@ -1292,11 +1323,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       >
         <div className="flex flex-wrap items-center gap-3">
           <FilterBar />
-          <button onClick={() => setShowReviewPanel(true)} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] hover:bg-[#F5F5F5] inline-flex items-center gap-1.5">
-            <PanelRightOpen className="h-3.5 w-3.5" /> HSE Review
+          <button onClick={() => setShowReviewPanel(true)} disabled={selectedCount === 0} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] hover:bg-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
+            <PanelRightOpen className="h-3.5 w-3.5" /> HSE Review{selectedCount > 0 ? ` (${selectedCount})` : ''}
           </button>
-          <button onClick={() => setShowCloseHazard(true)} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#CB0017]/30 bg-[#FFF7F7] text-[#CB0017] hover:bg-[#FDECEC] inline-flex items-center gap-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Close {entityName}
+          <button onClick={() => setShowCloseHazard(true)} disabled={selectedCount === 0} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#CB0017]/30 bg-[#FFF7F7] text-[#CB0017] hover:bg-[#FDECEC] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5" /> Close {entityName}{selectedCount > 0 ? ` (${selectedCount})` : ''}
           </button>
           <button onClick={() => setShowMobileFilters(true)} className="md:hidden h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] inline-flex items-center gap-1.5">
             <Filter className="h-3.5 w-3.5" /> Filters
@@ -1357,7 +1388,17 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             <table className="w-full enterprise-table">
               <thead>
                 <tr>
-                  <th className="w-10"><input type="checkbox" className="rounded border-[#D1D5DB]" /></th>
+                  <th className="w-10">
+                    <input
+                      ref={selectAllRef}
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleVisibleSelection}
+                      onClick={event => event.stopPropagation()}
+                      aria-label="Select all visible hazard records"
+                      className="rounded border-[#D1D5DB] focus:ring-2 focus:ring-[#CB0017]/30"
+                    />
+                  </th>
                   {visibleColumns.map(col => <th key={col.key}>{col.label}</th>)}
                   <th className="text-center">Audit</th>
                   <th className="text-center">Actions</th>
@@ -1392,6 +1433,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                             checked={!!selectedRows[entry.id]}
                             onChange={e => setSelectedRows(prev => ({ ...prev, [entry.id]: e.target.checked }))}
                             onClick={e => e.stopPropagation()}
+                            onKeyDown={e => e.stopPropagation()}
+                            aria-label={`Select hazard record ${entry.id}`}
+                            className="rounded border-[#D1D5DB] focus:ring-2 focus:ring-[#CB0017]/30"
                           />
                         </td>
                         {visibleColumns.map(col => (
