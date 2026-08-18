@@ -13,6 +13,13 @@ export interface ApiResponse<T> {
   meta?: any;
 }
 
+export interface DepartmentOption {
+  id: string;
+  name: string;
+  code?: string | null;
+  isActive?: boolean;
+}
+
 const schemaToEndpoint: Record<string, string> = {
   'hazard-reporting': '/hazards',
   'near-miss': '/near-misses',
@@ -94,6 +101,10 @@ const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? 
 const normalizeCollection = (value: unknown) => Array.isArray(value) ? value : [];
 
 export const moduleService = {
+  getDepartments: async (): Promise<ApiResponse<DepartmentOption[]>> => {
+    const response = await apiClient.get('/departments', { params: { isActive: true, page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
+    return response.data;
+  },
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
     const endpoint = getEndpoint(schemaId);
     const requestParams = { ...(params || {}) };
@@ -274,6 +285,8 @@ export const moduleService = {
         // not already completed. The user can explicitly set Closed if done.
         status: statusToApi(payload.status_id ?? payload.status ?? 'Pending', schemaId),
       };
+      // Manhours are server-derived from participantCount and durationMinutes.
+      delete payload.manhours;
     }
 
     const response = await apiClient.post(endpoint, payload, {
@@ -335,6 +348,7 @@ export const moduleService = {
         durationMinutes,
         manhours: Number(payload.manhours) || (participants && durationMinutes ? participants * durationMinutes / 60 : undefined),
       };
+      delete payload.manhours;
     }
 
     const response = await apiClient.put(`${endpoint}/${id}`, payload);

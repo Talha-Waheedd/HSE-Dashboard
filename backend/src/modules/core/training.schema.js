@@ -13,11 +13,12 @@ const createTrainingSchema = Joi.object({
   trainingType: Joi.string().valid(...Object.values(TrainingType)).required(),
   scheduledDate: Joi.date().iso().required(),
   scheduledTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/).optional(),
-  durationMinutes: Joi.number().integer().min(1).optional(),
+  durationMinutes: Joi.number().integer().min(1).required(),
   venue: Joi.string().max(255).optional(),
   maxAttendees: Joi.number().integer().min(1).optional(),
-  participantCount: Joi.number().integer().min(1).optional(),
-  manhours: Joi.number().min(0).optional(),
+  participantCount: Joi.number().integer().min(1).required(),
+  // Calculated by the service; clients cannot override the canonical value.
+  manhours: Joi.forbidden(),
   notes: Joi.string().optional(),
   status: Joi.string().valid(...Object.values(TrainingStatus)).default(TrainingStatus.SCHEDULED).optional(),
 });
@@ -35,7 +36,7 @@ const updateTrainingSchema = Joi.object({
   venue: Joi.string().max(255).optional(),
   maxAttendees: Joi.number().integer().min(1).optional(),
   participantCount: Joi.number().integer().min(1).optional(),
-  manhours: Joi.number().min(0).optional(),
+  manhours: Joi.forbidden(),
   notes: Joi.string().optional(),
   status: Joi.string().valid(...Object.values(TrainingStatus)).optional(),
 }).min(1);

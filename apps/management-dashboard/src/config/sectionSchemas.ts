@@ -177,7 +177,9 @@ export const trainingRecordsSchema: SectionConfig = {
   columns: [
     { key: 'date', label: 'Date', type: 'date', required: true, section: 'Training Details' },
     { key: 'training_type', label: 'Training Type', type: 'select', options: ['Internal', 'External', 'Toolbox Talk', 'Safety Briefing', 'Fire Drill', 'Orientation'], required: true, section: 'Training Details' },
-    { key: 'department_id', label: 'Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Training Details' },
+    // Populated from GET /departments?isActive=true. Values are UUIDs; labels
+    // are the department name and code returned by the master-data API.
+    { key: 'department_id', label: 'Department', type: 'select', options: [], required: true, section: 'Training Details' },
     { key: 'trainer', label: 'Trainer', type: 'text', required: true, section: 'Training Details' },
     { key: 'venue', label: 'Venue', type: 'text', section: 'Training Details' },
     { key: 'topic', label: 'Topics Delivered', type: 'textarea', required: true, section: 'Training Details' },

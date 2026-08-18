@@ -64,7 +64,10 @@ const buildTrainingWhere = async (query = {}) => {
  */
 const createSession = asyncHandler(async (req, res) => {
   const session = await trainingService.createSession(req.body, req.user.id);
-  res.status(201).json(ApiResponse.success(serializeTraining(session), 'Training session created successfully', 201));
+  // The transaction has committed when createSession resolves. Reload the
+  // committed row so the response includes the Department relationship.
+  const committedSession = await trainingService.getSessionById(session.id);
+  res.status(201).json(ApiResponse.success(serializeTraining(committedSession), 'Training session created successfully', 201));
 });
 
 /**

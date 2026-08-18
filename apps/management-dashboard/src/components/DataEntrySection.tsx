@@ -8,7 +8,7 @@ import { CenterModal } from './CenterModal';
 import type { SectionConfig, ColumnSchema } from '../config/sectionSchemas';
 import { usePermissions, useAuth } from '@cbl/auth';
 import { useModuleData } from '../hooks/useModuleData';
-import { moduleService } from '../services/api/moduleService';
+import { moduleService, type DepartmentOption } from '../services/api/moduleService';
 import { useFilters } from '../context/FilterContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -456,6 +456,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const hazardSummaryRequest = useRef(0);
   const [trainingSummary, setTrainingSummary] = useState({ totalRecords: 0, totalManhours: 0, pendingRecords: 0, completedRecords: 0, attendanceRate: null as number | null });
   const trainingSummaryRequest = useRef(0);
+  const [trainingDepartments, setTrainingDepartments] = useState<DepartmentOption[]>([]);
+  const [trainingDepartmentsLoading, setTrainingDepartmentsLoading] = useState(false);
+  const [trainingDepartmentsError, setTrainingDepartmentsError] = useState<string | null>(null);
   const [showReviewPanel, setShowReviewPanel] = useState(false);
   const [showCloseHazard, setShowCloseHazard] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -467,6 +470,24 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
   const routeCategory = schema.id === 'incident-log' ? searchParams.get('category') : null;
+
+  useEffect(() => {
+    if (schema.id !== 'training-records') return;
+    let active = true;
+    setTrainingDepartmentsLoading(true);
+    setTrainingDepartmentsError(null);
+    void moduleService.getDepartments()
+      .then(response => {
+        if (!active) return;
+        if (!response.success || !Array.isArray(response.data)) throw new Error(response.message || 'Unable to load departments.');
+        setTrainingDepartments(response.data.filter(department => department.isActive !== false && department.id));
+      })
+      .catch(error => {
+        if (active) setTrainingDepartmentsError(error instanceof Error ? error.message : 'Unable to load departments.');
+      })
+      .finally(() => { if (active) setTrainingDepartmentsLoading(false); });
+    return () => { active = false; };
+  }, [schema.id]);
 
   const listQuery = useMemo(() => ({
     ...(filters as unknown as Record<string, unknown>),
@@ -566,6 +587,15 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (schema.id === 'action-tracker') {
       if (data.completion_date && data.completion_date > today) return 'Completion date cannot be in the future.';
       if (data.status_id === 'Closed' && !data.completion_date) return 'A completion date is required to close a CAPA.';
+    }
+    if (schema.id === 'training-records') {
+      const departmentId = String(data.department_id || '').trim();
+      if (departmentId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(departmentId)) return 'Department must be selected from the active department list.';
+      const participants = Number(data.participants);
+      const durationMinutes = Number(data.duration_minutes);
+      if (data.participants !== '' && (!Number.isInteger(participants) || participants < 1)) return 'Total Participants must be a positive whole number.';
+      if (data.duration_minutes !== '' && (!Number.isInteger(durationMinutes) || durationMinutes < 1)) return 'Duration (Min) must be a positive whole number.';
+      if (departmentId && trainingDepartments.length > 0 && !trainingDepartments.some(department => department.id === departmentId)) return 'Selected department is not active or no longer exists.';
     }
     if (schema.id === 'incident-log' && Array.isArray(data.actions)) {
       for (let index = 0; index < data.actions.length; index += 1) {
@@ -934,6 +964,18 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
 
     if (col.type === 'select') {
+      if (schema.id === 'training-records' && col.key === 'department_id') {
+        return (
+          <div className="space-y-1">
+            <select name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={FIELD_BASE} required={col.required} disabled={col.readonly || trainingDepartmentsLoading}>
+              <option value="">{trainingDepartmentsLoading ? 'Loading departments...' : 'Select department...'}</option>
+              {trainingDepartments.map(department => <option key={department.id} value={department.id}>{department.name}{department.code ? ` (${department.code})` : ''}</option>)}
+            </select>
+            {trainingDepartmentsError && <p className="text-[11px] text-[#B91C1C]" role="alert">{trainingDepartmentsError}</p>}
+            {!trainingDepartmentsLoading && !trainingDepartmentsError && trainingDepartments.length === 0 && <p className="text-[11px] text-[#B91C1C]" role="alert">No active departments found.</p>}
+          </div>
+        );
+      }
       return (
         <div className="space-y-2">
           <select name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={FIELD_BASE} required={col.required} disabled={col.readonly}>

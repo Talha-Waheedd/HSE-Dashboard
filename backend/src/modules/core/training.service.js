@@ -13,19 +13,21 @@ class TrainingService {
    * Create a new training session
    */
   async createSession(data, userId) {
-    const plant = await plantRepository.findById(data.plantId);
-    if (!plant) {
-      throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
-    }
-
-    data.trainerId = userId; // In this design, the creator is the trainer (could be decoupled later)
-    data.createdBy = userId;
-    
-    if (!Object.values(TrainingStatus).includes(data.status)) {
-      data.status = TrainingStatus.SCHEDULED;
-    }
-
-    return trainingRepository.create(data);
+    return sequelize.transaction(async (transaction) => {
+      const plant = await plantRepository.findById(data.plantId, { transaction });
+      if (!plant) throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
+      if (data.departmentId) {
+        const department = await Department.findOne({ where: { id: data.departmentId, isActive: true }, attributes: ['id'], transaction });
+        if (!department) throw ApiError.badRequest('departmentId must reference an active department.');
+      }
+      const participants = Number(data.participantCount);
+      const durationMinutes = Number(data.durationMinutes);
+      data.manhours = Number((participants * durationMinutes / 60).toFixed(2));
+      data.trainerId = userId; // In this design, the creator is the trainer (could be decoupled later)
+      data.createdBy = userId;
+      if (!Object.values(TrainingStatus).includes(data.status)) data.status = TrainingStatus.SCHEDULED;
+      return trainingRepository.create(data, { transaction });
+    });
   }
 
   /**
@@ -71,6 +73,19 @@ class TrainingService {
     if (updateData.plantId && updateData.plantId !== session.plantId) {
       const plant = await plantRepository.findById(updateData.plantId);
       if (!plant) throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
+    }
+
+    if (updateData.departmentId) {
+      const department = await Department.findOne({ where: { id: updateData.departmentId, isActive: true }, attributes: ['id'] });
+      if (!department) throw ApiError.badRequest('departmentId must reference an active department.');
+    }
+
+    const participants = updateData.participantCount ?? session.participantCount;
+    const durationMinutes = updateData.durationMinutes ?? session.durationMinutes;
+    if (participants !== null && participants !== undefined && durationMinutes !== null && durationMinutes !== undefined) {
+      updateData.manhours = Number((Number(participants) * Number(durationMinutes) / 60).toFixed(2));
+    } else {
+      updateData.manhours = null;
     }
 
     updateData.updatedBy = userId;
