@@ -57,7 +57,7 @@ export const hazardReportingSchema: SectionConfig = {
       }
     },
     { key: 'department_id', label: 'Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Basic Information' },
-    { key: 'location', label: 'Location', type: 'text', required: true, section: 'Basic Information' },
+    { key: 'location', label: 'Location', type: 'text', required: true, section: 'Hazard Details' },
     { key: 'originator', label: 'Reported By', type: 'text', required: true, section: 'Basic Information' },
     { key: 'hazard_category_id', label: 'Hazard Category', type: 'select', options: HAZARD_CATEGORIES, required: true, section: 'Hazard Details' },
     { key: 'description', label: 'Hazard Details', type: 'textarea', required: true, section: 'Hazard Details' },

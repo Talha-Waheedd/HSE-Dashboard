@@ -17,6 +17,7 @@ export const INCIDENT_CATEGORIES = [
   'RWC',
   'Fatality',
   'Minor Fire',
+  'Major Fire',
   'Significant Near Miss'
 ];
 

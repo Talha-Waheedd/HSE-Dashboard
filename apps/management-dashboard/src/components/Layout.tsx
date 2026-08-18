@@ -42,9 +42,9 @@ const NAV_GROUPS: NavGroup[] = [
         title: 'Leading Indicators', href: '/leading-lagging-indicators', Icon: Activity,
         children: [
           { title: 'Training', href: '/training-records', Icon: Users },
-          { title: 'Audits', href: '/audit-management', Icon: ClipboardList },
+          { title: 'Audit Management', href: '/audit-management', Icon: ClipboardList },
           { title: 'Inspections', href: '/inspection-records', Icon: ClipboardList },
-          { title: 'Hazard Reporting', href: '/hazard-reporting', Icon: AlertTriangle },
+          { title: 'Incident Reporting', href: '/hazard-reporting', Icon: AlertTriangle },
           { title: 'Near-Miss Reporting', href: '/near-miss', Icon: Target },
           { title: 'Hazard Closing', href: '/leading-indicators/hazard-closing', Icon: CheckSquare },
           { title: 'Incident Investigation', href: '/leading-indicators/incident-investigation', Icon: FileWarning },
@@ -73,7 +73,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: 'CAPA / Actions', href: '/action-tracker', Icon: CheckSquare },
       { title: 'Critical Audit Plan', href: '/critical-audit-plan', Icon: ClipboardList },
-      { title: 'Audit Management', href: '/audit-management', Icon: ClipboardList },
+
       { title: 'Inspection Records', href: '/inspection-records', Icon: ClipboardList },
     ],
   },

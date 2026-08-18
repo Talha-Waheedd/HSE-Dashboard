@@ -187,15 +187,26 @@ const TimePickerField = ({
   label,
   required,
   disabled,
+  autoPopulateOnFocus,
 }: {
   value?: string;
   onChange: (nextValue: string) => void;
   label: string;
   required?: boolean;
   disabled?: boolean;
+  autoPopulateOnFocus?: boolean;
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const openPicker = () => inputRef.current?.showPicker?.();
+  
+  const handleInteraction = () => {
+    if (!value && autoPopulateOnFocus) {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      onChange(`${hours}:${minutes}`);
+    }
+    inputRef.current?.showPicker?.();
+  };
 
   return (
     <div className="relative">
@@ -205,8 +216,8 @@ const TimePickerField = ({
         aria-label={label}
         value={value ?? ''}
         onChange={e => onChange(e.target.value)}
-        onClick={openPicker}
-        onFocus={openPicker}
+        onClick={handleInteraction}
+        onFocus={handleInteraction}
         onKeyDown={e => {
           const allowed = [
             'Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
@@ -1032,6 +1043,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           onChange={v => handleInputChange({ target: { name: col.key, value: v } } as any, isEdit)}
           required={col.required}
           disabled={col.readonly}
+          autoPopulateOnFocus={schema.id === 'near-miss'}
         />
       );
     }
