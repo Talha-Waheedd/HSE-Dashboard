@@ -85,7 +85,7 @@ export const UserManagement = () => {
         </div>
       </div>
 
-      <div className={${CARD} overflow-hidden}>
+      <div className={`${CARD} overflow-hidden`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
@@ -120,12 +120,18 @@ export const UserManagement = () => {
                   </td>
                   <td className="px-5 py-4 text-[13px] font-medium text-[#1C1C1E]">{user.department}</td>
                   <td className="px-5 py-4">
-                    <span className={inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium }>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
+                      user.role === 'System Administrator' ? 'bg-[#FEE2E2] text-[#B91C1C]' : 'bg-[#F3F4F6] text-[#4B5563]'
+                    }`}>
                       {user.role}
                     </span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className={inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium }>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
+                      user.status === 'Active' ? 'bg-[#ECFDF5] text-[#059669]' : 
+                      user.status === 'Suspended' ? 'bg-[#FEF2F2] text-[#DC2626]' :
+                      'bg-[#F3F4F6] text-[#6B7280]'
+                    }`}>
                       {user.status}
                     </span>
                   </td>
