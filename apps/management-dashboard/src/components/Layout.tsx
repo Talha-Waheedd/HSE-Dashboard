@@ -481,15 +481,14 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 </div>
 
                 {/* Subtle divider — not between last group */}
-                {!collapsed && gi < activeNavGroups.length - 2 && (
+                {!collapsed && gi < activeNavGroups.length - 1 && (
                   <div className="mx-4 mt-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }} />
                 )}
               </div>
             ))}
-          </nav>
 
-          {/* Sidebar footer — Settings + Support pinned at bottom */}
-          <div className="pb-4 px-2 space-y-0.5" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
+            {/* Sidebar footer — Settings + Support (now scrollable) */}
+            <div className="pb-4 px-2 space-y-0.5 mt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
             {[{ title: 'Settings', href: '/settings', Icon: Settings }, { title: 'Support', href: '/support', Icon: HelpCircle }].map(item => {
               const isActive = getIsActive(location.pathname, item.href);
               return (
@@ -533,6 +532,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
               }
             </button>
           </div>
+          </nav>
         </aside>
 
         {/* Mobile overlay */}
