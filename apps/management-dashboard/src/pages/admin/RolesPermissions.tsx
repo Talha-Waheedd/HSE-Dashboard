@@ -84,7 +84,9 @@ export const RolesPermissions = () => {
           <button
             key={item}
             onClick={() => setActiveTab(item)}
-            className={h-8 px-4 text-[12px] font-medium rounded-md transition-colors }
+            className={`h-8 px-4 text-[12px] font-medium rounded-md transition-colors ${
+              activeTab === item ? 'bg-[#CB0017] text-white' : 'text-[#374151] hover:bg-[#F5F5F5]'
+            }`}
           >
             <div className="flex items-center gap-2">
               {item === 'Roles' && <Shield className="w-3.5 h-3.5" />}
@@ -95,7 +97,7 @@ export const RolesPermissions = () => {
         ))}
       </div>
 
-      <div className={${CARD} overflow-hidden}>
+      <div className={`${CARD} overflow-hidden`}>
         {activeTab === 'Roles' ? (
           <table className="w-full text-left border-collapse">
             <thead>
@@ -112,7 +114,9 @@ export const RolesPermissions = () => {
                   <td className="px-5 py-4 text-[13px] font-bold text-[#1C1C1E]">{role.name}</td>
                   <td className="px-5 py-4 text-[13px] text-[#6B7280]">{role.description}</td>
                   <td className="px-5 py-4">
-                    <span className={inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium }>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
+                      role.isCustom ? 'bg-[#EFF6FF] text-[#1D4ED8]' : 'bg-[#F3F4F6] text-[#4B5563]'
+                    }`}>
                       {role.isCustom ? 'Custom' : 'System Default'}
                     </span>
                   </td>
@@ -165,9 +169,9 @@ export const RolesPermissions = () => {
                               <button 
                                 onClick={() => !isSystemAdmin && togglePermission(role.id, perm.id)}
                                 disabled={isSystemAdmin}
-                                className={elative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none  }
+                                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isGranted ? 'bg-[#1B7C1B]' : 'bg-[#E5E7EB]'} ${isSystemAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
                               >
-                                <span className={pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out } />
+                                <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isGranted ? 'translate-x-4' : 'translate-x-0'}`} />
                               </button>
                             </td>
                           );
@@ -194,7 +198,7 @@ export const RolesPermissions = () => {
           </div>
           <div>
             <label className="block text-[12px] font-bold text-[#374151] mb-1">Description</label>
-            <textarea className={${FIELD_BASE} min-h-[80px] py-2} placeholder="Briefly describe the role's purpose..." value={formData.description || ''} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+            <textarea className={`${FIELD_BASE} min-h-[80px] py-2`} placeholder="Briefly describe the role's purpose..." value={formData.description || ''} onChange={e => setFormData({ ...formData, description: e.target.value })} />
           </div>
           {formData.cloneFrom && (
             <div className="bg-[#F0F9FF] border border-[#BAE6FD] p-3 rounded text-[12px] text-[#0369A1]">
@@ -210,4 +214,3 @@ export const RolesPermissions = () => {
     </div>
   );
 };
-
