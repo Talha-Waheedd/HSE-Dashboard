@@ -86,6 +86,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'REPORTING',
     items: [
+      { title: 'Master Analysis', href: '/master-analysis', Icon: Activity },
       { title: 'Reports', href: '/reports', Icon: FileText },
       { title: 'Analytics', href: '/analytics', Icon: BarChart3 },
     ],

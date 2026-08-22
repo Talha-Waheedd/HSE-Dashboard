@@ -11,6 +11,8 @@ import { LeadingLaggingIndicators } from './pages/LeadingLaggingIndicators';
 import { LeadingIndicatorDetails } from './pages/LeadingIndicatorDetails';
 import { LaggingIndicatorDetails } from './pages/LaggingIndicatorDetails';
 import { IncidentDetails } from './pages/IncidentDetails';
+import { MasterAnalysisDashboard } from './pages/MasterAnalysis/MasterAnalysisDashboard';
+import { MasterAnalysisDetail } from './pages/MasterAnalysis/MasterAnalysisDetail';
 import { DataEntrySection } from './components/DataEntrySection';
 import { ALL_SECTIONS } from './config/sectionSchemas';
 import { FilterProvider } from './context/FilterContext';
@@ -104,6 +106,8 @@ function App() {
           <Route path="/reports" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Reports /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Profile /></ProtectedRoute>} />
           <Route path="/master-management" element={<ProtectedRoute fallback={<Navigate to="/login" />}><MasterManagement /></ProtectedRoute>} />
+          <Route path="/master-analysis" element={<ProtectedRoute fallback={<Navigate to="/login" />}><MasterAnalysisDashboard /></ProtectedRoute>} />
+          <Route path="/master-analysis/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><MasterAnalysisDetail /></ProtectedRoute>} />
           <Route path="/incident-log/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><IncidentDetails /></ProtectedRoute>} />
 
           {/* Dynamic Data Entry Sections */}
