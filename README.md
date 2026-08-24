@@ -672,41 +672,81 @@ HTTP Request
 
 ## 🗄️ Database Setup
 
-### Migrations (5 files)
+### Database source of truth
 
-| File | Creates |
+The live application database is the MySQL database configured by `DB_NAME`
+(normally `cbl_db`). It is not represented by one complete SQL file in the
+repository. The authoritative application schema is maintained through the
+Sequelize migrations in [`backend/src/database/migrations`](backend/src/database/migrations),
+and initial/reference data is maintained by the seeders in
+[`backend/src/database/seeders`](backend/src/database/seeders).
+
+The files [`backend/storage/mysql.sql`](backend/storage/mysql.sql) and
+[`backend/src/database/init.sql`](backend/src/database/init.sql) are legacy,
+minimal development scripts. They only define a small roles/users schema and
+contain `DROP DATABASE IF EXISTS cbl_db`; do not run them against an existing
+database.
+
+The files in [`database/schema`](database/schema) are a large, fragmented
+legacy SQL schema collection. They contain overlapping/duplicate module
+definitions and are not the migration source used by the running backend.
+
+### Migrations (current application schema)
+
+The migration directory includes the core authentication tables plus the
+current HSE modules: plants, departments, locations, hazards, near misses,
+incidents, training, audits, inspections, corrective actions, attachments,
+indexes, and later reconciliation migrations. Always apply them in filename
+order using Sequelize.
+
+| Location | Purpose |
 |---|---|
-| `20240101000001-create-users.js` | `users` table |
-| `20240101000002-create-roles.js` | `roles` table |
-| `20240101000003-create-permissions.js` | `permissions` + `role_permissions` tables |
-| `20240101000004-create-tokens.js` | `tokens` table (JWT blacklist/refresh) |
-| `20240101000005-create-audit-notifications.js` | `audit_logs` + `notifications` tables |
-
-### Seeders (3 files)
-
-| File | Seeds |
-|---|---|
-| `01-roles.seeder.js` | Default roles: `superadmin`, `admin`, `user` |
-| `02-permissions.seeder.js` | All CRUD permissions per resource |
-| `03-admin-user.seeder.js` | Default superadmin user |
+| `backend/src/database/migrations` | Authoritative Sequelize schema and reversible changes |
+| `backend/src/database/seeders` | Roles, permissions, users, plants, and departments |
+| `backend/database/seed` | Legacy SQL seed snippets; use only when explicitly required |
 
 ### Run migrations + seeds
+
+From the `backend` directory, use the explicit Sequelize config because the
+repository's default `.sequelizerc` points to an outdated config path:
 ```bash
-npx sequelize-cli db:migrate
-npx sequelize-cli db:seed:all
+npx sequelize-cli db:migrate --config src/database/config/database.js
+npx sequelize-cli db:seed:all --config src/database/config/database.js
 ```
+
+Seeders are not all idempotent. Run them once on a fresh database, or confirm
+the existing roles/users before rerunning them.
+
+### Create a complete backup of the live database
+
+To capture the actual current schema and data, create a MySQL dump from the
+running database rather than using the legacy repository SQL files:
+
+```bash
+mysqldump -h 127.0.0.1 -u root -p cbl_db > cbl_db_full_backup.sql
+```
+
+The generated dump contains the current tables, records, indexes, and
+constraints. Store it securely and do not commit credentials or production
+data to the repository.
 
 ### Reset database
 ```bash
 npm run db:fresh
 ```
 
-## Enterprise HSE SQL Schema
+> **Warning:** `db:fresh` is destructive. It undoes migrations and recreates
+> the database structure. Use a verified backup first and never run it against
+> production data without explicit approval.
 
-The repository also contains the production-oriented MySQL 8 schema for the CBL
-LU Sukkur Plant HSE Management System in [`database/schema`](database/schema).
-The scripts are organized by module and are designed to be executed in numeric
-order after the `cbl_hse` database and prerequisite tables exist.
+## Legacy Enterprise HSE SQL Schema Reference
+
+The repository also contains a broad, production-oriented MySQL 8 schema
+reference for the CBL LU Sukkur Plant HSE Management System in
+[`database/schema`](database/schema). These files are organized by module, but
+they are not the schema loaded by the current Sequelize backend. Do not run
+the entire directory against the live `cbl_db` database without first
+reconciling it with the Sequelize migrations and taking a verified backup.
 
 ### Schema Modules
 
