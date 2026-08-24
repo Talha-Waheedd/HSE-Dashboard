@@ -672,6 +672,23 @@ HTTP Request
 
 ## 🗄️ Database Setup
 
+### Master Analysis module
+
+Master Analysis is backed by the additive `master_analyses` table and the
+authenticated `/api/v1/master-analysis` API. The dashboard reads live Hazard,
+Near Miss, and Incident records through server-side filters and pagination;
+analysis classifications are persisted as JSON with normalized statuses:
+`not_reviewed`, `under_review`, and `completed`. Apply the migration with:
+
+```powershell
+cd backend
+npx sequelize-cli db:migrate --config src/database/config/database.js
+```
+
+The source reporting tables remain unchanged. The composite source key prevents
+more than one analysis record per source report, and the API returns summary
+counts separately from the paginated rows.
+
 ### Database source of truth
 
 The live application database is the MySQL database configured by `DB_NAME`

@@ -5,7 +5,7 @@ import { Users, Shield, MapPin, Building2, Database, Activity, Bell, Settings, L
 import { UserManagement } from './admin/UserManagement';
 import { RolesPermissions } from './admin/RolesPermissions';
 
-const ADMIN_MODULES = [
+const ADMIN_MODULES: Array<{ group: string; items: Array<{ id: string; label: string; icon: any; component?: any }> }> = [
   { group: 'Identity & Access', items: [
     { id: 'users', label: 'User Management', icon: Users, component: UserManagement },
     { id: 'roles', label: 'Roles & Permissions', icon: Shield, component: RolesPermissions },

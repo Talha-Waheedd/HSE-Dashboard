@@ -1,17 +1,19 @@
 ﻿import React, { useState } from 'react';
-import { type MasterAnalysisData, type AnalysisStatus } from '../mockData';
+import { type MasterAnalysisData, type AnalysisStatus } from '../types';
 import { IncidentTypeSelect, LocationConditionSelect, InjuryTypeSelect, BodyPartGroupSelect } from './ClassificationDropdowns';
-import { Save, CheckCircle, Clock } from 'lucide-react';
+import { Save } from 'lucide-react';
 
 interface Props {
   initialData: MasterAnalysisData;
   initialStatus: AnalysisStatus;
-  onSave: (data: MasterAnalysisData, status: AnalysisStatus) => void;
+  onSave: (data: MasterAnalysisData, status: AnalysisStatus) => Promise<void>;
 }
 
 export const AnalysisForm: React.FC<Props> = ({ initialData, initialStatus, onSave }) => {
   const [data, setData] = useState<MasterAnalysisData>(initialData || {});
   const [status, setStatus] = useState<AnalysisStatus>(initialStatus);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const updateNested = (category: keyof MasterAnalysisData, field: string, value: string) => {
     setData(prev => ({
@@ -24,6 +26,12 @@ export const AnalysisForm: React.FC<Props> = ({ initialData, initialStatus, onSa
   };
 
   const isCompleted = status === 'Analysis Completed';
+  const save = async () => {
+    setSaving(true);
+    setError('');
+    try { await onSave(data, status); } catch (saveError: any) { setError(saveError?.message || 'Unable to save analysis. Your changes are still here.'); }
+    finally { setSaving(false); }
+  };
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] flex flex-col h-full relative">
@@ -49,14 +57,17 @@ export const AnalysisForm: React.FC<Props> = ({ initialData, initialStatus, onSa
           </select>
           
           <button 
-            onClick={() => onSave(data, status)}
+            onClick={save}
+            disabled={saving || isCompleted}
             className="flex items-center gap-1.5 h-8 px-4 bg-[#A30012] hover:bg-[#7B000E] text-white rounded text-[12px] font-bold transition-colors shadow-sm"
           >
             <Save className="w-4 h-4" />
-            Save Analysis
+            {saving ? 'Saving…' : 'Save Analysis'}
           </button>
         </div>
       </div>
+
+      {error && <div role="alert" className="mx-6 mb-4 rounded-md border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-[12px] text-[#B91C1C]">{error}</div>}
 
       {/* Scrollable Form Content */}
       <div className="p-6 overflow-y-auto flex-1 bg-[#FAFAFA]">
