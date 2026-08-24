@@ -27,6 +27,7 @@ const schemaToEndpoint: Record<string, string> = {
   'training-records': '/trainings',
   'action-tracker': '/corrective-actions',
   'audit-management': '/audits',
+  'critical-audit-plan': '/audits',
   'inspection-records': '/inspections',
 };
 
@@ -46,6 +47,9 @@ const statusToApi = (value: unknown, schemaId: string) => {
   }
   if (schemaId === 'action-tracker') {
     return ({ Open: 'open', Pending: 'open', 'Work in Progress': 'in_progress', Closed: 'completed', Cancelled: 'cancelled' }[status] || status.toLowerCase().replaceAll(' ', '_'));
+  }
+  if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') {
+    return ({ Planned: 'planned', Pending: 'planned', Done: 'completed', Closed: 'completed', WIP: 'in_progress', 'Work in Progress': 'in_progress', Cancelled: 'cancelled' }[status] || status.toLowerCase().replaceAll(' ', '_'));
   }
   if (schemaId === 'near-miss') {
     return ({ Open: 'submitted', Pending: 'under_review', 'Work in Progress': 'under_review', Closed: 'closed', Cancelled: 'closed' }[status] || status.toLowerCase().replaceAll(' ', '_'));

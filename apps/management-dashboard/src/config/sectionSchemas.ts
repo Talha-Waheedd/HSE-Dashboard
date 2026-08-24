@@ -226,22 +226,14 @@ export const auditManagementSchema: SectionConfig = {
   accentColor: '#8B5CF6',
   icon: 'ClipboardList',
   columns: [
-    { key: 'conducted_by', label: 'Audit Conducted by', type: 'text', required: true, section: 'Audit Header' },
-    { key: 'person_interviewed', label: 'Person Interviewed', type: 'text', required: true, section: 'Audit Header' },
-    { key: 'audit_date', label: 'Date of Audit', type: 'date', required: true, section: 'Audit Header' },
-    { key: 's_no', label: 'Sr. #', type: 'text', hideFromForm: true, compute: d => d.s_no || '' },
-    { key: 'standard_reference', label: 'Standard Reference', type: 'text', required: true, section: 'Audit Findings' },
-    { key: 'audit_point', label: 'Audit Point', type: 'text', required: true, section: 'Audit Findings' },
-    { key: 'standard_limit', label: 'Standard Limit/Requirement', type: 'text', required: true, section: 'Audit Findings' },
-    { key: 'scoring', label: 'Scoring (1-4)', type: 'select', options: ['1', '2', '3', '4'], required: true, section: 'Audit Findings' },
-    { key: 'actions_recommendations', label: 'Actions / Recommendations', type: 'textarea', required: true, section: 'Corrective Actions' },
-    { key: 'target_date', label: 'Target Date for Completion', type: 'date', required: true, section: 'Corrective Actions' },
-    { key: 'responsibility', label: 'Responsibility', type: 'text', required: true, section: 'Corrective Actions' },
-    { key: 'department_id', label: 'Responsible Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Corrective Actions' },
-    { key: 'status_id', label: 'Closure Status', type: 'select', options: ['Open', 'Closed'], required: true, section: 'Corrective Actions' },
-    { key: 'points_scored', label: 'Points Scored', type: 'number', readonly: true, compute: d => parseFloat(d.scoring) || 0, section: 'Summary' },
-    { key: 'points_available', label: 'Points Available', type: 'number', readonly: true, compute: () => 4, section: 'Summary' },
-    { key: 'compliance_percentage', label: 'Overall %Compliance', type: 'number', readonly: true, compute: d => ((parseFloat(d.scoring) || 0) / 4) * 100, section: 'Summary' }
+    { key: 'auditNumber', label: 'Audit Number', type: 'text', readonly: true, section: 'Audit Details' },
+    { key: 'title', label: 'Title', type: 'text', required: true, section: 'Audit Details' },
+    { key: 'auditType', label: 'Audit Type', type: 'select', options: ['internal', 'external', 'regulatory'], required: true, section: 'Audit Details' },
+    { key: 'status', label: 'Status', type: 'select', options: ['planned', 'in_progress', 'completed', 'cancelled'], required: true, section: 'Audit Details' },
+    { key: 'scheduledDate', label: 'Scheduled Date', type: 'date', required: true, section: 'Schedule' },
+    { key: 'completedDate', label: 'Completed Date', type: 'date', section: 'Schedule' },
+    { key: 'scope', label: 'Scope / Objective', type: 'textarea', section: 'Audit Details' },
+    { key: 'summary', label: 'Summary', type: 'textarea', section: 'Audit Details' }
   ]
 };
 
@@ -273,26 +265,14 @@ export const criticalAuditPlanSchema: SectionConfig = {
   accentColor: '#10B981',
   icon: 'Calendar',
   columns: [
-    { key: 's_no', label: 'S.No', type: 'text', hideFromForm: true, compute: d => d.s_no || '' },
-    { key: 'area_name', label: 'Area Name', type: 'text', required: true, section: 'Audit Area' },
-    { key: 'area_owners', label: 'Area Owners', type: 'text', required: true, section: 'Audit Area' },
-    { key: 'audit_objective', label: 'Audit Objective (Aligned with HSE Standards)', type: 'textarea', required: true, section: 'Audit Area' },
-    { key: 'risk_rating', label: 'Risk Rating', type: 'select', options: ['Low', 'Medium', 'High'], required: true, section: 'Planning' },
-    { key: 'auditors', label: 'Auditors', type: 'text', required: true, section: 'Planning' },
-    { key: 'frequency', label: 'Frequency', type: 'select', options: ['Monthly', 'Annually', 'Bi-Annually', 'Quarterly', 'Half Yearly'], required: true, section: 'Planning' },
-    { key: 'jan', label: 'January', type: 'text', section: 'Schedule' },
-    { key: 'feb', label: 'February', type: 'text', section: 'Schedule' },
-    { key: 'mar', label: 'March', type: 'text', section: 'Schedule' },
-    { key: 'apr', label: 'April', type: 'text', section: 'Schedule' },
-    { key: 'may', label: 'May', type: 'text', section: 'Schedule' },
-    { key: 'jun', label: 'June', type: 'text', section: 'Schedule' },
-    { key: 'jul', label: 'July', type: 'text', section: 'Schedule' },
-    { key: 'aug', label: 'August', type: 'text', section: 'Schedule' },
-    { key: 'sep', label: 'September', type: 'text', section: 'Schedule' },
-    { key: 'oct', label: 'October', type: 'text', section: 'Schedule' },
-    { key: 'nov', label: 'November', type: 'text', section: 'Schedule' },
-    { key: 'dec', label: 'December', type: 'text', section: 'Schedule' },
-    { key: 'status_id', label: 'Status', type: 'select', options: ['Pending', 'Done', 'WIP'], required: true, section: 'Schedule' }
+    { key: 'auditNumber', label: 'Audit Number', type: 'text', readonly: true, section: 'Audit Details' },
+    { key: 'title', label: 'Area Name', type: 'text', required: true, section: 'Audit Area' },
+    { key: 'auditType', label: 'Audit Type', type: 'select', options: ['internal', 'external', 'regulatory'], required: true, section: 'Audit Area' },
+    { key: 'status', label: 'Status', type: 'select', options: ['planned', 'in_progress', 'completed', 'cancelled'], required: true, section: 'Audit Area' },
+    { key: 'scheduledDate', label: 'Scheduled Date', type: 'date', required: true, section: 'Schedule' },
+    { key: 'completedDate', label: 'Completed Date', type: 'date', section: 'Schedule' },
+    { key: 'scope', label: 'Audit Objective', type: 'textarea', section: 'Audit Area' },
+    { key: 'summary', label: 'Frequency & Owners', type: 'textarea', section: 'Planning' }
   ]
 };
 
