@@ -20,6 +20,29 @@ export interface DepartmentOption {
   isActive?: boolean;
 }
 
+const analysisStatusFromApi = (value: unknown) => ({
+  not_reviewed: 'Not Reviewed',
+  under_review: 'Under Review',
+  completed: 'Analysis Completed',
+}[String(value || '').toLowerCase()] || 'Not Reviewed');
+
+const normalizeMasterAnalysisRecord = (item: any) => ({
+  id: item.analysis_key,
+  originalReportId: item.source_id,
+  sourceType: item.source_type,
+  sourceId: item.source_id,
+  reportType: item.report_type,
+  reportedBy: item.reported_by || '—',
+  department: item.department || '—',
+  location: item.location || '—',
+  date: item.report_date || '—',
+  description: item.description || item.title || '',
+  originalStatus: item.original_status || '—',
+  analysisStatus: analysisStatusFromApi(item.analysis_status),
+  analysisData: item.analysis_data || {},
+  originalData: item.original_data || {},
+});
+
 const schemaToEndpoint: Record<string, string> = {
   'hazard-reporting': '/hazards',
   'near-miss': '/near-misses',
@@ -105,6 +128,35 @@ const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? 
 const normalizeCollection = (value: unknown) => Array.isArray(value) ? value : [];
 
 export const moduleService = {
+  getMasterAnalysis: async (params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
+    const requestParams = { ...(params || {}) };
+    Object.entries(requestParams).forEach(([key, value]) => {
+      if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
+    });
+    const response = await apiClient.get('/master-analysis', { params: requestParams });
+    const payload = response.data;
+    return {
+      success: payload?.success !== false,
+      message: payload?.message || 'Master analysis loaded successfully.',
+      data: Array.isArray(payload?.data) ? payload.data.map(normalizeMasterAnalysisRecord) : [],
+      meta: {
+        ...(payload?.meta || {}),
+        summary: payload?.meta?.summary || { totalReports: 0, notReviewed: 0, underReview: 0, completed: 0 },
+      },
+    };
+  },
+  getMasterAnalysisRecord: async (key: string): Promise<ApiResponse<any>> => {
+    const response = await apiClient.get(`/master-analysis/${encodeURIComponent(key)}`);
+    const payload = response.data;
+    return { ...payload, data: normalizeMasterAnalysisRecord(payload?.data || {}) };
+  },
+  saveMasterAnalysis: async (key: string, analysisData: any, analysisStatus: string): Promise<ApiResponse<any>> => {
+    const normalizedStatus = ({ 'Not Reviewed': 'not_reviewed', 'Under Review': 'under_review', 'Analysis Completed': 'completed' } as Record<string, string>)[analysisStatus] || analysisStatus;
+    const response = await apiClient.put(`/master-analysis/${encodeURIComponent(key)}`, { analysisData, analysisStatus: normalizedStatus });
+    const payload = response.data;
+    notifyDashboardRefresh();
+    return { ...payload, data: normalizeMasterAnalysisRecord(payload?.data || {}) };
+  },
   getDepartments: async (): Promise<ApiResponse<DepartmentOption[]>> => {
     const response = await apiClient.get('/departments', { params: { isActive: true, page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
     return response.data;

@@ -7,6 +7,7 @@ const Permission = require('../modules/users/permission.model');
 const Token = require('../modules/users/token.model');
 const AuditLog = require('../modules/audits/audit-log.model');
 const Notification = require('../modules/core/notification.model');
+const MasterAnalysis = require('../modules/analysis/master-analysis.model');
 
 // ─── HSE Foundation Models ────────────────────────────────────────────────────
 const Plant = require('../modules/hse-foundation/plant.model');
@@ -225,6 +226,6 @@ module.exports = {
   // HSE Audits & Inspections
   HseAudit, AuditFinding, Inspection, InspectionItem,
   // HSE Actions & Attachments
-  CorrectiveAction, Attachment,
+  CorrectiveAction, Attachment, MasterAnalysis,
 };
 

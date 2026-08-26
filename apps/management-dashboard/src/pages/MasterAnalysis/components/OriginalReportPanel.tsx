@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import type { UnifiedReport } from '../mockData';
+import type { UnifiedReport } from '../types';
 import { ALL_SECTIONS } from '../../../config/sectionSchemas';
 
 export const OriginalReportPanel: React.FC<{ report: UnifiedReport }> = ({ report }) => {
@@ -58,7 +58,7 @@ export const OriginalReportPanel: React.FC<{ report: UnifiedReport }> = ({ repor
                 <div key={key} className={isLongText ? 'col-span-1' : ''}>
                   <dt className="font-semibold text-[#6B7280] mb-1">{formatLabel(key)}</dt>
                   <dd className={`text-[#111827] ${isLongText ? 'bg-[#F9FAFB] p-3 rounded border border-[#F3F4F6]' : 'font-medium'}`}>
-                    {value}
+                    {String(value)}
                   </dd>
                 </div>
               );

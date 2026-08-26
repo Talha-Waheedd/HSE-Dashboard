@@ -24,6 +24,7 @@ const attachmentRoutes = require('../actions/attachment.routes');
 const dashboardRoutes = require('./dashboard.routes');
 const reportRoutes = require('./report.routes');
 const analyticsRoutes = require('./analytics.routes');
+const masterAnalysisRoutes = require('../analysis/master-analysis.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -46,5 +47,6 @@ router.use('/attachments', attachmentRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
 router.use('/analytics', analyticsRoutes);
+router.use('/master-analysis', masterAnalysisRoutes);
 
 module.exports = router;
