@@ -40,6 +40,11 @@ const HseAudit = sequelize.define('HseAudit', {
     allowNull: false,
     defaultValue: 'internal',
   },
+  source: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    defaultValue: 'audit-management',
+  },
   status: {
     type: DataTypes.ENUM(...Object.values(AuditStatus)),
     defaultValue: AuditStatus.PLANNED,

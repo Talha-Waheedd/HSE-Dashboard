@@ -27,6 +27,7 @@ const getAllAudits = asyncHandler(async (req, res) => {
   if (req.query.plantId) options.where.plantId = req.query.plantId;
   if (req.query.status) options.where.status = req.query.status;
   if (req.query.auditType) options.where.auditType = req.query.auditType;
+  if (req.query.source) options.where.source = req.query.source;
   const auditFrom = req.query.fromDate || (req.query.year && /^\d{4}$/.test(req.query.year) ? `${req.query.year}-01-01` : null);
   const auditTo = req.query.toDate || (req.query.year && /^\d{4}$/.test(req.query.year) ? `${req.query.year}-12-31 23:59:59` : null);
   if (auditFrom || auditTo) options.where.scheduledDate = { ...(auditFrom ? { [Op.gte]: auditFrom } : {}), ...(auditTo ? { [Op.lte]: auditTo } : {}) };
@@ -49,6 +50,7 @@ const exportAudits = asyncHandler(async (req, res) => {
   if (req.query.plantId) where.plantId = req.query.plantId;
   if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
   if (req.query.auditType) where.auditType = req.query.auditType;
+  if (req.query.source) where.source = req.query.source;
   addTextSearch(where, req.query.search, ['audit_number', 'title', 'description'], HseAudit);
   await sendCsvExport(res, HseAudit, { where, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }) }, `audits-${new Date().toISOString().slice(0, 10)}.csv`);
 });

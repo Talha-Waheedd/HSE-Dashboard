@@ -173,8 +173,12 @@ export const moduleService = {
         delete requestParams[key];
       }
     });
-    if ((schemaId === 'hazard-reporting' || schemaId === 'near-miss' || schemaId === 'training-records') && requestParams.status && requestParams.status !== 'All') {
+    if ((schemaId === 'hazard-reporting' || schemaId === 'near-miss' || schemaId === 'training-records' || schemaId === 'audit-management' || schemaId === 'critical-audit-plan') && requestParams.status && requestParams.status !== 'All') {
       requestParams.status = statusToApi(requestParams.status, schemaId);
+    }
+    
+    if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') {
+      requestParams.source = schemaId;
     }
     const response = await apiClient.get(endpoint, { params: requestParams });
     const payload = response.data;
@@ -222,7 +226,7 @@ export const moduleService = {
       }));
     }
 
-    if (schemaId === 'training-records' || schemaId === 'audit-management' || schemaId === 'inspection-records' || schemaId === 'action-tracker') {
+    if (schemaId === 'training-records' || schemaId === 'audit-management' || schemaId === 'critical-audit-plan' || schemaId === 'inspection-records' || schemaId === 'action-tracker') {
       rawData = rawData.map((item: any) => ({
         ...item,
         date: item.metadata?.date || item.scheduledDate || item.scheduled_date || item.dueDate || item.due_date || item.createdAt || item.created_at,
@@ -343,6 +347,13 @@ export const moduleService = {
       };
       // Manhours are server-derived from participantCount and durationMinutes.
       delete payload.manhours;
+    } else if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') {
+      payload = {
+        ...payload,
+        plantId: payload.plantId || DEFAULT_PLANT_ID,
+        status: statusToApi(payload.status_id ?? payload.status ?? 'planned', schemaId),
+        source: schemaId,
+      };
     }
 
     const response = await apiClient.post(endpoint, payload, {
@@ -405,6 +416,12 @@ export const moduleService = {
         manhours: Number(payload.manhours) || (participants && durationMinutes ? participants * durationMinutes / 60 : undefined),
       };
       delete payload.manhours;
+    } else if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') {
+      payload = {
+        ...payload,
+        status: payload.status_id ? statusToApi(payload.status_id, schemaId) : undefined,
+        source: schemaId,
+      };
     }
 
     const response = await apiClient.put(`${endpoint}/${id}`, payload);

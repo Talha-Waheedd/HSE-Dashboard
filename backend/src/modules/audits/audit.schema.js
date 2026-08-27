@@ -17,7 +17,10 @@ const createAuditSchema = Joi.object({
   auditType: Joi.string().valid('internal', 'external', 'regulatory').default('internal').optional(),
   scheduledDate: Joi.date().iso().required(),
   scope: Joi.string().optional(),
-  status: Joi.string().valid(AuditStatus.PLANNED, AuditStatus.IN_PROGRESS).default(AuditStatus.PLANNED).optional(),
+  status: Joi.string().valid(...Object.values(AuditStatus)).default(AuditStatus.PLANNED).optional(),
+  completedDate: Joi.date().iso().optional(),
+  summary: Joi.string().optional(),
+  source: Joi.string().valid('audit-management', 'critical-audit-plan').default('audit-management').optional(),
   findings: Joi.array().items(auditFindingSchema).optional(),
 });
 
@@ -30,6 +33,9 @@ const updateAuditSchema = Joi.object({
   scope: Joi.string().optional(),
   summary: Joi.string().optional(),
   score: Joi.number().precision(2).min(0).max(100).optional(),
+  status: Joi.string().valid(...Object.values(AuditStatus)).optional(),
+  completedDate: Joi.date().iso().optional(),
+  source: Joi.string().valid('audit-management', 'critical-audit-plan').optional(),
 }).min(1);
 
 const updateAuditStatusSchema = Joi.object({
