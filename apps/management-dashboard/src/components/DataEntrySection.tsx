@@ -8,6 +8,7 @@ import { CenterModal } from './CenterModal';
 import type { SectionConfig, ColumnSchema } from '../config/sectionSchemas';
 import { usePermissions, useAuth } from '@cbl/auth';
 import { useModuleData } from '../hooks/useModuleData';
+import { useEmployeeLookup } from '../hooks/useEmployeeLookup';
 import { moduleService, type DepartmentOption } from '../services/api/moduleService';
 import { useFilters } from '../context/FilterContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -441,6 +442,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const { user } = useAuth();
   const permissions = usePermissions();
   const { filters } = useFilters();
+  const { lookupEmployee, error: employeeError, setError: setEmployeeError } = useEmployeeLookup();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formData, setFormData] = useState<any>({});
@@ -620,6 +622,47 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
     return null;
   };
+
+  const EMPLOYEE_FIELD_MAP: Record<string, Record<string, string>> = {
+    'hazard-reporting': { name: 'originator' }, // Based on the schema
+    'near-miss': { name: 'reported_by' },
+    'incident-log': { name: 'reported_by' },
+    'training-records': { name: 'trainer_name' },
+  };
+
+  useEffect(() => {
+    const currentEmpId = editingId ? editFormData.emp_id : formData.emp_id;
+    if (!currentEmpId || String(currentEmpId).trim().length < 3) {
+      setEmployeeError(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const employee = await lookupEmployee(currentEmpId);
+      if (employee) {
+        const updateData = (prev: any) => {
+          const next = { ...prev };
+          const map = EMPLOYEE_FIELD_MAP[schema.id] || {};
+          
+          if (map.name) next[map.name] = employee.user?.firstName + ' ' + (employee.user?.lastName || '');
+          if (map.department && employee.departmentId) next[map.department] = employee.departmentId;
+          
+          // Also set default common fields if they exist in schema
+          const schemaKeys = schema.columns.map(c => c.key);
+          if (schemaKeys.includes('department_id') && employee.departmentId) next['department_id'] = employee.departmentId;
+          if (schemaKeys.includes('gender') && employee.gender) next['gender'] = employee.gender;
+          if (schemaKeys.includes('designation') && employee.designation) next['designation'] = employee.designation;
+          
+          return applyComputes(next, schema, entries);
+        };
+        
+        if (editingId) setEditFormData(updateData);
+        else setFormData(updateData);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [editingId ? editFormData.emp_id : formData.emp_id, schema.id, lookupEmployee, editingId, setEmployeeError]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>, isEdit = false) => {
     const { name, value, type } = e.target as any;
@@ -873,6 +916,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const renderField = (col: ColumnSchema, value: any, isEdit = false) => {
+    const isMappedEmployeeField = Object.values(EMPLOYEE_FIELD_MAP[schema.id] || {}).includes(col.key) || ['department_id', 'gender', 'designation'].includes(col.key);
+    const effectiveReadonly = col.readonly || (isMappedEmployeeField && col.key !== 'emp_id');
+
     if (col.type === 'file') {
       return (
         <label className="block rounded-lg border border-dashed border-[#D6D6D6] bg-[#FAFAFA] p-4 cursor-pointer">
@@ -1011,7 +1057,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (col.type === 'textarea') {
       return (
         <div>
-          <textarea name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={TEXTAREA_BASE} rows={4} required={col.required} readOnly={col.readonly} />
+          <textarea name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={TEXTAREA_BASE} rows={4} required={col.required} readOnly={effectiveReadonly} />
           {schema.id === 'hazard-reporting' && ['description', 'corrective_action', 'remarks'].includes(col.key) && <p className={`mt-1 text-[11px] ${String(value || '').trim().split(/\s+/).filter(Boolean).length > 500 ? 'text-[#B91C1C]' : 'text-[#64748B]'}`}>{String(value || '').trim().split(/\s+/).filter(Boolean).length}/500 words</p>}
         </div>
       );
@@ -1023,7 +1069,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           label={col.label}
           value={value ?? ''}
           required={col.required}
-          disabled={col.readonly}
+          disabled={effectiveReadonly}
           onChange={nextValue => handleInputChange({
             target: { name: col.key, value: nextValue, type: 'date' }
           } as React.ChangeEvent<HTMLInputElement>, isEdit)}
@@ -1032,7 +1078,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
 
     if (col.type === 'datetime') {
-      return <input type="datetime-local" name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={FIELD_BASE} required={col.required} readOnly={col.readonly} />;
+      return <input type="datetime-local" name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={FIELD_BASE} required={col.required} readOnly={effectiveReadonly} />;
     }
 
     if (col.type === 'time') {
@@ -1042,23 +1088,28 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           value={value ?? ''}
           onChange={v => handleInputChange({ target: { name: col.key, value: v } } as any, isEdit)}
           required={col.required}
-          disabled={col.readonly}
+          disabled={effectiveReadonly}
           autoPopulateOnFocus={schema.id === 'near-miss'}
         />
       );
     }
 
     return (
-      <input
-        type={col.type === 'number' ? 'number' : 'text'}
-        name={col.key}
-        value={value ?? ''}
-        onChange={e => handleInputChange(e, isEdit)}
-        className={FIELD_BASE}
-        required={col.required}
-        readOnly={col.readonly}
-        placeholder={col.placeholder}
-      />
+      <div className="space-y-1">
+        <input
+          type={col.type === 'number' ? 'number' : 'text'}
+          name={col.key}
+          value={value ?? ''}
+          onChange={e => handleInputChange(e, isEdit)}
+          className={FIELD_BASE}
+          required={col.required}
+          readOnly={effectiveReadonly}
+          placeholder={col.placeholder}
+        />
+        {col.key === 'emp_id' && employeeError && (
+          <p className="text-[11px] text-[#B91C1C]">{employeeError}</p>
+        )}
+      </div>
     );
   };
 

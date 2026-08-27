@@ -461,5 +461,10 @@ export const moduleService = {
     const endpoint = getEndpoint(schemaId);
     const response = await apiClient.get(`${endpoint}/export`, { params, responseType: 'blob' });
     return response.data;
+  },
+
+  getEmployeeByEmpId: async (empId: string): Promise<ApiResponse<any>> => {
+    const response = await apiClient.get(`/employees/lookup/${empId}`);
+    return response.data;
   }
 };
