@@ -953,17 +953,23 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
 
     if (col.key === 'location') {
+      const source = isEdit ? editFormData : formData;
       return (
-        <LocationCombobox
-          name={col.key}
-          label={col.label}
-          value={value ?? ''}
-          onChange={nextValue => handleInputChange({
-            target: { name: col.key, value: nextValue },
-          } as React.ChangeEvent<HTMLInputElement>, isEdit)}
-          required={col.required}
-          disabled={col.readonly}
-        />
+        <div className="space-y-2">
+          <LocationCombobox
+            name={col.key}
+            label={col.label}
+            value={value ?? ''}
+            onChange={nextValue => handleInputChange({
+              target: { name: col.key, value: nextValue },
+            } as React.ChangeEvent<HTMLInputElement>, isEdit)}
+            required={col.required}
+            disabled={col.readonly}
+          />
+          {value === 'Other' && (
+            <input type="text" name={`${col.key}_other`} value={source[`${col.key}_other`] ?? ''} onChange={event => handleInputChange(event, isEdit)} placeholder="Enter custom location" className={FIELD_BASE} required />
+          )}
+        </div>
       );
     }
 
@@ -982,7 +988,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
             <input
               type="text"
-              value={hazardCategoryQuery || (value === 'Other' ? '' : value ?? '')}
+              value={hazardCategoryQuery || (value ?? '')}
               onFocus={() => setHazardCategoryOpen(true)}
               onClick={() => setHazardCategoryOpen(true)}
               onChange={event => {
@@ -1005,12 +1011,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                   {option}
                 </button>
               ))}
-              {query && options.length === 0 && (
-                <button type="button" onMouseDown={event => event.preventDefault()} onClick={() => choose('Other')} className="block w-full px-3 py-2 text-left text-[13px] font-semibold text-[#CB0017] hover:bg-[#FFF1F3]">
-                  Other — use custom category
-                </button>
-              )}
-              {!query && options.length === 0 && <p className="px-3 py-2 text-[13px] text-[#64748B]">No categories found</p>}
+              <button type="button" onMouseDown={event => event.preventDefault()} onClick={() => choose('Other')} className="block w-full px-3 py-2 text-left text-[13px] font-semibold text-[#CB0017] hover:bg-[#FFF1F3] border-t border-[#F0F0F0]">
+                Other
+              </button>
             </div>
           )}
           {value === 'Other' && (
