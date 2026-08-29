@@ -1,17 +1,23 @@
 'use strict';
 
 const { Op } = require('sequelize');
+const ApiError = require('./ApiError');
+
+const DEFAULT_LIMIT = 25;
+const MAX_LIMIT = 100;
 
 const parsePagination = (query = {}, defaults = {}) => {
   const rawPage = query.page ?? 1;
-  const rawLimit = query.limit ?? query.pageSize ?? defaults.defaultLimit ?? 10;
+  const defaultLimit = defaults.defaultLimit ?? DEFAULT_LIMIT;
+  const maxLimit = defaults.maxLimit ?? MAX_LIMIT;
+  const rawLimit = query.limit ?? query.pageSize ?? defaultLimit;
   const page = Number(rawPage);
   const limit = Number(rawLimit);
   if (!Number.isInteger(page) || page < 1) {
-    const error = new Error('page must be a positive integer'); error.statusCode = 400; throw error;
+    throw ApiError.badRequest('page must be a positive integer');
   }
-  if (!Number.isInteger(limit) || limit < 1 || limit > (defaults.maxLimit || 100)) {
-    const error = new Error(`limit must be an integer between 1 and ${defaults.maxLimit || 100}`); error.statusCode = 400; throw error;
+  if (!Number.isInteger(limit) || limit < 1 || limit > maxLimit) {
+    throw ApiError.badRequest(`limit must be an integer between 1 and ${maxLimit}`);
   }
   return { page, limit, offset: (page - 1) * limit };
 };
@@ -49,6 +55,8 @@ const addTextSearch = (where, query, fields, Model) => {
 };
 
 module.exports = { parsePagination, parseOrder, paginationMeta, addTextSearch, buildPagination };
+module.exports.DEFAULT_LIMIT = DEFAULT_LIMIT;
+module.exports.MAX_LIMIT = MAX_LIMIT;
 
 module.exports.toCsv = (rows) => {
   const values = rows.map((row) => (typeof row.toJSON === 'function' ? row.toJSON() : row));

@@ -6,6 +6,7 @@ const CorrectiveActionStatus = require('../../shared/enums/CorrectiveActionStatu
 const CorrectiveActionSource = require('../../shared/enums/CorrectiveActionSource');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
+const { col, fn, literal } = require('sequelize');
 
 class CorrectiveActionService {
   /**
@@ -37,6 +38,23 @@ class CorrectiveActionService {
    */
   async getAllActions(options = {}) {
     return correctiveActionRepository.findAndCountAll(options);
+  }
+
+  /**
+   * Return action totals without transferring the action rows.
+   */
+  async getSummary(where = {}) {
+    const row = await correctiveActionRepository.model.findOne({
+      where,
+      raw: true,
+      attributes: [
+        [fn('COUNT', col('id')), 'totalRecords'],
+        [fn('SUM', literal("status IN ('completed','verified')")), 'completedRecords'],
+      ],
+    });
+    const totalRecords = Number(row?.totalRecords || 0);
+    const completedRecords = Number(row?.completedRecords || 0);
+    return { totalRecords, pendingRecords: Math.max(0, totalRecords - completedRecords), completedRecords };
   }
 
   /**

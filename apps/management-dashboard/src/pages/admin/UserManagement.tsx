@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { Plus, Upload, Trash2, Edit2, Play, Users } from 'lucide-react';
 import { CenterModal } from '../../components/CenterModal';
 import { DEPARTMENTS } from '../../config/constants';
@@ -16,24 +16,33 @@ const MOCK_USERS = [
 export const UserManagement = () => {
   const [users, setUsers] = useState(MOCK_USERS);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const selectAllRef = useRef<HTMLInputElement>(null);
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [formData, setFormData] = useState<any>({});
 
-  const toggleSelectAll = () => {
-    if (selectedUsers.size === users.length) {
-      setSelectedUsers(new Set());
-    } else {
-      setSelectedUsers(new Set(users.map(u => u.id)));
+  const userIds = users.map(user => String(user.id));
+  const selectedUserCount = userIds.filter(id => selectedUsers.has(id)).length;
+  const allUsersSelected = userIds.length > 0 && selectedUserCount === userIds.length;
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = selectedUserCount > 0 && !allUsersSelected;
     }
+  }, [selectedUserCount, allUsersSelected]);
+
+  const toggleSelectAll = () => {
+    setSelectedUsers(allUsersSelected ? new Set() : new Set(userIds));
   };
 
   const toggleSelect = (id: string) => {
-    const next = new Set(selectedUsers);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelectedUsers(next);
+    setSelectedUsers(previous => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const handleAdd = () => {
@@ -56,6 +65,11 @@ export const UserManagement = () => {
 
   const handleDelete = (id: string) => {
     setUsers(users.filter(u => u.id !== id));
+    setSelectedUsers(previous => {
+      const next = new Set(previous);
+      next.delete(id);
+      return next;
+    });
   };
 
   const bulkDeactivate = () => {
@@ -91,7 +105,14 @@ export const UserManagement = () => {
             <thead>
               <tr className="border-b border-[#F0F0F0] bg-[#FAFAFA]">
                 <th className="w-12 px-5 py-4 text-center">
-                  <input type="checkbox" className="rounded border-gray-300 text-[#CB0017] focus:ring-[#CB0017]" checked={users.length > 0 && selectedUsers.size === users.length} onChange={toggleSelectAll} />
+                  <input
+                    ref={selectAllRef}
+                    type="checkbox"
+                    className="rounded border-gray-300 text-[#CB0017] focus:ring-[#CB0017]"
+                    checked={allUsersSelected}
+                    onChange={toggleSelectAll}
+                    aria-label="Select all users"
+                  />
                 </th>
                 <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">User</th>
                 <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Department</th>
@@ -105,7 +126,7 @@ export const UserManagement = () => {
               {users.map(user => (
                 <tr key={user.id} className="border-b border-[#F0F0F0] hover:bg-[#FAFAFA]">
                   <td className="px-5 py-4 text-center">
-                    <input type="checkbox" className="rounded border-gray-300 text-[#CB0017] focus:ring-[#CB0017]" checked={selectedUsers.has(user.id)} onChange={() => toggleSelect(user.id)} />
+                    <input type="checkbox" className="rounded border-gray-300 text-[#CB0017] focus:ring-[#CB0017]" checked={selectedUsers.has(String(user.id))} onChange={() => toggleSelect(String(user.id))} />
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">

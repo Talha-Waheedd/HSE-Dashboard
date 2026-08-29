@@ -7,6 +7,7 @@ const IncidentStatus = require('../../shared/enums/IncidentStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { sequelize } = require('../../database/connection');
+const { col, fn } = require('sequelize');
 
 const normalizeActions = (actions) => (Array.isArray(actions) ? actions.map((item) => ({
   ...item,
@@ -92,6 +93,29 @@ class IncidentService {
    */
   async getAllIncidents(options = {}) {
     return incidentRepository.findAndCountAll(options);
+  }
+
+  /**
+   * Return incident totals without loading incident rows into the caller.
+   */
+  async getSummary(where = {}) {
+    const rows = await incidentRepository.model.findAll({
+      where,
+      attributes: ['incidentType', 'status', [fn('COUNT', col('id')), 'count']],
+      group: ['incidentType', 'status'],
+      raw: true,
+    });
+    const summary = { totalRecords: 0, pendingRecords: 0, completedRecords: 0, byType: {} };
+    for (const row of rows) {
+      const count = Number(row.count || 0);
+      const type = String(row.incidentType || '').toLowerCase();
+      const status = String(row.status || '').toLowerCase();
+      summary.totalRecords += count;
+      summary.byType[type] = (summary.byType[type] || 0) + count;
+      if (['closed', 'resolved'].includes(status)) summary.completedRecords += count;
+      else summary.pendingRecords += count;
+    }
+    return summary;
   }
 
   /**

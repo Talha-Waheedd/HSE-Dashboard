@@ -116,6 +116,17 @@ const categoryFromApi = (value: unknown) => ({
 const notifyDashboardRefresh = () => {
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('dashboard-refresh'));
 };
+const prepareRequestParams = (params: Record<string, unknown> = {}, schemaId?: string) => {
+  const requestParams = { ...params };
+  Object.entries(requestParams).forEach(([key, value]) => {
+    if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
+  });
+  if (schemaId && ['hazard-reporting', 'near-miss', 'incident-log', 'training-records', 'action-tracker', 'audit-management', 'critical-audit-plan'].includes(schemaId) && requestParams.status) {
+    requestParams.status = statusToApi(requestParams.status, schemaId);
+  }
+  if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') requestParams.source = schemaId;
+  return requestParams;
+};
 const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? actions.map((item: any) => ({
   action: String(item?.action ?? item?.action_description ?? '').trim(),
   responsible_person: String(item?.responsible_person ?? item?.responsiblePerson ?? item?.responsibility ?? item?.responsible ?? '').trim(),
@@ -163,23 +174,7 @@ export const moduleService = {
   },
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
     const endpoint = getEndpoint(schemaId);
-    const requestParams = { ...(params || {}) };
-
-    // Global filter controls use "All" as a display value.  It must never be
-    // sent to an API as a literal database value (for example, status=All),
-    // otherwise a valid collection is incorrectly returned as empty.
-    Object.entries(requestParams).forEach(([key, value]) => {
-      if (value === '' || value === null || value === undefined || value === 'All') {
-        delete requestParams[key];
-      }
-    });
-    if ((schemaId === 'hazard-reporting' || schemaId === 'near-miss' || schemaId === 'training-records' || schemaId === 'audit-management' || schemaId === 'critical-audit-plan') && requestParams.status && requestParams.status !== 'All') {
-      requestParams.status = statusToApi(requestParams.status, schemaId);
-    }
-    
-    if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') {
-      requestParams.source = schemaId;
-    }
+    const requestParams = prepareRequestParams(params, schemaId);
     const response = await apiClient.get(endpoint, { params: requestParams });
     const payload = response.data;
     let rawData = Array.isArray(payload?.data) ? payload.data : payload?.data?.rows || [];
@@ -264,11 +259,20 @@ export const moduleService = {
   },
 
   getTrainingSummary: async (params?: Record<string, unknown>): Promise<ApiResponse<any>> => {
-    const requestParams = { ...(params || {}) };
-    Object.entries(requestParams).forEach(([key, value]) => {
-      if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
-    });
+    const requestParams = prepareRequestParams(params, 'training-records');
     const response = await apiClient.get('/trainings/summary', { params: requestParams });
+    return response.data;
+  },
+
+  getIncidentSummary: async (params?: Record<string, unknown>): Promise<ApiResponse<any>> => {
+    const requestParams = prepareRequestParams(params, 'incident-log');
+    const response = await apiClient.get('/incidents/summary', { params: requestParams });
+    return response.data;
+  },
+
+  getActionSummary: async (params?: Record<string, unknown>): Promise<ApiResponse<any>> => {
+    const requestParams = prepareRequestParams(params, 'action-tracker');
+    const response = await apiClient.get('/corrective-actions/summary', { params: requestParams });
     return response.data;
   },
 

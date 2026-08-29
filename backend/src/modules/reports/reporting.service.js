@@ -12,7 +12,7 @@ class ReportingService {
 
   async getById(resource, id, options = {}) {
     const record = await repositories[resource].findById(id, options);
-    if (!record) throw new ApiError(404, `${resource} record not found`);
+    if (!record) throw ApiError.notFound(`${resource} record not found`);
     return record;
   }
 
@@ -27,7 +27,7 @@ class ReportingService {
   async update(resource, id, data, userId, options = {}) {
     const repository = repositories[resource];
     const record = await repository.findById(id, { transaction: options.transaction });
-    if (!record) throw new ApiError(404, `${resource} record not found`);
+    if (!record) throw ApiError.notFound(`${resource} record not found`);
     await record.update({ ...data, updatedBy: userId }, { transaction: options.transaction });
     return record;
   }
@@ -35,7 +35,7 @@ class ReportingService {
   async remove(resource, id, userId, options = {}) {
     const repository = repositories[resource];
     const record = await repository.findById(id, { transaction: options.transaction });
-    if (!record) throw new ApiError(404, `${resource} record not found`);
+    if (!record) throw ApiError.notFound(`${resource} record not found`);
     await record.update({ updatedBy: userId }, { transaction: options.transaction });
     await record.destroy({ transaction: options.transaction });
     return { id, deleted: true };
@@ -44,12 +44,12 @@ class ReportingService {
   async restore(resource, id, options = {}) {
     const repository = repositories[resource];
     const count = await repository.restoreById(id, options);
-    if (!count) throw new ApiError(404, `${resource} deleted record not found`);
+    if (!count) throw ApiError.notFound(`${resource} deleted record not found`);
     return repository.findById(id, { paranoid: false, transaction: options.transaction });
   }
 
   async bulkCreate(resource, rows, userId, options = {}) {
-    if (!Array.isArray(rows) || rows.length === 0) throw new ApiError(422, 'At least one record is required');
+    if (!Array.isArray(rows) || rows.length === 0) throw ApiError.unprocessable('At least one record is required');
     return withTransaction((transaction) => repositories[resource].bulkCreate(rows.map((row) => ({ ...row, ...auditData(userId) })), { transaction }), options.transaction);
   }
 }

@@ -56,15 +56,22 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // 2. Handle Transient Errors with Exponential Backoff
-    // Retry on 5xx (server error), 429 (rate limit), or network error (no response)
-    const shouldRetry = original && (
-      !error.response || 
-      error.response.status >= 500 || 
-      error.response.status === 429
-    );
+    // 2. Handle transient, idempotent failures with exponential backoff.
+    // Deterministic application errors (including HTTP 500 responses caused by
+    // invalid queries) must not be retried three times, and mutating requests
+    // must never be duplicated by this interceptor.
+    const method = original?.method?.toUpperCase();
+    const retryableMethod = !method || ["GET", "HEAD", "OPTIONS"].includes(method);
+    const status = error.response?.status;
+    const shouldRetry = Boolean(original && retryableMethod && (
+      !error.response ||
+      status === 429 ||
+      status === 502 ||
+      status === 503 ||
+      status === 504
+    ));
 
-    if (shouldRetry) {
+    if (original && shouldRetry) {
       original._retryCount = original._retryCount || 0;
       if (original._retryCount < MAX_RETRIES) {
         original._retryCount += 1;

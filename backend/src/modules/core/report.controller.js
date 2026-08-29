@@ -10,7 +10,7 @@ const getPerformanceReport = asyncHandler(async (req, res) => {
   const { startDate, endDate, plantId } = req.query;
 
   if (!startDate || !endDate) {
-    throw new ApiError(400, 'startDate and endDate are required');
+    throw ApiError.badRequest('startDate and endDate are required');
   }
 
   const report = await reportService.generatePerformanceReport(startDate, endDate, plantId);

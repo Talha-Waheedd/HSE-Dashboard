@@ -22,7 +22,7 @@ module.exports = {
 
     const plants = [
       {
-        id: uuidv4(),
+        id: '5126923e-b77f-4eb6-8b98-d5fc9db8d71b', // Fixed UUID to match DEFAULT_PLANT_ID in frontend/backend
         name: 'CBL Plant Alpha',
         code: 'PLANT-A',
         location: 'Karachi, Sindh',

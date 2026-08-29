@@ -54,7 +54,7 @@ class HazardService {
     } else {
       const plant = await plantRepository.findById(data.plantId);
       if (!plant) {
-        throw new ApiError(404, MESSAGES.PLANT_NOT_FOUND);
+        throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
       }
     }
 
@@ -108,7 +108,7 @@ class HazardService {
   async getHazardById(id) {
     const hazard = await hazardRepository.getDetails(id);
     if (!hazard) {
-      throw new ApiError(404, MESSAGES.HAZARD_NOT_FOUND);
+      throw ApiError.notFound(MESSAGES.HAZARD_NOT_FOUND);
     }
     return hazard;
   }
@@ -125,7 +125,7 @@ class HazardService {
     // If changing plant, validate it
     if (updateData.plantId && updateData.plantId !== hazard.plantId) {
       const plant = await plantRepository.findById(updateData.plantId);
-      if (!plant) throw new ApiError(404, MESSAGES.PLANT_NOT_FOUND);
+      if (!plant) throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
     }
 
     updateData.updatedBy = userId;
@@ -140,7 +140,7 @@ class HazardService {
 
     const validStatuses = Object.values(HazardStatus);
     if (!validStatuses.includes(newStatus)) {
-      throw new ApiError(400, MESSAGES.HAZARD_INVALID_STATUS);
+      throw ApiError.badRequest(MESSAGES.HAZARD_INVALID_STATUS);
     }
 
     const updateData = {

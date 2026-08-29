@@ -19,12 +19,16 @@ const titles: Record<IndicatorKind, { title: string; subtitle: string }> = {
   'action-plan-closure': { title: 'Action Plan Closure Tracker', subtitle: 'Monitor corrective-action plans through completion and verification.' },
 };
 
+const PAGE_SIZE = 25;
 const rawDateOf = (row: Row) => row.date || row.incidentDate || row.incident_date || row.scheduledDate || row.scheduled_date || row.dueDate || row.due_date || row.createdAt || row.created_at;
 const dateOf = (row: Row) => formatDateOnly(rawDateOf(row));
 const statusOf = (row: Row) => String(row.status_id || row.status || row.statusId || 'Open').toLowerCase();
 const isClosed = (row: Row) => ['closed', 'close', 'resolved', 'completed', 'complete', 'verified', 'approved'].includes(statusOf(row));
-const departmentOf = (row: Row) => String(row.department_id || row.departmentId || row.department?.id || row.department?.code || row.department?.name || '').toLowerCase();
 const categoryOf = (row: Row) => String(row.incident_category_id || row.incidentType || row.category || '').replaceAll('_', ' ').toLowerCase();
+const errorMessageOf = (error: unknown, fallback: string) => {
+  const response = (error as any)?.response?.data;
+  return response?.message || response?.error || (error instanceof Error ? error.message : fallback);
+};
 
 const Panel = ({ title, children }: { title: string; children: React.ReactNode }) => <section className="overflow-hidden rounded-xl border border-[#D9E1EC] bg-white shadow-sm"><div className="flex items-center gap-2 border-b border-[#E5E7EB] bg-[#F8FAFC] px-5 py-3"><span className="h-4 w-1 rounded-full bg-[#CB0017]" /><h2 className="text-xs font-bold uppercase tracking-wider text-[#374151]">{title}</h2></div><div className="p-5">{children}</div></section>;
 
@@ -32,46 +36,69 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
   const { filters } = useFilters();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hazardSummary, setHazardSummary] = useState<{ total: number; closed: number } | null>(null);
+  const [summary, setSummary] = useState<{ total: number; closed: number } | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({ totalRecords: 0, totalPages: 1, pageSize: 10 });
+  const [pagination, setPagination] = useState({ totalRecords: 0, totalPages: 1, pageSize: PAGE_SIZE });
   const requestSequence = useRef(0);
+  const previousFilterKey = useRef<string | null>(null);
   const config = titles[kind];
 
   useEffect(() => {
+    const filterKey = [kind, filters.year, filters.department, filters.status, filters.fromDate, filters.toDate].join('|');
+    const filterChanged = previousFilterKey.current !== filterKey;
+    previousFilterKey.current = filterKey;
+    // Let the reset effect below move later-page views to page 1 without
+    // issuing an obsolete request for the old filter/page combination.
+    if (filterChanged && currentPage !== 1) return;
     const requestId = ++requestSequence.current;
     let cancelled = false;
     const load = async () => {
       setLoading(true);
+      setErrorMessage('');
       try {
-        const isHazardClosing = kind === 'hazard-closing';
-        const params = { ...(isHazardClosing ? { page: currentPage, limit: 10 } : { page: 1, limit: 1000 }), year: filters.year, department: filters.department, status: filters.status, fromDate: filters.fromDate, toDate: filters.toDate };
-        const overviewPromise = kind === 'hazard-closing'
-          ? dashboardClient.getOverview({ year: filters.year, department: filters.department, status: filters.status, fromDate: filters.fromDate, toDate: filters.toDate })
-          : Promise.resolve(null);
-        const response = kind === 'hazard-closing'
-          ? await moduleService.getAll('hazard-reporting', params)
+        const filtersParams = { year: filters.year, department: filters.department, status: filters.status, fromDate: filters.fromDate, toDate: filters.toDate };
+        const params = { page: currentPage, limit: PAGE_SIZE, ...filtersParams };
+        const summaryPromise: Promise<any> = kind === 'hazard-closing'
+          ? dashboardClient.getOverview(filtersParams)
           : kind === 'incident-investigation'
-            ? await moduleService.getAll('incident-log', params)
+            ? moduleService.getIncidentSummary(params)
             : kind === 'emergency-drills'
-              ? await moduleService.getAll('training-records', { ...params, trainingType: 'emergency_response' })
-              : await moduleService.getAll('action-tracker', params);
+              ? moduleService.getTrainingSummary({ ...params, trainingType: 'emergency_response' })
+              : moduleService.getActionSummary(params);
+        const listPromise = kind === 'hazard-closing'
+          ? moduleService.getAll('hazard-reporting', params)
+          : kind === 'incident-investigation'
+            ? moduleService.getAll('incident-log', params)
+            : kind === 'emergency-drills'
+              ? moduleService.getAll('training-records', { ...params, trainingType: 'emergency_response' })
+              : moduleService.getAll('action-tracker', params);
+        const [response, summaryResponse] = await Promise.all([listPromise, summaryPromise]);
+
         if (!cancelled && requestId === requestSequence.current) {
           setRows(response.data || []);
-          if (isHazardClosing) {
-            const meta = response.meta || {};
-            setPagination({ totalRecords: Number(meta.totalRecords ?? meta.total ?? 0), totalPages: Number(meta.totalPages ?? 1), pageSize: Number(meta.pageSize ?? meta.limit ?? 10) });
-          }
-          if (overviewPromise) {
-            const overviewResponse = await overviewPromise;
-            if (cancelled || requestId !== requestSequence.current) return;
-            const summary = overviewResponse?.data?.data?.summary?.hazards;
-            setHazardSummary(summary ? { total: Number(summary.total || 0), closed: Number(summary.closed || 0) } : null);
-          }
+          const meta = response.meta || {};
+          setPagination({
+            totalRecords: Number(meta.totalRecords ?? meta.total ?? 0),
+            totalPages: Math.max(1, Number(meta.totalPages ?? 1)),
+            pageSize: Number(meta.pageSize ?? meta.limit ?? PAGE_SIZE),
+          });
+          const summaryData = kind === 'hazard-closing'
+            ? summaryResponse?.data?.data?.summary?.hazards
+            : summaryResponse?.data;
+          setSummary(summaryData ? {
+            total: Number(summaryData.totalRecords ?? summaryData.total ?? 0),
+            closed: Number(summaryData.completedRecords ?? summaryData.closed ?? 0),
+          } : null);
         }
       } catch (error) {
         console.error(`${config.title} data fetch failed`, error);
-        if (!cancelled && requestId === requestSequence.current) setRows([]);
+        if (!cancelled && requestId === requestSequence.current) {
+          setRows([]);
+          setSummary(null);
+          setPagination({ totalRecords: 0, totalPages: 1, pageSize: PAGE_SIZE });
+          setErrorMessage(errorMessageOf(error, `Failed to load ${config.title.toLowerCase()} records.`));
+        }
       } finally {
         if (!cancelled && requestId === requestSequence.current) setLoading(false);
       }
@@ -87,17 +114,11 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
     setCurrentPage(1);
   }, [kind, filters.year, filters.department, filters.status, filters.fromDate, filters.toDate]);
 
-  const filteredRows = useMemo(() => kind === 'hazard-closing' ? rows : rows.filter(row => {
-    const date = String(rawDateOf(row) || '').slice(0, 10);
-    if (filters.department !== 'All' && filters.department && departmentOf(row) !== String(filters.department).toLowerCase()) return false;
-    if (filters.year !== 'All' && filters.year && !date.startsWith(filters.year)) return false;
-    if (filters.fromDate && date.slice(0, 10) < filters.fromDate) return false;
-    if (filters.toDate && date.slice(0, 10) > filters.toDate) return false;
-    return true;
-  }), [kind, rows, filters]);
-
-  const total = kind === 'hazard-closing' && hazardSummary ? hazardSummary.total : filteredRows.length;
-  const closed = kind === 'hazard-closing' && hazardSummary ? hazardSummary.closed : filteredRows.filter(isClosed).length;
+  // Filters are applied by the database before counting and paginating. The
+  // table therefore renders only the server-returned page.
+  const filteredRows = useMemo(() => rows, [rows]);
+  const total = summary?.total ?? pagination.totalRecords;
+  const closed = summary?.closed ?? filteredRows.filter(isClosed).length;
   const pending = Math.max(0, total - closed);
   const closure = total ? Math.round((closed / total) * 100) : 0;
   const headers = kind === 'hazard-closing' ? ['Date', 'Description', 'Department', 'Risk', 'Status']
@@ -122,10 +143,10 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
   }, [currentPage, pagination.totalPages]);
 
   return <Layout><ContextHeader title={config.title} breadcrumbs={['Leading Indicators', config.title]} subtitle={config.subtitle}><FilterBar /></ContextHeader><main className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
-    {loading ? <div className="flex min-h-[300px] items-center justify-center"><RefreshCw className="h-8 w-8 animate-spin text-[#CB0017]" /></div> : <>
+    {loading ? <div className="flex min-h-[300px] items-center justify-center"><RefreshCw className="h-8 w-8 animate-spin text-[#CB0017]" /></div> : errorMessage ? <div className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] p-5 text-sm font-semibold text-[#B91C1C]" role="alert">{errorMessage}</div> : <>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4"><KpiTile label="Total Records" value={total} icon={<Activity />} accent="info" /><KpiTile label="Closed / Completed" value={closed} icon={<CheckCircle2 />} accent="success" /><KpiTile label="Pending / Open" value={pending} icon={<AlertTriangle />} accent={pending ? 'warning' : 'success'} /><KpiTile label="Closure Rate" value={`${closure}%`} icon={<ClipboardCheck />} accent={closure >= 80 ? 'success' : 'warning'} /></div>
-      <Panel title={`${config.title} — Live Backend Records`}><div className="overflow-x-auto"><table className="min-w-[850px] w-full border-collapse text-sm"><thead><tr className="bg-[#4777BE] text-white">{headers.map(header => <th key={header} className="border border-[#1F2937] px-3 py-3 text-left">{header}</th>)}</tr></thead><tbody>{filteredRows.length ? filteredRows.map((row, index) => <tr key={row.id || index} className="odd:bg-white even:bg-[#F8FAFC]">{cells(row).map((cell, cellIndex) => <td key={`${row.id || index}-${cellIndex}`} className={`border border-[#CBD5E1] px-3 py-3 ${cellIndex === 0 ? 'whitespace-nowrap' : ''} ${cellIndex === headers.length - 1 ? (isClosed(row) ? 'bg-[#C6E0B4] font-semibold' : 'bg-[#F8CBAD] font-semibold') : ''}`}>{String(cell)}</td>)}</tr>) : <tr><td colSpan={headers.length} className="border border-[#CBD5E1] px-4 py-10 text-center text-[#6B7280]">No records match the selected filters.</td></tr>}</tbody></table></div></Panel>
-      {kind === 'hazard-closing' && <div className="flex flex-col gap-3 border-t border-[#E5E7EB] pt-4 text-sm sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-[#64748B]">Page {currentPage} of {pagination.totalPages} <span className="mx-1 text-[#CBD5E1]">•</span> {pagination.totalRecords} total records</p><div className="flex items-center gap-1" aria-label="Hazard closing pagination"><button type="button" onClick={() => setCurrentPage(page => Math.max(1, page - 1))} disabled={currentPage === 1 || loading} className="rounded-md border border-[#D1D5DB] px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#FFF7F8] disabled:cursor-not-allowed disabled:opacity-40">Previous</button>{pageItems.map(item => item === 'ellipsis-start' || item === 'ellipsis-end' ? <span key={item} className="px-1.5 text-[#94A3B8]">…</span> : <button type="button" key={item} onClick={() => setCurrentPage(item)} aria-current={item === currentPage ? 'page' : undefined} disabled={loading} className={`h-8 min-w-8 rounded-md border px-2 text-xs font-semibold ${item === currentPage ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-[#D1D5DB] bg-white text-[#374151] hover:bg-[#FFF7F8]'}`}>{item}</button>)}<button type="button" onClick={() => setCurrentPage(page => Math.min(pagination.totalPages, page + 1))} disabled={currentPage === pagination.totalPages || loading} className="rounded-md border border-[#D1D5DB] px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#FFF7F8] disabled:cursor-not-allowed disabled:opacity-40">Next</button></div></div>}
+      <Panel title={`${config.title} — Live Backend Records`}><div className="overflow-x-auto"><table className="min-w-[850px] w-full border-collapse text-sm"><thead><tr className="bg-[#4777BE] text-white">{headers.map(header => <th key={header} className="border border-[#1F2937] px-3 py-3 text-left">{header}</th>)}</tr></thead><tbody>{filteredRows.length ? filteredRows.map((row, index) => <tr key={row.id || `row-${index}`} className="odd:bg-white even:bg-[#F8FAFC]">{cells(row).map((cell, cellIndex) => <td key={`${row.id || `row-${index}`}-${cellIndex}`} className={`border border-[#CBD5E1] px-3 py-3 ${cellIndex === 0 ? 'whitespace-nowrap' : ''} ${cellIndex === headers.length - 1 ? (isClosed(row) ? 'bg-[#C6E0B4] font-semibold' : 'bg-[#F8CBAD] font-semibold') : ''}`}>{String(cell)}</td>)}</tr>) : <tr><td colSpan={headers.length} className="border border-[#CBD5E1] px-4 py-10 text-center text-[#6B7280]">No records match the selected filters.</td></tr>}</tbody></table></div></Panel>
+      <div className="flex flex-col gap-3 border-t border-[#E5E7EB] pt-4 text-sm sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-[#64748B]">Page {currentPage} of {pagination.totalPages} <span className="mx-1 text-[#CBD5E1]">•</span> {pagination.totalRecords} total records</p><div className="flex items-center gap-1" aria-label={`${config.title} pagination`}><button type="button" onClick={() => setCurrentPage(page => Math.max(1, page - 1))} disabled={currentPage === 1 || loading} className="rounded-md border border-[#D1D5DB] px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#FFF7F8] disabled:cursor-not-allowed disabled:opacity-40">Previous</button>{pageItems.map(item => item === 'ellipsis-start' || item === 'ellipsis-end' ? <span key={item} className="px-1.5 text-[#94A3B8]">…</span> : <button type="button" key={item} onClick={() => setCurrentPage(item)} aria-current={item === currentPage ? 'page' : undefined} disabled={loading} className={`h-8 min-w-8 rounded-md border px-2 text-xs font-semibold ${item === currentPage ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-[#D1D5DB] bg-white text-[#374151] hover:bg-[#FFF7F8]'}`}>{item}</button>)}<button type="button" onClick={() => setCurrentPage(page => Math.min(pagination.totalPages, page + 1))} disabled={currentPage === pagination.totalPages || loading} className="rounded-md border border-[#D1D5DB] px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#FFF7F8] disabled:cursor-not-allowed disabled:opacity-40">Next</button></div></div>
     </>}
   </main></Layout>;
 };

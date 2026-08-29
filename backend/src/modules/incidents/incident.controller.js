@@ -6,6 +6,55 @@ const { Department, Incident } = require('../../database/models');
 const { Op } = require('sequelize');
 const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
 
+const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
+const nextDate = (value) => {
+  const date = new Date(`${value}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+};
+
+const buildIncidentWhere = async (query = {}) => {
+  const where = {};
+  if (query.plantId && query.plantId !== 'All') where.plantId = query.plantId;
+  if (query.status && query.status !== 'All') where.status = query.status;
+  if (query.severityLevel && query.severityLevel !== 'All') where.severityLevel = query.severityLevel;
+
+  if (query.incidentType && query.incidentType !== 'All') {
+    const requestedTypes = String(query.incidentType).split(',').map((value) => value.trim()).filter(Boolean);
+    const expandedTypes = requestedTypes.flatMap((type) => ({
+      fire: ['major_fire', 'minor_fire', 'fire'],
+      injury: ['lti', 'rwc', 'mtc'],
+    }[type.toLowerCase()] || [type]));
+    where.incidentType = expandedTypes.length === 1 ? expandedTypes[0] : { [Op.in]: expandedTypes };
+  }
+
+  const year = /^\d{4}$/.test(String(query.year || '')) ? String(query.year) : null;
+  const fromDate = isDate(query.fromDate) ? query.fromDate : (year ? `${year}-01-01` : null);
+  const toDate = isDate(query.toDate) ? nextDate(query.toDate) : (year ? `${Number(year) + 1}-01-01` : null);
+  if (fromDate || toDate) {
+    where.incidentDate = {
+      ...(fromDate ? { [Op.gte]: fromDate } : {}),
+      ...(toDate ? { [Op.lt]: toDate } : {}),
+    };
+  }
+
+  addTextSearch(where, query.search, ['incident_number', 'title', 'description'], Incident);
+  if (query.department && query.department !== 'All') {
+    const department = await Department.findOne({
+      where: { [Op.or]: [{ id: query.department }, { code: query.department }, { name: query.department }] },
+      attributes: ['id'],
+    });
+    where[Op.or] = department?.id
+      ? [
+        { departmentId: department.id },
+        Incident.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.department_id')) = ${Incident.sequelize.escape(query.department)}`),
+        Incident.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.department')) = ${Incident.sequelize.escape(query.department)}`),
+      ]
+      : [{ departmentId: '__no_matching_department__' }];
+  }
+  return where;
+};
+
 /**
  * Report a new incident
  */
@@ -19,33 +68,16 @@ const createIncident = asyncHandler(async (req, res) => {
  */
 const getAllIncidents = asyncHandler(async (req, res) => {
   const pagination = parsePagination(req.query);
-  const options = {
-    ...pagination,
-    where: {},
-  };
-  
-  if (req.query.plantId) options.where.plantId = req.query.plantId;
-  if (req.query.status) options.where.status = req.query.status;
-  if (req.query.incidentType) options.where.incidentType = req.query.incidentType;
-  if (req.query.severityLevel) options.where.severityLevel = req.query.severityLevel;
-  addTextSearch(options.where, req.query.search, ['incident_number', 'title', 'description'], Incident);
+  const options = { ...pagination, where: await buildIncidentWhere(req.query) };
   options.order = parseOrder(req.query, { date: 'incidentDate', incidentDate: 'incidentDate', createdAt: 'createdAt' });
-  if (req.query.department && req.query.department !== 'All') {
-    const department = await Department.findOne({
-      where: { [Op.or]: [{ code: req.query.department }, { name: req.query.department }] },
-      attributes: ['id'],
-    });
-    options.where[Op.or] = department?.id
-      ? [
-        { departmentId: department.id },
-        Incident.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.department_id')) = ${Incident.sequelize.escape(req.query.department)}`),
-        Incident.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.department')) = ${Incident.sequelize.escape(req.query.department)}`),
-      ]
-      : [{ departmentId: '__no_matching_department__' }];
-  }
 
   const result = await incidentService.getAllIncidents(options);
   res.status(200).json(ApiResponse.success(result.rows, 'Incidents retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
+});
+
+const getIncidentSummary = asyncHandler(async (req, res) => {
+  const summary = await incidentService.getSummary(await buildIncidentWhere(req.query));
+  res.status(200).json(ApiResponse.success(summary, 'Incident summary retrieved successfully'));
 });
 
 /**
@@ -91,6 +123,7 @@ const deleteIncident = asyncHandler(async (req, res) => {
 module.exports = {
   createIncident,
   getAllIncidents,
+  getIncidentSummary,
   getIncidentById,
   exportIncidents,
   updateIncident,
