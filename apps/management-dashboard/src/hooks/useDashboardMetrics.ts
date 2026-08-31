@@ -81,7 +81,7 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
       { id: 'incident-capa-closure', name: 'Incident Inv. Actions Closure', value: incidentCapaClosureRate, unit: '%', target: 100, status: incidentCapaClosureRate >= 80 ? 'success' : 'warning', path: '/action-tracker', iconClass: 'text-indigo-600', bgClass: 'bg-indigo-100' },
       { id: 'drills', name: 'Emergency Drills (Int/Ext)', value: 'N/A', unit: 'Module Pending', status: 'neutral', isPendingModule: true },
       { id: 'capa-closure', name: 'Action Plans Closure Tracker', value: capaClosureRate, unit: '%', target: 100, status: capaClosureRate >= 80 ? 'success' : 'warning', path: '/action-tracker', iconClass: 'text-violet-600', bgClass: 'bg-violet-100' },
-      { id: 'legal', name: 'Legal Compliance', value: 'N/A', unit: 'Module Pending', status: 'neutral', isPendingModule: true },
+      { id: 'legal', name: 'Legal Compliance', value: 'N/A', unit: '%', status: 'neutral', path: '/leading-indicators/legal-compliance' },
     ];
 
     // --- Lagging Indicators ---

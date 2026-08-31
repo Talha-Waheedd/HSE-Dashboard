@@ -99,6 +99,7 @@ function App() {
           <Route path="/leading-indicators/incident-investigation" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="incident-investigation" /></ProtectedRoute>} />
           <Route path="/leading-indicators/emergency-drills" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="emergency-drills" /></ProtectedRoute>} />
           <Route path="/leading-indicators/action-plan-closure" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="action-plan-closure" /></ProtectedRoute>} />
+          <Route path="/leading-indicators/legal-compliance" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Analytics focus="legal-compliance" /></ProtectedRoute>} />
           <Route path="/lagging-indicators/fire" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="fire" /></ProtectedRoute>} />
           <Route path="/lagging-indicators/ltir" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="ltir" /></ProtectedRoute>} />
           <Route path="/lagging-indicators/trir" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="trir" /></ProtectedRoute>} />

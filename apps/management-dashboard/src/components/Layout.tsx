@@ -7,7 +7,7 @@ import {
   ChevronRight, ChevronLeft, Menu, Bell, ChevronDown, X,
   UserCircle, Settings as SettingsIcon, HelpCircle,
   AlertTriangle, Target, FileWarning, CheckSquare, ClipboardList,
-  Users, ExternalLink, Sun, Moon, Activity, ShieldAlert, Flame
+  Users, ExternalLink, Sun, Moon, Activity, ShieldAlert, Flame, Scale
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -50,6 +50,7 @@ const NAV_GROUPS: NavGroup[] = [
           { title: 'Incident Investigation', href: '/leading-indicators/incident-investigation', Icon: FileWarning },
           { title: 'Emergency Drills', href: '/leading-indicators/emergency-drills', Icon: ShieldAlert },
           { title: 'Action Plan Closure Tracker', href: '/leading-indicators/action-plan-closure', Icon: ClipboardList },
+          { title: 'Legal Compliance', href: '/leading-indicators/legal-compliance', Icon: Scale },
         ],
       },
       {

@@ -12,6 +12,7 @@ import { CHART_COLORS } from '../config/constants';
 
 type RecordSet = { hazards: any[]; incidents: any[]; nearMisses: any[]; trainings: any[]; audits: any[]; inspections: any[]; capas: any[] };
 type IndicatorRow = { label: string; unit: string; key: string; target?: number; remark: string; category?: string };
+type AnalyticsProps = { focus?: 'legal-compliance' };
 
 const emptyRecords: RecordSet = { hazards: [], incidents: [], nearMisses: [], trainings: [], audits: [], inspections: [], capas: [] };
 const yearOf = (record: any) => {
@@ -54,7 +55,8 @@ const StatusMark = ({ status }: { status: string }) => (
   <span className={`inline-block h-0 w-0 border-l-[13px] border-r-[13px] border-b-[22px] border-l-transparent border-r-transparent ${status === 'good' ? 'border-b-[#16A34A]' : status === 'bad' ? 'border-b-[#EF1111]' : 'border-b-[#F59E0B]'}`} title={status === 'good' ? 'On target' : status === 'bad' ? 'Below target' : 'Watch'} />
 );
 
-export const Analytics = () => {
+export const Analytics = ({ focus }: AnalyticsProps = {}) => {
+  const legalComplianceOnly = focus === 'legal-compliance';
   const navigate = useNavigate();
   const { filters } = useFilters();
   const [records, setRecords] = useState<RecordSet>(emptyRecords);
@@ -64,7 +66,7 @@ export const Analytics = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [overview, setOverview] = useState<any>(null);
   const [view, setView] = useState<'summary' | 'pyramid'>('summary');
-  const [activeTab, setActiveTab] = useState<'kpi' | 'department' | 'training' | 'assurance'>('kpi');
+  const [activeTab, setActiveTab] = useState<'kpi' | 'department' | 'training' | 'assurance'>(legalComplianceOnly ? 'assurance' : 'kpi');
 
   useEffect(() => {
     let cancelled = false;
@@ -162,7 +164,7 @@ export const Analytics = () => {
     { label: 'Incident Investigation Actions Closure', unit: '%', key: 'actionClosure', target: 100, remark: 'Closure rate for incident-linked CAPAs.' },
     { label: 'Emergency Drills', unit: 'No', key: 'drills', remark: 'No emergency-drill API source is currently configured.' },
     { label: 'Action Plans Closure Tracker', unit: '%', key: 'capaClosure', target: 100, remark: 'Overall CAPA closure rate.' },
-    { label: 'Legal Compliance', unit: '%', key: 'legal', remark: 'No legal-compliance API source is currently configured.' },
+    { label: 'Legal Compliance', unit: '%', key: 'legal', remark: 'Open the Legal Compliance module for the compliance register and action tracking.' },
   ];
 
   const valueFor = (key: string) => ({ hazards: overview?.summary?.hazards?.total ?? current.hazards.length, nearMisses: overview?.summary?.nearMisses?.total ?? current.nearMisses.length, unsafeActs: metrics.unsafeActs, closure: metrics.closure, training: overview?.summary?.training?.manhours ?? Math.round(current.trainings.reduce((sum, item) => sum + trainingManhours(item), 0)), assurance: (overview?.summary?.audits || 0) + (overview?.summary?.inspections || 0) || current.audits.length + current.inspections.length, actionClosure: metrics.actionClosure, capaClosure: overview?.summary?.actions?.total ? Math.round((Number(overview.summary.actions.completed || 0) / Number(overview.summary.actions.total)) * 100) : (current.capas.length ? Math.round((current.capas.filter(item => ['closed', 'close', 'completed', 'verified', 'approved'].includes(statusOf(item))).length / current.capas.length) * 100) : 0), initiatives: '—', drills: '—', legal: '—' }[key] ?? '—');
@@ -655,11 +657,18 @@ export const Analytics = () => {
 
   return (
     <Layout>
-      <ContextHeader title="HSE Analytics" breadcrumbs={['Reporting', 'Analytics']} subtitle="Safety Pyramid and HSE KPI Performance Summary">
+      <ContextHeader title={legalComplianceOnly ? 'Legal Compliance' : 'HSE Analytics'} breadcrumbs={legalComplianceOnly ? ['Leading Indicators', 'Legal Compliance'] : ['Reporting', 'Analytics']} subtitle={legalComplianceOnly ? 'Review the legal register, licenses, NoCs, and related action items.' : 'Safety Pyramid and HSE KPI Performance Summary'}>
         <FilterBar />
       </ContextHeader>
       <main className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
         {(refreshing || sourceErrors.length > 0) && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-[11px] text-[#6B7280]" role="status"><span>{refreshing ? 'Refreshing live analytics data…' : `Showing the last successful snapshot; unavailable source(s): ${sourceErrors.join(', ')}.`}</span>{lastUpdated && <span>Updated {lastUpdated.toLocaleTimeString()}</span>}</div>}
+        {legalComplianceOnly ? (
+          <>
+            {renderLegalComplianceSummary()}
+            {renderLegalActionItemsSummary()}
+          </>
+        ) : (
+          <>
         <nav aria-label="Analytics sections" className="relative z-30 flex min-w-0 overflow-x-auto rounded-xl border-2 border-[#CB0017] bg-white shadow-md">
           {([['kpi', 'HSE KPI’s Review'], ['department', 'Department-Wise HSE KPIs Status'], ['training', 'HSE Trainings'], ['assurance', 'Assurance']] as const).map(([tab, label]) => <button key={tab} aria-selected={activeTab === tab} onClick={() => { setActiveTab(tab); setView('summary'); }} className={`min-h-14 min-w-[180px] flex-1 shrink-0 border-r border-[#E5E7EB] px-4 py-3 text-xs font-bold transition last:border-r-0 sm:text-sm ${activeTab === tab ? 'bg-[#CB0017] text-white shadow-inner' : 'text-[#374151] hover:bg-[#FFF1F2] hover:text-[#CB0017]'}`}>{label}</button>)}
         </nav>
@@ -706,6 +715,8 @@ export const Analytics = () => {
             {renderAuditsInspectionsSummary()}
             {renderSpecialistAuditsSummary()}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2"><Panel title="Monthly Safety Events"><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={trendData}><CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="Hazards" stroke={CHART_COLORS.warning} strokeWidth={3} /><Line dataKey="Incidents" stroke={CHART_COLORS.danger} strokeWidth={3} /><Line dataKey="Near Misses" stroke={CHART_COLORS.info} strokeWidth={3} /></LineChart></ResponsiveContainer></div></Panel><Panel title="Current Outcome Breakdown"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><KpiTile label="First Aid" value={metrics.firstAid} icon={<Activity />} accent="info" /><KpiTile label="MTC" value={metrics.mtc} icon={<FileText />} accent="warning" /><KpiTile label="RWC" value={metrics.rwc} icon={<FileText />} accent="warning" /><KpiTile label="Fire" value={metrics.majorFire + metrics.minorFire} icon={<Flame />} accent="danger" /></div></Panel></div>
+          </>
+        )}
           </>
         )}
         <div className="flex items-center gap-2 text-[11px] text-[#6B7280]"><CheckCircle2 className="h-4 w-4 text-[#16A34A]" /> Values are calculated from the latest backend records and refresh automatically.</div>
