@@ -491,7 +491,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   useEffect(() => {
     if (!activeDropdown) return;
     const handleClickOutside = (event: MouseEvent) => {
-      if (!(event.target as Element).closest('[data-dropdown-container]')) {
+      const activeContainer = Array.from(document.querySelectorAll<HTMLElement>('[data-dropdown-container]'))
+        .find(container => container.dataset.dropdownContainer === activeDropdown);
+      if (!activeContainer?.contains(event.target as Node)) {
         setActiveDropdown(null);
       }
     };
@@ -1041,7 +1043,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             required={col.required}
             disabled={col.readonly}
             open={activeDropdown === col.key}
-            onOpenChange={(isOpen) => setActiveDropdown(isOpen ? col.key : null)}
+            onOpenChange={(isOpen) => setActiveDropdown(current => {
+              if (isOpen) return col.key;
+              return current === col.key ? null : current;
+            })}
           />
           {value === 'Other' && (
             <input type="text" name={`${col.key}_other`} value={source[`${col.key}_other`] ?? ''} onChange={event => handleInputChange(event, isEdit)} placeholder="Enter custom location" className={FIELD_BASE} required />
@@ -1061,7 +1066,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         setActiveDropdown(null);
       };
       return (
-        <div className="relative space-y-2" data-dropdown-container="true">
+        <div className="relative space-y-2" data-dropdown-container={col.key}>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
             <input

@@ -1,5 +1,5 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, Loader2, MapPin, Search, X } from 'lucide-react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Loader2, MapPin, X } from 'lucide-react';
 import { apiClient } from '@cbl/api';
 
 type LocationOption = { id: string; name: string; code?: string | null };
@@ -24,11 +24,12 @@ export const LocationCombobox = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [internalOpen, setInternalOpen] = useState(false);
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setOpen = (newOpen: boolean) => {
-    if (onOpenChange) onOpenChange(newOpen);
-    else setInternalOpen(newOpen);
-  };
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = useCallback((newOpen: boolean) => {
+    if (!isControlled) setInternalOpen(newOpen);
+    onOpenChange?.(newOpen);
+  }, [isControlled, onOpenChange]);
   const [query, setQuery] = useState(value);
   const [options, setOptions] = useState<LocationOption[]>([]);
   const [total, setTotal] = useState(0);
@@ -82,7 +83,7 @@ export const LocationCombobox = ({
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (isControlled || !open) return;
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpen(false);
@@ -90,7 +91,7 @@ export const LocationCombobox = ({
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [open, setOpen]);
+  }, [isControlled, open, setOpen]);
 
   const select = (location: LocationOption) => {
     onChange(location.name);
@@ -102,7 +103,7 @@ export const LocationCombobox = ({
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="relative" ref={dropdownRef} data-dropdown-container="true">
+    <div className="relative" ref={dropdownRef} data-dropdown-container={name}>
       <div className="relative">
         <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
         <input
@@ -120,7 +121,7 @@ export const LocationCombobox = ({
           disabled={disabled}
           placeholder="Search locations by name or code..."
           autoComplete="off"
-          className="w-full min-h-9 rounded-md border border-[#DEDEDE] bg-white py-2 pl-9 pr-16 text-[13px] text-[#1A1818] focus:border-[#CB0017] focus:outline-none focus:ring-2 focus:ring-[#CB0017]/15 disabled:cursor-not-allowed disabled:bg-[#F5F5F5] disabled:text-[#9CA3AF] cursor-text"
+          className="w-full min-h-9 rounded-md border border-[#DEDEDE] bg-white py-2 pl-9 pr-20 text-[13px] text-[#1A1818] focus:border-[#CB0017] focus:outline-none focus:ring-2 focus:ring-[#CB0017]/15 disabled:cursor-not-allowed disabled:bg-[#F5F5F5] disabled:text-[#9CA3AF] cursor-text"
           onFocus={() => { if (!open) { setOpen(true); setPage(0); } }}
           onClick={() => { if (!open) { setOpen(true); setPage(0); } else { setOpen(false); } }}
           onChange={event => { setQuery(event.target.value); setPage(0); setOpen(true); }}
@@ -131,9 +132,10 @@ export const LocationCombobox = ({
             if (event.key === 'Escape') { setOpen(false); inputRef.current?.blur(); }
           }}
         />
-        {loading ? <Loader2 className="pointer-events-none absolute right-9 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[#9CA3AF]" /> : <Search className="pointer-events-none absolute right-9 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />}
+        {loading && <Loader2 className="pointer-events-none absolute right-14 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[#9CA3AF]" />}
+        {open ? <ChevronUp className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" /> : <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />}
         {value && !disabled && (
-          <button type="button" aria-label="Clear selected location" title="Clear location" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(''); setQuery(''); setPage(0); inputRef.current?.focus(); setOpen(true); }} className="absolute right-2 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#CB0017]">
+          <button type="button" aria-label="Clear selected location" title="Clear location" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(''); setQuery(''); setPage(0); inputRef.current?.focus(); setOpen(true); }} className="absolute right-8 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#CB0017]">
             <X className="h-4 w-4" />
           </button>
         )}
