@@ -172,6 +172,18 @@ export const moduleService = {
     const response = await apiClient.get('/departments', { params: { isActive: true, page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
     return response.data;
   },
+  getLocations: async (): Promise<ApiResponse<any[]>> => {
+    const response = await apiClient.get('/locations', { params: { isActive: true, page: 1, limit: 500, sortBy: 'name', sortOrder: 'asc' } });
+    return response.data;
+  },
+  getHseActionItems: async (params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
+    const requestParams = { ...(params || {}) };
+    Object.entries(requestParams).forEach(([key, value]) => {
+      if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
+    });
+    const response = await apiClient.get('/hse-action-items', { params: requestParams });
+    return response.data;
+  },
   getAll: async (schemaId: string, params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
     const endpoint = getEndpoint(schemaId);
     const requestParams = prepareRequestParams(params, schemaId);

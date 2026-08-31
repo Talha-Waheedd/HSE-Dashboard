@@ -11,7 +11,7 @@ import {
 export interface ColumnSchema {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'datetime' | 'time' | 'select' | 'textarea' | 'file' | 'actions';
+  type: 'text' | 'number' | 'date' | 'datetime' | 'time' | 'select' | 'location-select' | 'textarea' | 'file' | 'actions';
   options?: string[];
   required?: boolean;
   readonly?: boolean;
@@ -57,7 +57,7 @@ export const hazardReportingSchema: SectionConfig = {
       }
     },
     { key: 'department_id', label: 'Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Basic Information' },
-    { key: 'location', label: 'Location', type: 'text', required: true, section: 'Hazard Details' },
+    { key: 'location', label: 'Location', type: 'location-select', required: true, section: 'Hazard Details' },
     { key: 'originator', label: 'Reported By', type: 'text', required: true, section: 'Basic Information' },
     { key: 'hazard_category_id', label: 'Hazard Category', type: 'select', options: HAZARD_CATEGORIES, required: true, section: 'Hazard Details' },
     { key: 'description', label: 'Hazard Details', type: 'textarea', required: true, section: 'Hazard Details' },
@@ -105,7 +105,7 @@ export const nearMissSchema: SectionConfig = {
     { key: 'affected_person', label: 'Affected Person Name', type: 'text', section: 'Basic Information' },
     { key: 'affected_designation', label: 'Affected Person Designation', type: 'text', section: 'Basic Information' },
     { key: 'time', label: 'Time (24 Hrs)', type: 'time', required: true, section: 'Basic Information' },
-    { key: 'location', label: 'Area / Location', type: 'text', required: true, section: 'Basic Information' },
+    { key: 'location', label: 'Area / Location', type: 'location-select', required: true, section: 'Basic Information' },
     { key: 'details', label: 'Details of the Near Miss', type: 'textarea', required: true, section: 'Near Miss Details' },
     { key: 'preventive_action', label: 'Preventive Action Suggestion', type: 'textarea', section: 'Corrective Actions' },
     { key: 'responsible_person', label: 'Resp.', type: 'text', section: 'Corrective Actions' },
@@ -130,7 +130,7 @@ export const incidentLogSchema: SectionConfig = {
     { key: 'shift', label: 'Shift', type: 'select', options: ['A', 'B', 'C', 'General'], required: true, section: 'Basic Information' },
     { key: 'area_manager', label: 'Area Manager', type: 'text', required: true, section: 'Basic Information' },
     { key: 'gender', label: 'Gender Wise', type: 'select', options: ['Male', 'Female', 'Other'], section: 'Basic Information' },
-    { key: 'location', label: 'Location', type: 'text', required: true, section: 'Basic Information' },
+    { key: 'location', label: 'Location', type: 'location-select', required: true, section: 'Basic Information' },
     { key: 'department_id', label: 'Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Basic Information' },
     { key: 'incident_category_id', label: 'Incident Category', type: 'select', options: INCIDENT_CATEGORIES, required: true, section: 'Incident Details' },
     { key: 'root_cause_id', label: 'Root Cause', type: 'select', options: ROOT_CAUSES, required: true, section: 'Incident Details' },

@@ -15,7 +15,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus, Save, Trash2, Download, Edit2, X, History, ArrowUpDown,
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
-  ChevronsLeft, ChevronsRight, ChevronDown,
+  ChevronsLeft, ChevronsRight, ChevronDown, ChevronUp,
   CheckCircle2, LayoutGrid, Filter, PanelRightOpen,
   Upload, Paperclip, FileText, CalendarDays, Clock, Check,
 } from 'lucide-react';
@@ -454,7 +454,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
   const [hazardCategoryQuery, setHazardCategoryQuery] = useState('');
-  const [hazardCategoryOpen, setHazardCategoryOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [attachmentWarning, setAttachmentWarning] = useState<string | null>(null);
   const [statusHistoryModal, setStatusHistoryModal] = useState<{ isOpen: boolean; record: any | null }>({ isOpen: false, record: null });
   const [searchQuery, setSearchQuery] = useState('');
@@ -472,6 +472,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [trainingDepartments, setTrainingDepartments] = useState<DepartmentOption[]>([]);
   const [trainingDepartmentsLoading, setTrainingDepartmentsLoading] = useState(false);
   const [trainingDepartmentsError, setTrainingDepartmentsError] = useState<string | null>(null);
+  const [locationsData, setLocationsData] = useState<any[]>([]);
+  const [locationsLoading, setLocationsLoading] = useState(false);
+  const [locationsError, setLocationsError] = useState<string | null>(null);
   const [showReviewPanel, setShowReviewPanel] = useState(false);
   const [showCloseHazard, setShowCloseHazard] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -484,6 +487,17 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
   const routeCategory = schema.id === 'incident-log' ? searchParams.get('category') : null;
+
+  useEffect(() => {
+    if (!activeDropdown) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!(event.target as Element).closest('[data-dropdown-container]')) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeDropdown]);
 
   useEffect(() => {
     if (schema.id !== 'training-records') return;
@@ -506,6 +520,26 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       .finally(() => { if (active) setTrainingDepartmentsLoading(false); });
     return () => { active = false; };
   }, [schema.id]);
+
+  useEffect(() => {
+    let active = true;
+    setLocationsLoading(true);
+    setLocationsError(null);
+    void moduleService.getLocations()
+      .then(response => {
+        if (!active) return;
+        if (!response.success || !Array.isArray(response.data)) throw new Error(response.message || 'Unable to load locations.');
+        setLocationsData(response.data.filter(location => {
+          const name = String(location.name || '').trim().toLowerCase();
+          return location.isActive !== false && location.id && !['other', 'others'].includes(name);
+        }));
+      })
+      .catch(error => {
+        if (active) setLocationsError(error instanceof Error ? error.message : 'Unable to load locations.');
+      })
+      .finally(() => { if (active) setLocationsLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const listFilters = useMemo(() => {
     const applicableFilters = { ...(filters as unknown as Record<string, unknown>) };
@@ -706,6 +740,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     const isTrainingDraft = schema.id === 'training-records' && String(sourceData.status_id ?? sourceData.status ?? '').toLowerCase() === 'draft';
     const effectiveStatusOverride = statusOverride || (editingId && isTrainingDraft ? 'Pending' : undefined);
     const dataToSave = applyComputes({ ...sourceData, ...(effectiveStatusOverride ? { [statusKey]: effectiveStatusOverride } : {}) }, schema, entries);
+    if (dataToSave.location === 'Other' && dataToSave.location_other) {
+      dataToSave.location = dataToSave.location_other;
+    }
     const isTrainingDraftSave = schema.id === 'training-records' && statusOverride === 'Draft';
     const err = isTrainingDraftSave ? null : validateFormData(dataToSave);
     if (err) {
@@ -1003,6 +1040,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             } as React.ChangeEvent<HTMLInputElement>, isEdit)}
             required={col.required}
             disabled={col.readonly}
+            open={activeDropdown === col.key}
+            onOpenChange={(isOpen) => setActiveDropdown(isOpen ? col.key : null)}
           />
           {value === 'Other' && (
             <input type="text" name={`${col.key}_other`} value={source[`${col.key}_other`] ?? ''} onChange={event => handleInputChange(event, isEdit)} placeholder="Enter custom location" className={FIELD_BASE} required />
@@ -1015,41 +1054,45 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       const source = isEdit ? editFormData : formData;
       const query = hazardCategoryQuery.trim().toLowerCase();
       const options = (col.options || []).filter(option => option.toLowerCase().includes(query));
+      const isOpen = activeDropdown === col.key;
       const choose = (nextValue: string) => {
         handleInputChange({ target: { name: col.key, value: nextValue } } as any, isEdit);
         setHazardCategoryQuery(nextValue === 'Other' ? '' : nextValue);
-        setHazardCategoryOpen(false);
+        setActiveDropdown(null);
       };
       return (
-        <div className="relative space-y-2">
+        <div className="relative space-y-2" data-dropdown-container="true">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
             <input
               type="text"
-              value={hazardCategoryQuery || (value ?? '')}
-              onFocus={() => setHazardCategoryOpen(true)}
-              onClick={() => setHazardCategoryOpen(true)}
+              value={isOpen ? hazardCategoryQuery : (value ?? '')}
+              onFocus={() => { if (!isOpen) setActiveDropdown(col.key); }}
+              onClick={() => { if (!isOpen) setActiveDropdown(col.key); else setActiveDropdown(null); }}
               onChange={event => {
                 setHazardCategoryQuery(event.target.value);
-                setHazardCategoryOpen(true);
+                setActiveDropdown(col.key);
                 handleInputChange({ target: { name: col.key, value: '' } } as any, isEdit);
               }}
               placeholder="Select or search hazard category..."
-              className={`${FIELD_BASE} pl-9 pr-9`}
+              className={`${FIELD_BASE} pl-9 pr-9 cursor-text`}
               required={col.required && !value}
-              aria-expanded={hazardCategoryOpen}
+              aria-expanded={isOpen}
               aria-autocomplete="list"
+              onKeyDown={event => {
+                if (event.key === 'Escape') setActiveDropdown(null);
+              }}
             />
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
+            {isOpen ? <ChevronUp className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" /> : <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />}
           </div>
-          {hazardCategoryOpen && (
+          {isOpen && (
             <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-lg border border-[#D6D6D6] bg-white py-1 shadow-lg">
               {options.map(option => (
                 <button key={option} type="button" onMouseDown={event => event.preventDefault()} onClick={() => choose(option)} className="block w-full px-3 py-2 text-left text-[13px] hover:bg-[#FFF1F3]">
                   {option}
                 </button>
               ))}
-              <button type="button" onMouseDown={event => event.preventDefault()} onClick={() => choose('Other')} className="block w-full px-3 py-2 text-left text-[13px] font-semibold text-[#CB0017] hover:bg-[#FFF1F3] border-t border-[#F0F0F0]">
+              <button type="button" onMouseDown={event => event.preventDefault()} onClick={() => choose('Other')} className="block w-full px-3 py-2 text-left text-[13px] hover:bg-[#FFF1F3] border-t border-[#F0F0F0]">
                 Other
               </button>
             </div>
@@ -1081,6 +1124,31 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             {col.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
           {(value === 'Others' || value === 'Other') && (
+            <input
+              type="text"
+              name={`${col.key}_other`}
+              value={(isEdit ? editFormData : formData)[`${col.key}_other`] ?? ''}
+              onChange={e => handleInputChange(e, isEdit)}
+              placeholder={`Specify ${col.label}`}
+              className={FIELD_BASE}
+              required
+            />
+          )}
+        </div>
+      );
+    }
+
+    if (col.type === 'location-select') {
+      return (
+        <div className="space-y-2">
+          <select name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={FIELD_BASE} required={col.required} disabled={col.readonly || locationsLoading}>
+            <option value="">{locationsLoading ? 'Loading locations...' : `Select ${col.label}...`}</option>
+            {locationsData.map(loc => <option key={loc.id} value={loc.name}>{loc.name}</option>)}
+            <option value="Other">Other</option>
+          </select>
+          {locationsError && <p className="text-[11px] text-[#B91C1C]" role="alert">{locationsError}</p>}
+          {!locationsLoading && !locationsError && locationsData.length === 0 && <p className="text-[11px] text-[#B91C1C]" role="alert">No active locations found.</p>}
+          {(value === 'Other') && (
             <input
               type="text"
               name={`${col.key}_other`}

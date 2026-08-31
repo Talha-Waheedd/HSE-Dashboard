@@ -11,16 +11,24 @@ interface LocationComboboxProps {
   disabled?: boolean;
   name?: string;
   label: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const PAGE_SIZE = 25;
 
 export const LocationCombobox = ({
-  value = '', onChange, required, disabled, name = 'location', label,
+  value = '', onChange, required, disabled, name = 'location', label, open: controlledOpen, onOpenChange,
 }: LocationComboboxProps) => {
   const listboxId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = (newOpen: boolean) => {
+    if (onOpenChange) onOpenChange(newOpen);
+    else setInternalOpen(newOpen);
+  };
   const [query, setQuery] = useState(value);
   const [options, setOptions] = useState<LocationOption[]>([]);
   const [total, setTotal] = useState(0);
@@ -73,6 +81,17 @@ export const LocationCombobox = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open, setOpen]);
+
   const select = (location: LocationOption) => {
     onChange(location.name);
     setQuery(location.name);
@@ -80,11 +99,10 @@ export const LocationCombobox = ({
     inputRef.current?.focus();
   };
 
-  const close = () => window.setTimeout(() => setOpen(false), 120);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef} data-dropdown-container="true">
       <div className="relative">
         <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
         <input
@@ -102,9 +120,9 @@ export const LocationCombobox = ({
           disabled={disabled}
           placeholder="Search locations by name or code..."
           autoComplete="off"
-          className="w-full min-h-9 rounded-md border border-[#DEDEDE] bg-white py-2 pl-9 pr-16 text-[13px] text-[#1A1818] focus:border-[#CB0017] focus:outline-none focus:ring-2 focus:ring-[#CB0017]/15 disabled:cursor-not-allowed disabled:bg-[#F5F5F5] disabled:text-[#9CA3AF]"
-          onFocus={() => { setOpen(true); setPage(0); }}
-          onBlur={close}
+          className="w-full min-h-9 rounded-md border border-[#DEDEDE] bg-white py-2 pl-9 pr-16 text-[13px] text-[#1A1818] focus:border-[#CB0017] focus:outline-none focus:ring-2 focus:ring-[#CB0017]/15 disabled:cursor-not-allowed disabled:bg-[#F5F5F5] disabled:text-[#9CA3AF] cursor-text"
+          onFocus={() => { if (!open) { setOpen(true); setPage(0); } }}
+          onClick={() => { if (!open) { setOpen(true); setPage(0); } else { setOpen(false); } }}
           onChange={event => { setQuery(event.target.value); setPage(0); setOpen(true); }}
           onKeyDown={event => {
             if (event.key === 'ArrowDown') { event.preventDefault(); setOpen(true); setActiveIndex(index => Math.min(index + 1, options.length - 1)); }

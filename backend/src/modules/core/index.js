@@ -25,6 +25,7 @@ const dashboardRoutes = require('./dashboard.routes');
 const reportRoutes = require('./report.routes');
 const analyticsRoutes = require('./analytics.routes');
 const masterAnalysisRoutes = require('../analysis/master-analysis.routes');
+const hseActionItemRoutes = require('../hse-action-items/hse-action-item.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -48,5 +49,6 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/master-analysis', masterAnalysisRoutes);
+router.use('/hse-action-items', hseActionItemRoutes);
 
 module.exports = router;
