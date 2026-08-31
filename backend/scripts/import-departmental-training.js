@@ -7,7 +7,9 @@ const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const INPUT = process.argv[2] || 'C:/Users/PMLS/Downloads/Departmental Training Log YTD-June-2026.xlsx';
+const args = process.argv.slice(2);
+const INPUT = args.find(argument => !argument.startsWith('--'));
+const DRY_RUN = args.includes('--dry-run');
 const USER_ID = process.env.PREVIEW_USER_ID || 'c7ec4de8-f2cd-457f-a6df-ae4530fe6b0c';
 const clean = value => String(value ?? '').replace(/\s+/g, ' ').trim();
 const normalized = value => clean(value).toLowerCase();
@@ -22,6 +24,25 @@ const excelDate = value => {
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(text)) { const [day, month, year] = text.split('/'); return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; }
   if (/^\d+(\.\d+)?$/.test(text)) { const date = new Date(Date.UTC(1899, 11, 30) + Number(text) * 86400000); return date.toISOString().slice(0, 10); }
   return null;
+};
+const sheetMonths = {
+  january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
+  july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
+};
+const dateForSheet = (value, sheet) => {
+  const date = excelDate(value);
+  const sheetMonth = sheetMonths[normalized(sheet)];
+  if (!date || !sheetMonth) return date;
+  const [year, parsedMonth] = date.split('-').map(Number);
+  if (parsedMonth === sheetMonth) return date;
+
+  // In the supplied departmental logs, dates entered as DD/MM/YYYY can be
+  // stored by Excel as MM/DD/YYYY for days 1-12. The named worksheet is the
+  // authoritative month, while the parsed month is the intended day.
+  if (/^\d+(\.\d+)?$/.test(clean(value)) && parsedMonth >= 1 && parsedMonth <= 12) {
+    return `${year}-${String(sheetMonth).padStart(2, '0')}-${String(parsedMonth).padStart(2, '0')}`;
+  }
+  return date;
 };
 const classify = topic => {
   const value = normalized(topic);
@@ -70,33 +91,60 @@ function sourceRows(file) {
   return rows;
 }
 async function main() {
-  const report = { source: INPUT, sheets: ['January', 'February', 'March', 'April', 'May', 'June'], sourceRows: 0, successful: 0, duplicates: 0, failed: 0, departmentsCreated: [], rows: [] };
+  if (!INPUT) throw new Error('Usage: node scripts/import-departmental-training.js <workbook.xlsx> [--dry-run]');
+  if (!fs.existsSync(INPUT)) throw new Error(`Training workbook not found: ${INPUT}`);
+  const source = sourceRows(INPUT);
+  const report = {
+    source: path.basename(INPUT),
+    dryRun: DRY_RUN,
+    sheets: [...new Set(source.map(item => item.sheet))],
+    sourceRows: source.length,
+    successful: 0,
+    duplicates: 0,
+    ignored: 0,
+    failed: 0,
+    correctedDates: 0,
+    departmentsCreated: [],
+    rows: [],
+  };
   const db = await mysql.createConnection({ host: process.env.DB_HOST, port: Number(process.env.DB_PORT), user: process.env.DB_USER, password: process.env.DB_PASSWORD, database: process.env.DB_NAME });
-  const source = sourceRows(INPUT); report.sourceRows = source.length;
   const [[plant]] = await db.query('SELECT id FROM plants WHERE deleted_at IS NULL ORDER BY created_at ASC LIMIT 1');
   if (!plant) throw new Error('No active plant is available for training import');
-  const [departments] = await db.query('SELECT id, name FROM departments WHERE deleted_at IS NULL');
+  const [departments] = await db.query('SELECT id, name FROM departments WHERE plant_id = ? AND is_active = 1 AND deleted_at IS NULL', [plant.id]);
   const departmentMap = new Map(departments.map(row => [normalized(row.name), row.id]));
   const [fingerprints] = await db.query('SELECT source_fingerprint FROM training_sessions WHERE source_fingerprint IS NOT NULL');
   const known = new Set(fingerprints.map(row => row.source_fingerprint));
+  const sourceOccurrences = new Map();
   await db.beginTransaction();
   try {
     for (const item of source) {
-      const date = excelDate(item.date), participants = Number(item.participants), duration = Number(item.duration);
+      const parsedDate = excelDate(item.date), date = dateForSheet(item.date, item.sheet), participants = Number(item.participants), duration = Number(item.duration);
+      const hasRecordContent = [item.trainer, item.venue, item.topic, item.participants, item.duration, item.manhours].some(value => clean(value));
+      if (!date && !hasRecordContent) {
+        report.ignored += 1;
+        report.rows.push({ sheet: item.sheet, row: item.row, result: 'ignored', reason: 'Worksheet title or total row' });
+        continue;
+      }
       if (!date || !item.department || !item.trainer || !item.topic || !Number.isFinite(participants) || participants <= 0 || !Number.isFinite(duration) || duration <= 0) {
         report.failed += 1; report.rows.push({ sheet: item.sheet, row: item.row, result: 'failed', reason: 'Missing or invalid date, department, trainer, topic, participants, or duration' }); continue;
       }
+      if (date !== parsedDate) report.correctedDates += 1;
       const departmentName = canonicalDepartment(item.department);
       let departmentId = departmentMap.get(normalized(departmentName));
       if (!departmentId && normalized(departmentName) === 'hse') departmentId = departmentMap.get('hse department');
       if (!departmentId) {
-        const [result] = await db.query('INSERT INTO departments (id, plant_id, name, code, is_active, created_by, updated_by, created_at, updated_at) VALUES (UUID(),?,?,?,?,?,?,NOW(),NOW())', [plant.id, departmentName, `IMP-${departmentName.replace(/[^A-Za-z0-9]/g, '').slice(0, 14).toUpperCase()}`, true, USER_ID, USER_ID]);
-        const [[created]] = await db.query('SELECT id FROM departments WHERE id = LAST_INSERT_ID()');
-        // UUID inserts do not expose LAST_INSERT_ID; resolve by normalized name instead.
+        await db.query('INSERT INTO departments (id, plant_id, name, code, is_active, created_by, updated_by, created_at, updated_at) VALUES (UUID(),?,?,?,?,?,?,NOW(),NOW())', [plant.id, departmentName, `IMP-${departmentName.replace(/[^A-Za-z0-9]/g, '').slice(0, 14).toUpperCase()}`, true, USER_ID, USER_ID]);
         const [[resolved]] = await db.query('SELECT id FROM departments WHERE plant_id = ? AND name = ? AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1', [plant.id, departmentName]);
         departmentId = resolved.id; departmentMap.set(normalized(departmentName), departmentId); report.departmentsCreated.push(departmentName);
       }
-      const fingerprint = crypto.createHash('sha256').update([date, normalized(departmentName), normalized(item.trainer), normalized(item.venue), normalized(item.topic), participants, duration].join('|')).digest('hex');
+      const fingerprintSource = [date, normalized(departmentName), normalized(item.trainer), normalized(item.venue), normalized(item.topic), participants, duration].join('|');
+      const occurrence = (sourceOccurrences.get(fingerprintSource) || 0) + 1;
+      sourceOccurrences.set(fingerprintSource, occurrence);
+      // Keep the first occurrence compatible with earlier imports. Repeated
+      // source rows receive a stable occurrence suffix so no workbook row is
+      // silently discarded and rerunning the same import remains idempotent.
+      const fingerprintValue = occurrence === 1 ? fingerprintSource : `${fingerprintSource}|occurrence:${occurrence}`;
+      const fingerprint = crypto.createHash('sha256').update(fingerprintValue).digest('hex');
       if (known.has(fingerprint)) { report.duplicates += 1; report.rows.push({ sheet: item.sheet, row: item.row, result: 'duplicate' }); continue; }
       if (!Number.isFinite(participants) || participants <= 0 || !Number.isFinite(duration) || duration <= 0) {
         report.failed += 1;
@@ -106,10 +154,22 @@ async function main() {
       const manhours = participants * duration / 60;
       const venue = String(item.venue || '').trim();
       await db.query('INSERT INTO training_sessions (id, plant_id, department_id, title, description, training_type, status, trainer_id, trainer_name, scheduled_date, duration_minutes, venue, max_attendees, participant_count, manhours, notes, source_fingerprint, created_by, updated_by, created_at, updated_at) VALUES (UUID(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW())', [plant.id, departmentId, item.topic.slice(0, 255), item.topic, classify(item.topic), 'completed', USER_ID, item.trainer.slice(0, 255), date, Math.round(duration), venue.slice(0, 255) || null, Math.round(participants), Math.round(participants), manhours.toFixed(2), `Imported from ${item.sheet} 2026 departmental training log`, fingerprint, USER_ID, USER_ID]);
-      known.add(fingerprint); report.successful += 1; report.rows.push({ sheet: item.sheet, row: item.row, result: 'imported', date, department: departmentName, manhours: Number(manhours.toFixed(2)) });
+      known.add(fingerprint); report.successful += 1; report.rows.push({ sheet: item.sheet, row: item.row, result: DRY_RUN ? 'validated' : 'imported', date, sourceDate: parsedDate, dateCorrected: date !== parsedDate, sourceOccurrence: occurrence, department: departmentName, manhours: Number(manhours.toFixed(2)) });
     }
-    await db.commit();
+    if (DRY_RUN) await db.rollback(); else await db.commit();
   } catch (error) { await db.rollback(); throw error; } finally { await db.end(); }
-  const output = path.resolve(__dirname, '../import-reports/departmental-training-import.json'); fs.mkdirSync(path.dirname(output), { recursive: true }); fs.writeFileSync(output, JSON.stringify(report, null, 2)); console.log(JSON.stringify({ ...report, reportPath: output }, null, 2));
+  let reportPath = null;
+  if (!DRY_RUN) {
+    const reportName = `${path.basename(INPUT, path.extname(INPUT)).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase()}-import.json`;
+    reportPath = path.resolve(__dirname, '../import-reports', reportName);
+    fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  }
+  const { rows, ...summary } = report;
+  console.log(JSON.stringify({ ...summary, issues: rows.filter(row => ['failed', 'warning'].includes(row.result)), reportPath }, null, 2));
 }
-main().catch(error => { console.error(error); process.exit(1); });
+if (require.main === module) {
+  main().catch(error => { console.error(error); process.exit(1); });
+}
+
+module.exports = { sourceRows, excelDate, dateForSheet, canonicalDepartment, classify };

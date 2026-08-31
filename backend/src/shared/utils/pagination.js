@@ -49,8 +49,12 @@ const addTextSearch = (where, query, fields, Model) => {
   const search = String(query || '').trim().slice(0, 255);
   if (!search || !fields.length) return;
   const escaped = Model.sequelize.escape(`%${search}%`);
+  const modelAlias = String(Model.name || '').replace(/`/g, '');
   where[Op.and] = [...(where[Op.and] || []), {
-    [Op.or]: fields.map((field) => Model.sequelize.literal(`CAST(\`${field}\` AS CHAR) LIKE ${escaped}`)),
+    [Op.or]: fields.map((field) => {
+      const columnName = String(field).replace(/`/g, '');
+      return Model.sequelize.literal(`CAST(\`${modelAlias}\`.\`${columnName}\` AS CHAR) LIKE ${escaped}`);
+    }),
   }];
 };
 
