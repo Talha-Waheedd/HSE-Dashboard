@@ -101,7 +101,7 @@ const trainingTypeToApi = (value: unknown) => ({
   chemical_handling: 'chemical_handling', emergency_response: 'emergency_response', other: 'other',
 }[String(value || '').trim().toLowerCase()] || 'other');
 const statusFromApi = (value: unknown) => ({
-  draft: 'Pending', reported: 'Open', submitted: 'Open', under_review: 'Pending',
+  draft: 'Draft', reported: 'Open', submitted: 'Open', under_review: 'Pending',
   under_investigation: 'Pending', corrective_action: 'Work in Progress', resolved: 'Closed', closed: 'Closed',
   scheduled: 'Pending', in_progress: 'Work in Progress', completed: 'Closed', cancelled: 'Cancelled',
 }[String(value || '').toLowerCase()] || value);
@@ -334,14 +334,15 @@ export const moduleService = {
         status: statusToApi(payload.status_id || 'Open', schemaId)
       };
     } else if (schemaId === 'training-records') {
+      const isDraft = String(payload.status_id ?? payload.status ?? '').toLowerCase() === 'draft';
       const participants = Number(payload.participants) || undefined;
       const durationMinutes = Number(payload.duration_minutes) || undefined;
       payload = {
         ...payload,
         plantId: payload.plantId || DEFAULT_PLANT_ID,
         departmentId: payload.department_id,
-        title: payload.topic || 'Training Session',
-        trainingType: trainingTypeToApi(payload.training_type),
+        title: payload.topic || (isDraft ? undefined : 'Training Session'),
+        trainingType: payload.training_type ? trainingTypeToApi(payload.training_type) : undefined,
         customTrainingType: payload.training_type === 'Other' ? String(payload.training_type_other || '').trim() : null,
         scheduledDate: payload.date,
         trainerName: payload.trainer,
@@ -424,6 +425,7 @@ export const moduleService = {
         participantCount: participants,
         durationMinutes,
         manhours: Number(payload.manhours) || (participants && durationMinutes ? participants * durationMinutes / 60 : undefined),
+        status: statusToApi(payload.status_id ?? payload.status, schemaId),
       };
       delete payload.manhours;
     } else if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') {

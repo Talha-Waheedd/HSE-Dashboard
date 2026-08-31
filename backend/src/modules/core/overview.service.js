@@ -79,7 +79,7 @@ class OverviewService {
         rows(`SELECT COUNT(*) total, SUM(status IN ('closed','resolved')) closed_count
           FROM near_misses WHERE ${nearMiss.where}`, nearMiss.replacements),
         rows(`SELECT COUNT(*) total, COALESCE(SUM(COALESCE(manhours, participant_count * duration_minutes / 60, 0)), 0) manhours
-          FROM training_sessions WHERE ${training.where}`, training.replacements),
+          FROM training_sessions WHERE ${training.where} AND status <> 'draft'`, training.replacements),
         rows(`SELECT COUNT(*) total,
           SUM(status IN ('open','in_progress','pending','planned')) open_count,
           SUM(status IN ('completed','closed','verified')) closed_count,
@@ -99,7 +99,7 @@ class OverviewService {
         rows(`SELECT COALESCE(d.code, d.name, CAST(t.department_id AS CHAR), 'Unassigned') department,
           COALESCE(SUM(COALESCE(t.manhours, t.participant_count * t.duration_minutes / 60, 0)), 0) manhours
           FROM training_sessions t LEFT JOIN departments d ON d.id = t.department_id
-          WHERE ${qualifyWhere(training.where, 't', ['department_id', 'scheduled_date', 'deleted_at', 'status'])}
+          WHERE ${qualifyWhere(training.where, 't', ['department_id', 'scheduled_date', 'deleted_at', 'status'])} AND t.status <> 'draft'
           GROUP BY department ORDER BY manhours DESC LIMIT 10`, training.replacements),
       ]);
 
@@ -140,7 +140,7 @@ class OverviewService {
         rows(`SELECT LOWER(category) category, LOWER(severity_level) severity, LOWER(status) status, MONTH(reported_at) month, COUNT(*) total FROM hazards WHERE ${hazard.where} GROUP BY category, severity, status, month`, hazard.replacements),
         rows(`SELECT LOWER(incident_type) type, MONTH(incident_date) month, COUNT(*) total FROM incidents WHERE ${incident.where} GROUP BY type, month`, incident.replacements),
         rows(`SELECT MONTH(reported_at) month, LOWER(department_id) department, COUNT(*) total FROM near_misses WHERE ${nearMiss.where} GROUP BY month, department`, nearMiss.replacements),
-        rows(`SELECT MONTH(t.scheduled_date) month, COALESCE(d.name, t.department_id) department, COUNT(*) total, COALESCE(SUM(COALESCE(t.manhours, t.participant_count * t.duration_minutes / 60, 0)),0) manhours FROM training_sessions t LEFT JOIN departments d ON d.id = t.department_id WHERE ${qualifyWhere(training.where, 't', ['department_id', 'scheduled_date', 'deleted_at', 'status'])} GROUP BY month, t.department_id, d.name`, training.replacements),
+        rows(`SELECT MONTH(t.scheduled_date) month, COALESCE(d.name, t.department_id) department, COUNT(*) total, COALESCE(SUM(COALESCE(t.manhours, t.participant_count * t.duration_minutes / 60, 0)),0) manhours FROM training_sessions t LEFT JOIN departments d ON d.id = t.department_id WHERE ${qualifyWhere(training.where, 't', ['department_id', 'scheduled_date', 'deleted_at', 'status'])} AND t.status <> 'draft' GROUP BY month, t.department_id, d.name`, training.replacements),
         rows(`SELECT LOWER(status) status, LOWER(priority) severity, COUNT(*) total, SUM(status IN ('completed','closed','verified')) completed FROM corrective_actions WHERE ${action.where} GROUP BY status, severity`, action.replacements),
         rows(`SELECT 'audits' source, department_id department, COUNT(*) total FROM audits WHERE ${assurance.where} GROUP BY department_id`, assurance.replacements),
         rows(`SELECT 'inspections' source, department_id department, COUNT(*) total FROM inspections WHERE ${assurance.where} GROUP BY department_id`, assurance.replacements),

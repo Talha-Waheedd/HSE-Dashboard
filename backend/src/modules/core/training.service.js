@@ -9,6 +9,14 @@ const { sequelize } = require('../../database/connection');
 const { Department } = require('../../database/models');
 
 class TrainingService {
+  assertRegisteredTrainingIsComplete(data) {
+    if (!String(data.title || '').trim()) throw ApiError.badRequest('title is required before a training draft can be registered.');
+    if (!data.trainingType) throw ApiError.badRequest('trainingType is required before a training draft can be registered.');
+    if (!data.scheduledDate) throw ApiError.badRequest('scheduledDate is required before a training draft can be registered.');
+    if (!Number.isInteger(Number(data.durationMinutes)) || Number(data.durationMinutes) < 1) throw ApiError.badRequest('durationMinutes must be a positive integer before a training draft can be registered.');
+    if (!Number.isInteger(Number(data.participantCount)) || Number(data.participantCount) < 1) throw ApiError.badRequest('participantCount must be a positive integer before a training draft can be registered.');
+  }
+
   /**
    * Create a new training session
    */
@@ -20,12 +28,14 @@ class TrainingService {
         const department = await Department.findOne({ where: { id: data.departmentId, isActive: true }, attributes: ['id'], transaction });
         if (!department) throw ApiError.badRequest('departmentId must reference an active department.');
       }
+      if (!Object.values(TrainingStatus).includes(data.status)) data.status = TrainingStatus.SCHEDULED;
+      if (data.status !== TrainingStatus.DRAFT) this.assertRegisteredTrainingIsComplete(data);
       const participants = Number(data.participantCount);
       const durationMinutes = Number(data.durationMinutes);
-      data.manhours = Number((participants * durationMinutes / 60).toFixed(2));
+      const hasManhourInputs = Number.isFinite(participants) && participants > 0 && Number.isFinite(durationMinutes) && durationMinutes > 0;
+      data.manhours = hasManhourInputs ? Number((participants * durationMinutes / 60).toFixed(2)) : null;
       data.trainerId = userId; // In this design, the creator is the trainer (could be decoupled later)
       data.createdBy = userId;
-      if (!Object.values(TrainingStatus).includes(data.status)) data.status = TrainingStatus.SCHEDULED;
       return trainingRepository.create(data, { transaction });
     });
   }
@@ -39,18 +49,19 @@ class TrainingService {
   }
 
   async getSummary(where = {}) {
-    const { fn, col, literal } = require('sequelize');
+    const { literal } = require('sequelize');
     const row = await trainingRepository.model.findOne({
       where, raw: true,
       attributes: [
-        [fn('COUNT', col('id')), 'totalRecords'],
+        [literal("COALESCE(SUM(CASE WHEN status <> 'draft' THEN 1 ELSE 0 END), 0)"), 'totalRecords'],
+        [literal("COALESCE(SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END), 0)"), 'draftRecords'],
         [literal("COALESCE(SUM(CASE WHEN status IN ('scheduled','in_progress') THEN 1 ELSE 0 END), 0)"), 'pendingRecords'],
         [literal("COALESCE(SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END), 0)"), 'completedRecords'],
-        [literal('COALESCE(SUM(COALESCE(manhours, participant_count * duration_minutes / 60, 0)), 0)'), 'totalManhours'],
+        [literal("COALESCE(SUM(CASE WHEN status <> 'draft' THEN COALESCE(manhours, participant_count * duration_minutes / 60, 0) ELSE 0 END), 0)"), 'totalManhours'],
       ],
     });
     const value = (key) => Number(row?.[key] || 0);
-    return { totalRecords: value('totalRecords'), totalManhours: value('totalManhours'), pendingRecords: value('pendingRecords'), completedRecords: value('completedRecords'), attendanceRate: null };
+    return { totalRecords: value('totalRecords'), draftRecords: value('draftRecords'), totalManhours: value('totalManhours'), pendingRecords: value('pendingRecords'), completedRecords: value('completedRecords'), attendanceRate: null };
   }
 
   /**
@@ -80,9 +91,15 @@ class TrainingService {
       if (!department) throw ApiError.badRequest('departmentId must reference an active department.');
     }
 
-    const participants = updateData.participantCount ?? session.participantCount;
-    const durationMinutes = updateData.durationMinutes ?? session.durationMinutes;
-    if (participants !== null && participants !== undefined && durationMinutes !== null && durationMinutes !== undefined) {
+    const mergedData = {
+      ...session.toJSON(),
+      ...updateData,
+    };
+    const nextStatus = updateData.status ?? session.status;
+    if (nextStatus !== TrainingStatus.DRAFT) this.assertRegisteredTrainingIsComplete(mergedData);
+    const participants = mergedData.participantCount;
+    const durationMinutes = mergedData.durationMinutes;
+    if (Number.isFinite(Number(participants)) && Number(participants) > 0 && Number.isFinite(Number(durationMinutes)) && Number(durationMinutes) > 0) {
       updateData.manhours = Number((Number(participants) * Number(durationMinutes) / 60).toFixed(2));
     } else {
       updateData.manhours = null;

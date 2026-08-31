@@ -27,7 +27,7 @@ const TrainingSession = sequelize.define('TrainingSession', {
   },
   title: {
     type: DataTypes.STRING(255),
-    allowNull: false,
+    allowNull: true,
   },
   description: {
     type: DataTypes.TEXT,
@@ -35,7 +35,7 @@ const TrainingSession = sequelize.define('TrainingSession', {
   },
   trainingType: {
     type: DataTypes.ENUM(...Object.values(TrainingType)),
-    allowNull: false,
+    allowNull: true,
   },
   customTrainingType: {
     type: DataTypes.STRING(255),
@@ -54,7 +54,7 @@ const TrainingSession = sequelize.define('TrainingSession', {
   trainerName: { type: DataTypes.STRING(255), allowNull: true },
   scheduledDate: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
+    allowNull: true,
   },
   scheduledTime: {
     type: DataTypes.TIME,

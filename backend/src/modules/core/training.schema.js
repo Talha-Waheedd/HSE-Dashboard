@@ -7,17 +7,37 @@ const TrainingStatus = require('../../shared/enums/TrainingStatus');
 const createTrainingSchema = Joi.object({
   plantId: Joi.string().uuid().required(),
   departmentId: Joi.string().uuid().optional().allow(null),
-  title: Joi.string().max(255).required(),
+  title: Joi.alternatives().conditional('status', {
+    is: TrainingStatus.DRAFT,
+    then: Joi.string().max(255).optional().allow(null, ''),
+    otherwise: Joi.string().max(255).required(),
+  }),
   trainerName: Joi.string().max(255).optional(),
   description: Joi.string().optional(),
-  trainingType: Joi.string().valid(...Object.values(TrainingType)).required(),
+  trainingType: Joi.alternatives().conditional('status', {
+    is: TrainingStatus.DRAFT,
+    then: Joi.string().valid(...Object.values(TrainingType)).optional().allow(null),
+    otherwise: Joi.string().valid(...Object.values(TrainingType)).required(),
+  }),
   customTrainingType: Joi.string().trim().max(255).optional().allow(null, ''),
-  scheduledDate: Joi.date().iso().required(),
+  scheduledDate: Joi.alternatives().conditional('status', {
+    is: TrainingStatus.DRAFT,
+    then: Joi.date().iso().optional().allow(null, ''),
+    otherwise: Joi.date().iso().required(),
+  }),
   scheduledTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/).optional(),
-  durationMinutes: Joi.number().integer().min(1).required(),
+  durationMinutes: Joi.alternatives().conditional('status', {
+    is: TrainingStatus.DRAFT,
+    then: Joi.number().integer().min(1).optional().allow(null),
+    otherwise: Joi.number().integer().min(1).required(),
+  }),
   venue: Joi.string().max(255).optional(),
   maxAttendees: Joi.number().integer().min(1).optional(),
-  participantCount: Joi.number().integer().min(1).required(),
+  participantCount: Joi.alternatives().conditional('status', {
+    is: TrainingStatus.DRAFT,
+    then: Joi.number().integer().min(1).optional().allow(null),
+    otherwise: Joi.number().integer().min(1).required(),
+  }),
   // Calculated by the service; clients cannot override the canonical value.
   manhours: Joi.forbidden(),
   notes: Joi.string().optional(),

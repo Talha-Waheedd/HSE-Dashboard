@@ -58,7 +58,8 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
     const hazardClosureTotal = aggregate?.hazards?.total ?? hazards.length;
     const hazardClosureRate = hazardClosureTotal > 0 ? Math.round((closedHazards / hazardClosureTotal) * 100) : 0;
 
-    const totalTrainingManhours = Math.round(training.reduce((sum, t) => sum + (Number(t.manhours || t.total_manhours) || 0), 0));
+    const registeredTraining = training.filter(t => String(t.status_id ?? t.status ?? '').toLowerCase() !== 'draft');
+    const totalTrainingManhours = Math.round(registeredTraining.reduce((sum, t) => sum + (Number(t.manhours || t.total_manhours) || 0), 0));
     
     // 🚨 No real data sources yet
     // drills.length;

@@ -2,9 +2,10 @@
 
 const trainingService = require('./training.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
-const { Op } = require('sequelize');
+const { Op, literal } = require('sequelize');
 const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
 const { TrainingSession, Department } = require('../../database/models');
+const TrainingStatus = require('../../shared/enums/TrainingStatus');
 
 const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
 const trainingTypeLabel = (value) => String(value || '').split('_').map((part) => part ? part.charAt(0).toUpperCase() + part.slice(1) : '').join(' ');
@@ -82,7 +83,10 @@ const createSession = asyncHandler(async (req, res) => {
 const getAllSessions = asyncHandler(async (req, res) => {
   const pagination = parsePagination(req.query);
   const options = { ...pagination, where: await buildTrainingWhere(req.query) };
-  options.order = parseOrder(req.query, { date: 'scheduledDate', scheduledDate: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']);
+  options.order = [
+    [literal("CASE WHEN `TrainingSession`.`status` = 'draft' THEN 0 ELSE 1 END"), 'ASC'],
+    ...parseOrder(req.query, { date: 'scheduledDate', scheduledDate: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']),
+  ];
 
   const sessions = await trainingService.getAllSessions(options);
   res.status(200).json(ApiResponse.success(sessions.rows.map(serializeTraining), 'Training sessions retrieved successfully', paginationMeta({ ...pagination, total: sessions.count })));
@@ -97,6 +101,7 @@ const getSessionById = asyncHandler(async (req, res) => {
 });
 const exportSessions = asyncHandler(async (req, res) => {
   const where = await buildTrainingWhere(req.query);
+  if (!where.status) where.status = { [Op.ne]: TrainingStatus.DRAFT };
   await sendCsvExport(res, TrainingSession, { where, nest: true, include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }], serializeRow: serializeTraining, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']) }, `trainings-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 

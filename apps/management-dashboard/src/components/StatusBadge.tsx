@@ -15,6 +15,7 @@ interface StatusConfig {
 const STATUS_MAP: Record<string, StatusConfig> = {
   // Open / Active states
   'Open':             { bg: '#FEF9EC', text: '#92400E', border: '#FDE68A', dot: '#F59E0B' },
+  'Draft':            { bg: '#FFF7ED', text: '#9A3412', border: '#FDBA74', dot: '#F97316' },
   'Pending':          { bg: '#FEF9EC', text: '#92400E', border: '#FDE68A', dot: '#F59E0B' },
   'Assigned':         { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE', dot: '#3B82F6' },
   'Submitted for Review': { bg: '#F5F3FF', text: '#6D28D9', border: '#DDD6FE', dot: '#8B5CF6' },
