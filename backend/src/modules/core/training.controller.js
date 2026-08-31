@@ -12,12 +12,13 @@ const serializeTraining = (value) => {
   const row = typeof value?.toJSON === 'function' ? value.toJSON() : value;
   const participants = row.participantCount ?? row.participant_count;
   const durationMinutes = row.durationMinutes ?? row.duration_minutes;
+  const customTrainingType = String(row.customTrainingType ?? row.custom_training_type ?? '').trim();
   const hasInputs = participants !== null && participants !== undefined && durationMinutes !== null && durationMinutes !== undefined && Number.isFinite(Number(participants)) && Number.isFinite(Number(durationMinutes));
   return {
     ...row,
     departmentId: row.departmentId ?? row.department_id ?? null,
     departmentName: row.department?.name ?? null,
-    trainingTypeLabel: trainingTypeLabel(row.trainingType ?? row.training_type),
+    trainingTypeLabel: customTrainingType || trainingTypeLabel(row.trainingType ?? row.training_type),
     durationMinutes: durationMinutes ?? null,
     participantCount: participants ?? null,
     manhours: hasInputs ? (row.manhours ?? Number(participants) * Number(durationMinutes) / 60) : null,
@@ -37,7 +38,12 @@ const buildTrainingWhere = async (query = {}) => {
     });
     where.departmentId = department ? department.id : '__no_matching_department__';
   }
-  addTextSearch(where, query.search, ['title', 'description', 'trainer_name'], TrainingSession);
+  addTextSearch(
+    where,
+    query.search,
+    ['title', 'description', 'trainer_name', 'custom_training_type'],
+    TrainingSession
+  );
   const year = /^\d{4}$/.test(String(query.year || '')) ? Number(query.year) : null;
   const month = /^(?:[1-9]|1[0-2])$/.test(String(query.month || '')) ? Number(query.month) : null;
   let start = isDate(query.fromDate) ? query.fromDate : (year ? `${year}-01-01` : null);

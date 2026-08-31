@@ -222,23 +222,27 @@ export const moduleService = {
     }
 
     if (schemaId === 'training-records' || schemaId === 'audit-management' || schemaId === 'critical-audit-plan' || schemaId === 'inspection-records' || schemaId === 'action-tracker') {
-      rawData = rawData.map((item: any) => ({
-        ...item,
-        date: item.metadata?.date || item.scheduledDate || item.scheduled_date || item.dueDate || item.due_date || item.createdAt || item.created_at,
-        department_id: item.metadata?.department_id || item.departmentId || item.department_id || item.department?.id,
-        department_name: item.metadata?.department_name || item.departmentName || item.department?.name,
-        department_code: item.metadata?.department_code || item.department?.code,
-        status_id: item.metadata?.status_id || statusFromApi(item.status),
-        source: item.metadata?.source || item.sourceType || item.source_type,
-        training_type: item.metadata?.training_type || item.trainingType || item.training_type,
-        training_type_label: item.trainingTypeLabel || String(item.trainingType || item.training_type || '').split('_').map((part: string) => part ? part.charAt(0).toUpperCase() + part.slice(1) : '').join(' '),
-        trainer: item.metadata?.trainer || item.trainerName || item.trainer_name || item.trainer?.name,
-        topic: item.metadata?.topic || item.title,
-        participants: item.metadata?.participants ?? item.participantCount ?? item.participant_count ?? item.maxAttendees ?? item.max_attendees,
-        duration_minutes: item.metadata?.duration_minutes ?? item.durationMinutes ?? item.duration_minutes ?? null,
-        manhours: item.metadata?.manhours ?? item.manhours ?? item.total_manhours ?? (item.participantCount != null && item.durationMinutes != null ? Number(item.participantCount) * Number(item.durationMinutes) / 60 : null),
-        manhours_warning: item.manhoursWarning || (item.participantCount == null || item.durationMinutes == null ? 'Participants and duration are required to calculate manhours.' : null),
-      }));
+      rawData = rawData.map((item: any) => {
+        const customTrainingType = item.customTrainingType || item.custom_training_type || null;
+        return {
+          ...item,
+          date: item.metadata?.date || item.scheduledDate || item.scheduled_date || item.dueDate || item.due_date || item.createdAt || item.created_at,
+          department_id: item.metadata?.department_id || item.departmentId || item.department_id || item.department?.id,
+          department_name: item.metadata?.department_name || item.departmentName || item.department?.name,
+          department_code: item.metadata?.department_code || item.department?.code,
+          status_id: item.metadata?.status_id || statusFromApi(item.status),
+          source: item.metadata?.source || item.sourceType || item.source_type,
+          training_type: customTrainingType ? 'Other' : (item.metadata?.training_type || item.trainingType || item.training_type),
+          training_type_other: customTrainingType,
+          training_type_label: customTrainingType || item.trainingTypeLabel || String(item.trainingType || item.training_type || '').split('_').map((part: string) => part ? part.charAt(0).toUpperCase() + part.slice(1) : '').join(' '),
+          trainer: item.metadata?.trainer || item.trainerName || item.trainer_name || item.trainer?.name,
+          topic: item.metadata?.topic || item.title,
+          participants: item.metadata?.participants ?? item.participantCount ?? item.participant_count ?? item.maxAttendees ?? item.max_attendees,
+          duration_minutes: item.metadata?.duration_minutes ?? item.durationMinutes ?? item.duration_minutes ?? null,
+          manhours: item.metadata?.manhours ?? item.manhours ?? item.total_manhours ?? (item.participantCount != null && item.durationMinutes != null ? Number(item.participantCount) * Number(item.durationMinutes) / 60 : null),
+          manhours_warning: item.manhoursWarning || (item.participantCount == null || item.durationMinutes == null ? 'Participants and duration are required to calculate manhours.' : null),
+        };
+      });
     }
 
     return {
@@ -338,6 +342,7 @@ export const moduleService = {
         departmentId: payload.department_id,
         title: payload.topic || 'Training Session',
         trainingType: trainingTypeToApi(payload.training_type),
+        customTrainingType: payload.training_type === 'Other' ? String(payload.training_type_other || '').trim() : null,
         scheduledDate: payload.date,
         trainerName: payload.trainer,
         maxAttendees: participants,
@@ -412,6 +417,7 @@ export const moduleService = {
         departmentId: payload.department_id,
         title: payload.topic,
         trainingType: payload.training_type ? trainingTypeToApi(payload.training_type) : undefined,
+        customTrainingType: payload.training_type === 'Other' ? String(payload.training_type_other || '').trim() : null,
         scheduledDate: payload.date,
         trainerName: payload.trainer,
         maxAttendees: participants,

@@ -494,7 +494,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       .then(response => {
         if (!active) return;
         if (!response.success || !Array.isArray(response.data)) throw new Error(response.message || 'Unable to load departments.');
-        setTrainingDepartments(response.data.filter(department => department.isActive !== false && department.id));
+        setTrainingDepartments(response.data.filter(department => {
+          const name = String(department.name || '').trim().toLowerCase();
+          const code = String(department.code || '').trim().toLowerCase();
+          return department.isActive !== false && department.id && !['other', 'others'].includes(name) && !['other', 'others'].includes(code);
+        }));
       })
       .catch(error => {
         if (active) setTrainingDepartmentsError(error instanceof Error ? error.message : 'Unable to load departments.');
@@ -503,19 +507,25 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     return () => { active = false; };
   }, [schema.id]);
 
+  const listFilters = useMemo(() => {
+    const applicableFilters = { ...(filters as unknown as Record<string, unknown>) };
+    if (schema.id === 'training-records') delete applicableFilters.status;
+    else delete applicableFilters.month;
+    return applicableFilters;
+  }, [filters, schema.id]);
   const listQuery = useMemo(() => ({
-    ...(filters as unknown as Record<string, unknown>),
+    ...listFilters,
     page: currentPage,
     limit: PAGE_SIZE,
     search: searchQuery || undefined,
     sortBy: sortConfig?.key || 'createdAt',
     sortOrder: sortConfig?.direction || 'desc',
-  }), [filters, currentPage, searchQuery, sortConfig]);
+  }), [listFilters, currentPage, searchQuery, sortConfig]);
   const listFilterKey = useMemo(() => JSON.stringify({
     schemaId: schema.id,
-    filters,
+    filters: listFilters,
     searchQuery,
-  }), [schema.id, filters, searchQuery]);
+  }), [schema.id, listFilters, searchQuery]);
   const summaryQuery = useMemo(() => {
     if (!['hazard-reporting', 'training-records'].includes(schema.id)) return null;
     const { page: _page, limit: _limit, sortBy: _sortBy, sortOrder: _sortOrder, ...filtersOnly } = listQuery;
@@ -558,7 +568,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     window.addEventListener('dashboard-refresh', refresh);
     return () => window.removeEventListener('dashboard-refresh', refresh);
   }, [fetchAll, listQuery, schema.id, summaryQuery]);
-  useEffect(() => { setCurrentPage(1); }, [filters, searchQuery, schema.id]);
+  useEffect(() => { setCurrentPage(1); }, [listFilterKey]);
   useEffect(() => {
     if (schema.id === 'incident-log' && routeCategory) setSearchQuery(routeCategory);
   }, [schema.id, routeCategory]);
@@ -614,6 +624,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
     if (schema.id === 'training-records') {
       const departmentId = String(data.department_id || '').trim();
+      if (data.training_type === 'Other' && !String(data.training_type_other || '').trim()) return 'Other Training Type is required.';
       if (departmentId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(departmentId)) return 'Department must be selected from the active department list.';
       const participants = Number(data.participants);
       const durationMinutes = Number(data.duration_minutes);
@@ -816,8 +827,13 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (filters.department && filters.department !== 'All' && !recordDepartments.some(department =>
       selectedAliases.includes(department) || departmentAliases[department]?.includes(selectedDepartment)
     )) return false;
-    if (filters.status && filters.status !== 'All' && entry.status_id !== filters.status) return false;
+    if (schema.id !== 'training-records' && filters.status && filters.status !== 'All' && entry.status_id !== filters.status) return false;
     const recordDate = entry.date || entry.target_date || entry.due_date;
+    if (schema.id === 'training-records' && filters.month && filters.month !== 'All') {
+      if (!recordDate) return false;
+      const dateMonth = String(recordDate).match(/^\d{4}-(\d{2})/)?.[1];
+      if (Number(dateMonth) !== Number(filters.month)) return false;
+    }
     if (filters.year && filters.year !== 'All' && recordDate && !recordDate.startsWith(filters.year)) return false;
     if (filters.fromDate && recordDate && recordDate < filters.fromDate) return false;
     if (filters.toDate && recordDate && recordDate > filters.toDate) return false;
@@ -827,7 +843,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       if (normalize(category) !== normalize(routeCategory)) return false;
     }
     return true;
-  }), [entries, filters, routeCategory]);
+  }), [entries, filters, routeCategory, schema.id]);
 
   const searchedEntries = useMemo(() => {
     if (!searchQuery.trim()) return filteredEntries;
@@ -893,9 +909,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const endRecord = Math.min(currentPage * PAGE_SIZE, pagination.totalRecords || sortedEntries.length);
   const visibleColumns = schema.columns.filter(col => !col.hideFromForm && col.type !== 'file');
   const formatTableValue = (column: ColumnSchema, value: unknown) => {
+    if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) return '-';
     if (column.type === 'date') return formatDateOnly(value);
     if (column.type === 'datetime') return formatDateTimeLocal(value);
-    return value === undefined || value === null || value === '' ? '—' : String(value);
+    return String(value);
   };
   const displayTableValue = (entry: any, column: ColumnSchema) => {
     if (schema.id !== 'training-records') return entry[column.key];
@@ -903,7 +920,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (column.key === 'training_type') return entry.training_type_label || entry.trainingTypeLabel || String(entry.training_type || entry.trainingType || '').split('_').map((part: string) => part ? part[0].toUpperCase() + part.slice(1) : '').join(' ');
     if (column.key === 'participants') return entry.participants ?? entry.participantCount ?? entry.participant_count;
     if (column.key === 'duration_minutes') return entry.duration_minutes ?? entry.durationMinutes;
-    if (column.key === 'manhours') return entry.manhours_warning ? `${entry.manhours ?? '—'} (warning)` : entry.manhours;
+    if (column.key === 'manhours') return entry.manhours;
     return entry[column.key];
   };
   const sectionGroups = moduleSections(schema);
@@ -1813,7 +1830,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         ]}
       >
         <div className="flex flex-wrap items-center gap-3">
-          <FilterBar />
+          <FilterBar showMonthInsteadOfStatus={schema.id === 'training-records'} />
           <button onClick={() => setShowMobileFilters(true)} className="md:hidden h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] inline-flex items-center gap-1.5">
             <Filter className="h-3.5 w-3.5" /> Filters
           </button>
@@ -1966,29 +1983,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           </div>
 
           {searchedEntries.length > 0 && (
-            <div className="flex items-center justify-between gap-4 border-t border-[#F0F0F0] bg-[#FAFAFA] px-4 py-3">
-              <p className="text-[12px] text-[#6B7280]">
-                Showing <span className="font-semibold text-[#374151]">{startRecord}-{endRecord}</span> of{' '}
-                <span className="font-semibold text-[#374151]">{searchedEntries.length}</span> records
-              </p>
-              <div className="flex items-center gap-1">
-                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-8 h-8 rounded border border-[#DEDEDE] bg-white disabled:opacity-40">
-                  <ChevronLeft className="h-4 w-4 mx-auto" />
-                </button>
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  const page = totalPages <= 5 ? i + 1 : Math.max(1, currentPage - 2) + i;
-                  if (page > totalPages) return null;
-                  return (
-                    <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 rounded border text-[13px] font-medium ${page === currentPage ? 'bg-[#CB0017] text-white border-[#CB0017]' : 'bg-white text-[#374151] border-[#DEDEDE]'}`}>
-                      {page}
-                    </button>
-                  );
-                })}
-                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="w-8 h-8 rounded border border-[#DEDEDE] bg-white disabled:opacity-40">
-                  <ChevronRight className="h-4 w-4 mx-auto" />
-                </button>
-              </div>
-            </div>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              startRecord={startRecord}
+              endRecord={endRecord}
+              totalRecords={pagination.totalRecords || searchedEntries.length}
+              onPageChange={setCurrentPage}
+            />
           )}
         </div>
       </div>
@@ -2086,7 +2088,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       </CenterModal>
 
       <SlideOverPanel isOpen={showMobileFilters} onClose={() => setShowMobileFilters(false)} title="Filters" description="Mobile filter drawer for enterprise modules.">
-        <FilterBar className="flex-col items-stretch" />
+        <FilterBar showMonthInsteadOfStatus={schema.id === 'training-records'} className="flex-col items-stretch" />
       </SlideOverPanel>
     </Layout>
   );

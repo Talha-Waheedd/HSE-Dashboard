@@ -7,6 +7,7 @@ import { DEPARTMENTS } from '../config/constants';
 interface FilterBarProps {
   showDepartment?: boolean;
   showStatus?: boolean;
+  showMonthInsteadOfStatus?: boolean;
   showYear?: boolean;
   showDateRange?: boolean;
   className?: string;
@@ -21,9 +22,15 @@ const incidentFieldClass =
   'h-[52px] w-full appearance-none rounded-lg border border-[#D9DDE4] bg-white px-10 text-[13px] text-[#1C1C1E] shadow-[0_1px_2px_rgba(0,0,0,0.02)] ' +
   'focus:border-[#7B1010] focus:outline-none focus:ring-2 focus:ring-[#7B1010]/10 cursor-pointer';
 
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
 export const FilterBar: React.FC<FilterBarProps> = ({
   showDepartment = true,
   showStatus = true,
+  showMonthInsteadOfStatus = false,
   showYear = true,
   showDateRange = true,
   className = '',
@@ -37,7 +44,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
   const hasActiveFilters =
     (filters.department !== '' && filters.department !== 'All') ||
-    (filters.status !== '' && filters.status !== 'All') ||
+    (showMonthInsteadOfStatus
+      ? filters.month !== '' && filters.month !== 'All'
+      : filters.status !== '' && filters.status !== 'All') ||
     (filters.year !== '' && filters.year !== 'All') ||
     filters.fromDate !== '' ||
     filters.toDate !== '';
@@ -45,6 +54,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const clearFilters = () => {
     setFilter('department', 'All');
     setFilter('status', 'All');
+    setFilter('month', 'All');
     setFilter('year', 'All');
     setFilter('fromDate', '');
     setFilter('toDate', '');
@@ -164,9 +174,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </select>
       )}
       {showStatus && (
-        <select value={filters.status} onChange={e => setFilter('status', e.target.value)} className={selectClass}>
-          <option value="All">All Statuses</option><option value="Open">Open</option><option value="Work in Progress">In Progress</option><option value="Pending">Pending</option><option value="Closed">Closed</option><option value="Cancelled">Cancelled</option>
-        </select>
+        showMonthInsteadOfStatus ? (
+          <select aria-label="Filter training records by month" value={filters.month} onChange={e => setFilter('month', e.target.value)} className={selectClass}>
+            <option value="All">All Months</option>
+            {MONTHS.map((month, index) => <option key={month} value={String(index + 1)}>{month}</option>)}
+          </select>
+        ) : (
+          <select value={filters.status} onChange={e => setFilter('status', e.target.value)} className={selectClass}>
+            <option value="All">All Statuses</option><option value="Open">Open</option><option value="Work in Progress">In Progress</option><option value="Pending">Pending</option><option value="Closed">Closed</option><option value="Cancelled">Cancelled</option>
+          </select>
+        )
       )}
       {showDateRange && <><input type="date" value={filters.fromDate} onChange={e => setFilter('fromDate', e.target.value)} className="h-8 rounded-md border border-[#E0E0E0] bg-white px-2 text-[12px] text-[#1C1C1E] focus:border-[#7B1010] focus:outline-none" /><span className="text-[12px] text-[#9CA3AF]">–</span><input type="date" value={filters.toDate} onChange={e => setFilter('toDate', e.target.value)} className="h-8 rounded-md border border-[#E0E0E0] bg-white px-2 text-[12px] text-[#1C1C1E] focus:border-[#7B1010] focus:outline-none" /></>}
       {hasActiveFilters && <button type="button" onClick={clearFilters} className="flex h-8 items-center gap-1 rounded-md border border-[#7B1010]/30 px-2 text-[12px] font-medium text-[#7B1010] hover:bg-[rgba(123,16,16,0.04)]"><RotateCcw className="h-3 w-3" /> Clear</button>}

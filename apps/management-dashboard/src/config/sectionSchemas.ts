@@ -176,7 +176,7 @@ export const trainingRecordsSchema: SectionConfig = {
   icon: 'Users',
   columns: [
     { key: 'date', label: 'Date', type: 'date', required: true, section: 'Training Details' },
-    { key: 'training_type', label: 'Training Type', type: 'select', options: ['Internal', 'External', 'Toolbox Talk', 'Safety Briefing', 'Fire Drill', 'Orientation'], required: true, section: 'Training Details' },
+    { key: 'training_type', label: 'Training Type', type: 'select', options: ['Internal', 'External', 'Toolbox Talk', 'Safety Briefing', 'Fire Drill', 'Orientation', 'Other'], required: true, section: 'Training Details' },
     // Populated from GET /departments?isActive=true. Values are UUIDs; labels
     // are the department name and code returned by the master-data API.
     { key: 'department_id', label: 'Department', type: 'select', options: [], required: true, section: 'Training Details' },
@@ -198,7 +198,6 @@ export const trainingRecordsSchema: SectionConfig = {
         return (p * (d / 60)).toFixed(2);
       }
     },
-    { key: 'status_id', label: 'Status', type: 'select', options: STATUSES, required: true, section: 'Training Details' },
     {
       key: 'total_manhours',
       label: 'Total Manhours',

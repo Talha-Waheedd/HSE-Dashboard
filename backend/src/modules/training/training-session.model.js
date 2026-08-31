@@ -37,6 +37,10 @@ const TrainingSession = sequelize.define('TrainingSession', {
     type: DataTypes.ENUM(...Object.values(TrainingType)),
     allowNull: false,
   },
+  customTrainingType: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
   status: {
     type: DataTypes.ENUM(...Object.values(TrainingStatus)),
     defaultValue: TrainingStatus.SCHEDULED,
