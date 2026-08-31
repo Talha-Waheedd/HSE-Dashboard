@@ -467,7 +467,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [hazardSummary, setHazardSummary] = useState({ totalRecords: 0, assigned: 0, submittedForReview: 0, closedThisMonth: 0 });
   const hazardSummaryRequest = useRef(0);
-  const [trainingSummary, setTrainingSummary] = useState({ totalRecords: 0, totalManhours: 0, pendingRecords: 0, completedRecords: 0, attendanceRate: null as number | null });
+  const [trainingSummary, setTrainingSummary] = useState({ totalRecords: 0, draftRecords: 0, totalManhours: 0, pendingRecords: 0, completedRecords: 0, attendanceRate: null as number | null });
   const trainingSummaryRequest = useRef(0);
   const [trainingDepartments, setTrainingDepartments] = useState<DepartmentOption[]>([]);
   const [trainingDepartmentsLoading, setTrainingDepartmentsLoading] = useState(false);
@@ -702,8 +702,12 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     setValidationError(null);
     setErrorTitle('Validation Error');
     const statusKey = schema.id === 'near-miss' ? 'status' : 'status_id';
-    const dataToSave = applyComputes({ ...formData, ...(statusOverride ? { [statusKey]: statusOverride } : {}) }, schema, entries);
-    const err = validateFormData(dataToSave);
+    const sourceData = editingId ? editFormData : formData;
+    const isTrainingDraft = schema.id === 'training-records' && String(sourceData.status_id ?? sourceData.status ?? '').toLowerCase() === 'draft';
+    const effectiveStatusOverride = statusOverride || (editingId && isTrainingDraft ? 'Pending' : undefined);
+    const dataToSave = applyComputes({ ...sourceData, ...(effectiveStatusOverride ? { [statusKey]: effectiveStatusOverride } : {}) }, schema, entries);
+    const isTrainingDraftSave = schema.id === 'training-records' && statusOverride === 'Draft';
+    const err = isTrainingDraftSave ? null : validateFormData(dataToSave);
     if (err) {
       setValidationError(err);
       setErrorTitle('Validation Error');
@@ -715,13 +719,16 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       ? crypto.randomUUID()
       : `form-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     try {
-      const result = await createRecord({ ...dataToSave, __idempotencyKey: idempotencyKey });
-      if (result.success && result.data?.id) {
-        if (schema.id === 'hazard-reporting' && Object.keys(pendingFiles).length > 0) {
+      const result: any = editingId
+        ? await updateRecord(editingId, dataToSave)
+        : await createRecord({ ...dataToSave, __idempotencyKey: idempotencyKey });
+      const savedRecordId = editingId || result.data?.id;
+      if (result.success && savedRecordId) {
+        if (!editingId && schema.id === 'hazard-reporting' && Object.keys(pendingFiles).length > 0) {
           const uploadResults = await Promise.allSettled(
             Object.values(pendingFiles).map(file => uploadClient.upload(file, {
               sourceType: 'hazard',
-              sourceId: result.data.id,
+              sourceId: savedRecordId,
             }))
           );
           const failedUploads = uploadResults.filter(item => item.status === 'rejected').length;
@@ -732,13 +739,15 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         // Reload only after the API has confirmed a committed row. The API
         // sorts hazards by createdAt DESC, so the new row is first when the
         // active filters include its date/department.
-        await fetchAll({ ...(filters as unknown as Record<string, unknown>), page: 1, limit: PAGE_SIZE });
+        setCurrentPage(1);
+        await fetchAll({ ...listQuery, page: 1 });
         setFormData({});
+        setEditFormData({});
+        setEditingId(null);
         setPendingFiles({});
         try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ }
         setIsAddModalOpen(false);
-        setSavedModalOpen(true);
-        window.dispatchEvent(new CustomEvent('dashboard-refresh'));
+        setSavedModalOpen(schema.id === 'hazard-reporting');
       } else if (!result.alreadyInProgress) {
         setErrorTitle((result as any).errorTitle || 'Request Failed');
         setValidationError(result.message || 'The server did not confirm that the record was saved.');
@@ -754,6 +763,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const startEdit = (entry: any) => {
+    setValidationError(null);
     setEditingId(entry.id);
     setEditFormData({ ...entry, actions: Array.isArray(entry.actions) ? entry.actions.map(normalizeIncidentAction) : [] });
   };
@@ -1145,7 +1155,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const renderFormSection = (sectionTitle: string, columns: ColumnSchema[]) => {
-    const visible = columns.filter(col => shouldShowConditionalField(schema.id, col.key, isAddModalOpen ? formData : editFormData));
+    const source = editingId ? editFormData : formData;
+    const visible = columns.filter(col => shouldShowConditionalField(schema.id, col.key, source));
     if (schema.id === 'near-miss' && sectionTitle === 'Investigation' && formData.investigation_required !== 'Yes' && editFormData.investigation_required !== 'Yes') {
       return null;
     }
@@ -1243,7 +1254,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                 {col.label}
                 {col.required && <span className="text-[#CB0017] ml-1">*</span>}
               </label>
-              {renderField(col, (isAddModalOpen ? formData : editFormData)[col.key], !!editingId)}
+              {renderField(col, source[col.key], !!editingId)}
             </div>
           ))}
         </div>
@@ -1390,6 +1401,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (schema.id === 'incident-log' || schema.id === 'near-miss') return renderWorkflowAddEditModal();
     if (schema.id === 'hazard-reporting') return renderHazardAddEditModal();
     const formSource = editingId ? editFormData : formData;
+    const isEditingTrainingDraft = schema.id === 'training-records' && String(formSource.status_id ?? formSource.status ?? '').toLowerCase() === 'draft';
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
         <div className="w-full max-w-6xl max-h-[92vh] overflow-hidden rounded-2xl bg-[#F5F5F5] border border-[#E0E0E0] shadow-[0_20px_60px_rgba(0,0,0,0.18)] flex flex-col">
@@ -1435,6 +1447,17 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               Fields marked with <span className="text-[#CB0017]">*</span> are required
             </div>
             <div className="flex items-center gap-2">
+              {schema.id === 'training-records' && (!editingId || isEditingTrainingDraft) && (
+                <button
+                  type="button"
+                  onClick={() => handleSubmit(undefined, 'Draft')}
+                  disabled={isSaving}
+                  className="h-9 px-4 text-[13px] font-medium rounded-md border border-[#D7A55A] bg-[#FFF7ED] text-[#9A3412] hover:bg-[#FFEDD5] disabled:opacity-50 inline-flex items-center gap-1.5"
+                >
+                  <Save className="h-3.5 w-3.5" />
+                  {editingId ? 'Update Draft' : 'Save as Draft'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -1457,7 +1480,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                 className="h-9 px-5 text-[13px] font-medium rounded-md bg-[#CB0017] text-white hover:bg-[#A8001A] inline-flex items-center gap-1.5"
               >
                 <Save className={`h-3.5 w-3.5 ${isSaving ? 'animate-pulse' : ''}`} />
-                {isSaving ? 'Saving…' : editingId ? 'Save Changes' : 'Save Record'}
+                {isSaving ? 'Saving…' : isEditingTrainingDraft ? 'Register Training' : editingId ? 'Save Changes' : 'Save Record'}
               </button>
             </div>
           </div>
@@ -1813,7 +1836,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       <ContextHeader
         title={schema.title}
         breadcrumbs={[schema.title]}
-        subtitle={`${pagination.totalRecords.toLocaleString()} records${searchQuery ? ` filtered by "${searchQuery}"` : ''}`}
+        subtitle={schema.id === 'training-records'
+          ? `${trainingSummary.totalRecords.toLocaleString()} registered trainings${trainingSummary.draftRecords ? ` • ${trainingSummary.draftRecords.toLocaleString()} draft${trainingSummary.draftRecords === 1 ? '' : 's'}` : ''}${searchQuery ? ` filtered by "${searchQuery}"` : ''}`
+          : `${pagination.totalRecords.toLocaleString()} records${searchQuery ? ` filtered by "${searchQuery}"` : ''}`}
         actions={[
           ...(canExportCSV() ? [{
             label: 'Export CSV',
@@ -1916,9 +1941,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                   </tr>
                 ) : pagedEntries.map((entry, rowIdx) => {
                   const isSelected = selectedRecordId === entry.id;
+                  const isTrainingDraft = schema.id === 'training-records' && String(entry.status_id ?? entry.status ?? '').toLowerCase() === 'draft';
                   return (
                     <React.Fragment key={entry.id}>
-                      <tr className={`${rowIdx % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'} ${isSelected ? '!bg-[#FFF7F7]' : ''}`} onClick={() => setSelectedRecordId(entry.id)}>
+                      <tr className={`${isTrainingDraft ? 'bg-[#FFF7ED]' : rowIdx % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'} ${isSelected ? '!bg-[#FFF7F7]' : ''}`} onClick={() => setSelectedRecordId(entry.id)}>
                         <td>
                           <input
                             type="checkbox"
@@ -1929,7 +1955,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                         </td>
                         {visibleColumns.map(col => (
                           <td key={col.key}>
-                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : <span className={`${col.type === 'date' || col.type === 'datetime' ? 'whitespace-nowrap ' : ''}text-[13px] text-[#1A1818]`}>{formatTableValue(col, displayTableValue(entry, col))}</span>}
+                            {editingId === entry.id ? renderField(col, editFormData[col.key], true) : STATUS_COLUMNS.has(col.key) && entry[col.key] ? <StatusBadge status={entry[col.key]} size="sm" /> : isTrainingDraft && col.key === 'date' ? <div className="flex items-center gap-2 whitespace-nowrap"><span className="text-[13px] text-[#1A1818]">{formatTableValue(col, displayTableValue(entry, col))}</span><StatusBadge status="Draft" size="xs" /></div> : <span className={`${col.type === 'date' || col.type === 'datetime' ? 'whitespace-nowrap ' : ''}text-[13px] text-[#1A1818]`}>{formatTableValue(col, displayTableValue(entry, col))}</span>}
                           </td>
                         ))}
                         <td className="text-center">

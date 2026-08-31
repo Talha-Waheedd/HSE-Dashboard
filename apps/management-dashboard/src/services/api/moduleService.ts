@@ -226,7 +226,9 @@ export const moduleService = {
         const customTrainingType = item.customTrainingType || item.custom_training_type || null;
         return {
           ...item,
-          date: item.metadata?.date || item.scheduledDate || item.scheduled_date || item.dueDate || item.due_date || item.createdAt || item.created_at,
+          date: schemaId === 'training-records'
+            ? (item.metadata?.date || item.scheduledDate || item.scheduled_date || null)
+            : (item.metadata?.date || item.scheduledDate || item.scheduled_date || item.dueDate || item.due_date || item.createdAt || item.created_at),
           department_id: item.metadata?.department_id || item.departmentId || item.department_id || item.department?.id,
           department_name: item.metadata?.department_name || item.departmentName || item.department?.name,
           department_code: item.metadata?.department_code || item.department?.code,
