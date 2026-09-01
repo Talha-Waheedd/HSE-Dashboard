@@ -462,7 +462,9 @@ export const moduleService = {
       payload = {
         ...payload,
         departmentId: isUuid(payload.department_id) ? payload.department_id : undefined,
-        responsibleDepartmentId: isUuid(payload.responsible_department_id) ? payload.responsible_department_id : undefined,
+        responsibleDepartmentId: payload.responsible_department_id === ''
+          ? null
+          : isUuid(payload.responsible_department_id) ? payload.responsible_department_id : undefined,
         furtherInvestigationRequired: yesNoToApi(payload.investigation_required),
         reportedInHazard: yesNoToApi(payload.reported_in_hazard),
         remarks: payload.remarks,

@@ -142,6 +142,12 @@ Incident.belongsTo(Plant, { foreignKey: 'plantId', as: 'plant' });
 Department.hasMany(Incident, { foreignKey: 'departmentId', as: 'incidents' });
 Incident.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
 
+// A finalized Near Miss can generate one Incident Investigation. The unique
+// database index on incidents.source_near_miss_id enforces the one-to-one
+// relationship even if a Near Miss is submitted more than once.
+NearMiss.hasOne(Incident, { foreignKey: 'sourceNearMissId', as: 'incidentInvestigation' });
+Incident.belongsTo(NearMiss, { foreignKey: 'sourceNearMissId', as: 'sourceNearMiss' });
+
 Incident.hasMany(IncidentInjury, { foreignKey: 'incidentId', as: 'injuries' });
 IncidentInjury.belongsTo(Incident, { foreignKey: 'incidentId', as: 'incident' });
 

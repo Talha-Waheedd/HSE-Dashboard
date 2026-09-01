@@ -1,7 +1,7 @@
 'use strict';
 
 const BaseRepository = require('./base.repository');
-const { Incident, IncidentInjury, User, Department, Plant } = require('../database/models');
+const { Incident, IncidentInjury, User, Department, Plant, NearMiss } = require('../database/models');
 
 class IncidentRepository extends BaseRepository {
   constructor() {
@@ -18,8 +18,9 @@ class IncidentRepository extends BaseRepository {
       include: [
         { model: User, as: 'reporter', attributes: ['id', 'firstName', 'lastName', 'email'] },
         { model: User, as: 'investigatedBy_user', attributes: ['id', 'firstName', 'lastName', 'email'] }, // Note: association is investigatedBy in model but need to verify alias if added
-        { model: Department, as: 'department', attributes: ['id', 'name'] },
+        { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
         { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
+        { model: NearMiss, as: 'sourceNearMiss', attributes: ['id', 'title', 'description', 'reportedAt'] },
         { model: IncidentInjury, as: 'injuries' },
       ],
     });

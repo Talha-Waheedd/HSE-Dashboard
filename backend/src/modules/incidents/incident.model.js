@@ -39,6 +39,11 @@ const Incident = sequelize.define('Incident', {
     allowNull: true,
     comment: 'FK → departments.id',
   },
+  sourceNearMissId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Near Miss that generated this Incident Investigation record',
+  },
   incidentType: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -144,6 +149,7 @@ const Incident = sequelize.define('Incident', {
     { fields: ['reported_by'], name: 'incidents_reported_by_idx' },
     { fields: ['plant_id'], name: 'incidents_plant_id_idx' },
     { fields: ['department_id'], name: 'incidents_department_id_idx' },
+    { fields: ['source_near_miss_id'], unique: true, name: 'incidents_source_near_miss_unique' },
     { fields: ['incident_type'], name: 'incidents_type_idx' },
     { fields: ['status'], name: 'incidents_status_idx' },
     { fields: ['incident_date'], name: 'incidents_date_idx' },

@@ -11,6 +11,7 @@ import { LeadingLaggingIndicators } from './pages/LeadingLaggingIndicators';
 import { LeadingIndicatorDetails } from './pages/LeadingIndicatorDetails';
 import { LaggingIndicatorDetails } from './pages/LaggingIndicatorDetails';
 import { IncidentDetails } from './pages/IncidentDetails';
+import { IncidentInvestigationDetails } from './pages/IncidentInvestigationDetails';
 import { MasterAnalysisDashboard } from './pages/MasterAnalysis/MasterAnalysisDashboard';
 import { MasterAnalysisDetail } from './pages/MasterAnalysis/MasterAnalysisDetail';
 import { DataEntrySection } from './components/DataEntrySection';
@@ -97,6 +98,7 @@ function App() {
           <Route path="/leading-lagging-indicators" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingLaggingIndicators /></ProtectedRoute>} />
           <Route path="/leading-indicators/hazard-closing" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="hazard-closing" /></ProtectedRoute>} />
           <Route path="/leading-indicators/incident-investigation" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="incident-investigation" /></ProtectedRoute>} />
+          <Route path="/leading-indicators/incident-investigation/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><IncidentInvestigationDetails /></ProtectedRoute>} />
           <Route path="/leading-indicators/emergency-drills" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="emergency-drills" /></ProtectedRoute>} />
           <Route path="/leading-indicators/action-plan-closure" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="action-plan-closure" /></ProtectedRoute>} />
           <Route path="/leading-indicators/legal-compliance" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Analytics focus="legal-compliance" /></ProtectedRoute>} />

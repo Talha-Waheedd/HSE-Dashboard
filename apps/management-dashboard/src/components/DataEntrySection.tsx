@@ -840,6 +840,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>, isEdit = false) => {
     const { name, value, type } = e.target as any;
     let finalValue: any = type === 'number' ? (value === '' ? '' : Number(value)) : value;
+    const selectedResponsibleDepartment = name === 'responsible_department_id'
+      ? trainingDepartments.find(department => department.id === finalValue)
+      : null;
     const employeeDerivedFields = schema.id === 'hazard-reporting'
       ? ['originator', 'department_id']
       : schema.id === 'near-miss'
@@ -848,6 +851,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (isEdit) {
       setEditFormData((prev: any) => {
         const next = { ...prev, [name]: finalValue };
+        if (name === 'responsible_department_id') {
+          next.responsible_department = selectedResponsibleDepartment?.code || selectedResponsibleDepartment?.name || '';
+        }
         if (name === 'emp_id' && employeeDerivedFields.length > 0) {
           employeeDerivedFields.forEach(field => { next[field] = ''; });
         }
@@ -856,6 +862,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     } else {
       setFormData((prev: any) => {
         const next = { ...prev, [name]: finalValue };
+        if (name === 'responsible_department_id') {
+          next.responsible_department = selectedResponsibleDepartment?.code || selectedResponsibleDepartment?.name || '';
+        }
         if (name === 'emp_id' && employeeDerivedFields.length > 0) {
           employeeDerivedFields.forEach(field => { next[field] = ''; });
         }
@@ -1149,6 +1158,17 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const startRecord = pagination.totalRecords === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const endRecord = Math.min(currentPage * PAGE_SIZE, pagination.totalRecords || sortedEntries.length);
   const visibleColumns = schema.columns.filter(col => !col.hideFromForm && col.type !== 'file');
+  const departmentDisplayValue = (value: unknown) => {
+    const text = String(value ?? '').trim();
+    if (!text) return '';
+    const department = trainingDepartments.find(item =>
+      item.id === text ||
+      String(item.code || '').trim().toLowerCase() === text.toLowerCase() ||
+      String(item.name || '').trim().toLowerCase() === text.toLowerCase(),
+    );
+    if (department) return department.code || department.name || '';
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(text) ? '' : text;
+  };
   const formatTableValue = (column: ColumnSchema, value: unknown) => {
     if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) return '-';
     if (column.type === 'date') return formatDateOnly(value);
@@ -1323,21 +1343,30 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (col.type === 'select') {
       if (['hazard-reporting', 'training-records', 'near-miss'].includes(schema.id) && ['department_id', 'responsible_department_id'].includes(col.key)) {
         const source = isEdit ? editFormData : formData;
-        const displayValue = col.key === 'responsible_department_id' ? source.responsible_department : value;
+        // A new form must be driven only by responsible_department_id. The
+        // label is retained only as an edit-mode fallback for legacy rows.
+        const displayValue = col.key === 'responsible_department_id' && isEdit ? source.responsible_department : value;
         const normalizedValue = String(value ?? '').trim();
         const legacyDisplayValue = String(displayValue ?? '').trim();
-        const rawHistoricalId = [normalizedValue, String(source.departmentId ?? '').trim()].find(candidate => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate)) || '';
+        // `departmentId` belongs to the reporting employee. It must never be
+        // used to populate the separate Responsible Department field.
+        const historicalCandidates = col.key === 'department_id'
+          ? [normalizedValue, String(source.departmentId ?? '').trim()]
+          : [normalizedValue];
+        const rawHistoricalId = historicalCandidates.find(candidate => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate)) || '';
         const selectedDepartment = trainingDepartments.find(department =>
           department.id === normalizedValue ||
-          String(department.name || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase() ||
-          String(department.code || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase(),
+          String(department.name || '').trim().toLowerCase() === normalizedValue.toLowerCase() ||
+          String(department.code || '').trim().toLowerCase() === normalizedValue.toLowerCase() ||
+          (isEdit && String(department.name || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase()) ||
+          (isEdit && String(department.code || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase()),
         );
         const isEmployeeReportingDepartment = ['hazard-reporting', 'near-miss'].includes(schema.id) && col.key === 'department_id';
         const currentEmployeeId = String(source.emp_id ?? '').trim();
         const selectedValue = isEmployeeReportingDepartment && currentEmployeeId.length < 3
           ? ''
-          : selectedDepartment?.id || (rawHistoricalId && legacyDisplayValue ? rawHistoricalId : legacyDisplayValue);
-        const hasLegacyOption = Boolean(legacyDisplayValue || rawHistoricalId) && !selectedDepartment;
+          : selectedDepartment?.id || (isEdit && (rawHistoricalId || legacyDisplayValue) ? (rawHistoricalId || legacyDisplayValue) : '');
+        const hasLegacyOption = isEdit && Boolean(legacyDisplayValue || rawHistoricalId) && !selectedDepartment;
         const legacyOptionValue = rawHistoricalId || legacyDisplayValue;
         const legacyOptionLabel = rawHistoricalId && !legacyDisplayValue ? 'Unmapped historical department' : `${legacyDisplayValue} (historical)`;
         const hasKnownLegacyLabel = Boolean(legacyDisplayValue) && trainingDepartments.some(department =>
@@ -1657,7 +1686,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               <section id="hazard-step-4" className="scroll-mt-5 rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
                 <div className="flex items-center gap-3"><div className="h-5 w-1 rounded-full bg-[#CB0017]" /><div><h3 className="text-[15px] font-semibold text-[#161616]">Review</h3><p className="mt-1 text-[12px] text-[#64748B]">Review the report before saving it to the HSE system.</p></div></div>
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {[['Status', status], ['Department', formSource.department_id || 'Not selected'], ['Location', formSource.location || 'Not selected'], ['Hazard Category', formSource.hazard_category_id || 'Not selected'], ['Risk Level', formSource.risk_rating_id || 'Not selected'], ['Evidence', Object.keys(pendingFiles).length ? `${Object.keys(pendingFiles).length} file queued` : 'None attached']].map(([label, value]) => <div key={label} className="rounded-lg bg-[#FAFAFA] px-3 py-2"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">{label}</p><p className="mt-1 truncate text-[13px] font-medium text-[#374151]">{value}</p></div>)}
+                  {[['Status', status], ['Department', departmentDisplayValue(formSource.department_id) || 'Not selected'], ['Location', formSource.location || 'Not selected'], ['Hazard Category', formSource.hazard_category_id || 'Not selected'], ['Risk Level', formSource.risk_rating_id || 'Not selected'], ['Evidence', Object.keys(pendingFiles).length ? `${Object.keys(pendingFiles).length} file queued` : 'None attached']].map(([label, value]) => <div key={label} className="rounded-lg bg-[#FAFAFA] px-3 py-2"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">{label}</p><p className="mt-1 truncate text-[13px] font-medium text-[#374151]">{value}</p></div>)}
                 </div>
               </section>
             </main>
@@ -1687,8 +1716,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       : ['department_id', 'location', 'incident_category_id', 'risk_rating_id', 'reported_by', 'emp_id'];
     const summaryFields = schema.columns.filter(col => !col.hideFromForm && summaryKeys.includes(col.key));
     const reviewValue = (field: ColumnSchema) => {
+      if (field.key === 'department_id') return departmentDisplayValue(formSource[field.key]);
       if (schema.id === 'near-miss' && field.key === 'responsible_department_id') {
-        return formSource.responsible_department || formSource.responsibleDepartment?.name || trainingDepartments.find(department => department.id === formSource[field.key])?.name || formSource[field.key];
+        const selectedDepartment = trainingDepartments.find(department =>
+          department.id === formSource[field.key] ||
+          String(department.code || '').trim().toLowerCase() === String(formSource[field.key] || '').trim().toLowerCase() ||
+          String(department.name || '').trim().toLowerCase() === String(formSource[field.key] || '').trim().toLowerCase(),
+        );
+        return selectedDepartment?.code || selectedDepartment?.name || formSource.responsible_department || formSource.responsibleDepartment?.name || '';
       }
       return formSource[field.key];
     };
@@ -1836,13 +1871,26 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             label: `Add ${entityName}`,
             icon: <Plus />,
             onClick: () => {
-              const defaultForm = schema.id === 'hazard-reporting' ? { status_id: 'Open', department_id: '' } : schema.id === 'near-miss' ? { status: 'Open', department_id: '' } : {};
+              const defaultForm = schema.id === 'hazard-reporting'
+                ? { status_id: 'Open', department_id: '' }
+                : schema.id === 'near-miss'
+                  ? { status: 'Open', department_id: '', responsible_department_id: '', responsible_department: '' }
+                  : {};
               let recoveredForm = defaultForm;
               try {
                 const savedDraft = sessionStorage.getItem(`hse-${schema.id}-draft`);
                 if (savedDraft) {
                   recoveredForm = { ...defaultForm, ...JSON.parse(savedDraft) };
                   if (['hazard-reporting', 'near-miss'].includes(schema.id)) recoveredForm.department_id = '';
+                  if (schema.id === 'near-miss') {
+                    // The browser autosave is not a persisted Near Miss
+                    // draft. Do not restore a responsible department from
+                    // it, because older versions could save ADM (the first
+                    // option) as if it were an intentional selection. A
+                    // persisted server draft is reopened through edit mode.
+                    recoveredForm.responsible_department_id = '';
+                    recoveredForm.responsible_department = '';
+                  }
                 }
               } catch { /* ignore malformed or unavailable draft storage */ }
               setPendingFiles({});
@@ -2173,7 +2221,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             icon: <Plus />,
             onClick: () => {
               const defaultForm = schema.id === 'near-miss'
-                ? { status: 'Open', department_id: '', investigation_required: 'No', reported_in_hazard: 'No' }
+                ? { status: 'Open', department_id: '', responsible_department_id: '', responsible_department: '', investigation_required: 'No', reported_in_hazard: 'No' }
                 : {};
               let recoveredForm: any = defaultForm;
               try {
@@ -2186,6 +2234,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                     // department into a new entry. Saved drafts reopened
                     // through the register use edit mode and keep their ID.
                     recoveredForm.department_id = '';
+                    recoveredForm.responsible_department_id = '';
+                    recoveredForm.responsible_department = '';
                   }
                 }
               } catch { /* ignore malformed or unavailable draft storage */ }

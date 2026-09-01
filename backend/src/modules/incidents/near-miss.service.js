@@ -2,9 +2,12 @@
 
 const nearMissRepository = require('../../repositories/near-miss.repository');
 const plantRepository = require('../../repositories/plant.repository');
-const { Department } = require('../../database/models');
+const { Department, Incident } = require('../../database/models');
+const IncidentType = require('../../shared/enums/IncidentType');
+const IncidentStatus = require('../../shared/enums/IncidentStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
+const { sequelize } = require('../../database/connection');
 
 const yesNoLabel = (value) => {
   if (value === true || ['yes', 'y', 'true', '1'].includes(String(value ?? '').trim().toLowerCase())) return 'Yes';
@@ -30,6 +33,100 @@ const validateResponsibleDepartment = async (departmentId) => {
   const department = await Department.findByPk(departmentId, { attributes: ['id', 'name', 'code'] });
   if (!department) throw ApiError.badRequest('Responsible Department must be selected from the department list.');
   return department;
+};
+
+const isFinalNearMiss = (nearMiss) => nearMiss.status !== 'draft';
+
+const dateOnly = (value) => {
+  if (!value) return null;
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value).slice(0, 10);
+};
+
+/**
+ * Create the single Incident Investigation record associated with a finalized
+ * Near Miss. Official report fields that cannot be derived reliably remain in
+ * metadata as empty values for the HSE investigator to complete later.
+ */
+const ensureIncidentInvestigation = async (nearMiss, userId, transaction) => {
+  if (!nearMiss || !nearMiss.furtherInvestigationRequired || !isFinalNearMiss(nearMiss)) return null;
+
+  const existing = await Incident.findOne({
+    where: { sourceNearMissId: nearMiss.id },
+    transaction,
+    lock: transaction.LOCK.UPDATE,
+  });
+  if (existing) return existing;
+
+  const sourceMetadata = nearMiss.metadata || {};
+  const department = nearMiss.departmentId
+    ? await Department.findByPk(nearMiss.departmentId, { attributes: ['id', 'name', 'code'], transaction })
+    : null;
+  const responsibleDepartment = nearMiss.responsibleDepartmentId
+    ? await Department.findByPk(nearMiss.responsibleDepartmentId, { attributes: ['id', 'name', 'code'], transaction })
+    : null;
+  const eventDate = dateOnly(nearMiss.reportedAt || nearMiss.createdAt);
+  const responsibleLabel = responsibleDepartment?.code || responsibleDepartment?.name || sourceMetadata.responsible_department || '';
+
+  const investigationMetadata = {
+    ...sourceMetadata,
+    source_type: 'near_miss',
+    source_near_miss_id: nearMiss.id,
+    generated_from_near_miss: true,
+    title_of_accident: nearMiss.title || '',
+    date_of_accident: eventDate || '',
+    time: sourceMetadata.time || '',
+    shift_manager_incharge: '',
+    shift: sourceMetadata.shift || '',
+    place_of_accident: nearMiss.location || '',
+    name_of_sufferer: sourceMetadata.affected_person || '',
+    designation: sourceMetadata.affected_designation || '',
+    department_id: nearMiss.departmentId || '',
+    department: department?.code || department?.name || sourceMetadata.department || '',
+    area_section: sourceMetadata.area_section || '',
+    area_incharge: '',
+    operator: '',
+    production_officer: '',
+    supervisor: '',
+    witnesses: '',
+    injury_classification: '',
+    probability_of_occurrence: '',
+    accident_details: nearMiss.description || '',
+    main_causes: '',
+    immediate_action_taken: '',
+    preventive_action_safety_measures: nearMiss.immediateAction || sourceMetadata.preventive_action || '',
+    responsibility: responsibleLabel,
+    timeline: '',
+    safety_incident_pictures: sourceMetadata.attachments || '',
+    investigation_team: '',
+    capa_verification: '',
+    target_date: '',
+    completion_status: '',
+    completion_date: '',
+    verified_by_icm: '',
+    reviewed_by_fm: '',
+    closed_by_fm: '',
+  };
+
+  return Incident.create({
+    incidentNumber: `NMI-${eventDate?.slice(0, 4) || new Date().getFullYear()}-${nearMiss.id.slice(0, 8).toUpperCase()}`,
+    reportedBy: nearMiss.reportedBy || userId,
+    plantId: nearMiss.plantId,
+    departmentId: nearMiss.departmentId || null,
+    sourceNearMissId: nearMiss.id,
+    incidentType: IncidentType.NEAR_MISS_PROMOTED,
+    status: IncidentStatus.UNDER_INVESTIGATION,
+    severityLevel: nearMiss.severityLevel || 'medium',
+    title: nearMiss.title || 'Near Miss Investigation',
+    description: nearMiss.description || 'Near Miss investigation generated from a submitted Near Miss record.',
+    location: nearMiss.location || null,
+    incidentDate: eventDate,
+    incidentTime: sourceMetadata.time || null,
+    injuredPersonName: sourceMetadata.affected_person || null,
+    immediateAction: nearMiss.immediateAction || null,
+    createdBy: userId,
+    metadata: investigationMetadata,
+  }, { transaction });
 };
 
 class NearMissService {
@@ -58,7 +155,16 @@ class NearMissService {
       persistedData.status = 'draft';
     }
 
-    return nearMissRepository.create(persistedData);
+    const transaction = await sequelize.transaction();
+    try {
+      const nearMiss = await nearMissRepository.create(persistedData, { transaction });
+      await ensureIncidentInvestigation(nearMiss, userId, transaction);
+      await transaction.commit();
+      return nearMiss;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   /**
@@ -100,18 +206,33 @@ class NearMissService {
       nextMetadata.responsible_department = responsibleDepartment.code || responsibleDepartment.name;
     }
 
-    return nearMissRepository.updateById(id, {
-      ...nearMissFields,
-      metadata: nextMetadata,
-      updatedBy: userId,
-    });
+    const transaction = await sequelize.transaction();
+    try {
+      const updatePayload = {
+        ...nearMissFields,
+        metadata: nextMetadata,
+        updatedBy: userId,
+      };
+      const result = await nearMissRepository.updateById(id, updatePayload, { transaction });
+      const updatedNearMiss = {
+        ...(nearMiss.get ? nearMiss.get({ plain: true }) : nearMiss),
+        ...nearMissFields,
+        metadata: nextMetadata,
+      };
+      await ensureIncidentInvestigation(updatedNearMiss, userId, transaction);
+      await transaction.commit();
+      return result;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   /**
    * Update near miss status
    */
   async updateStatus(id, newStatus, userId) {
-    await this.getNearMissById(id);
+    const nearMiss = await this.getNearMissById(id);
 
     const validStatuses = ['draft', 'submitted', 'under_review', 'closed'];
     if (!validStatuses.includes(newStatus)) {
@@ -128,7 +249,20 @@ class NearMissService {
       updateData.closedBy = userId;
     }
 
-    return nearMissRepository.updateById(id, updateData);
+    const transaction = await sequelize.transaction();
+    try {
+      const result = await nearMissRepository.updateById(id, updateData, { transaction });
+      const updatedNearMiss = {
+        ...(nearMiss.get ? nearMiss.get({ plain: true }) : nearMiss),
+        ...updateData,
+      };
+      await ensureIncidentInvestigation(updatedNearMiss, userId, transaction);
+      await transaction.commit();
+      return result;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   /**

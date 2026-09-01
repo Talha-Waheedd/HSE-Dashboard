@@ -19,6 +19,14 @@ const buildIncidentWhere = async (query = {}) => {
   if (query.status && query.status !== 'All') where.status = query.status;
   if (query.severityLevel && query.severityLevel !== 'All') where.severityLevel = query.severityLevel;
 
+  // The Incident Investigation leading-indicator page is backed by the
+  // incidents table, but must show only investigations generated from Near
+  // Miss submissions rather than every incident in the lagging register.
+  if (query.sourceType === 'near_miss' || query.investigationOnly === 'true') {
+    where.sourceNearMissId = { [Op.not]: null };
+  }
+  if (query.sourceNearMissId) where.sourceNearMissId = query.sourceNearMissId;
+
   if (query.incidentType && query.incidentType !== 'All') {
     const requestedTypes = String(query.incidentType).split(',').map((value) => value.trim()).filter(Boolean);
     const expandedTypes = requestedTypes.flatMap((type) => ({
@@ -68,7 +76,11 @@ const createIncident = asyncHandler(async (req, res) => {
  */
 const getAllIncidents = asyncHandler(async (req, res) => {
   const pagination = parsePagination(req.query);
-  const options = { ...pagination, where: await buildIncidentWhere(req.query) };
+  const options = {
+    ...pagination,
+    where: await buildIncidentWhere(req.query),
+    include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }],
+  };
   options.order = parseOrder(req.query, { date: 'incidentDate', incidentDate: 'incidentDate', createdAt: 'createdAt' });
 
   const result = await incidentService.getAllIncidents(options);

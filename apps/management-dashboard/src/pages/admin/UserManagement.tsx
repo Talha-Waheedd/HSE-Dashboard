@@ -53,7 +53,7 @@ export const UserManagement = () => {
         id: String(Date.now()),
         name: formData.name,
         email: formData.email,
-        department: formData.department || DEPARTMENTS[0],
+        department: formData.department || '',
         role: formData.role || 'Viewer',
         status: formData.status || 'Active',
         lastLogin: 'Never'
@@ -206,6 +206,7 @@ export const UserManagement = () => {
             <div>
               <label className="block text-[12px] font-bold text-[#374151] mb-1">Department</label>
               <select className={FIELD_BASE} value={formData.department || ''} onChange={e => setFormData({ ...formData, department: e.target.value })}>
+                <option value="">Select department...</option>
                 {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
