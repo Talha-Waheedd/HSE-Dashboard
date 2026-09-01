@@ -33,6 +33,12 @@ const getAttachmentById = asyncHandler(async (req, res) => {
   res.status(200).json(ApiResponse.success(attachment, 'Attachment retrieved successfully'));
 });
 
+const getAttachmentFile = asyncHandler(async (req, res) => {
+  const file = await attachmentService.getAttachmentFile(req.params.id);
+  res.type(file.mimeType);
+  res.sendFile(file.filename, { root: file.directory });
+});
+
 /**
  * Delete attachment
  */
@@ -45,5 +51,6 @@ module.exports = {
   uploadAttachment,
   getAttachmentsBySource,
   getAttachmentById,
+  getAttachmentFile,
   deleteAttachment,
 };

@@ -25,6 +25,11 @@ const Attachment = sequelize.define('Attachment', {
     allowNull: false,
     comment: 'Polymorphic FK — ID of the parent record',
   },
+  attachmentType: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    comment: 'Evidence role, for example INITIAL_PHOTO or CLOSING_PROOF_PHOTO',
+  },
   filename: {
     type: DataTypes.STRING(255),
     allowNull: false,

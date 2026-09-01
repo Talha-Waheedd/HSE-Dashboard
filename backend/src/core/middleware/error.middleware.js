@@ -1,5 +1,6 @@
 'use strict';
 
+const multer = require('multer');
 const ApiError = require('../../shared/utils/ApiError');
 const ApiResponse = require('../../shared/utils/ApiResponse');
 const logger = require('../../shared/utils/logger');
@@ -17,6 +18,14 @@ const { HTTP_STATUS } = require('../../shared/constants/httpStatus');
 // eslint-disable-next-line no-unused-vars
 const errorMiddleware = (err, req, res, next) => {
   const requestId = req.requestId || 'unknown';
+
+  if (err instanceof multer.MulterError) {
+    const message = err.code === 'LIMIT_FILE_SIZE'
+      ? 'Image size must not exceed 10 MB.'
+      : 'Image upload could not be processed.';
+    logger.warn(`[${requestId}] Image upload rejected: ${err.code}`);
+    return res.status(HTTP_STATUS.BAD_REQUEST).json(ApiResponse.error(message));
+  }
 
   // ─── Sequelize Validation Error ──────────────────────────────────────────
   if (err.name === 'SequelizeValidationError') {

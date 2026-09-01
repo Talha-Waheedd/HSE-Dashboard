@@ -1,5 +1,16 @@
 import { apiClient } from "./client";
 
+export interface AttachmentRecord {
+  id: string;
+  sourceType: string;
+  sourceId: string;
+  attachmentType?: string | null;
+  originalName: string;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  url?: string | null;
+}
+
 export interface UploadProgress {
   loaded: number;
   total?: number;
@@ -20,4 +31,11 @@ export const uploadClient = {
       }),
     });
   },
+  getBySource: async (sourceType: string, sourceId: string) => {
+    const response = await apiClient.get(`/attachments/source/${encodeURIComponent(sourceType)}/${encodeURIComponent(sourceId)}`);
+    return response.data as { success: boolean; data?: AttachmentRecord[]; message?: string };
+  },
+  getFile: async (attachmentId: string) => apiClient.get<Blob>(`/attachments/${encodeURIComponent(attachmentId)}/file`, {
+    responseType: "blob",
+  }),
 };

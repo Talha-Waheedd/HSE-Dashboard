@@ -9,6 +9,7 @@ const AttachmentSource = require('../../shared/enums/AttachmentSource');
 const uploadAttachmentSchema = Joi.object({
   sourceType: Joi.string().valid(...Object.values(AttachmentSource)).required(),
   sourceId: Joi.string().uuid().required(),
+  attachmentType: Joi.string().trim().pattern(/^[A-Za-z0-9_-]+$/).max(100).default('GENERAL').optional(),
 });
 
 module.exports = {

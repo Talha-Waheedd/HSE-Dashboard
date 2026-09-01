@@ -53,7 +53,12 @@ app.use(
 app.use(globalRateLimiter);
 
 // ─── Static Files ─────────────────────────────────────────────────────────────
-app.use('/public', express.static(path.resolve(process.cwd(), 'public')));
+const publicDirectory = path.resolve(process.cwd(), 'public');
+app.use('/public', (req, res, next) => {
+  // Evidence files are served through the authenticated attachment route.
+  if (req.path === '/uploads' || req.path.startsWith('/uploads/')) return res.status(404).end();
+  return next();
+}, express.static(publicDirectory));
 
 // ─── API Documentation ────────────────────────────────────────────────────────
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

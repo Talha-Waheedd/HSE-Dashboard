@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const path = require('path');
 const mime = require('mime-types');
 const storageConfig = require('../../database/config/storage');
@@ -22,13 +23,13 @@ const validateFileMime = (file, category = 'images') => {
 /**
  * Build a unique filename for uploaded files.
  * @param {string} originalName
+ * @param {string} [forcedExtension] - Extension selected from a validated MIME type.
  * @returns {string}
  */
-const buildFilename = (originalName) => {
-  const ext = path.extname(originalName).toLowerCase();
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 8);
-  return `${timestamp}-${random}${ext}`;
+const buildFilename = (originalName, forcedExtension) => {
+  const originalExtension = path.extname(originalName || '').toLowerCase();
+  const ext = forcedExtension || (['.jpg', '.jpeg', '.png'].includes(originalExtension) ? originalExtension : '');
+  return `${crypto.randomUUID()}${ext}`;
 };
 
 /**

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Layout } from './Layout';
 import { FilterBar } from './FilterBar';
 import { ContextHeader } from './ContextHeader';
@@ -17,14 +17,15 @@ import {
   ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
   ChevronsLeft, ChevronsRight, ChevronDown, ChevronUp,
   CheckCircle2, LayoutGrid, Filter, PanelRightOpen,
-  Upload, Paperclip, FileText, CalendarDays, Clock, Check,
+  FileText, CalendarDays, Clock, Check,
 } from 'lucide-react';
 import { LinkedSourceBadge } from './LinkedSourceBadge';
 import { AvatarInitials } from './AvatarInitials';
 import { DepartmentStatusBar } from './DepartmentStatusBar';
 import { MyPendingWidget } from './MyPendingWidget';
-import { uploadClient } from '../../../../packages/api/src/uploadClient';
+import { uploadClient, type AttachmentRecord } from '../../../../packages/api/src/uploadClient';
 import { LocationCombobox } from './LocationCombobox';
+import { ImageUploadField } from './ImageUploadField';
 import { formatDateOnly, formatDateTimeLocal } from '../utils/dateFormat';
 
 interface DataEntrySectionProps {
@@ -46,6 +47,27 @@ const CARD =
 const STATUS_COLUMNS = new Set(['status_id', 'risk_rating_id', 'investigation_required']);
 const MAX_INCIDENT_ACTIONS = 15;
 const bypassHazardValidation = import.meta.env.VITE_BYPASS_HAZARD_VALIDATION === 'true';
+
+const ATTACHMENT_SOURCE_BY_SCHEMA: Record<string, string> = {
+  'hazard-reporting': 'hazard',
+  'near-miss': 'near_miss',
+  'incident-log': 'incident',
+  'training-records': 'training',
+  'audit-management': 'audit',
+  'inspection-records': 'inspection',
+  'action-tracker': 'corrective_action',
+  'critical-audit-plan': 'audit',
+};
+
+const ATTACHMENT_TYPE_BY_FIELD: Record<string, string> = {
+  initial_photo: 'INITIAL_PHOTO',
+  closing_proof_photo: 'CLOSING_PROOF_PHOTO',
+  evidence_upload: 'EVIDENCE_PHOTO',
+  pictorial: 'PICTORIAL',
+};
+
+const attachmentSourceForSchema = (schemaId: string) => ATTACHMENT_SOURCE_BY_SCHEMA[schemaId];
+const attachmentTypeForField = (fieldKey: string) => ATTACHMENT_TYPE_BY_FIELD[fieldKey] || fieldKey.toUpperCase();
 
 const paginationItems = (currentPage: number, totalPages: number): Array<number | 'ellipsis-start' | 'ellipsis-end'> => {
   if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -453,6 +475,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [isSaving, setIsSaving] = useState(false);
   const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
+  const [existingAttachments, setExistingAttachments] = useState<AttachmentRecord[]>([]);
+  const [attachmentPreviewUrls, setAttachmentPreviewUrls] = useState<Record<string, string>>({});
+  const attachmentPreviewUrlsRef = useRef<Record<string, string>>({});
   const [hazardCategoryQuery, setHazardCategoryQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [attachmentWarning, setAttachmentWarning] = useState<string | null>(null);
@@ -478,7 +503,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [showReviewPanel, setShowReviewPanel] = useState(false);
   const [showCloseHazard, setShowCloseHazard] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [closeHazardData, setCloseHazardData] = useState({ closingProof: '', closingRemarks: '' });
+  const [closeHazardData, setCloseHazardData] = useState<{ closingProof: File | null; closingRemarks: string }>({ closingProof: null, closingRemarks: '' });
   const [reviewData, setReviewData] = useState({ remarks: '', reason: '' });
   const [hazardStep, setHazardStep] = useState(1);
   const [hazardAutosavedAt, setHazardAutosavedAt] = useState<Date | null>(null);
@@ -487,6 +512,58 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const { canAddData, canEditData, canDeleteData, canExportCSV } = permissions;
   const routeCategory = schema.id === 'incident-log' ? searchParams.get('category') : null;
+  const selectedCloseHazardId = schema.id === 'hazard-reporting' && showCloseHazard
+    ? Object.keys(selectedRows).find(id => selectedRows[id]) || null
+    : null;
+  const attachmentRecordId = editingId || selectedCloseHazardId;
+
+  const clearAttachmentPreviews = useCallback(() => {
+    Object.values(attachmentPreviewUrlsRef.current).forEach(url => URL.revokeObjectURL(url));
+    attachmentPreviewUrlsRef.current = {};
+    setAttachmentPreviewUrls({});
+  }, []);
+
+  useEffect(() => () => clearAttachmentPreviews(), [clearAttachmentPreviews]);
+
+  useEffect(() => {
+    let active = true;
+    setExistingAttachments([]);
+    clearAttachmentPreviews();
+    const sourceType = attachmentSourceForSchema(schema.id);
+    if (!attachmentRecordId || !sourceType) return () => { active = false; };
+
+    const loadAttachments = async () => {
+      try {
+        const response = await uploadClient.getBySource(sourceType, attachmentRecordId);
+        const attachments = Array.isArray(response.data) ? response.data : [];
+        if (!active) return;
+        setExistingAttachments(attachments);
+        await Promise.all(attachments.map(async attachment => {
+          try {
+            const fileResponse = await uploadClient.getFile(attachment.id);
+            const previewUrl = URL.createObjectURL(fileResponse.data);
+            if (!active) {
+              URL.revokeObjectURL(previewUrl);
+              return;
+            }
+            attachmentPreviewUrlsRef.current[attachment.id] = previewUrl;
+            setAttachmentPreviewUrls(previous => ({ ...previous, [attachment.id]: previewUrl }));
+          } catch (error) {
+            console.error(`Unable to load attachment preview ${attachment.id}:`, error);
+          }
+        }));
+      } catch (error) {
+        if (active) setAttachmentWarning('Existing image evidence could not be loaded.');
+        console.error('Unable to load image evidence:', error);
+      }
+    };
+
+    void loadAttachments();
+    return () => {
+      active = false;
+      clearAttachmentPreviews();
+    };
+  }, [attachmentRecordId, clearAttachmentPreviews, schema.id]);
 
   useEffect(() => {
     if (!activeDropdown) return;
@@ -732,6 +809,33 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
   };
 
+  const attachmentForField = (fieldKey: string) => {
+    const attachmentType = attachmentTypeForField(fieldKey);
+    return existingAttachments.find(attachment => attachment.attachmentType === attachmentType) || null;
+  };
+
+  const handleImageSelection = (fieldKey: string, file: File | null) => {
+    setPendingFiles(previous => {
+      const next = { ...previous };
+      if (file) next[fieldKey] = file;
+      else delete next[fieldKey];
+      return next;
+    });
+  };
+
+  const uploadPendingImages = async (sourceId: string): Promise<string[]> => {
+    const pendingEntries = Object.entries(pendingFiles);
+    if (pendingEntries.length === 0) return [];
+    const sourceType = attachmentSourceForSchema(schema.id);
+    if (!sourceType) return pendingEntries.map(([fieldKey]) => fieldKey);
+    const results = await Promise.allSettled(pendingEntries.map(([fieldKey, file]) => uploadClient.upload(file, {
+      sourceType,
+      sourceId,
+      attachmentType: attachmentTypeForField(fieldKey),
+    })));
+    return results.flatMap((result, index) => result.status === 'rejected' ? [pendingEntries[index][0]] : []);
+  };
+
   const handleSubmit = async (e?: React.FormEvent, statusOverride?: string) => {
     e?.preventDefault();
     if (isSaving) return;
@@ -763,17 +867,18 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         : await createRecord({ ...dataToSave, __idempotencyKey: idempotencyKey });
       const savedRecordId = editingId || result.data?.id;
       if (result.success && savedRecordId) {
-        if (!editingId && schema.id === 'hazard-reporting' && Object.keys(pendingFiles).length > 0) {
-          const uploadResults = await Promise.allSettled(
-            Object.values(pendingFiles).map(file => uploadClient.upload(file, {
-              sourceType: 'hazard',
-              sourceId: savedRecordId,
-            }))
-          );
-          const failedUploads = uploadResults.filter(item => item.status === 'rejected').length;
-          if (failedUploads > 0) {
-            setAttachmentWarning(`${failedUploads} attachment${failedUploads > 1 ? 's' : ''} could not be uploaded. The hazard record was saved.`);
-          }
+        const failedUploadKeys = await uploadPendingImages(savedRecordId);
+        if (failedUploadKeys.length > 0) {
+          const message = `${failedUploadKeys.length} image${failedUploadKeys.length > 1 ? 's' : ''} could not be uploaded. The record was saved.`;
+          setErrorTitle('Attachment Error');
+          setAttachmentWarning(message);
+          setPendingFiles(previous => Object.fromEntries(failedUploadKeys.filter(key => previous[key]).map(key => [key, previous[key]])));
+          setEditingId(savedRecordId);
+          setEditFormData(dataToSave);
+          setFormData({});
+          setIsAddModalOpen(false);
+          setValidationError(message);
+          return;
         }
         // Reload only after the API has confirmed a committed row. The API
         // sorts hazards by createdAt DESC, so the new row is first when the
@@ -803,6 +908,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const startEdit = (entry: any) => {
     setValidationError(null);
+    setAttachmentWarning(null);
+    setPendingFiles({});
     setEditingId(entry.id);
     setEditFormData({ ...entry, actions: Array.isArray(entry.actions) ? entry.actions.map(normalizeIncidentAction) : [] });
   };
@@ -825,8 +932,38 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     const result = await updateRecord(editingId, updatedData);
     if (result.success) {
       setEditingId(null);
+      setPendingFiles({});
     } else {
       setValidationError(result.message || 'Failed to update record.');
+    }
+  };
+
+  const submitClosingProof = async () => {
+    const selectedIds = Object.keys(selectedRows).filter(id => selectedRows[id]);
+    if (selectedIds.length !== 1) {
+      setAttachmentWarning('Select exactly one hazard before submitting closing proof.');
+      return;
+    }
+    if (!closeHazardData.closingProof) {
+      setAttachmentWarning('Select a JPG, JPEG, or PNG closing proof image.');
+      return;
+    }
+
+    setIsSaving(true);
+    setAttachmentWarning(null);
+    try {
+      await uploadClient.upload(closeHazardData.closingProof, {
+        sourceType: 'hazard',
+        sourceId: selectedIds[0],
+        attachmentType: 'CLOSING_PROOF_PHOTO',
+      });
+      setShowCloseHazard(false);
+      setCloseHazardData({ closingProof: null, closingRemarks: '' });
+      await fetchAll(listQuery);
+    } catch (error: any) {
+      setAttachmentWarning(error?.response?.data?.message || 'Image upload failed. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -997,35 +1134,17 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     const effectiveReadonly = col.readonly || (isMappedEmployeeField && col.key !== 'emp_id');
 
     if (col.type === 'file') {
+      const existingAttachment = attachmentForField(col.key);
+      const selectedFile = pendingFiles[col.key] || null;
       return (
-        <label className="block rounded-lg border border-dashed border-[#D6D6D6] bg-[#FAFAFA] p-4 cursor-pointer">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-white border border-[#E0E0E0] flex items-center justify-center text-[#9CA3AF]">
-              <Upload className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[13px] font-medium text-[#1A1818]">{col.label}</p>
-              <p className="text-[11px] text-[#9CA3AF]">Select a file to upload it through the enterprise attachment service.</p>
-            </div>
-          </div>
-          <input type="file" className="sr-only" onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (!file) return;
-            // A new hazard has no source ID until the main record is committed.
-            // Queue the file and upload it only after the create API returns the
-            // generated hazard ID.
-            if (schema.id === 'hazard-reporting' && !isEdit) {
-              setPendingFiles(previous => ({ ...previous, [col.key]: file }));
-              return;
-            }
-            if (!selectedRecordId) {
-              setValidationError('Save the record before uploading an attachment.');
-              return;
-            }
-            uploadClient.upload(file, { sourceType: schema.id === 'hazard-reporting' ? 'hazard' : schema.id, sourceId: selectedRecordId })
-              .catch((error: unknown) => setValidationError(error instanceof Error ? error.message : 'Attachment upload failed.'));
-          }} />
-        </label>
+        <ImageUploadField
+          label={col.label}
+          file={selectedFile}
+          existingAttachment={existingAttachment}
+          existingPreviewUrl={existingAttachment ? attachmentPreviewUrls[existingAttachment.id] : null}
+          disabled={effectiveReadonly}
+           onFileChange={file => handleImageSelection(col.key, file)}
+        />
       );
     }
 
@@ -1504,6 +1623,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                 </div>
               </div>
             )}
+            {attachmentWarning && <div className="rounded-xl border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-[12px] text-[#9A3412]" role="status">{attachmentWarning}</div>}
 
             <form id="module-form" onSubmit={handleSubmit} className="space-y-5">
               {sectionGroups.map(section => {
@@ -1603,6 +1723,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                 const savedDraft = sessionStorage.getItem(`hse-${schema.id}-draft`);
                 if (savedDraft) recoveredForm = { ...defaultForm, ...JSON.parse(savedDraft) };
               } catch { /* ignore malformed or unavailable draft storage */ }
+              setPendingFiles({});
+              setExistingAttachments([]);
+              clearAttachmentPreviews();
+              setAttachmentWarning(null);
               setFormData(recoveredForm);
               if (schema.id === 'hazard-reporting') {
                 setHazardStep(1);
@@ -1623,7 +1747,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           <button onClick={() => setShowReviewPanel(true)} disabled={selectedCount === 0} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] hover:bg-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
             <PanelRightOpen className="h-3.5 w-3.5" /> HSE Review{selectedCount > 0 ? ` (${selectedCount})` : ''}
           </button>
-          <button onClick={() => setShowCloseHazard(true)} disabled={selectedCount === 0} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#CB0017]/30 bg-[#FFF7F7] text-[#CB0017] hover:bg-[#FDECEC] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
+          <button onClick={() => { setAttachmentWarning(null); setCloseHazardData({ closingProof: null, closingRemarks: '' }); setShowCloseHazard(true); }} disabled={selectedCount === 0} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#CB0017]/30 bg-[#FFF7F7] text-[#CB0017] hover:bg-[#FDECEC] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
             <CheckCircle2 className="h-3.5 w-3.5" /> Close {entityName}{selectedCount > 0 ? ` (${selectedCount})` : ''}
           </button>
           <button onClick={() => setShowMobileFilters(true)} className="md:hidden h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] inline-flex items-center gap-1.5">
@@ -1854,9 +1978,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               value={reviewData.remarks}
               onChange={e => setReviewData({ ...reviewData, remarks: e.target.value })}
             />
-          </div>
-          <div>
-            <label className="block text-[12px] font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Reason</label>
+           </div>
+           <div>
+             <label className="block text-[12px] font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Reason</label>
             <textarea 
               className={TEXTAREA_BASE} 
               rows={4} 
@@ -1875,25 +1999,28 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
       <CenterModal
         isOpen={showCloseHazard}
-        onClose={() => setShowCloseHazard(false)}
+        onClose={() => { setShowCloseHazard(false); setCloseHazardData({ closingProof: null, closingRemarks: '' }); setAttachmentWarning(null); }}
         title="Close Hazard"
         description="Submit closing proof for review. No permanent close action is performed."
       >
         <div className="space-y-5">
           <div className="rounded-xl border border-dashed border-[#D6D6D6] bg-[#FAFAFA] p-4">
-            <p className="text-[13px] font-semibold text-[#1A1818]">Upload Closing Proof</p>
-            <p className="text-[12px] text-[#9CA3AF] mt-1">Files are uploaded through the enterprise attachment service.</p>
-            <div className="mt-3 h-28 rounded-lg border border-[#E0E0E0] bg-white flex items-center justify-center text-[#9CA3AF]">
-              <Paperclip className="h-4 w-4 mr-2" /> Drag or choose a file
-            </div>
-          </div>
-          <div>
+            <ImageUploadField
+              label="Closing Proof Photo"
+              file={closeHazardData.closingProof}
+              existingAttachment={existingAttachments.find(attachment => attachment.attachmentType === 'CLOSING_PROOF_PHOTO') || null}
+              existingPreviewUrl={existingAttachments.find(attachment => attachment.attachmentType === 'CLOSING_PROOF_PHOTO') ? attachmentPreviewUrls[existingAttachments.find(attachment => attachment.attachmentType === 'CLOSING_PROOF_PHOTO')!.id] : null}
+              onFileChange={file => setCloseHazardData(previous => ({ ...previous, closingProof: file }))}
+            />
+           </div>
+           {attachmentWarning && <p className="rounded-md bg-[#FFF7ED] px-3 py-2 text-[12px] text-[#9A3412]" role="alert">{attachmentWarning}</p>}
+           <div>
             <label className="block text-[12px] font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Closing Remarks</label>
             <textarea className={TEXTAREA_BASE} rows={4} value={closeHazardData.closingRemarks} onChange={e => setCloseHazardData(prev => ({ ...prev, closingRemarks: e.target.value }))} placeholder="Enter closing remarks..." />
           </div>
           <div className="flex items-center justify-end gap-2">
-            <button className="h-9 px-4 text-[13px] font-medium rounded-md border border-[#DEDEDE] text-[#374151] hover:bg-[#F5F5F5]" onClick={() => setShowCloseHazard(false)}>Cancel</button>
-            <button className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#CB0017] text-white hover:bg-[#A8001A]">Submit for Review</button>
+             <button type="button" className="h-9 px-4 text-[13px] font-medium rounded-md border border-[#DEDEDE] text-[#374151] hover:bg-[#F5F5F5]" onClick={() => { setShowCloseHazard(false); setCloseHazardData({ closingProof: null, closingRemarks: '' }); setAttachmentWarning(null); }}>Cancel</button>
+             <button type="button" disabled={isSaving} onClick={submitClosingProof} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#CB0017] text-white hover:bg-[#A8001A] disabled:opacity-50">{isSaving ? 'Uploading…' : 'Submit for Review'}</button>
           </div>
         </div>
       </CenterModal>
@@ -2163,25 +2290,28 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
       <CenterModal
         isOpen={showCloseHazard}
-        onClose={() => setShowCloseHazard(false)}
+        onClose={() => { setShowCloseHazard(false); setCloseHazardData({ closingProof: null, closingRemarks: '' }); setAttachmentWarning(null); }}
         title="Close Hazard"
         description="Submit closing proof for review. No permanent close action is performed."
       >
         <div className="space-y-5">
           <div className="rounded-xl border border-dashed border-[#D6D6D6] bg-[#FAFAFA] p-4">
-            <p className="text-[13px] font-semibold text-[#1A1818]">Upload Closing Proof</p>
-            <p className="text-[12px] text-[#9CA3AF] mt-1">Files are uploaded through the enterprise attachment service.</p>
-            <div className="mt-3 h-28 rounded-lg border border-[#E0E0E0] bg-white flex items-center justify-center text-[#9CA3AF]">
-              <Paperclip className="h-4 w-4 mr-2" /> Drag or choose a file
-            </div>
+            <ImageUploadField
+              label="Closing Proof Photo"
+              file={closeHazardData.closingProof}
+              existingAttachment={existingAttachments.find(attachment => attachment.attachmentType === 'CLOSING_PROOF_PHOTO') || null}
+              existingPreviewUrl={existingAttachments.find(attachment => attachment.attachmentType === 'CLOSING_PROOF_PHOTO') ? attachmentPreviewUrls[existingAttachments.find(attachment => attachment.attachmentType === 'CLOSING_PROOF_PHOTO')!.id] : null}
+              onFileChange={file => setCloseHazardData(previous => ({ ...previous, closingProof: file }))}
+            />
           </div>
+          {attachmentWarning && <p className="rounded-md bg-[#FFF7ED] px-3 py-2 text-[12px] text-[#9A3412]" role="alert">{attachmentWarning}</p>}
           <div>
             <label className="block text-[12px] font-semibold text-[#374151] mb-1.5 uppercase tracking-wide">Closing Remarks</label>
             <textarea className={TEXTAREA_BASE} rows={4} value={closeHazardData.closingRemarks} onChange={e => setCloseHazardData(prev => ({ ...prev, closingRemarks: e.target.value }))} placeholder="Enter closing remarks..." />
           </div>
           <div className="flex items-center justify-end gap-2">
-            <button className="h-9 px-4 text-[13px] font-medium rounded-md border border-[#DEDEDE] text-[#374151] hover:bg-[#F5F5F5]" onClick={() => setShowCloseHazard(false)}>Cancel</button>
-            <button className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#CB0017] text-white hover:bg-[#A8001A]">Submit for Review</button>
+            <button type="button" className="h-9 px-4 text-[13px] font-medium rounded-md border border-[#DEDEDE] text-[#374151] hover:bg-[#F5F5F5]" onClick={() => { setShowCloseHazard(false); setCloseHazardData({ closingProof: null, closingRemarks: '' }); setAttachmentWarning(null); }}>Cancel</button>
+            <button type="button" disabled={isSaving} onClick={submitClosingProof} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#CB0017] text-white hover:bg-[#A8001A] disabled:opacity-50">{isSaving ? 'Uploading…' : 'Submit for Review'}</button>
           </div>
         </div>
       </CenterModal>
