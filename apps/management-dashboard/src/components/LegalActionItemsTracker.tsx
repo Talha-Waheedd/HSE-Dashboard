@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { moduleService } from '../services/api/moduleService';
 
 const statusClass = (status: string) => {

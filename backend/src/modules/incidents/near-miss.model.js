@@ -2,7 +2,6 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../../database/connection');
-const SeverityLevel = require('../../shared/enums/SeverityLevel');
 
 const NearMissStatus = Object.freeze({
   DRAFT: 'draft',
@@ -36,6 +35,11 @@ const NearMiss = sequelize.define('NearMiss', {
     allowNull: true,
     comment: 'FK → departments.id',
   },
+  responsibleDepartmentId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Department responsible for the preventive/corrective action',
+  },
   title: {
     type: DataTypes.STRING(255),
     allowNull: false,
@@ -62,6 +66,18 @@ const NearMiss = sequelize.define('NearMiss', {
     type: DataTypes.TEXT,
     allowNull: true,
     comment: 'Action taken immediately after the near miss',
+  },
+  furtherInvestigationRequired: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+  },
+  reportedInHazard: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+  },
+  remarks: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
   rootCause: {
     type: DataTypes.TEXT,
@@ -107,6 +123,7 @@ const NearMiss = sequelize.define('NearMiss', {
     { fields: ['department_id'], name: 'near_misses_department_id_idx' },
     { fields: ['status'], name: 'near_misses_status_idx' },
     { fields: ['severity_level'], name: 'near_misses_severity_level_idx' },
+    { fields: ['responsible_department_id'], name: 'near_misses_responsible_department_idx' },
     { fields: ['created_at'], name: 'near_misses_created_at_idx' },
   ],
 });

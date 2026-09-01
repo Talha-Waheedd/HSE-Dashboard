@@ -18,7 +18,7 @@ class HazardRepository extends BaseRepository {
       include: [
         { model: User, as: 'reporter', attributes: ['id', 'firstName', 'lastName', 'email'] },
         { model: User, as: 'assignee', attributes: ['id', 'firstName', 'lastName', 'email'] },
-        { model: Department, as: 'department', attributes: ['id', 'name'] },
+        { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
         { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
       ],
     });

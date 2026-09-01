@@ -18,6 +18,7 @@ class NearMissRepository extends BaseRepository {
       include: [
         { model: User, as: 'reporter', attributes: ['id', 'firstName', 'lastName', 'email'] },
         { model: Department, as: 'department', attributes: ['id', 'name'] },
+        { model: Department, as: 'responsibleDepartment', attributes: ['id', 'name', 'code'] },
         { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
       ],
     });

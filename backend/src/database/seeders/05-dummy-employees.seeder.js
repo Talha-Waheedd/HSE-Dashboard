@@ -5,6 +5,17 @@ const { v4: uuidv4 } = require('uuid');
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const departmentRows = await queryInterface.sequelize.query(
+      "SELECT id, name FROM departments WHERE name IN ('ADM', 'ESD', 'IT')",
+      { type: Sequelize.QueryTypes.SELECT },
+    );
+    const departmentsByName = Object.fromEntries(departmentRows.map(department => [department.name, department.id]));
+    for (const departmentName of ['ADM', 'ESD', 'IT']) {
+      if (!departmentsByName[departmentName]) {
+        throw new Error(`Required dummy employee department not found: ${departmentName}`);
+      }
+    }
+
     // We need 3 users first
     const users = [
       {
@@ -47,6 +58,7 @@ module.exports = {
         id: uuidv4(),
         user_id: users[0].id,
         employee_id: '101',
+        department_id: departmentsByName.ADM,
         designation: 'Software Engineer',
         gender: 'Male',
         created_at: new Date(),
@@ -56,6 +68,7 @@ module.exports = {
         id: uuidv4(),
         user_id: users[1].id,
         employee_id: '102',
+        department_id: departmentsByName.ESD,
         designation: 'QA Engineer',
         gender: 'Female',
         created_at: new Date(),
@@ -65,6 +78,7 @@ module.exports = {
         id: uuidv4(),
         user_id: users[2].id,
         employee_id: '103',
+        department_id: departmentsByName.IT,
         designation: 'Project Manager',
         gender: 'Male',
         created_at: new Date(),

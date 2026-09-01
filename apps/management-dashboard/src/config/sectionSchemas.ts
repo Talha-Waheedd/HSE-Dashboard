@@ -109,11 +109,11 @@ export const nearMissSchema: SectionConfig = {
     { key: 'location', label: 'Area / Location', type: 'location-select', required: true, section: 'Basic Information' },
     { key: 'details', label: 'Details of the Near Miss', type: 'textarea', required: true, section: 'Near Miss Details' },
     { key: 'preventive_action', label: 'Preventive Action Suggestion', type: 'textarea', section: 'Corrective Actions' },
-    { key: 'responsible_person', label: 'Resp.', type: 'text', section: 'Corrective Actions' },
-    { key: 'investigation_required', label: 'Further Investigation Required (Y/N)', type: 'select', options: ['Yes', 'No'], section: 'Investigation' },
-    { key: 'reported_in_hazard', label: 'Reported in HAZARD (Y/N)', type: 'select', options: ['Yes', 'No'], section: 'Investigation' },
-    { key: 'status', label: 'Status (Open/Close)', type: 'select', options: ['Open', 'Closed'], section: 'Investigation' },
-    { key: 'remarks', label: 'Remarks', type: 'textarea', section: 'Investigation' },
+    { key: 'responsible_department_id', label: 'Responsible Department', type: 'select', section: 'Corrective Actions' },
+    { key: 'investigation_required', label: 'Further Investigation Required', type: 'select', options: ['Yes', 'No'], section: 'Corrective Actions' },
+    { key: 'reported_in_hazard', label: 'Reported in Hazard', type: 'select', options: ['Yes', 'No'], section: 'Corrective Actions' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Open', 'Close'], section: 'Corrective Actions' },
+    { key: 'remarks', label: 'Remarks', type: 'textarea', section: 'Corrective Actions' },
   ]
 };
 

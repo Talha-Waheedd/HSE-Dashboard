@@ -20,6 +20,17 @@ export interface DepartmentOption {
   isActive?: boolean;
 }
 
+const DEPARTMENT_DISPLAY_ORDER = ['ADM', 'ESD', 'HSE', 'IT', 'PRD', 'Projects', 'QC/FS/NPD', 'Stores', 'Others'];
+const sortDepartmentOptions = (departments: DepartmentOption[]) => [...departments].sort((left, right) => {
+  const labels = (department: DepartmentOption) => [department.code, department.name].map(value => String(value || '').trim().toLowerCase()).filter(Boolean);
+  const rank = (department: DepartmentOption) => {
+    const values = labels(department);
+    const index = DEPARTMENT_DISPLAY_ORDER.findIndex(item => values.includes(item.toLowerCase()));
+    return index === -1 ? (values.includes('other') || values.includes('others') ? DEPARTMENT_DISPLAY_ORDER.length : DEPARTMENT_DISPLAY_ORDER.length - 1) : index;
+  };
+  return rank(left) - rank(right) || labels(left)[0].localeCompare(labels(right)[0]);
+});
+
 const analysisStatusFromApi = (value: unknown) => ({
   not_reviewed: 'Not Reviewed',
   under_review: 'Under Review',
@@ -75,7 +86,7 @@ const statusToApi = (value: unknown, schemaId: string) => {
     return ({ Planned: 'planned', Pending: 'planned', Done: 'completed', Closed: 'completed', WIP: 'in_progress', 'Work in Progress': 'in_progress', Cancelled: 'cancelled' }[status] || status.toLowerCase().replaceAll(' ', '_'));
   }
   if (schemaId === 'near-miss') {
-    return ({ Open: 'submitted', Pending: 'under_review', 'Work in Progress': 'under_review', Closed: 'closed', Cancelled: 'closed' }[status] || status.toLowerCase().replaceAll(' ', '_'));
+    return ({ Open: 'submitted', Close: 'closed', Closed: 'closed', Pending: 'under_review', 'Work in Progress': 'under_review', Cancelled: 'closed', Draft: 'draft' }[status] || status.toLowerCase().replaceAll(' ', '_'));
   }
   const common: Record<string, string> = {
     Open: schemaId === 'hazard-reporting' ? 'submitted' : 'reported',
@@ -89,6 +100,13 @@ const statusToApi = (value: unknown, schemaId: string) => {
 
 const severityToApi = (value: unknown) => String(value || '').trim().toLowerCase() || undefined;
 const isUuid = (value: unknown) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
+const departmentDisplayValue = (...values: unknown[]) => {
+  for (const value of values) {
+    const text = String(value ?? '').trim();
+    if (text && !isUuid(text)) return text;
+  }
+  return '';
+};
 const categoryToApi = (value: unknown) => {
   const text = String(value || '').trim().toLowerCase();
   const known = ['physical', 'chemical', 'biological', 'ergonomic', 'electrical', 'fire', 'environmental', 'behavioral', 'other'];
@@ -105,6 +123,19 @@ const statusFromApi = (value: unknown) => ({
   under_investigation: 'Pending', corrective_action: 'Work in Progress', resolved: 'Closed', closed: 'Closed',
   scheduled: 'Pending', in_progress: 'Work in Progress', completed: 'Closed', cancelled: 'Cancelled',
 }[String(value || '').toLowerCase()] || value);
+const nearMissStatusFromApi = (value: unknown) => ({
+  draft: 'Open', reported: 'Open', submitted: 'Open', under_review: 'Open', open: 'Open', closed: 'Close', close: 'Close',
+}[String(value || '').toLowerCase()] || value || 'Open');
+const yesNoFromApi = (value: unknown) => {
+  if (value === true || ['yes', 'y', 'true', '1'].includes(String(value ?? '').trim().toLowerCase())) return 'Yes';
+  if (value === false || ['no', 'n', 'false', '0'].includes(String(value ?? '').trim().toLowerCase())) return 'No';
+  return '';
+};
+const yesNoToApi = (value: unknown) => {
+  if (value === true || ['yes', 'y', 'true', '1'].includes(String(value ?? '').trim().toLowerCase())) return true;
+  if (value === false || ['no', 'n', 'false', '0'].includes(String(value ?? '').trim().toLowerCase())) return false;
+  return undefined;
+};
 const severityFromApi = (value: unknown) => {
   const text = String(value || '');
   return text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : value;
@@ -170,7 +201,8 @@ export const moduleService = {
   },
   getDepartments: async (): Promise<ApiResponse<DepartmentOption[]>> => {
     const response = await apiClient.get('/departments', { params: { isActive: true, page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
-    return response.data;
+    const payload = response.data;
+    return { ...payload, data: sortDepartmentOptions(Array.isArray(payload?.data) ? payload.data : []) };
   },
   getLocations: async (): Promise<ApiResponse<any[]>> => {
     const response = await apiClient.get('/locations', { params: { isActive: true, page: 1, limit: 500, sortBy: 'name', sortOrder: 'asc' } });
@@ -207,16 +239,37 @@ export const moduleService = {
         // metadata can contain legacy display dates and must not override it.
         date: item.reportedAt || item.reported_at || item.metadata?.date || item.createdAt || item.created_at || new Date().toISOString(),
         status_id: item.metadata?.status_id || statusFromApi(item.status),
-        department_id: item.metadata?.originated_department || item.metadata?.department_id || item.departmentId || item.department_id,
+        department_id: departmentDisplayValue(
+          item.department?.code,
+          item.department?.name,
+          item.metadata?.originated_department,
+          item.metadata?.originated_dept,
+          item.metadata?.department_name,
+          item.metadata?.department_code,
+        ),
       }));
     } else if (schemaId === 'near-miss') {
       rawData = rawData.map((item: any) => ({
         ...item,
         details: item.metadata?.details || item.description,
-        investigation_required: item.metadata?.investigation_required || (String(item.severityLevel || item.severity_level).toLowerCase() === 'high' ? 'Yes' : 'No'),
+        responsible_department_id: item.responsibleDepartmentId || item.responsible_department_id || item.metadata?.responsible_department_id || '',
+        responsible_department: item.responsibleDepartment?.code || item.responsibleDepartment?.name || item.responsible_department || item.metadata?.responsible_department || item.metadata?.responsibleDepartment || item.metadata?.resp || item.responsible_person || item.metadata?.responsible_person || '',
+        investigation_required: yesNoFromApi(item.furtherInvestigationRequired ?? item.further_investigation_required ?? item.investigation_required ?? item.metadata?.investigation_required ?? item.metadata?.further_investigation_required ?? item.metadata?.further_investigation),
+        reported_in_hazard: yesNoFromApi(item.reportedInHazard ?? item.reported_in_hazard ?? item.metadata?.reported_in_hazard),
         preventive_action: item.metadata?.preventive_action || item.immediateAction || item.action_taken,
+        remarks: item.remarks ?? item.metadata?.remarks ?? '',
         date: item.metadata?.date || item.reportedAt || item.reported_at || item.createdAt || item.created_at || new Date().toISOString(),
-        department_id: item.metadata?.department_id || item.departmentId || item.department_id,
+        department_id: departmentDisplayValue(
+          item.department?.code,
+          item.department?.name,
+          item.metadata?.department_name,
+          item.metadata?.department_code,
+          item.metadata?.originated_department,
+          item.metadata?.originated_dept,
+          item.metadata?.department_id,
+        ),
+        status: nearMissStatusFromApi(item.status ?? item.status_id ?? item.metadata?.status_id),
+        status_id: nearMissStatusFromApi(item.status ?? item.status_id ?? item.metadata?.status_id),
       }));
     } else if (schemaId === 'incident-log') {
       rawData = rawData.map((item: any) => ({
@@ -325,6 +378,11 @@ export const moduleService = {
       payload = {
         ...payload,
         plantId: payload.plantId || DEFAULT_PLANT_ID,
+        departmentId: isUuid(payload.department_id) ? payload.department_id : undefined,
+        responsibleDepartmentId: isUuid(payload.responsible_department_id) ? payload.responsible_department_id : undefined,
+        furtherInvestigationRequired: yesNoToApi(payload.investigation_required),
+        reportedInHazard: yesNoToApi(payload.reported_in_hazard),
+        remarks: payload.remarks,
         title: payload.details ? payload.details.substring(0, 50) : 'Near Miss',
         description: payload.details || 'No details provided',
         severityLevel: payload.investigation_required === 'Yes' ? 'high' : 'low',
@@ -403,6 +461,11 @@ export const moduleService = {
     } else if (schemaId === 'near-miss') {
       payload = {
         ...payload,
+        departmentId: isUuid(payload.department_id) ? payload.department_id : undefined,
+        responsibleDepartmentId: isUuid(payload.responsible_department_id) ? payload.responsible_department_id : undefined,
+        furtherInvestigationRequired: yesNoToApi(payload.investigation_required),
+        reportedInHazard: yesNoToApi(payload.reported_in_hazard),
+        remarks: payload.remarks,
         title: payload.details ? payload.details.substring(0, 50) : 'Near Miss',
         description: payload.details,
         severityLevel: payload.investigation_required === 'Yes' ? 'high' : 'low',

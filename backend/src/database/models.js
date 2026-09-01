@@ -123,6 +123,8 @@ NearMiss.belongsTo(Plant, { foreignKey: 'plantId', as: 'plant' });
 
 Department.hasMany(NearMiss, { foreignKey: 'departmentId', as: 'nearMisses' });
 NearMiss.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
+Department.hasMany(NearMiss, { foreignKey: 'responsibleDepartmentId', as: 'responsibleNearMisses' });
+NearMiss.belongsTo(Department, { foreignKey: 'responsibleDepartmentId', as: 'responsibleDepartment' });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Associations — Incidents

@@ -86,6 +86,7 @@ const getAllHazards = asyncHandler(async (req, res) => {
     limit,
     offset,
     where: await buildHazardWhere(req.query),
+    include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }],
     order: parseOrder(req.query, { date: 'reportedAt', reportedAt: 'reportedAt', createdAt: 'createdAt' }),
   };
 
