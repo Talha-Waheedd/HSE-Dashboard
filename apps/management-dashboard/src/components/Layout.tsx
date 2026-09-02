@@ -79,12 +79,6 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: 'TRAINING',
-    items: [
-      { title: 'Training Records', href: '/training-records', Icon: Users },
-    ],
-  },
-  {
     label: 'REPORTING',
     items: [
       { title: 'Master Analysis', href: '/master-analysis', Icon: Activity },
@@ -126,13 +120,15 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { logout, user } = useAuth();
-  const { hasRole } = useAuthStore();
+  const { hasRole, hasPermission } = useAuthStore();
   const { canViewReports } = usePermissions();
   const { theme, toggleTheme } = useTheme();
 
   const activeNavGroups: NavGroup[] = [
     ...NAV_GROUPS,
-    ...(hasRole('System Administrator') || hasRole('Administrator') ? [{
+    ...(hasRole('System Administrator') || hasRole('Administrator') || [
+      'user:view', 'role:view', 'location:view', 'department:view',
+    ].some(hasPermission) ? [{
       label: 'ADMINISTRATION',
       items: [
         { title: 'Administrative Rights', href: '/master-management', Icon: Settings },

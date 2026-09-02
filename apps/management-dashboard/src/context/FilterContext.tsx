@@ -5,6 +5,7 @@ export interface Filters {
   year: string;
   auditType: string;
   department: string;
+  riskRating: string;
   status: string;
   month: string;
   fromDate: string;
@@ -23,6 +24,7 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
     year: 'All',
     auditType: 'All',
     department: 'All',
+    riskRating: 'All',
     status: 'All',
     month: 'All',
     fromDate: '',

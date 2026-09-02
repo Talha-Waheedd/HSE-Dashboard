@@ -9,6 +9,11 @@ const { MESSAGES } = require('../../shared/constants/messages');
 const { getFileUrl } = require('../../shared/helpers/file.helper');
 
 class UserController {
+  create = asyncHandler(async (req, res) => {
+    const user = await userService.createUser(req.body, req.user.id);
+    res.status(HTTP_STATUS.CREATED).json(ApiResponse.success(user, 'User created successfully'));
+  });
+
   getAll = asyncHandler(async (req, res) => {
     const { users, meta } = await userService.getAllUsers(req.query);
     res.status(HTTP_STATUS.OK).json(
@@ -27,7 +32,7 @@ class UserController {
   });
 
   delete = asyncHandler(async (req, res) => {
-    await userService.deleteUser(req.params.id);
+    await userService.deleteUser(req.params.id, req.user.id);
     res.status(HTTP_STATUS.OK).json(ApiResponse.success(null, MESSAGES.USER_DELETED));
   });
 

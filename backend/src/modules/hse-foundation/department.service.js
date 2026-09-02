@@ -1,5 +1,6 @@
 'use strict';
 
+const { Op } = require('sequelize');
 const departmentRepository = require('../../repositories/department.repository');
 const plantRepository = require('../../repositories/plant.repository');
 const { ApiError } = require('../../shared/utils/index');
@@ -14,8 +15,16 @@ class DepartmentService {
     if (!plant) {
       throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
     }
-    data.createdBy = userId;
-    return departmentRepository.create(data);
+    const name = data.name.trim();
+    const code = data.code?.trim() || null;
+    const duplicate = await departmentRepository.findOne({
+      plantId: data.plantId,
+      [Op.or]: [{ name }, ...(code ? [{ code }] : [])],
+    });
+    if (duplicate) throw ApiError.conflict('A department with this name or code already exists for the selected plant');
+    return departmentRepository.create({
+      ...data, name, code, createdBy: userId, updatedBy: userId,
+    });
   }
 
   /**
@@ -56,16 +65,32 @@ class DepartmentService {
       }
     }
 
-    updateData.updatedBy = userId;
-    return departmentRepository.updateById(id, updateData);
+    const patch = { ...updateData, updatedBy: userId };
+    if (Object.prototype.hasOwnProperty.call(patch, 'name')) patch.name = patch.name.trim();
+    if (Object.prototype.hasOwnProperty.call(patch, 'code')) patch.code = patch.code?.trim() || null;
+    const plantId = patch.plantId || dept.plantId;
+    if (patch.name || patch.code) {
+      const duplicate = await departmentRepository.findOne({
+        id: { [Op.ne]: id },
+        plantId,
+        [Op.or]: [
+          ...(patch.name ? [{ name: patch.name }] : []),
+          ...(patch.code ? [{ code: patch.code }] : []),
+        ],
+      });
+      if (duplicate) throw ApiError.conflict('A department with this name or code already exists for the selected plant');
+    }
+    await departmentRepository.updateById(id, patch);
+    return this.getDepartmentById(id);
   }
 
   /**
    * Delete department (soft delete)
    */
-  async deleteDepartment(id) {
+  async deleteDepartment(id, userId) {
     await this.getDepartmentById(id);
-    return departmentRepository.deleteById(id);
+    await departmentRepository.updateById(id, { isActive: false, updatedBy: userId });
+    return this.getDepartmentById(id);
   }
 }
 

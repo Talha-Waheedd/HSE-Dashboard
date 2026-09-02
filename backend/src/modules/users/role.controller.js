@@ -17,6 +17,11 @@ class RoleController {
     res.status(HTTP_STATUS.OK).json(ApiResponse.success(role, MESSAGES.ROLE_FETCHED));
   });
 
+  getPermissions = asyncHandler(async (req, res) => {
+    const permissions = await roleService.getAllPermissions();
+    res.status(HTTP_STATUS.OK).json(ApiResponse.success(permissions, 'Permissions fetched successfully'));
+  });
+
   create = asyncHandler(async (req, res) => {
     const role = await roleService.createRole(req.body);
     res.status(HTTP_STATUS.CREATED).json(ApiResponse.success(role, MESSAGES.ROLE_CREATED));
@@ -25,6 +30,11 @@ class RoleController {
   update = asyncHandler(async (req, res) => {
     const role = await roleService.updateRole(req.params.id, req.body);
     res.status(HTTP_STATUS.OK).json(ApiResponse.success(role, MESSAGES.ROLE_UPDATED));
+  });
+
+  updatePermissions = asyncHandler(async (req, res) => {
+    const role = await roleService.updatePermissions(req.params.id, req.body.permissionIds);
+    res.status(HTTP_STATUS.OK).json(ApiResponse.success(role, 'Role permissions updated successfully'));
   });
 
   delete = asyncHandler(async (req, res) => {

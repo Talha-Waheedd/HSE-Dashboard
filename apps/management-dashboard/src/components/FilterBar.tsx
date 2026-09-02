@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Filter, RotateCcw } from 'lucide-react';
 import { useFilters } from '../context/FilterContext';
 import { usePermissions } from '@cbl/auth';
-import { DEPARTMENTS } from '../config/constants';
+import { departmentLabel, useDepartments } from '../hooks/useDepartments';
 
 interface FilterBarProps {
   showDepartment?: boolean;
@@ -11,7 +11,7 @@ interface FilterBarProps {
   showYear?: boolean;
   showDateRange?: boolean;
   className?: string;
-  variant?: 'default' | 'incident';
+  variant?: 'default' | 'incident' | 'hazard' | 'near-miss';
 }
 
 const selectClass =
@@ -38,13 +38,26 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 }) => {
   const { filters, setFilter } = useFilters();
   const { isDepartmentRestricted } = usePermissions();
+  const { departments } = useDepartments();
   const isRestricted = isDepartmentRestricted();
   const [collapsed, setCollapsed] = useState(false);
   const isIncident = variant === 'incident';
+  const isHazard = variant === 'hazard';
+  const isNearMiss = variant === 'near-miss';
+
+  useEffect(() => {
+    if (isNearMiss && !['All', 'Open', 'Closed'].includes(filters.status)) {
+      setFilter('status', 'All');
+    }
+  }, [filters.status, isNearMiss, setFilter]);
 
   const hasActiveFilters =
     (filters.department !== '' && filters.department !== 'All') ||
-    (showMonthInsteadOfStatus
+    (isHazard || isNearMiss
+      ? (filters.month !== '' && filters.month !== 'All') ||
+        (isHazard && filters.riskRating !== '' && filters.riskRating !== 'All') ||
+        (filters.status !== '' && filters.status !== 'All')
+      : showMonthInsteadOfStatus
       ? filters.month !== '' && filters.month !== 'All'
       : filters.status !== '' && filters.status !== 'All') ||
     (filters.year !== '' && filters.year !== 'All') ||
@@ -53,6 +66,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
   const clearFilters = () => {
     setFilter('department', 'All');
+    setFilter('riskRating', 'All');
     setFilter('status', 'All');
     setFilter('month', 'All');
     setFilter('year', 'All');
@@ -111,7 +125,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   <Building2 className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
                   <select value={filters.department} onChange={e => setFilter('department', e.target.value)} disabled={isRestricted} className={`${incidentFieldClass} ${isRestricted ? 'cursor-not-allowed opacity-60' : ''}`}>
                     <option value="All">All Departments</option>
-                    {DEPARTMENTS.map(department => <option key={department} value={department}>{department}</option>)}
+                    {departments.map(department => <option key={department.id} value={departmentLabel(department)}>{departmentLabel(department)}</option>)}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B1010]" />
                 </div>
@@ -164,13 +178,24 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         <Filter className="h-3.5 w-3.5" /> Filter:
       </span>
       {showYear && (
-        <select value={filters.year} onChange={e => setFilter('year', e.target.value)} className={selectClass}>
+        <select aria-label="Year" value={filters.year} onChange={e => setFilter('year', e.target.value)} className={selectClass}>
           <option value="All">All Years</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
         </select>
       )}
+      {(isHazard || isNearMiss) && (
+        <select aria-label="Month" value={filters.month} onChange={e => setFilter('month', e.target.value)} className={selectClass}>
+          <option value="All">All Months</option>
+          {MONTHS.map((month, index) => <option key={month} value={String(index + 1)}>{month}</option>)}
+        </select>
+      )}
       {showDepartment && (
-        <select value={filters.department} onChange={e => setFilter('department', e.target.value)} disabled={isRestricted} className={`${selectClass} ${isRestricted ? 'opacity-60 cursor-not-allowed' : ''}`}>
-          <option value="All">All Departments</option>{DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+        <select aria-label="Department" value={filters.department} onChange={e => setFilter('department', e.target.value)} disabled={isRestricted} className={`${selectClass} ${isRestricted ? 'opacity-60 cursor-not-allowed' : ''}`}>
+          <option value="All">All Departments</option>{departments.map(department => <option key={department.id} value={departmentLabel(department)}>{departmentLabel(department)}</option>)}
+        </select>
+      )}
+      {isHazard && (
+        <select aria-label="Risk Rating" value={filters.riskRating} onChange={e => setFilter('riskRating', e.target.value)} className={selectClass}>
+          <option value="All">All</option><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option>
         </select>
       )}
       {showStatus && (
@@ -180,8 +205,20 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             {MONTHS.map((month, index) => <option key={month} value={String(index + 1)}>{month}</option>)}
           </select>
         ) : (
-          <select value={filters.status} onChange={e => setFilter('status', e.target.value)} className={selectClass}>
-            <option value="All">All Statuses</option><option value="Open">Open</option><option value="Work in Progress">In Progress</option><option value="Pending">Pending</option><option value="Closed">Closed</option><option value="Cancelled">Cancelled</option>
+          <select aria-label="Status" value={filters.status} onChange={e => setFilter('status', e.target.value)} className={selectClass}>
+            {isHazard ? (
+              <>
+                <option value="All">All Statuses</option><option value="Open">Open</option><option value="Pending">Pending</option><option value="Close">Close</option>
+              </>
+            ) : isNearMiss ? (
+              <>
+                <option value="All">All Statuses</option><option value="Open">Open</option><option value="Closed">Closed</option>
+              </>
+            ) : (
+              <>
+                <option value="All">All Statuses</option><option value="Open">Open</option><option value="Work in Progress">In Progress</option><option value="Pending">Pending</option><option value="Closed">Closed</option><option value="Cancelled">Cancelled</option>
+              </>
+            )}
           </select>
         )
       )}

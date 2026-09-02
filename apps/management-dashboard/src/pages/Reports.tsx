@@ -6,7 +6,8 @@ import { StatusBadge }     from '../components/StatusBadge';
 import {
   Download, Printer, Table as TableIcon, RefreshCw, ChevronRight
 } from 'lucide-react';
-import { DEPARTMENTS, STATUSES, RISK_RATINGS, INCIDENT_CATEGORIES } from '../config/constants';
+import { STATUSES, RISK_RATINGS, INCIDENT_CATEGORIES } from '../config/constants';
+import { departmentLabel, useDepartments } from '../hooks/useDepartments';
 import { moduleService }   from '../services/api/moduleService';
 import { ALL_SECTIONS }    from '../config/sectionSchemas';
 import { reportClient } from '@cbl/api';
@@ -31,6 +32,7 @@ const inputClass =
 const labelClass = 'block text-[11px] font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5';
 
 export const Reports = () => {
+  const { departments } = useDepartments();
   const { canExportCSV, isDepartmentRestricted, userDepartment } = usePermissions();
   const [currentReportId, setCurrentReportId] = useState(REPORT_TYPES[0].id);
   const [generating, setGenerating]            = useState(false);
@@ -226,7 +228,7 @@ export const Reports = () => {
                 className={`${inputClass} ${isDepartmentRestricted() ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <option value="All">All Departments</option>
-                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                {departments.map(item => <option key={item.id} value={departmentLabel(item)}>{departmentLabel(item)}</option>)}
               </select>
             </div>
 

@@ -27,6 +27,13 @@ import { uploadClient, type AttachmentRecord } from '../../../../packages/api/sr
 import { LocationCombobox } from './LocationCombobox';
 import { ImageUploadField } from './ImageUploadField';
 import { formatDateOnly, formatDateTimeLocal } from '../utils/dateFormat';
+import {
+  createNewNearMissFormDefaults,
+  nearMissResponsibleDepartmentFormValues,
+  nearMissResponsibleDepartmentLabel,
+  nearMissResponsibleDepartmentOptions,
+  resolveNearMissResponsibleDepartmentValue,
+} from '../utils/nearMissResponsibleDepartment';
 
 interface DataEntrySectionProps {
   schema: SectionConfig;
@@ -576,11 +583,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   }, [activeDropdown]);
 
   useEffect(() => {
-    if (!['hazard-reporting', 'training-records', 'near-miss'].includes(schema.id)) return;
     let active = true;
-    setTrainingDepartmentsLoading(true);
-    setTrainingDepartmentsError(null);
-    void moduleService.getDepartments()
+    const loadDepartments = () => {
+      setTrainingDepartmentsLoading(true);
+      setTrainingDepartmentsError(null);
+      void moduleService.getDepartments()
       .then(response => {
         if (!active) return;
         if (!response.success || !Array.isArray(response.data)) throw new Error(response.message || 'Unable to load departments.');
@@ -595,14 +602,18 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         if (active) setTrainingDepartmentsError(error instanceof Error ? error.message : 'Unable to load departments.');
       })
       .finally(() => { if (active) setTrainingDepartmentsLoading(false); });
-    return () => { active = false; };
+    };
+    loadDepartments();
+    window.addEventListener('departments-refresh', loadDepartments);
+    return () => { active = false; window.removeEventListener('departments-refresh', loadDepartments); };
   }, [schema.id]);
 
   useEffect(() => {
     let active = true;
-    setLocationsLoading(true);
-    setLocationsError(null);
-    void moduleService.getLocations()
+    const loadLocations = () => {
+      setLocationsLoading(true);
+      setLocationsError(null);
+      void moduleService.getLocations()
       .then(response => {
         if (!active) return;
         if (!response.success || !Array.isArray(response.data)) throw new Error(response.message || 'Unable to load locations.');
@@ -615,13 +626,21 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         if (active) setLocationsError(error instanceof Error ? error.message : 'Unable to load locations.');
       })
       .finally(() => { if (active) setLocationsLoading(false); });
-    return () => { active = false; };
-  }, []);
+    };
+    loadLocations();
+    window.addEventListener('locations-refresh', loadLocations);
+    return () => { active = false; window.removeEventListener('locations-refresh', loadLocations); };
+  }, [schema.id]);
 
   const listFilters = useMemo(() => {
     const applicableFilters = { ...(filters as unknown as Record<string, unknown>) };
-    if (schema.id === 'training-records') delete applicableFilters.status;
-    else delete applicableFilters.month;
+    if (schema.id === 'training-records') {
+      delete applicableFilters.status;
+      delete applicableFilters.riskRating;
+    } else {
+      if (!['hazard-reporting', 'near-miss'].includes(schema.id)) delete applicableFilters.month;
+      if (schema.id !== 'hazard-reporting') delete applicableFilters.riskRating;
+    }
     return applicableFilters;
   }, [filters, schema.id]);
   const listQuery = useMemo(() => ({
@@ -752,7 +771,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       if (responsibleDepartmentId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(responsibleDepartmentId)) {
         return 'Responsible Department must be selected from the active department list.';
       }
-      if (responsibleDepartmentId && trainingDepartments.length > 0 && !trainingDepartments.some(department => department.id === responsibleDepartmentId)) {
+      const allowedResponsibleDepartments = nearMissResponsibleDepartmentOptions(trainingDepartments);
+      if (responsibleDepartmentId && allowedResponsibleDepartments.length > 0 && !allowedResponsibleDepartments.some(department => department.id === responsibleDepartmentId)) {
         return 'Selected Responsible Department is not active or no longer exists.';
       }
     }
@@ -840,6 +860,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>, isEdit = false) => {
     const { name, value, type } = e.target as any;
     let finalValue: any = type === 'number' ? (value === '' ? '' : Number(value)) : value;
+    const nearMissResponsibleSelection = schema.id === 'near-miss' && name === 'responsible_department_id'
+      ? nearMissResponsibleDepartmentFormValues(trainingDepartments, finalValue)
+      : null;
+    if (nearMissResponsibleSelection) finalValue = nearMissResponsibleSelection.responsible_department_id;
     const selectedResponsibleDepartment = name === 'responsible_department_id'
       ? trainingDepartments.find(department => department.id === finalValue)
       : null;
@@ -852,7 +876,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       setEditFormData((prev: any) => {
         const next = { ...prev, [name]: finalValue };
         if (name === 'responsible_department_id') {
-          next.responsible_department = selectedResponsibleDepartment?.code || selectedResponsibleDepartment?.name || '';
+          next.responsible_department = nearMissResponsibleSelection?.responsible_department
+            ?? selectedResponsibleDepartment?.code
+            ?? selectedResponsibleDepartment?.name
+            ?? '';
         }
         if (name === 'emp_id' && employeeDerivedFields.length > 0) {
           employeeDerivedFields.forEach(field => { next[field] = ''; });
@@ -863,7 +890,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       setFormData((prev: any) => {
         const next = { ...prev, [name]: finalValue };
         if (name === 'responsible_department_id') {
-          next.responsible_department = selectedResponsibleDepartment?.code || selectedResponsibleDepartment?.name || '';
+          next.responsible_department = nearMissResponsibleSelection?.responsible_department
+            ?? selectedResponsibleDepartment?.code
+            ?? selectedResponsibleDepartment?.name
+            ?? '';
         }
         if (name === 'emp_id' && employeeDerivedFields.length > 0) {
           employeeDerivedFields.forEach(field => { next[field] = ''; });
@@ -1056,7 +1086,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     setShowReviewPanel(false);
   };
 
-  const filteredEntries = useMemo(() => entries.filter(entry => {
+  const filteredEntries = useMemo(() => {
+    // Hazard and Near Miss filters are applied by MySQL before count/limit/offset. Do not
+    // re-filter a server page in React or the displayed page can become sparse.
+    if (['hazard-reporting', 'near-miss'].includes(schema.id)) return entries;
+    return entries.filter(entry => {
     const normalizedDepartment = (value: unknown) => String(value || '')
       .trim().toLowerCase().replace(/[^a-z0-9]/g, '');
     const selectedDepartment = normalizedDepartment(filters.department);
@@ -1093,15 +1127,18 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       if (normalize(category) !== normalize(routeCategory)) return false;
     }
     return true;
-  }), [entries, filters, routeCategory, schema.id]);
+    });
+  }, [entries, filters, routeCategory, schema.id]);
 
   const searchedEntries = useMemo(() => {
+    if (['hazard-reporting', 'near-miss'].includes(schema.id)) return filteredEntries;
     if (!searchQuery.trim()) return filteredEntries;
     const q = searchQuery.toLowerCase();
     return filteredEntries.filter(entry => JSON.stringify(entry).toLowerCase().includes(q));
-  }, [filteredEntries, searchQuery, schema.columns]);
+  }, [filteredEntries, searchQuery, schema.id]);
 
   const sortedEntries = useMemo(() => {
+    if (['hazard-reporting', 'near-miss'].includes(schema.id)) return searchedEntries;
     if (!sortConfig) return searchedEntries;
     const valueForSort = (entry: any) => {
       const values: Record<string, unknown> = {
@@ -1121,7 +1158,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       const comparison = valueForSort(left).localeCompare(valueForSort(right), undefined, { numeric: true, sensitivity: 'base' });
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
-  }, [searchedEntries, sortConfig]);
+  }, [searchedEntries, sortConfig, schema.id]);
 
   const totalPages = Math.max(1, pagination.totalPages || Math.ceil(sortedEntries.length / PAGE_SIZE));
   const pagedEntries = sortedEntries;
@@ -1225,7 +1262,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const exportCSV = async () => {
     try {
       const blob = await moduleService.export(schema.id, {
-        ...(filters as unknown as Record<string, unknown>),
+        ...listFilters,
         search: searchQuery || undefined,
         sortBy: sortConfig?.key || 'createdAt',
         sortOrder: sortConfig?.direction || 'desc',
@@ -1341,7 +1378,45 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
 
     if (col.type === 'select') {
-      if (['hazard-reporting', 'training-records', 'near-miss'].includes(schema.id) && ['department_id', 'responsible_department_id'].includes(col.key)) {
+      if (schema.id === 'near-miss' && col.key === 'responsible_department_id') {
+        const source = isEdit ? editFormData : formData;
+        const options = nearMissResponsibleDepartmentOptions(trainingDepartments);
+        const selectedValue = resolveNearMissResponsibleDepartmentValue({
+          departments: options,
+          value,
+          legacyLabel: source.responsible_department,
+          isEdit,
+        });
+        const hasUnmappedHistoricalValue = isEdit
+          && Boolean(selectedValue)
+          && !options.some(department => department.id === selectedValue);
+
+        return (
+          <div className="space-y-1">
+            <select
+              key={`near-miss-responsible-department-${editingId || 'new'}`}
+              name={col.key}
+              value={selectedValue}
+              onChange={event => handleInputChange(event, isEdit)}
+              className={FIELD_BASE}
+              required={col.required}
+              disabled={trainingDepartmentsLoading}
+            >
+              <option value="">{trainingDepartmentsLoading ? 'Loading departments...' : 'Select department...'}</option>
+              {hasUnmappedHistoricalValue && <option value={selectedValue}>Unmapped historical department</option>}
+              {options.map(department => (
+                <option key={department.id} value={department.id}>
+                  {nearMissResponsibleDepartmentLabel(department)}
+                </option>
+              ))}
+            </select>
+            {trainingDepartmentsError && <p className="text-[11px] text-[#B91C1C]" role="alert">{trainingDepartmentsError}</p>}
+            {!trainingDepartmentsLoading && !trainingDepartmentsError && options.length === 0 && <p className="text-[11px] text-[#B91C1C]" role="alert">No active departments found.</p>}
+          </div>
+        );
+      }
+
+      if (['department_id', 'responsible_department_id', 'responsible_department'].includes(col.key)) {
         const source = isEdit ? editFormData : formData;
         // A new form must be driven only by responsible_department_id. The
         // label is retained only as an edit-mode fallback for legacy rows.
@@ -1363,9 +1438,13 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         );
         const isEmployeeReportingDepartment = ['hazard-reporting', 'near-miss'].includes(schema.id) && col.key === 'department_id';
         const currentEmployeeId = String(source.emp_id ?? '').trim();
+        const storesDepartmentId = col.key.endsWith('_id');
+        const matchedValue = storesDepartmentId
+          ? selectedDepartment?.id
+          : selectedDepartment ? (selectedDepartment.code || selectedDepartment.name) : '';
         const selectedValue = isEmployeeReportingDepartment && currentEmployeeId.length < 3
           ? ''
-          : selectedDepartment?.id || (isEdit && (rawHistoricalId || legacyDisplayValue) ? (rawHistoricalId || legacyDisplayValue) : '');
+          : matchedValue || (isEdit && (rawHistoricalId || legacyDisplayValue) ? (rawHistoricalId || legacyDisplayValue) : '');
         const hasLegacyOption = isEdit && Boolean(legacyDisplayValue || rawHistoricalId) && !selectedDepartment;
         const legacyOptionValue = rawHistoricalId || legacyDisplayValue;
         const legacyOptionLabel = rawHistoricalId && !legacyDisplayValue ? 'Unmapped historical department' : `${legacyDisplayValue} (historical)`;
@@ -1381,7 +1460,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             <select name={col.key} value={selectedValue} onChange={e => handleInputChange(e, isEdit)} className={departmentFieldClass} required={col.required} disabled={effectiveReadonly || trainingDepartmentsLoading}>
               <option value="">{trainingDepartmentsLoading ? 'Loading departments...' : 'Select department...'}</option>
               {hasLegacyOption && !hasKnownLegacyLabel && <option value={legacyOptionValue}>{legacyOptionLabel}</option>}
-              {trainingDepartments.map(department => <option key={department.id} value={department.id}>{department.name}{department.code ? ` (${department.code})` : ''}</option>)}
+              {trainingDepartments.map(department => <option key={department.id} value={storesDepartmentId ? department.id : (department.code || department.name)}>{department.code || department.name}</option>)}
             </select>
             {trainingDepartmentsError && <p className="text-[11px] text-[#B91C1C]" role="alert">{trainingDepartmentsError}</p>}
             {!trainingDepartmentsLoading && !trainingDepartmentsError && trainingDepartments.length === 0 && <p className="text-[11px] text-[#B91C1C]" role="alert">No active departments found.</p>}
@@ -1414,22 +1493,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         <div className="space-y-2">
           <select name={col.key} value={value ?? ''} onChange={e => handleInputChange(e, isEdit)} className={FIELD_BASE} required={col.required} disabled={col.readonly || locationsLoading}>
             <option value="">{locationsLoading ? 'Loading locations...' : `Select ${col.label}...`}</option>
+            {isEdit && value && !locationsData.some(location => location.name === value) && <option value={value}>{value} (historical)</option>}
             {locationsData.map(loc => <option key={loc.id} value={loc.name}>{loc.name}</option>)}
-            <option value="Other">Other</option>
           </select>
           {locationsError && <p className="text-[11px] text-[#B91C1C]" role="alert">{locationsError}</p>}
           {!locationsLoading && !locationsError && locationsData.length === 0 && <p className="text-[11px] text-[#B91C1C]" role="alert">No active locations found.</p>}
-          {(value === 'Other') && (
-            <input
-              type="text"
-              name={`${col.key}_other`}
-              value={(isEdit ? editFormData : formData)[`${col.key}_other`] ?? ''}
-              onChange={e => handleInputChange(e, isEdit)}
-              placeholder={`Specify ${col.label}`}
-              className={FIELD_BASE}
-              required
-            />
-          )}
         </div>
       );
     }
@@ -1874,9 +1942,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               const defaultForm = schema.id === 'hazard-reporting'
                 ? { status_id: 'Open', department_id: '' }
                 : schema.id === 'near-miss'
-                  ? { status: 'Open', department_id: '', responsible_department_id: '', responsible_department: '' }
+                  ? createNewNearMissFormDefaults()
                   : {};
-              let recoveredForm = defaultForm;
+              let recoveredForm: any = defaultForm;
               try {
                 const savedDraft = sessionStorage.getItem(`hse-${schema.id}-draft`);
                 if (savedDraft) {
@@ -1913,7 +1981,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         ]}
       >
         <div className="flex flex-wrap items-center gap-3">
-          <FilterBar />
+          <FilterBar variant="hazard" />
           <button onClick={() => setShowReviewPanel(true)} disabled={selectedCount === 0} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] hover:bg-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
             <PanelRightOpen className="h-3.5 w-3.5" /> HSE Review{selectedCount > 0 ? ` (${selectedCount})` : ''}
           </button>
@@ -2196,7 +2264,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       </CenterModal>
 
       <SlideOverPanel isOpen={showMobileFilters} onClose={() => setShowMobileFilters(false)} title="Filters" description="Mobile filter drawer for enterprise modules.">
-        <FilterBar className="flex-col items-stretch" />
+        <FilterBar variant="hazard" className="flex-col items-stretch" />
       </SlideOverPanel>
     </Layout>
   );
@@ -2221,7 +2289,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             icon: <Plus />,
             onClick: () => {
               const defaultForm = schema.id === 'near-miss'
-                ? { status: 'Open', department_id: '', responsible_department_id: '', responsible_department: '', investigation_required: 'No', reported_in_hazard: 'No' }
+                ? createNewNearMissFormDefaults()
                 : {};
               let recoveredForm: any = defaultForm;
               try {
@@ -2253,7 +2321,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         ]}
       >
         <div className="flex flex-wrap items-center gap-3">
-          <FilterBar showMonthInsteadOfStatus={schema.id === 'training-records'} />
+          <FilterBar
+            showMonthInsteadOfStatus={schema.id === 'training-records'}
+            variant={schema.id === 'near-miss' ? 'near-miss' : 'default'}
+          />
           <button onClick={() => setShowMobileFilters(true)} className="md:hidden h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] inline-flex items-center gap-1.5">
             <Filter className="h-3.5 w-3.5" /> Filters
           </button>
@@ -2515,7 +2586,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       </CenterModal>
 
       <SlideOverPanel isOpen={showMobileFilters} onClose={() => setShowMobileFilters(false)} title="Filters" description="Mobile filter drawer for enterprise modules.">
-        <FilterBar showMonthInsteadOfStatus={schema.id === 'training-records'} className="flex-col items-stretch" />
+        <FilterBar
+          showMonthInsteadOfStatus={schema.id === 'training-records'}
+          variant={schema.id === 'near-miss' ? 'near-miss' : 'default'}
+          className="flex-col items-stretch"
+        />
       </SlideOverPanel>
     </Layout>
   );

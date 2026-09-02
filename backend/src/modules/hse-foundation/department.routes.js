@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+
 const router = express.Router();
 const departmentController = require('./department.controller');
 const { validate } = require('../../core/middleware/validate.middleware');
@@ -13,40 +14,40 @@ router.use(authenticate);
 
 router.post(
   '/',
-  requirePermissions([PERMISSIONS.HSE_MANAGE_PLANTS]), // Assuming same permission level as plants for now
+  requirePermissions([PERMISSIONS.DEPARTMENT_CREATE]),
   validate(createDepartmentSchema),
-  departmentController.createDepartment
+  departmentController.createDepartment,
 );
 
 router.get(
   '/',
-  requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
-  departmentController.getAllDepartments
+  requirePermissions([PERMISSIONS.DEPARTMENT_VIEW]),
+  departmentController.getAllDepartments,
 );
 
 router.get(
   '/plant/:plantId',
-  requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
-  departmentController.getDepartmentsByPlant
+  requirePermissions([PERMISSIONS.DEPARTMENT_VIEW]),
+  departmentController.getDepartmentsByPlant,
 );
 
 router.get(
   '/:id',
-  requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
-  departmentController.getDepartmentById
+  requirePermissions([PERMISSIONS.DEPARTMENT_VIEW]),
+  departmentController.getDepartmentById,
 );
 
 router.put(
   '/:id',
-  requirePermissions([PERMISSIONS.HSE_MANAGE_PLANTS]),
+  requirePermissions([PERMISSIONS.DEPARTMENT_UPDATE]),
   validate(updateDepartmentSchema),
-  departmentController.updateDepartment
+  departmentController.updateDepartment,
 );
 
 router.delete(
   '/:id',
-  requirePermissions([PERMISSIONS.HSE_MANAGE_PLANTS]),
-  departmentController.deleteDepartment
+  requirePermissions([PERMISSIONS.DEPARTMENT_DELETE]),
+  departmentController.deleteDepartment,
 );
 
 module.exports = router;

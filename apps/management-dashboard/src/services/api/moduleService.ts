@@ -20,15 +20,10 @@ export interface DepartmentOption {
   isActive?: boolean;
 }
 
-const DEPARTMENT_DISPLAY_ORDER = ['ADM', 'ESD', 'HSE', 'IT', 'PRD', 'Projects', 'QC/FS/NPD', 'Stores', 'Others'];
 const sortDepartmentOptions = (departments: DepartmentOption[]) => [...departments].sort((left, right) => {
   const labels = (department: DepartmentOption) => [department.code, department.name].map(value => String(value || '').trim().toLowerCase()).filter(Boolean);
-  const rank = (department: DepartmentOption) => {
-    const values = labels(department);
-    const index = DEPARTMENT_DISPLAY_ORDER.findIndex(item => values.includes(item.toLowerCase()));
-    return index === -1 ? (values.includes('other') || values.includes('others') ? DEPARTMENT_DISPLAY_ORDER.length : DEPARTMENT_DISPLAY_ORDER.length - 1) : index;
-  };
-  return rank(left) - rank(right) || labels(left)[0].localeCompare(labels(right)[0]);
+  const isOther = (department: DepartmentOption) => labels(department).some(value => value === 'other' || value === 'others');
+  return Number(isOther(left)) - Number(isOther(right)) || labels(left)[0].localeCompare(labels(right)[0]);
 });
 
 const analysisStatusFromApi = (value: unknown) => ({
@@ -92,6 +87,7 @@ const statusToApi = (value: unknown, schemaId: string) => {
     Open: schemaId === 'hazard-reporting' ? 'submitted' : 'reported',
     Pending: schemaId === 'hazard-reporting' ? 'under_review' : 'under_investigation',
     'Work in Progress': schemaId === 'hazard-reporting' ? 'under_review' : 'corrective_action',
+    Close: 'closed',
     Closed: 'closed',
     Cancelled: 'closed',
   };
@@ -153,7 +149,16 @@ const prepareRequestParams = (params: Record<string, unknown> = {}, schemaId?: s
     if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
   });
   if (schemaId && ['hazard-reporting', 'near-miss', 'incident-log', 'training-records', 'action-tracker', 'audit-management', 'critical-audit-plan'].includes(schemaId) && requestParams.status) {
-    requestParams.status = statusToApi(requestParams.status, schemaId);
+    if (schemaId === 'near-miss') {
+      const normalizedStatus = String(requestParams.status).trim().toLowerCase();
+      requestParams.status = ['close', 'closed'].includes(normalizedStatus)
+        ? 'Closed'
+        : normalizedStatus === 'open'
+          ? 'Open'
+          : requestParams.status;
+    } else {
+      requestParams.status = statusToApi(requestParams.status, schemaId);
+    }
   }
   if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') requestParams.source = schemaId;
   return requestParams;
@@ -205,8 +210,17 @@ export const moduleService = {
     return { ...payload, data: sortDepartmentOptions(Array.isArray(payload?.data) ? payload.data : []) };
   },
   getLocations: async (): Promise<ApiResponse<any[]>> => {
-    const response = await apiClient.get('/locations', { params: { isActive: true, page: 1, limit: 500, sortBy: 'name', sortOrder: 'asc' } });
-    return response.data;
+    const first = await apiClient.get('/locations', { params: { isActive: true, page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
+    const firstPayload = first.data;
+    const rows = Array.isArray(firstPayload?.data) ? [...firstPayload.data] : [];
+    const totalPages = Number(firstPayload?.meta?.totalPages || 1);
+    if (totalPages > 1) {
+      const remaining = await Promise.all(Array.from({ length: totalPages - 1 }, (_, index) => apiClient.get('/locations', {
+        params: { isActive: true, page: index + 2, limit: 100, sortBy: 'name', sortOrder: 'asc' },
+      })));
+      remaining.forEach(response => rows.push(...(Array.isArray(response.data?.data) ? response.data.data : [])));
+    }
+    return { ...firstPayload, data: rows };
   },
   getHseActionItems: async (params?: Record<string, unknown>): Promise<ApiResponse<any[]>> => {
     const requestParams = { ...(params || {}) };
@@ -321,10 +335,7 @@ export const moduleService = {
   },
 
   getHazardSummary: async (params?: Record<string, unknown>): Promise<ApiResponse<{ totalRecords: number; assigned: number; submittedForReview: number; closedThisMonth: number }>> => {
-    const requestParams = { ...(params || {}) };
-    Object.entries(requestParams).forEach(([key, value]) => {
-      if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
-    });
+    const requestParams = prepareRequestParams(params, 'hazard-reporting');
     const response = await apiClient.get('/hazards/summary', { params: requestParams });
     return response.data;
   },
@@ -550,7 +561,7 @@ export const moduleService = {
 
   export: async (schemaId: string, params?: Record<string, unknown>) => {
     const endpoint = getEndpoint(schemaId);
-    const response = await apiClient.get(`${endpoint}/export`, { params, responseType: 'blob' });
+    const response = await apiClient.get(`${endpoint}/export`, { params: prepareRequestParams(params, schemaId), responseType: 'blob' });
     return response.data;
   },
 

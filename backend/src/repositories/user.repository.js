@@ -1,7 +1,22 @@
 'use strict';
 
 const BaseRepository = require('./base.repository');
-const { User, Role } = require('../database/models');
+const {
+  User, Role, Employee, Department, Plant,
+} = require('../database/models');
+
+const userIncludes = [
+  { model: Role, as: 'role', include: [{ association: 'permissions', through: { attributes: [] } }] },
+  {
+    model: Employee,
+    as: 'employeeProfile',
+    required: false,
+    include: [
+      { model: Department, as: 'department', attributes: ['id', 'name', 'code', 'isActive'] },
+      { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
+    ],
+  },
+];
 
 class UserRepository extends BaseRepository {
   constructor() {
@@ -12,7 +27,7 @@ class UserRepository extends BaseRepository {
    * Find a user by email (with password included for auth checks).
    */
   async findByEmailWithPassword(email) {
-    return User.scope('withPassword').findOne({ where: { email } });
+    return User.scope('withPassword').findOne({ where: { email }, include: userIncludes });
   }
 
   /**
@@ -20,20 +35,40 @@ class UserRepository extends BaseRepository {
    */
   async findByIdWithRole(id) {
     return User.findByPk(id, {
-      include: [{ model: Role, as: 'role', include: [{ association: 'permissions' }] }],
+      include: userIncludes,
     });
   }
 
   /**
    * Find all users with pagination, search, filter, and sort applied.
    */
-  async findAllPaginated({ where, order, limit, offset }) {
+  async findAllPaginated({
+    where, order, limit, offset, roleId, departmentId,
+  }) {
+    const includes = [
+      {
+        model: Role,
+        as: 'role',
+        attributes: ['id', 'name', 'displayName'],
+        ...(roleId ? { where: { id: roleId }, required: true } : {}),
+      },
+      {
+        model: Employee,
+        as: 'employeeProfile',
+        required: Boolean(departmentId),
+        ...(departmentId ? { where: { departmentId } } : {}),
+        include: [
+          { model: Department, as: 'department', attributes: ['id', 'name', 'code', 'isActive'] },
+          { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
+        ],
+      },
+    ];
     return User.findAndCountAll({
       where,
       order,
       limit,
       offset,
-      include: [{ model: Role, as: 'role', attributes: ['id', 'name', 'displayName'] }],
+      include: includes,
       distinct: true,
     });
   }

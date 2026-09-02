@@ -51,11 +51,11 @@ export const LocationCombobox = ({
       setErrorMessage(null);
       try {
         const response = await apiClient.get('/locations', {
-          params: { q: query, isActive: true, limit: PAGE_SIZE, offset: page * PAGE_SIZE },
+          params: { q: query, isActive: true, limit: PAGE_SIZE, page: page + 1 },
         });
         if (!current) return;
         setOptions(Array.isArray(response.data?.data) ? response.data.data : []);
-        setTotal(Number(response.data?.meta?.total ?? 0));
+        setTotal(Number(response.data?.meta?.totalRecords ?? response.data?.meta?.total ?? 0));
         setActiveIndex(-1);
       } catch (error) {
         if (current) {
@@ -152,12 +152,6 @@ export const LocationCombobox = ({
                 {location.name === value && <Check className="h-4 w-4 shrink-0 text-[#CB0017]" />}
               </li>
             ))}
-            {!loading && !errorMessage && (
-              <li key="other" role="option" aria-selected={'Other' === value} onMouseDown={event => event.preventDefault()} onClick={() => select({ id: 'other', name: 'Other' })} className={`flex cursor-pointer items-center justify-between gap-3 px-3 py-2 text-[13px] hover:bg-[#F9FAFB] border-t border-[#F0F0F0]`}>
-                <span className="min-w-0"><span className="block truncate font-medium text-[#1A1818]">Other</span></span>
-                {'Other' === value && <Check className="h-4 w-4 shrink-0 text-[#CB0017]" />}
-              </li>
-            )}
           </ul>
           {total > PAGE_SIZE && (
             <div className="flex items-center justify-between border-t border-[#F0F0F0] bg-[#FAFAFA] px-2 py-1.5 text-[11px] text-[#6B7280]">

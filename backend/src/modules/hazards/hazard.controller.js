@@ -1,7 +1,7 @@
 'use strict';
 
 const hazardService = require('./hazard.service');
-const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
+const { ApiError, ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { Department, Hazard } = require('../../database/models');
 const { Op } = require('sequelize');
 const { parseOrder, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
@@ -11,33 +11,81 @@ const { parseOrder, addTextSearch, sendCsvExport } = require('../../shared/utils
 // safe when two identical requests arrive concurrently.
 const inFlightCreates = new Map();
 
+const addAndCondition = (where, condition) => {
+  where[Op.and] = [...(where[Op.and] || []), condition];
+};
+
 const buildHazardWhere = async (query = {}) => {
   const where = {};
   if (query.plantId && query.plantId !== 'All') where.plantId = query.plantId;
   if (query.status && query.status !== 'All') {
     const statusMap = {
-      Open: ['reported', 'submitted'], Pending: ['draft', 'under_review'],
-      'Work in Progress': ['under_review'], Closed: ['closed', 'resolved'], Cancelled: ['closed'],
-      submitted: ['submitted', 'reported'], under_review: ['under_review', 'draft'], closed: ['closed', 'resolved'],
+      Open: ['reported', 'submitted'],
+      Pending: ['draft', 'under_review'],
+      'Work in Progress': ['under_review'],
+      Close: ['closed', 'resolved'],
+      Closed: ['closed', 'resolved'],
+      Cancelled: ['closed'],
+      open: ['reported', 'submitted'],
+      pending: ['draft', 'under_review'],
+      close: ['closed', 'resolved'],
+      submitted: ['submitted', 'reported'],
+      under_review: ['under_review', 'draft'],
+      closed: ['closed', 'resolved'],
     };
     where.status = statusMap[query.status] || query.status;
   }
-  if (query.severityLevel && query.severityLevel !== 'All') where.severityLevel = query.severityLevel;
+  const requestedRiskRating = query.riskRating || query.severityLevel;
+  if (requestedRiskRating && requestedRiskRating !== 'All') {
+    const normalizedRiskRating = String(requestedRiskRating).trim().toLowerCase();
+    if (query.riskRating && !['low', 'medium', 'high'].includes(normalizedRiskRating)) {
+      throw ApiError.badRequest('riskRating must be Low, Medium, or High');
+    }
+    where.severityLevel = normalizedRiskRating;
+  }
   addTextSearch(where, query.search, ['title', 'description'], Hazard);
 
-  const year = query.year && query.year !== 'All' ? String(query.year) : null;
-  const fromDate = query.fromDate || (year ? `${year}-01-01` : null);
-  const toDate = query.toDate
-    ? (String(query.toDate).length === 10 ? `${query.toDate} 23:59:59` : query.toDate)
-    : (year ? `${year}-12-31 23:59:59` : null);
-  if (fromDate || toDate) where.reportedAt = { ...(fromDate ? { [Op.gte]: fromDate } : {}), ...(toDate ? { [Op.lte]: toDate } : {}) };
+  const year = query.year && query.year !== 'All' ? Number(query.year) : null;
+  if (year !== null && (!Number.isInteger(year) || year < 1900 || year > 2200)) {
+    throw ApiError.badRequest('year must be a valid four-digit year');
+  }
+  const month = query.month && query.month !== 'All' ? Number(query.month) : null;
+  if (month !== null && (!Number.isInteger(month) || month < 1 || month > 12)) {
+    throw ApiError.badRequest('month must be an integer between 1 and 12');
+  }
+
+  if (year !== null) {
+    const startMonth = month || 1;
+    const endMonth = month ? month + 1 : 13;
+    const periodStart = `${year}-${String(startMonth).padStart(2, '0')}-01`;
+    const periodEnd = endMonth === 13
+      ? `${year + 1}-01-01`
+      : `${year}-${String(endMonth).padStart(2, '0')}-01`;
+    addAndCondition(where, { reportedAt: { [Op.gte]: periodStart, [Op.lt]: periodEnd } });
+  } else if (month !== null) {
+    addAndCondition(where, Hazard.sequelize.where(
+      Hazard.sequelize.fn('MONTH', Hazard.sequelize.col('reported_at')),
+      month,
+    ));
+  }
+
+  if (query.fromDate) addAndCondition(where, { reportedAt: { [Op.gte]: query.fromDate } });
+  if (query.toDate) {
+    const toDate = String(query.toDate).length === 10 ? `${query.toDate} 23:59:59` : query.toDate;
+    addAndCondition(where, { reportedAt: { [Op.lte]: toDate } });
+  }
 
   if (query.department && query.department !== 'All') {
-    const department = await Department.findOne({ where: { [Op.or]: [{ code: query.department }, { name: query.department }] }, attributes: ['id'] });
-    where[Op.and] = [{ [Op.or]: [
-      ...(department?.id ? [{ departmentId: department.id }] : []),
-      Hazard.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.originated_department')) = ${Hazard.sequelize.escape(query.department)}`),
-    ] }];
+    const department = await Department.findOne({
+      where: { [Op.or]: [{ code: query.department }, { name: query.department }] },
+      attributes: ['id'],
+    });
+    addAndCondition(where, {
+      [Op.or]: [
+        ...(department?.id ? [{ departmentId: department.id }] : []),
+        Hazard.sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(\`metadata\`, '$.originated_department')) = ${Hazard.sequelize.escape(query.department)}`),
+      ],
+    });
     delete where.departmentId;
   }
   return where;

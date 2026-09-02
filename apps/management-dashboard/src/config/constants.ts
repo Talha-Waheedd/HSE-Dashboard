@@ -1,15 +1,3 @@
-export const DEPARTMENTS = [
-  'ADM',
-  'ESD',
-  'HSE',
-  'IT',
-  'PRD',
-  'Projects',
-  'QC/FS/NPD',
-  'Stores',
-  'Others'
-];
-
 export const INCIDENT_CATEGORIES = [
   'First Aid',
   'MTC',

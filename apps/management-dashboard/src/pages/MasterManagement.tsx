@@ -1,104 +1,63 @@
-﻿import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuthStore } from '@cbl/auth';
+import { Activity, Bell, Building2, Database, HardDrive, Link, Lock, MapPin, Settings, Shield, UserCheck, Users } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
-import { Users, Shield, MapPin, Building2, Database, Activity, Bell, Settings, Lock, HardDrive, Link, UserCheck } from 'lucide-react';
 import { UserManagement } from './admin/UserManagement';
 import { RolesPermissions } from './admin/RolesPermissions';
+import { DepartmentsManagement, LocationsManagement } from './admin/MasterDataManagement';
 
-const ADMIN_MODULES: Array<{ group: string; items: Array<{ id: string; label: string; icon: any; component?: any }> }> = [
+type AdminItem = { id: string; label: string; icon: any; permission: string; component?: any };
+const ADMIN_MODULES: Array<{ group: string; items: AdminItem[] }> = [
   { group: 'Identity & Access', items: [
-    { id: 'users', label: 'User Management', icon: Users, component: UserManagement },
-    { id: 'roles', label: 'Roles & Permissions', icon: Shield, component: RolesPermissions },
-  ]},
+    { id: 'users', label: 'User Management', icon: Users, permission: 'user:view', component: UserManagement },
+    { id: 'roles', label: 'Roles & Permissions', icon: Shield, permission: 'role:view', component: RolesPermissions },
+  ] },
   { group: 'Organization Data', items: [
-    { id: 'locations', label: 'Locations & Plants', icon: MapPin },
-    { id: 'departments', label: 'Departments', icon: Building2 },
-    { id: 'master_data', label: 'Master Data', icon: Database },
-  ]},
+    { id: 'locations', label: 'Locations', icon: MapPin, permission: 'location:view', component: LocationsManagement },
+    { id: 'departments', label: 'Departments', icon: Building2, permission: 'department:view', component: DepartmentsManagement },
+    { id: 'master_data', label: 'Master Data', icon: Database, permission: 'settings:manage' },
+  ] },
   { group: 'System & Security', items: [
-    { id: 'audit', label: 'Audit Log', icon: Activity },
-    { id: 'notifications', label: 'Notifications & Alerts', icon: Bell },
-    { id: 'settings', label: 'Organization Settings', icon: Settings },
-    { id: 'security', label: 'Security Policies', icon: Lock },
-    { id: 'data', label: 'Data Management', icon: HardDrive },
-    { id: 'integrations', label: 'Integrations', icon: Link },
-    { id: 'licenses', label: 'License Management', icon: UserCheck },
-  ]}
+    { id: 'audit', label: 'Audit Log', icon: Activity, permission: 'audit:view' },
+    { id: 'notifications', label: 'Notifications & Alerts', icon: Bell, permission: 'notification:manage' },
+    { id: 'settings', label: 'Organization Settings', icon: Settings, permission: 'settings:manage' },
+    { id: 'security', label: 'Security Policies', icon: Lock, permission: 'settings:manage' },
+    { id: 'data', label: 'Data Management', icon: HardDrive, permission: 'settings:manage' },
+    { id: 'integrations', label: 'Integrations', icon: Link, permission: 'settings:manage' },
+    { id: 'licenses', label: 'License Management', icon: UserCheck, permission: 'settings:manage' },
+  ] },
 ];
 
 export const MasterManagement = () => {
+  const { hasPermission } = useAuthStore();
   const [activeModuleId, setActiveModuleId] = useState('users');
+  const visibleModules = useMemo(() => ADMIN_MODULES
+    .map(group => ({ ...group, items: group.items.filter(item => hasPermission(item.permission)) }))
+    .filter(group => group.items.length > 0), [hasPermission]);
 
-  let ActiveComponent = null;
-  let activeModuleLabel = '';
+  useEffect(() => {
+    const accessible = visibleModules.some(group => group.items.some(item => item.id === activeModuleId));
+    if (!accessible && visibleModules[0]?.items[0]) setActiveModuleId(visibleModules[0].items[0].id);
+  }, [activeModuleId, visibleModules]);
 
-  for (const group of ADMIN_MODULES) {
-    const found = group.items.find(i => i.id === activeModuleId);
-    if (found) {
-      ActiveComponent = found.component;
-      activeModuleLabel = found.label;
-      break;
-    }
-  }
+  const activeModule = visibleModules.flatMap(group => group.items).find(item => item.id === activeModuleId);
+  const ActiveComponent = activeModule?.component;
+  const activeModuleLabel = activeModule?.label || '';
 
-  return (
-    <Layout>
-      <ContextHeader
-        title="Enterprise Administration"
-        breadcrumbs={['Administration', activeModuleLabel]}
-        subtitle="Manage users, system configurations, and master records"
-      />
-
-      <div className="flex h-[calc(100vh-140px)]">
-        {/* Sub-Sidebar Navigation */}
-        <div className="w-64 border-r border-[#E5E7EB] bg-white overflow-y-auto hide-scrollbar flex-shrink-0">
-          <div className="py-4">
-            {ADMIN_MODULES.map((group, idx) => (
-              <div key={group.group} className={idx > 0 ? 'mt-6' : ''}>
-                <div className="px-6 pb-2 text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">
-                  {group.group}
-                </div>
-                <div className="space-y-0.5 px-3">
-                  {group.items.map(item => {
-                    const isActive = activeModuleId === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveModuleId(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-colors ${
-                          isActive 
-                            ? 'bg-[#FEE2E2] text-[#B91C1C]' 
-                            : 'text-[#4B5563] hover:bg-[#F3F4F6] hover:text-[#111827]'
-                        }`}
-                      >
-                        <item.icon className={`w-4 h-4 ${isActive ? 'text-[#B91C1C]' : 'text-[#9CA3AF]'}`} />
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 bg-[#FAFAFA]">
-          {ActiveComponent ? (
-            <ActiveComponent />
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-[#6B7280] space-y-4">
-              <div className="w-16 h-16 rounded-full bg-[#F3F4F6] flex items-center justify-center">
-                <Settings className="w-8 h-8 text-[#D1D5DB]" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-lg font-bold text-[#1C1C1E]">{activeModuleLabel}</h3>
-                <p className="text-[13px] mt-1">This module is scheduled for implementation in a future phase.</p>
-              </div>
-            </div>
-          )}
-        </div>
+  return <Layout>
+    <ContextHeader title="Enterprise Administration" breadcrumbs={['Administration', activeModuleLabel]} subtitle="Manage users, system configurations, and master records" />
+    <div className="flex h-[calc(100vh-140px)]">
+      <div className="hide-scrollbar w-64 flex-shrink-0 overflow-y-auto border-r border-[#E5E7EB] bg-white">
+        <div className="py-4">{visibleModules.map((group, index) => <div key={group.group} className={index > 0 ? 'mt-6' : ''}>
+          <div className="px-6 pb-2 text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">{group.group}</div>
+          <div className="space-y-0.5 px-3">{group.items.map(item => {
+            const active = activeModuleId === item.id;
+            return <button key={item.id} onClick={() => setActiveModuleId(item.id)} className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors ${active ? 'bg-[#FEE2E2] text-[#B91C1C]' : 'text-[#4B5563] hover:bg-[#F3F4F6] hover:text-[#111827]'}`}><item.icon className={`h-4 w-4 ${active ? 'text-[#B91C1C]' : 'text-[#9CA3AF]'}`} />{item.label}</button>;
+          })}</div>
+        </div>)}</div>
       </div>
-    </Layout>
-  );
+      <div className="flex-1 overflow-y-auto bg-[#FAFAFA] p-6">{ActiveComponent ? <ActiveComponent /> : activeModuleLabel ? <div className="flex h-full flex-col items-center justify-center space-y-4 text-[#6B7280]"><div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F3F4F6]"><Settings className="h-8 w-8 text-[#D1D5DB]" /></div><div className="text-center"><h3 className="text-lg font-bold text-[#1C1C1E]">{activeModuleLabel}</h3><p className="mt-1 text-[13px]">This module is scheduled for implementation in a future phase.</p></div></div> : <div className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] p-5 text-[13px] font-semibold text-[#B91C1C]">You do not have permission to access Administration.</div>}</div>
+    </div>
+  </Layout>;
 };

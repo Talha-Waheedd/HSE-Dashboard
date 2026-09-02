@@ -15,6 +15,7 @@ class RoleRepository extends BaseRepository {
   async findAllWithPermissions() {
     return Role.findAll({
       include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }],
+      order: [['displayName', 'ASC']],
     });
   }
 
@@ -22,6 +23,11 @@ class RoleRepository extends BaseRepository {
     return Role.findByPk(id, {
       include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }],
     });
+  }
+
+  async findPermissionsByIds(ids, options = {}) {
+    if (!ids.length) return [];
+    return Permission.findAll({ where: { id: ids }, ...options });
   }
 }
 

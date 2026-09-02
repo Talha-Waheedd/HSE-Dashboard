@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ArrowLeft, Save, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Printer, Save, ShieldAlert } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { apiClient } from '@cbl/api';
+import { apiClient, uploadClient } from '@cbl/api';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
 import { StatusBadge } from '../components/StatusBadge';
+import { IncidentInvestigationPrint } from '../components/IncidentInvestigationPrint';
 
 type RecordData = Record<string, any>;
 type FormData = Record<string, string>;
@@ -61,6 +62,7 @@ export const IncidentInvestigationDetails = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [pictureUrls, setPictureUrls] = useState<string[]>([]);
 
   const loadIncident = useCallback(async () => {
     if (!id) { setError('Investigation ID is missing.'); setLoading(false); return; }
@@ -78,6 +80,28 @@ export const IncidentInvestigationDetails = () => {
   }, [id]);
 
   useEffect(() => { loadIncident(); }, [loadIncident]);
+
+  useEffect(() => {
+    if (!id) return undefined;
+    let active = true;
+    const objectUrls: string[] = [];
+    void uploadClient.getBySource('incident', id)
+      .then(async response => {
+        const attachments = Array.isArray(response.data) ? response.data : [];
+        const images = attachments.filter(attachment =>
+          String(attachment.mimeType || '').startsWith('image/') || /\.(png|jpe?g)$/i.test(attachment.originalName || ''),
+        );
+        const files = await Promise.all(images.map(attachment => uploadClient.getFile(attachment.id)));
+        files.forEach(file => objectUrls.push(URL.createObjectURL(file.data)));
+        if (active) setPictureUrls([...objectUrls]);
+        else objectUrls.forEach(url => URL.revokeObjectURL(url));
+      })
+      .catch(() => { if (active) setPictureUrls([]); });
+    return () => {
+      active = false;
+      objectUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [id]);
 
   const metadata = incident?.metadata || {};
   const department = incident?.department?.code || incident?.department?.name || metadata.department || '—';
@@ -115,7 +139,7 @@ export const IncidentInvestigationDetails = () => {
   };
 
   return <Layout>
-    <ContextHeader title="Incident Investigation" breadcrumbs={['Leading Indicators', 'Incident Investigation', 'Details']} subtitle="Complete and review the investigation generated from the Near Miss record." actions={[{ label: 'Back to Investigations', icon: <ArrowLeft />, onClick: () => navigate('/leading-indicators/incident-investigation'), variant: 'outlined' }]} />
+    <ContextHeader title="Incident Investigation" breadcrumbs={['Leading Indicators', 'Incident Investigation', 'Details']} subtitle="Complete and review the investigation generated from the Near Miss record." actions={[{ label: 'Print', icon: <Printer />, onClick: () => window.print(), variant: 'outlined', disabled: !incident }, { label: 'Back to Investigations', icon: <ArrowLeft />, onClick: () => navigate('/leading-indicators/incident-investigation'), variant: 'outlined' }]} />
     <main className="min-h-full bg-[#F7F7F5] px-4 py-5 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-5">
         {loading && <div className="rounded-xl border border-[#E8E0D2] bg-white p-8 text-center text-sm text-[#8A8F98]">Loading investigation...</div>}
@@ -167,6 +191,7 @@ export const IncidentInvestigationDetails = () => {
         </>}
       </div>
     </main>
+      {incident && <IncidentInvestigationPrint incident={incident} form={form} pictureUrls={pictureUrls} />}
   </Layout>;
 };
 

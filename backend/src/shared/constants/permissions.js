@@ -26,6 +26,13 @@ const PERMISSIONS = Object.freeze({
   PLANT_UPDATE: 'plant:update',
   PLANT_DELETE: 'plant:delete',
 
+  // Locations are managed independently from plants. Keeping dedicated
+  // permission keys lets the API enforce read/write access per master type.
+  LOCATION_VIEW: 'location:view',
+  LOCATION_CREATE: 'location:create',
+  LOCATION_UPDATE: 'location:update',
+  LOCATION_DELETE: 'location:delete',
+
   // ─── HSE: Departments ─────────────────────────────────────────────────────
   DEPARTMENT_VIEW: 'department:view',
   DEPARTMENT_CREATE: 'department:create',

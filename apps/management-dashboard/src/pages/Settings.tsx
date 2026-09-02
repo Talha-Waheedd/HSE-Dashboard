@@ -18,7 +18,7 @@ import {
   User,
   UserRoundCog,
 } from 'lucide-react';
-import { DEPARTMENTS } from '../config/constants';
+import { departmentLabel, useDepartments } from '../hooks/useDepartments';
 
 const initials = (name?: string) =>
   (name || 'User')
@@ -54,6 +54,7 @@ const SectionTitle = ({ icon, title, description }: { icon: ReactNode; title: st
 );
 
 export const Settings = () => {
+  const { departments } = useDepartments();
   const { user } = useAuth();
   const { hasRole } = useAuthStore();
   const { theme, toggleTheme } = useTheme();
@@ -228,17 +229,17 @@ export const Settings = () => {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[13px] font-semibold text-[#374151]">Departments</p>
-                        <p className="mt-1 text-[12px] text-[#8A8F98]">{DEPARTMENTS.length} configured department codes</p>
+                        <p className="mt-1 text-[12px] text-[#8A8F98]">{departments.length} active departments</p>
                       </div>
                       <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white text-[#7B1010] shadow-sm">
                         <LayoutGrid className="h-4 w-4" />
                       </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1.5">
-                      {DEPARTMENTS.slice(0, 6).map(department => (
-                        <span key={department} className="rounded border border-[#E5E7EB] bg-white px-2 py-1 text-[10px] font-medium text-[#6B7280]">{department}</span>
+                      {departments.slice(0, 6).map(department => (
+                        <span key={department.id} className="rounded border border-[#E5E7EB] bg-white px-2 py-1 text-[10px] font-medium text-[#6B7280]">{departmentLabel(department)}</span>
                       ))}
-                      <span className="rounded border border-[#E5E7EB] bg-white px-2 py-1 text-[10px] font-medium text-[#9CA3AF]">+{Math.max(DEPARTMENTS.length - 6, 0)} more</span>
+                      <span className="rounded border border-[#E5E7EB] bg-white px-2 py-1 text-[10px] font-medium text-[#9CA3AF]">+{Math.max(departments.length - 6, 0)} more</span>
                     </div>
                   </div>
                   <button type="button" onClick={() => navigate('/master-management')} className="mt-4 inline-flex w-full items-center justify-between rounded-lg border border-[#E8E0C8] bg-white px-3 py-2.5 text-[12px] font-semibold text-[#7B1010] transition-colors hover:bg-[#FFFDF5]">

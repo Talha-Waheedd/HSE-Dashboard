@@ -1,5 +1,4 @@
 import {
-  DEPARTMENTS,
   INCIDENT_CATEGORIES,
   HAZARD_CATEGORIES,
   ROOT_CAUSES,
@@ -56,7 +55,7 @@ export const hazardReportingSchema: SectionConfig = {
         return d.toLocaleString('default', { month: 'short', year: 'numeric' });
       }
     },
-    { key: 'department_id', label: 'Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Basic Information' },
+    { key: 'department_id', label: 'Department', type: 'select', options: [], required: true, section: 'Basic Information' },
     { key: 'location', label: 'Location', type: 'location-select', required: true, section: 'Hazard Details' },
     { key: 'originator', label: 'Reported By', type: 'text', required: true, section: 'Basic Information' },
     { key: 'hazard_category_id', label: 'Hazard Category', type: 'select', options: HAZARD_CATEGORIES, required: true, section: 'Hazard Details' },
@@ -66,7 +65,7 @@ export const hazardReportingSchema: SectionConfig = {
     { key: 'person_category', label: 'Person Type', type: 'select', options: ['Employee', 'Contractor', 'Visitor', 'Other'], section: 'Hazard Details' },
     { key: 'corrective_action', label: 'Corrective Action', type: 'textarea', section: 'Corrective Actions' },
     { key: 'responsible_person', label: 'Responsible Person', type: 'text', required: true, section: 'Assignment' },
-    { key: 'responsible_department', label: 'Responsible Department', type: 'select', options: DEPARTMENTS, section: 'Assignment' },
+    { key: 'responsible_department', label: 'Responsible Department', type: 'select', options: [], section: 'Assignment' },
     { key: 'target_date', label: 'Target Date', type: 'date', section: 'Assignment' },
     { key: 'risk_rating_id', label: 'Risk Rating', type: 'select', options: RISK_RATINGS, required: true, section: 'Assignment' },
     { key: 'contractor_name', label: 'Contractor Name', type: 'text', section: 'Assignment' },
@@ -100,7 +99,7 @@ export const nearMissSchema: SectionConfig = {
         return d.toLocaleString('default', { month: 'short', year: 'numeric' });
       }
     },
-    { key: 'department_id', label: 'Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Basic Information' },
+    { key: 'department_id', label: 'Department', type: 'select', options: [], required: true, section: 'Basic Information' },
     { key: 'reported_by', label: 'Reported By', type: 'text', required: true, section: 'Basic Information' },
     { key: 'designation', label: 'Designation', type: 'text', required: true, section: 'Basic Information' },
     { key: 'affected_person', label: 'Affected Person Name', type: 'text', section: 'Basic Information' },
@@ -132,7 +131,7 @@ export const incidentLogSchema: SectionConfig = {
     { key: 'area_manager', label: 'Area Manager', type: 'text', required: true, section: 'Basic Information' },
     { key: 'gender', label: 'Gender Wise', type: 'select', options: ['Male', 'Female', 'Other'], section: 'Basic Information' },
     { key: 'location', label: 'Location', type: 'location-select', required: true, section: 'Basic Information' },
-    { key: 'department_id', label: 'Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Basic Information' },
+    { key: 'department_id', label: 'Department', type: 'select', options: [], required: true, section: 'Basic Information' },
     { key: 'incident_category_id', label: 'Incident Category', type: 'select', options: INCIDENT_CATEGORIES, required: true, section: 'Incident Details' },
     { key: 'root_cause_id', label: 'Root Cause', type: 'select', options: ROOT_CAUSES, required: true, section: 'Incident Details' },
     { key: 'immediate_cause', label: 'Immediate Cause', type: 'textarea', section: 'Investigation' },
@@ -162,7 +161,7 @@ export const actionTrackerSchema: SectionConfig = {
     { key: 'area_clauses', label: 'Area/Clauses', type: 'text', required: true, section: 'Action Details' },
     { key: 'actions_recommendation', label: 'Actions / Recommendation', type: 'textarea', required: true, section: 'Action Details' },
     { key: 'severity', label: 'Severity', type: 'select', options: ['Low', 'Medium', 'High'], required: true, section: 'Action Details' },
-    { key: 'department_id', label: 'Responsible Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Assignment' },
+    { key: 'department_id', label: 'Responsible Department', type: 'select', options: [], required: true, section: 'Assignment' },
     { key: 'responsible_manager', label: 'Responsible Manager', type: 'text', required: true, section: 'Assignment' },
     { key: 'target_date', label: 'Target Date', type: 'date', required: true, section: 'Assignment' },
     { key: 'status_id', label: 'Action Item Status', type: 'select', options: STATUSES, required: true, section: 'Assignment' }
@@ -252,7 +251,7 @@ export const inspectionRecordsSchema: SectionConfig = {
     { key: 'severity', label: 'Severity', type: 'select', options: ['Low', 'Medium', 'High'], required: true, section: 'Findings' },
     { key: 'target_date', label: 'Target Date for Completion', type: 'date', required: true, section: 'Findings' },
     { key: 'responsibility', label: 'Responsibility', type: 'text', required: true, section: 'Action Assignment' },
-    { key: 'department_id', label: 'Responsible Department', type: 'select', options: DEPARTMENTS, required: true, section: 'Action Assignment' },
+    { key: 'department_id', label: 'Responsible Department', type: 'select', options: [], required: true, section: 'Action Assignment' },
     { key: 'status_id', label: 'Closure Status', type: 'select', options: ['Open', 'Closed'], required: true, section: 'Action Assignment' },
     { key: 'pictorial', label: 'Pictorial', type: 'file', section: 'Action Assignment' }
   ]
