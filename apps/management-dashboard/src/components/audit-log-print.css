@@ -1,0 +1,152 @@
+.audit-log-print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 7mm;
+  }
+
+  body.printing-audit-log {
+    background: #fff !important;
+  }
+
+  body.printing-audit-log > *:not(.audit-log-print-root) {
+    display: none !important;
+  }
+
+  body.printing-audit-log > .audit-log-print-root {
+    display: block !important;
+  }
+
+  .audit-log-print-root {
+    width: 100%;
+    color: #000;
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.18;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .audit-print-title {
+    border: 1px solid #000;
+    background: #bfbfbf;
+    padding: 3mm;
+    text-align: center;
+    font-size: 19pt;
+    font-weight: 700;
+  }
+
+  .audit-print-top-grid {
+    display: grid;
+    grid-template-columns: 54% 42%;
+    justify-content: space-between;
+    min-height: 35mm;
+    padding: 5mm 0 3mm;
+  }
+
+  .audit-print-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .audit-print-table th,
+  .audit-print-table td {
+    border: 0.3mm solid #000;
+    padding: 1.1mm 1.4mm;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+  }
+
+  .audit-print-table th {
+    font-weight: 700;
+  }
+
+  .audit-print-value {
+    font-weight: 400 !important;
+    white-space: pre-wrap;
+  }
+
+  .audit-print-criteria th {
+    text-align: left;
+    text-decoration: underline;
+  }
+
+  .audit-print-score-number {
+    width: 8mm;
+    text-align: center;
+    font-weight: 400;
+  }
+
+  .audit-print-info {
+    align-self: end;
+  }
+
+  .audit-print-info th {
+    width: 42%;
+    text-align: right;
+  }
+
+  .audit-print-items thead th {
+    height: 13mm;
+    background: #bfbfbf;
+    text-align: center;
+    font-size: 7pt;
+  }
+
+  .audit-print-items tbody td {
+    height: 7.2mm;
+  }
+
+  .audit-print-items tbody td:first-child,
+  .audit-print-items tbody td:nth-child(5),
+  .audit-print-items tbody td:last-child {
+    text-align: center;
+  }
+
+  .audit-print-sr { width: 4%; }
+  .audit-print-reference { width: 15.5%; }
+  .audit-print-point { width: 11%; }
+  .audit-print-limit { width: 22%; }
+  .audit-print-score { width: 6%; }
+  .audit-print-actions { width: 11%; }
+  .audit-print-target { width: 8%; }
+  .audit-print-responsibility { width: 8.5%; }
+  .audit-print-department { width: 7.5%; }
+  .audit-print-closure { width: 6.5%; }
+
+  .audit-print-summary {
+    width: 29%;
+    margin: 0 41% 0 30%;
+  }
+
+  .audit-print-summary th {
+    width: 75%;
+    background: #d0d0d0;
+    text-align: right;
+  }
+
+  .audit-print-summary td {
+    background: #d0d0d0;
+    text-align: center;
+  }
+
+  .audit-print-source {
+    margin-top: 4mm;
+    border-top: 0.3mm solid #000;
+    padding-top: 2mm;
+    font-size: 6.5pt;
+  }
+
+  .audit-print-source strong {
+    font-weight: 700;
+  }
+
+  .audit-print-source span {
+    font-weight: 400;
+  }
+}

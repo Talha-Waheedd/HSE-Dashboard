@@ -218,24 +218,6 @@ export const trainingRecordsSchema: SectionConfig = {
   ]
 };
 
-export const auditManagementSchema: SectionConfig = {
-  id: 'audit-management',
-  title: 'Audit Management',
-  path: '/audit-management',
-  accentColor: '#8B5CF6',
-  icon: 'ClipboardList',
-  columns: [
-    { key: 'auditNumber', label: 'Audit Number', type: 'text', readonly: true, section: 'Audit Details' },
-    { key: 'title', label: 'Title', type: 'text', required: true, section: 'Audit Details' },
-    { key: 'auditType', label: 'Audit Type', type: 'select', options: ['internal', 'external', 'regulatory'], required: true, section: 'Audit Details' },
-    { key: 'status', label: 'Status', type: 'select', options: ['planned', 'in_progress', 'completed', 'cancelled'], required: true, section: 'Audit Details' },
-    { key: 'scheduledDate', label: 'Scheduled Date', type: 'date', required: true, section: 'Schedule' },
-    { key: 'completedDate', label: 'Completed Date', type: 'date', section: 'Schedule' },
-    { key: 'scope', label: 'Scope / Objective', type: 'textarea', section: 'Audit Details' },
-    { key: 'summary', label: 'Summary', type: 'textarea', section: 'Audit Details' }
-  ]
-};
-
 export const inspectionRecordsSchema: SectionConfig = {
   id: 'inspection-records',
   title: 'Inspection Records',
@@ -257,31 +239,11 @@ export const inspectionRecordsSchema: SectionConfig = {
   ]
 };
 
-export const criticalAuditPlanSchema: SectionConfig = {
-  id: 'critical-audit-plan',
-  title: 'Critical Audit Plan',
-  path: '/critical-audit-plan',
-  accentColor: '#10B981',
-  icon: 'Calendar',
-  columns: [
-    { key: 'auditNumber', label: 'Audit Number', type: 'text', readonly: true, section: 'Audit Details' },
-    { key: 'title', label: 'Area Name', type: 'text', required: true, section: 'Audit Area' },
-    { key: 'auditType', label: 'Audit Type', type: 'select', options: ['internal', 'external', 'regulatory'], required: true, section: 'Audit Area' },
-    { key: 'status', label: 'Status', type: 'select', options: ['planned', 'in_progress', 'completed', 'cancelled'], required: true, section: 'Audit Area' },
-    { key: 'scheduledDate', label: 'Scheduled Date', type: 'date', required: true, section: 'Schedule' },
-    { key: 'completedDate', label: 'Completed Date', type: 'date', section: 'Schedule' },
-    { key: 'scope', label: 'Audit Objective', type: 'textarea', section: 'Audit Area' },
-    { key: 'summary', label: 'Frequency & Owners', type: 'textarea', section: 'Planning' }
-  ]
-};
-
 export const ALL_SECTIONS = [
   hazardReportingSchema,
   nearMissSchema,
   incidentLogSchema,
   trainingRecordsSchema,
   actionTrackerSchema,
-  auditManagementSchema,
   inspectionRecordsSchema,
-  criticalAuditPlanSchema
 ];

@@ -25,6 +25,11 @@ const HseAudit = sequelize.define('HseAudit', {
     allowNull: true,
     comment: 'FK → departments.id — null means plant-wide audit',
   },
+  criticalAuditPlanId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'FK to the master Critical Audit Plan row that scheduled this occurrence',
+  },
   auditNumber: {
     type: DataTypes.STRING(30),
     allowNull: true,
@@ -35,6 +40,12 @@ const HseAudit = sequelize.define('HseAudit', {
     type: DataTypes.STRING(255),
     allowNull: false,
   },
+  areaOwner: { type: DataTypes.TEXT, allowNull: true },
+  auditObjective: { type: DataTypes.TEXT, allowNull: true },
+  riskRating: { type: DataTypes.STRING(20), allowNull: true },
+  auditors: { type: DataTypes.TEXT, allowNull: true },
+  frequency: { type: DataTypes.STRING(80), allowNull: true },
+  personsInterviewed: { type: DataTypes.TEXT, allowNull: true },
   auditType: {
     type: DataTypes.ENUM('internal', 'external', 'regulatory'),
     allowNull: false,
@@ -96,6 +107,8 @@ const HseAudit = sequelize.define('HseAudit', {
     { fields: ['status'], name: 'audits_status_idx' },
     { fields: ['audit_type'], name: 'audits_type_idx' },
     { fields: ['scheduled_date'], name: 'audits_scheduled_date_idx' },
+    { fields: ['critical_audit_plan_id'], name: 'audits_critical_plan_idx' },
+    { fields: ['critical_audit_plan_id', 'scheduled_date'], unique: true, name: 'audits_plan_scheduled_date_unique' },
   ],
 });
 

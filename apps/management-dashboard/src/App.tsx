@@ -16,6 +16,9 @@ import { MasterAnalysisDashboard } from './pages/MasterAnalysis/MasterAnalysisDa
 import { MasterAnalysisDetail } from './pages/MasterAnalysis/MasterAnalysisDetail';
 import { DataEntrySection } from './components/DataEntrySection';
 import { ALL_SECTIONS } from './config/sectionSchemas';
+import { AuditLogs } from './pages/AuditLogs';
+import { AuditLogDetails } from './pages/AuditLogDetails';
+import { CriticalAuditPlan } from './pages/CriticalAuditPlan';
 import { FilterProvider } from './context/FilterContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Button } from '@cbl/ui';
@@ -112,6 +115,9 @@ function App() {
           <Route path="/master-analysis" element={<ProtectedRoute fallback={<Navigate to="/login" />}><MasterAnalysisDashboard /></ProtectedRoute>} />
           <Route path="/master-analysis/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><MasterAnalysisDetail /></ProtectedRoute>} />
           <Route path="/incident-log/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><IncidentDetails /></ProtectedRoute>} />
+          <Route path="/audit-management" element={<ProtectedRoute fallback={<Navigate to="/login" />}><AuditLogs /></ProtectedRoute>} />
+          <Route path="/audit-management/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><AuditLogDetails /></ProtectedRoute>} />
+          <Route path="/critical-audit-plan" element={<ProtectedRoute fallback={<Navigate to="/login" />}><CriticalAuditPlan /></ProtectedRoute>} />
 
           {/* Dynamic Data Entry Sections */}
           {ALL_SECTIONS.map(section => (

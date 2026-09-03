@@ -11,6 +11,9 @@ const { requirePermissions } = require('../../core/middleware/rbac.middleware');
 const { PERMISSIONS } = require('../../shared/constants/permissions');
 
 router.use(authenticate);
+// Every authenticated operational form may read active location master data.
+// Full/inactive administration lists remain protected by location:view.
+router.get('/active', controller.listActive);
 router.get('/', requirePermissions([PERMISSIONS.LOCATION_VIEW]), controller.list);
 router.get('/:id', requirePermissions([PERMISSIONS.LOCATION_VIEW]), controller.get);
 router.post('/', requirePermissions([PERMISSIONS.LOCATION_CREATE]), validate(createLocationSchema), controller.create);

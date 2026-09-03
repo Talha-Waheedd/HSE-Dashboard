@@ -6,6 +6,25 @@ const AuditStatus = require('../../shared/enums/AuditStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { sequelize } = require('../../database/connection');
+const { Op } = require('sequelize');
+const { AuditFinding } = require('../../database/models');
+
+const scoringFor = (findings = []) => {
+  const scores = findings.map((finding) => Number(finding.score)).filter((score) => Number.isInteger(score) && score >= 1 && score <= 4);
+  const pointsScored = scores.reduce((sum, score) => sum + score, 0);
+  const pointsAvailable = scores.length * 4;
+  return {
+    pointsScored,
+    pointsAvailable,
+    overallCompliance: pointsAvailable ? Number(((pointsScored / pointsAvailable) * 100).toFixed(2)) : 0,
+  };
+};
+
+const withScoring = (audit) => {
+  if (!audit) return audit;
+  const values = typeof audit.toJSON === 'function' ? audit.toJSON() : audit;
+  return { ...values, ...scoringFor(values.findings || []) };
+};
 
 class HseAuditService {
   /**
@@ -57,7 +76,7 @@ class HseAuditService {
    * Get all audits
    */
   async getAllAudits(options = {}) {
-    return auditRepository.findAndCountAll(options);
+    return auditRepository.listDetails(options);
   }
 
   /**
@@ -68,29 +87,79 @@ class HseAuditService {
     if (!audit) {
       throw ApiError.notFound(MESSAGES.AUDIT_NOT_FOUND);
     }
-    return audit;
+    return withScoring(audit);
   }
 
   /**
    * Update audit
    */
   async updateAudit(id, updateData, userId) {
-    const audit = await this.getAuditById(id);
+    const audit = await auditRepository.findById(id);
+    if (!audit) throw ApiError.notFound(MESSAGES.AUDIT_NOT_FOUND);
 
     if (updateData.plantId && updateData.plantId !== audit.plantId) {
       const plant = await plantRepository.findById(updateData.plantId);
       if (!plant) throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
     }
 
-    updateData.updatedBy = userId;
-    return auditRepository.updateById(id, updateData);
+    const { findings, ...auditUpdates } = updateData;
+    auditUpdates.updatedBy = userId;
+    if (auditUpdates.status === AuditStatus.COMPLETED && !auditUpdates.completedDate) {
+      auditUpdates.completedDate = new Date().toISOString().slice(0, 10);
+    } else if (auditUpdates.status && auditUpdates.status !== AuditStatus.COMPLETED) {
+      auditUpdates.completedDate = null;
+    }
+
+    const transaction = await sequelize.transaction();
+    try {
+      if (Array.isArray(findings)) {
+        const retainedIds = [];
+        for (let index = 0; index < findings.length; index += 1) {
+          const finding = findings[index];
+          const values = {
+            standardReference: finding.standardReference || null,
+            description: finding.description,
+            standardLimitRequirement: finding.standardLimitRequirement || null,
+            score: finding.score || null,
+            severityLevel: finding.severityLevel || null,
+            recommendation: finding.recommendation || null,
+            targetDate: finding.targetDate || null,
+            responsibility: finding.responsibility || null,
+            responsibleDepartmentId: finding.responsibleDepartmentId || null,
+            sortOrder: finding.sortOrder ?? index,
+            status: finding.status || 'open',
+            closedAt: finding.status === 'closed' ? new Date() : null,
+          };
+          if (finding.id) {
+            const [updated] = await AuditFinding.update(values, { where: { id: finding.id, auditId: id }, transaction });
+            if (!updated) throw ApiError.badRequest('An Audit Item does not belong to this Audit Log.');
+            retainedIds.push(finding.id);
+          } else {
+            const created = await AuditFinding.create({ ...values, auditId: id }, { transaction });
+            retainedIds.push(created.id);
+          }
+        }
+        await AuditFinding.destroy({
+          where: { auditId: id, ...(retainedIds.length ? { id: { [Op.notIn]: retainedIds } } : {}) },
+          transaction,
+        });
+        const scoring = scoringFor(findings);
+        auditUpdates.score = scoring.pointsAvailable ? scoring.overallCompliance : null;
+      }
+      await audit.update(auditUpdates, { transaction });
+      await transaction.commit();
+      return this.getAuditById(id);
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   /**
    * Update audit status
    */
   async updateStatus(id, newStatus, userId) {
-    const audit = await this.getAuditById(id);
+    await this.getAuditById(id);
 
     const validStatuses = Object.values(AuditStatus);
     if (!validStatuses.includes(newStatus)) {

@@ -16,11 +16,14 @@ const createDepartment = asyncHandler(async (req, res) => {
 /**
  * Get all departments
  */
-const getAllDepartments = asyncHandler(async (req, res) => {
+const sendDepartments = async (req, res, activeOnly = false) => {
   const pagination = parsePagination(req.query);
+  const requestedActiveFilter = req.query.isActive
+    ? { isActive: req.query.isActive === 'true' }
+    : {};
   const options = {
     ...pagination,
-    where: req.query.isActive ? { isActive: req.query.isActive === 'true' } : {},
+    where: activeOnly ? { isActive: true } : requestedActiveFilter,
   };
   const query = String(req.query.q || '').trim().slice(0, 100);
   if (query) {
@@ -33,7 +36,10 @@ const getAllDepartments = asyncHandler(async (req, res) => {
   options.order = parseOrder(req.query, { name: 'name', createdAt: 'createdAt' }, ['name', 'ASC']);
   const result = await departmentService.getAllDepartments(options);
   res.status(200).json(ApiResponse.success(result.rows, 'Departments retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
-});
+};
+
+const getAllDepartments = asyncHandler(async (req, res) => sendDepartments(req, res));
+const getActiveDepartments = asyncHandler(async (req, res) => sendDepartments(req, res, true));
 
 /**
  * Get departments by plant
@@ -70,6 +76,7 @@ const deleteDepartment = asyncHandler(async (req, res) => {
 module.exports = {
   createDepartment,
   getAllDepartments,
+  getActiveDepartments,
   getDepartmentsByPlant,
   getDepartmentById,
   updateDepartment,

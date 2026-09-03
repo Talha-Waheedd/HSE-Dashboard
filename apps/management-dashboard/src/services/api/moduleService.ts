@@ -160,7 +160,8 @@ const prepareRequestParams = (params: Record<string, unknown> = {}, schemaId?: s
       requestParams.status = statusToApi(requestParams.status, schemaId);
     }
   }
-  if (schemaId === 'audit-management' || schemaId === 'critical-audit-plan') requestParams.source = schemaId;
+  if (schemaId === 'audit-management') requestParams.hasPlan = true;
+  if (schemaId === 'critical-audit-plan') requestParams.source = schemaId;
   return requestParams;
 };
 const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? actions.map((item: any) => ({
@@ -205,18 +206,18 @@ export const moduleService = {
     return { ...payload, data: normalizeMasterAnalysisRecord(payload?.data || {}) };
   },
   getDepartments: async (): Promise<ApiResponse<DepartmentOption[]>> => {
-    const response = await apiClient.get('/departments', { params: { isActive: true, page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
+    const response = await apiClient.get('/departments/active', { params: { page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
     const payload = response.data;
     return { ...payload, data: sortDepartmentOptions(Array.isArray(payload?.data) ? payload.data : []) };
   },
   getLocations: async (): Promise<ApiResponse<any[]>> => {
-    const first = await apiClient.get('/locations', { params: { isActive: true, page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
+    const first = await apiClient.get('/locations/active', { params: { page: 1, limit: 100, sortBy: 'name', sortOrder: 'asc' } });
     const firstPayload = first.data;
     const rows = Array.isArray(firstPayload?.data) ? [...firstPayload.data] : [];
     const totalPages = Number(firstPayload?.meta?.totalPages || 1);
     if (totalPages > 1) {
-      const remaining = await Promise.all(Array.from({ length: totalPages - 1 }, (_, index) => apiClient.get('/locations', {
-        params: { isActive: true, page: index + 2, limit: 100, sortBy: 'name', sortOrder: 'asc' },
+      const remaining = await Promise.all(Array.from({ length: totalPages - 1 }, (_, index) => apiClient.get('/locations/active', {
+        params: { page: index + 2, limit: 100, sortBy: 'name', sortOrder: 'asc' },
       })));
       remaining.forEach(response => rows.push(...(Array.isArray(response.data?.data) ? response.data.data : [])));
     }

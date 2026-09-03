@@ -8,6 +8,17 @@ const { authenticate } = require('../../core/middleware/auth.middleware');
 const { requirePermissions } = require('../../core/middleware/rbac.middleware');
 const { createAuditSchema, updateAuditSchema, updateAuditStatusSchema } = require('./audit.schema');
 const { PERMISSIONS } = require('../../shared/constants/permissions');
+const multer = require('multer');
+const ApiError = require('../../shared/utils/ApiError');
+
+const planWorkbookUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, callback) => {
+    if (/\.xlsx$/i.test(file.originalname || '')) return callback(null, true);
+    return callback(ApiError.badRequest('Only .xlsx Critical Audit Plan files are supported.'));
+  },
+});
 
 router.use(authenticate);
 
@@ -22,6 +33,19 @@ router.get(
   '/',
   requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
   hseAuditController.getAllAudits
+);
+
+router.get(
+  '/critical-plans',
+  requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
+  hseAuditController.getCriticalAuditPlans
+);
+
+router.post(
+  '/critical-plans/import',
+  requirePermissions([PERMISSIONS.HSE_MANAGE_AUDITS]),
+  planWorkbookUpload.single('file'),
+  hseAuditController.importCriticalAuditPlan
 );
 
 router.get(

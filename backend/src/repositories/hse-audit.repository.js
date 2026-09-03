@@ -1,7 +1,9 @@
 'use strict';
 
 const BaseRepository = require('./base.repository');
-const { HseAudit, AuditFinding, User, Department, Plant } = require('../database/models');
+const {
+  HseAudit, AuditFinding, CriticalAuditPlan, User, Department, Plant,
+} = require('../database/models');
 
 class HseAuditRepository extends BaseRepository {
   constructor() {
@@ -17,9 +19,27 @@ class HseAuditRepository extends BaseRepository {
     return this.findById(id, {
       include: [
         { model: User, as: 'auditor', attributes: ['id', 'firstName', 'lastName', 'email'] },
-        { model: Department, as: 'department', attributes: ['id', 'name'] },
+        { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
         { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
-        { model: AuditFinding, as: 'findings' },
+        { model: CriticalAuditPlan, as: 'criticalAuditPlan' },
+        {
+          model: AuditFinding,
+          as: 'findings',
+          separate: true,
+          order: [['sortOrder', 'ASC'], ['createdAt', 'ASC']],
+          include: [{ model: Department, as: 'responsibleDepartment', attributes: ['id', 'name', 'code'] }],
+        },
+      ],
+    });
+  }
+
+  async listDetails(options = {}) {
+    return this.model.findAndCountAll({
+      ...options,
+      distinct: true,
+      include: [
+        { model: Department, as: 'department', attributes: ['id', 'name', 'code'], required: false },
+        { model: CriticalAuditPlan, as: 'criticalAuditPlan', required: false },
       ],
     });
   }

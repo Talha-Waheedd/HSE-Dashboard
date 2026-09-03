@@ -5,14 +5,19 @@ const service = require('./location.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { parsePagination, parseOrder, paginationMeta } = require('../../shared/utils/pagination');
 
-const list = asyncHandler(async (req, res) => {
+const sendList = async (req, res, activeOnly = false) => {
   const pagination = parsePagination(req.query, { defaultLimit: 25 });
-  const where = req.query.isActive === undefined ? {} : { isActive: req.query.isActive === 'true' };
+  const requestedActiveFilter = req.query.isActive === undefined
+    ? {}
+    : { isActive: req.query.isActive === 'true' };
+  const where = activeOnly ? { isActive: true } : requestedActiveFilter;
   const query = String(req.query.q || '').trim().slice(0, 100);
   if (query) where[Op.or] = [{ name: { [Op.like]: `%${query}%` } }, { code: { [Op.like]: `%${query}%` } }];
   const result = await service.list({ ...pagination, where, order: parseOrder(req.query, { name: 'name', createdAt: 'createdAt' }, ['name', 'ASC']) });
   res.json(ApiResponse.success(result.rows, 'Locations retrieved successfully', paginationMeta({ ...pagination, total: result.count })));
-});
+};
+const list = asyncHandler(async (req, res) => sendList(req, res));
+const listActive = asyncHandler(async (req, res) => sendList(req, res, true));
 const get = asyncHandler(async (req, res) => res.json(ApiResponse.success(await service.get(req.params.id), 'Location retrieved successfully')));
 const create = asyncHandler(async (req, res) => res.status(201).json(ApiResponse.success(await service.create(req.body, req.user.id), 'Location created successfully')));
 const update = asyncHandler(async (req, res) => res.json(ApiResponse.success(await service.update(req.params.id, req.body, req.user.id), 'Location updated successfully')));
@@ -21,5 +26,5 @@ const remove = asyncHandler(async (req, res) => {
   res.json(ApiResponse.success(location, 'Location deactivated successfully'));
 });
 module.exports = {
-  list, get, create, update, remove,
+  list, listActive, get, create, update, remove,
 };

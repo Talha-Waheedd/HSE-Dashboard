@@ -28,6 +28,7 @@ const TrainingAttendee = require('../modules/training/training-attendee.model');
 // ─── HSE Audit & Inspection Models ───────────────────────────────────────────
 const HseAudit = require('../modules/audits/audit.model');
 const AuditFinding = require('../modules/audits/audit-finding.model');
+const CriticalAuditPlan = require('../modules/audits/critical-audit-plan.model');
 const Inspection = require('../modules/audits/inspection.model');
 const InspectionItem = require('../modules/audits/inspection-item.model');
 
@@ -186,6 +187,15 @@ HseAudit.belongsTo(User, { foreignKey: 'auditedBy', as: 'auditor' });
 HseAudit.hasMany(AuditFinding, { foreignKey: 'auditId', as: 'findings' });
 AuditFinding.belongsTo(HseAudit, { foreignKey: 'auditId', as: 'audit' });
 
+CriticalAuditPlan.hasMany(HseAudit, { foreignKey: 'criticalAuditPlanId', as: 'auditLogs' });
+HseAudit.belongsTo(CriticalAuditPlan, { foreignKey: 'criticalAuditPlanId', as: 'criticalAuditPlan' });
+Plant.hasMany(CriticalAuditPlan, { foreignKey: 'plantId', as: 'criticalAuditPlans' });
+CriticalAuditPlan.belongsTo(Plant, { foreignKey: 'plantId', as: 'plant' });
+User.hasMany(CriticalAuditPlan, { foreignKey: 'importedBy', as: 'importedCriticalAuditPlans' });
+CriticalAuditPlan.belongsTo(User, { foreignKey: 'importedBy', as: 'importer' });
+Department.hasMany(AuditFinding, { foreignKey: 'responsibleDepartmentId', as: 'responsibleAuditFindings' });
+AuditFinding.belongsTo(Department, { foreignKey: 'responsibleDepartmentId', as: 'responsibleDepartment' });
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Associations — Inspections
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -232,7 +242,7 @@ module.exports = {
   // HSE Training
   TrainingSession, TrainingAttendee,
   // HSE Audits & Inspections
-  HseAudit, AuditFinding, Inspection, InspectionItem,
+  HseAudit, AuditFinding, CriticalAuditPlan, Inspection, InspectionItem,
   // HSE Actions & Attachments
   CorrectiveAction, Attachment, MasterAnalysis,
 };

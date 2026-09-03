@@ -5,9 +5,18 @@ const AuditStatus = require('../../shared/enums/AuditStatus');
 const SeverityLevel = require('../../shared/enums/SeverityLevel');
 
 const auditFindingSchema = Joi.object({
+  id: Joi.string().uuid().optional(),
+  standardReference: Joi.string().max(255).allow('', null).optional(),
   description: Joi.string().required(),
-  severityLevel: Joi.string().valid(...Object.values(SeverityLevel)).required(),
-  recommendation: Joi.string().optional(),
+  standardLimitRequirement: Joi.string().allow('', null).optional(),
+  score: Joi.number().integer().min(1).max(4).allow(null).optional(),
+  severityLevel: Joi.string().valid(...Object.values(SeverityLevel)).allow(null).optional(),
+  recommendation: Joi.string().allow('', null).optional(),
+  targetDate: Joi.date().iso().allow(null, '').optional(),
+  responsibility: Joi.string().allow('', null).optional(),
+  responsibleDepartmentId: Joi.string().uuid().allow(null, '').optional(),
+  status: Joi.string().valid('open', 'closed').default('open').optional(),
+  sortOrder: Joi.number().integer().min(0).optional(),
 });
 
 const createAuditSchema = Joi.object({
@@ -20,6 +29,12 @@ const createAuditSchema = Joi.object({
   status: Joi.string().valid(...Object.values(AuditStatus)).default(AuditStatus.PLANNED).optional(),
   completedDate: Joi.date().iso().optional(),
   summary: Joi.string().optional(),
+  areaOwner: Joi.string().allow('', null).optional(),
+  auditObjective: Joi.string().allow('', null).optional(),
+  riskRating: Joi.string().valid('Low', 'Medium', 'High').allow(null).optional(),
+  auditors: Joi.string().allow('', null).optional(),
+  frequency: Joi.string().allow('', null).optional(),
+  personsInterviewed: Joi.string().allow('', null).optional(),
   source: Joi.string().valid('audit-management', 'critical-audit-plan').default('audit-management').optional(),
   findings: Joi.array().items(auditFindingSchema).optional(),
 });
@@ -32,10 +47,17 @@ const updateAuditSchema = Joi.object({
   scheduledDate: Joi.date().iso().optional(),
   scope: Joi.string().optional(),
   summary: Joi.string().optional(),
+  areaOwner: Joi.string().allow('', null).optional(),
+  auditObjective: Joi.string().allow('', null).optional(),
+  riskRating: Joi.string().valid('Low', 'Medium', 'High').allow(null).optional(),
+  auditors: Joi.string().allow('', null).optional(),
+  frequency: Joi.string().allow('', null).optional(),
+  personsInterviewed: Joi.string().allow('', null).optional(),
   score: Joi.number().precision(2).min(0).max(100).optional(),
   status: Joi.string().valid(...Object.values(AuditStatus)).optional(),
   completedDate: Joi.date().iso().optional(),
   source: Joi.string().valid('audit-management', 'critical-audit-plan').optional(),
+  findings: Joi.array().items(auditFindingSchema).optional(),
 }).min(1);
 
 const updateAuditStatusSchema = Joi.object({

@@ -50,8 +50,8 @@ export const LocationCombobox = ({
       setLoading(true);
       setErrorMessage(null);
       try {
-        const response = await apiClient.get('/locations', {
-          params: { q: query, isActive: true, limit: PAGE_SIZE, page: page + 1 },
+        const response = await apiClient.get('/locations/active', {
+          params: { q: query, limit: PAGE_SIZE, page: page + 1 },
         });
         if (!current) return;
         setOptions(Array.isArray(response.data?.data) ? response.data.data : []);

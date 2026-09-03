@@ -12,6 +12,10 @@ const { PERMISSIONS } = require('../../shared/constants/permissions');
 
 router.use(authenticate);
 
+// Active departments are shared form options, not an administration action.
+// Mutation and full/inactive-list endpoints still require explicit RBAC rights.
+router.get('/active', departmentController.getActiveDepartments);
+
 router.post(
   '/',
   requirePermissions([PERMISSIONS.DEPARTMENT_CREATE]),
