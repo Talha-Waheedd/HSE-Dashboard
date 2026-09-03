@@ -88,6 +88,8 @@ const exportActions = asyncHandler(async (req, res) => {
   const where = await buildActionWhere(req.query);
   await sendCsvExport(res, CorrectiveAction, {
     where,
+    include: [{ model: Department, as: 'responsibleDepartment', attributes: ['name', 'code'], required: false }],
+    nest: true,
     serializeRow: (row) => ({
       Date: csvDate(row.createdAt),
       'CAPA ID': row.capaNumber || '',
@@ -95,6 +97,7 @@ const exportActions = asyncHandler(async (req, res) => {
       'Source Reference': row.sourceReference || '',
       'Incident Category': row.incidentCategory || '',
       'Action Item': row.description || row.title || '',
+      'Responsible Department': row.responsibleDepartment?.code || row.responsibleDepartment?.name || '',
       Responsibility: row.responsibility || '',
       'Risk / Priority': row.priority || '',
       'Target Date': csvDate(row.dueDate),

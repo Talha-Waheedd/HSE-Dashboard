@@ -16,8 +16,6 @@ const sourceUrl = (action: CapaAction) => {
   if (action.sourceItemKey === 'legacy') return null;
   if (action.sourceType === 'incident') return `/leading-indicators/incident-investigation/${action.sourceId}`;
   if (action.sourceType === 'audit') return `/audit-management/${action.sourceId}`;
-  if (action.sourceType === 'hazard') return '/hazard-reporting';
-  if (action.sourceType === 'near_miss') return '/near-miss';
   return null;
 };
 

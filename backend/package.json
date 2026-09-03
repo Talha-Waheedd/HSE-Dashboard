@@ -15,6 +15,7 @@
     "verify:incidents": "node scripts/verify-historical-incidents.js",
     "correct:hazard-statuses": "node scripts/correct-historical-hazard-statuses.js",
     "backfill:capa": "node scripts/backfill-capa-actions.js",
+    "verify:capa": "node scripts/verify-capa-actions.js",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
     "db:fresh": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && node scripts/seed.js",
     "test": "cross-env NODE_ENV=test jest --runInBand --forceExit",
