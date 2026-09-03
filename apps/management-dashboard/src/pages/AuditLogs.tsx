@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Eye, Search } from 'lucide-react';
+import { Eye, Search } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
 import { auditService, auditStatusLabel, type AuditLog, type PageMeta } from '../services/api/auditService';
+import { PaginationControls } from '../components/PaginationControls';
 
 const PAGE_SIZE = 25;
 const EMPTY_META: PageMeta = { currentPage: 1, pageSize: PAGE_SIZE, totalRecords: 0, totalPages: 1 };
@@ -113,13 +114,7 @@ export const AuditLogs = () => {
             </tbody>
           </table>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E5E7EB] px-5 py-3 text-[12px] text-[#6B7280]">
-          <span>Page {meta.currentPage} of {Math.max(meta.totalPages, 1)} · {meta.totalRecords} Audit Logs</span>
-          <div className="flex items-center gap-2">
-            <button aria-label="Previous page" disabled={page <= 1} onClick={() => setPage(value => Math.max(1, value - 1))} className="rounded border p-2 disabled:opacity-40"><ChevronLeft className="h-4 w-4" /></button>
-            <button aria-label="Next page" disabled={page >= meta.totalPages} onClick={() => setPage(value => Math.min(meta.totalPages, value + 1))} className="rounded border p-2 disabled:opacity-40"><ChevronRight className="h-4 w-4" /></button>
-          </div>
-        </div>
+        <PaginationControls currentPage={page} totalPages={meta.totalPages} totalRecords={meta.totalRecords} pageSize={PAGE_SIZE} onPageChange={setPage} disabled={loading} itemLabel="Audit Logs" />
       </section>
     </main>
   </Layout>;

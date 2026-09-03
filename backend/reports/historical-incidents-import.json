@@ -1,0 +1,1040 @@
+{
+  "mode": "commit",
+  "generatedAt": "2026-09-02T16:36:59.566Z",
+  "sourceType": "historical_excel_import",
+  "database": "HSE",
+  "plant": {
+    "id": "5126923e-b77f-4eb6-8b98-d5fc9db8d71b",
+    "name": "CBL Plant Alpha",
+    "code": "PLANT-A"
+  },
+  "importUser": {
+    "id": "8e917f45-e5a4-453e-a926-76f2be994938",
+    "email": "superadmin@cblapp.com"
+  },
+  "workbooks": [
+    {
+      "name": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "worksheets": [
+        {
+          "name": "Master Sheet-V-2-13-March-26",
+          "state": "visible",
+          "rows": 115,
+          "columns": 15,
+          "mergedRanges": 0,
+          "classification": "canonical-record-source"
+        },
+        {
+          "name": "ADM-15-March",
+          "state": "visible",
+          "rows": 8,
+          "columns": 15,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "PRD-15March",
+          "state": "visible",
+          "rows": 82,
+          "columns": 15,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Sheet13",
+          "state": "visible",
+          "rows": 50,
+          "columns": 15,
+          "mergedRanges": 0,
+          "classification": "partial-working-copy"
+        },
+        {
+          "name": "Master Sheet With Action items",
+          "state": "visible",
+          "rows": 381,
+          "columns": 20,
+          "mergedRanges": 1492,
+          "classification": "record-enrichment-source"
+        },
+        {
+          "name": "action plan",
+          "state": "visible",
+          "rows": 23,
+          "columns": 4,
+          "mergedRanges": 1,
+          "classification": "aggregate-summary"
+        },
+        {
+          "name": "only added",
+          "state": "visible",
+          "rows": 52,
+          "columns": 15,
+          "mergedRanges": 120,
+          "classification": "working-copy-with-pivot-summary"
+        },
+        {
+          "name": "Working master Sheet",
+          "state": "visible",
+          "rows": 93,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "older-master-copy"
+        },
+        {
+          "name": "Body Part",
+          "state": "visible",
+          "rows": 73,
+          "columns": 15,
+          "mergedRanges": 4,
+          "classification": "analysis-subset-copy"
+        },
+        {
+          "name": "ADM",
+          "state": "visible",
+          "rows": 8,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "PRJ",
+          "state": "visible",
+          "rows": 4,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "PRD",
+          "state": "visible",
+          "rows": 66,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Q.C",
+          "state": "visible",
+          "rows": 3,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Stores",
+          "state": "visible",
+          "rows": 8,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "ESD",
+          "state": "visible",
+          "rows": 9,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        }
+      ],
+      "canonicalSheet": "Master Sheet-V-2-13-March-26",
+      "enrichmentSheet": "Master Sheet With Action items",
+      "canonicalCandidates": 108
+    },
+    {
+      "name": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "worksheets": [
+        {
+          "name": "Master Sheet-Final",
+          "state": "visible",
+          "rows": 60,
+          "columns": 11,
+          "mergedRanges": 1,
+          "classification": "canonical-record-source"
+        },
+        {
+          "name": "Master Sheet All",
+          "state": "visible",
+          "rows": 60,
+          "columns": 12,
+          "mergedRanges": 1,
+          "classification": "older-master-copy"
+        },
+        {
+          "name": "Master Sheet",
+          "state": "visible",
+          "rows": 32,
+          "columns": 11,
+          "mergedRanges": 1,
+          "classification": "older-master-copy"
+        },
+        {
+          "name": "HumanProcess-2Ag",
+          "state": "visible",
+          "rows": 174,
+          "columns": 10,
+          "mergedRanges": 5,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "ADM Human Process",
+          "state": "visible",
+          "rows": 10,
+          "columns": 10,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Updated HumanProcess",
+          "state": "visible",
+          "rows": 78,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "New HumanProcess-24jyuly",
+          "state": "visible",
+          "rows": 32,
+          "columns": 11,
+          "mergedRanges": 1,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "ESD Aspect",
+          "state": "visible",
+          "rows": 18,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "Sheet6",
+          "state": "visible",
+          "rows": 20,
+          "columns": 5,
+          "mergedRanges": 0,
+          "classification": "aggregate-summary"
+        },
+        {
+          "name": "repair",
+          "state": "visible",
+          "rows": 25,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "Short Circuit New",
+          "state": "visible",
+          "rows": 22,
+          "columns": 10,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "PRD Human Process",
+          "state": "visible",
+          "rows": 46,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Work2",
+          "state": "visible",
+          "rows": 54,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "Work1",
+          "state": "visible",
+          "rows": 39,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "Short Circuit Updated",
+          "state": "visible",
+          "rows": 22,
+          "columns": 10,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "PRD Aspect",
+          "state": "visible",
+          "rows": 24,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "Store Aspect",
+          "state": "visible",
+          "rows": 5,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        }
+      ],
+      "canonicalSheet": "Master Sheet-Final",
+      "canonicalCandidates": 58
+    }
+  ],
+  "reconciliation": {
+    "injuryCanonicalCandidates": 108,
+    "fireCanonicalCandidates": 58,
+    "totalCanonicalCandidates": 166,
+    "invalidCandidates": 0,
+    "exactDuplicatesWithinCanonicalSources": 0,
+    "existingDatabaseDuplicates": 0,
+    "recordsToInsert": 166,
+    "locationsToCreate": 30,
+    "incidentInjuriesToInsert": 108,
+    "byClassification": {
+      "First Aid": 78,
+      "MTC": 11,
+      "LTI": 19,
+      "Fire": 58
+    }
+  },
+  "mappings": {
+    "categories": {
+      "firstaid": {
+        "value": "first_aid",
+        "label": "First Aid"
+      },
+      "firstaidcase": {
+        "value": "first_aid",
+        "label": "First Aid"
+      },
+      "fa": {
+        "value": "first_aid",
+        "label": "First Aid"
+      },
+      "medicaltreatment": {
+        "value": "mtc",
+        "label": "MTC"
+      },
+      "medicaltreatmentcase": {
+        "value": "mtc",
+        "label": "MTC"
+      },
+      "mtc": {
+        "value": "mtc",
+        "label": "MTC"
+      },
+      "restrictedwork": {
+        "value": "rwc",
+        "label": "RWC"
+      },
+      "restrictedworkcase": {
+        "value": "rwc",
+        "label": "RWC"
+      },
+      "rwc": {
+        "value": "rwc",
+        "label": "RWC"
+      },
+      "losttimeinjury": {
+        "value": "lti",
+        "label": "LTI"
+      },
+      "lti": {
+        "value": "lti",
+        "label": "LTI"
+      },
+      "fatality": {
+        "value": "fatality",
+        "label": "Fatality"
+      },
+      "fire": {
+        "value": "fire",
+        "label": "Fire"
+      },
+      "fireincident": {
+        "value": "fire",
+        "label": "Fire"
+      }
+    },
+    "departments": {
+      "PRD": "60f8a755-9597-400a-983a-a4304016c2c7",
+      "Stores": "3cb9aec9-360f-4f80-87ad-9cdda88e176b",
+      "ESD": "a5eed423-4951-4245-a744-47699fad468e",
+      "ADM": "eaa5fb16-d01e-41be-b15f-85f3c4e2ab55",
+      "QC/FS/NPD": "d47f4a27-8ac7-423b-9b48-f242dd23c487",
+      "Projects": "e340a2bd-4962-4e75-b2f1-712c5dceaefa"
+    },
+    "locations": {
+      "Mixing": {
+        "id": "f3606114-6f90-43d4-98c6-d9d4b96390a3",
+        "name": "Mixing",
+        "create": true
+      },
+      "Boys Canteen": {
+        "id": "59eae0a6-b6bd-40ce-888e-14fffb58b74d",
+        "name": "Boys Canteen",
+        "create": false
+      },
+      "Packing": {
+        "id": "5d0e8652-0804-4950-b641-a147ac04236c",
+        "name": "Packing",
+        "create": true
+      },
+      "Stores": {
+        "id": "2139ce31-d934-43d4-8942-ac44d4f34021",
+        "name": "Stores",
+        "create": true
+      },
+      "Oven": {
+        "id": "39271ba5-ed52-419b-ad94-28a93072ca3e",
+        "name": "Oven",
+        "create": true
+      },
+      "Club House": {
+        "id": "d10e23ca-ebc5-42f1-ae4c-2dbf8c4fd640",
+        "name": "Club House",
+        "create": true
+      },
+      "Cutting": {
+        "id": "cc75c324-60dc-419b-b2a9-fb5fd06b0b78",
+        "name": "Cutting",
+        "create": true
+      },
+      "Gate-1": {
+        "id": "6dabea68-1435-4880-a7c0-bee1c5104d06",
+        "name": "Gate-1",
+        "create": false
+      },
+      "Washroom": {
+        "id": "24d7c87b-e501-4e1e-bed4-cf42c9dd8e1d",
+        "name": "Washroom",
+        "create": true
+      },
+      "Creaming": {
+        "id": "85630c50-006f-45e1-ac71-d38cde83eeae",
+        "name": "Creaming",
+        "create": true
+      },
+      "Project Site": {
+        "id": "19737d4f-032f-4bd6-8d7a-958e3ff79482",
+        "name": "Project Site",
+        "create": true
+      },
+      "Cooling Towers": {
+        "id": "7e71580d-1b97-4c69-a9d5-1544bccbeb19",
+        "name": "Cooling Towers",
+        "create": true
+      },
+      "Chemical Room": {
+        "id": "ba896393-6ad7-4d5b-a1e0-f02d2839cb1e",
+        "name": "Chemical Room",
+        "create": true
+      },
+      "Entrance stairs": {
+        "id": "c0e8bb0b-0156-4ab5-b6be-c0bf2d83552d",
+        "name": "Entrance stairs",
+        "create": true
+      },
+      "Washing Area": {
+        "id": "244b8aa9-1ec3-4519-bfa7-8e4a56e520a9",
+        "name": "Washing Area",
+        "create": true
+      },
+      "Girls Canteen": {
+        "id": "a5dedee2-0c4d-4013-b0f6-4caf387c1253",
+        "name": "Girls Canteen",
+        "create": false
+      },
+      "Workshop": {
+        "id": "b25314d9-04cd-4203-b684-1cf518278282",
+        "name": "Workshop",
+        "create": true
+      },
+      "Cooling Conveyor": {
+        "id": "99872946-fa81-4438-9d07-11275559b986",
+        "name": "Cooling Conveyor",
+        "create": true
+      },
+      "Labor Colony": {
+        "id": "21279cd6-871f-49b9-aae3-64df2d6bb68a",
+        "name": "Labor Colony",
+        "create": true
+      },
+      "Cake Plant": {
+        "id": "41308e00-1815-4405-9f70-80aa8f165ff3",
+        "name": "Cake Plant",
+        "create": true
+      },
+      "Near Silo Area": {
+        "id": "2a7fd419-7f0b-4149-9baf-309fbe0bd329",
+        "name": "Near Silo Area",
+        "create": true
+      },
+      "Ishida Hall": {
+        "id": "a072c48c-169e-42ab-9f69-397440e13ef2",
+        "name": "Ishida Hall",
+        "create": true
+      },
+      "Stairs to Girls canteen": {
+        "id": "94fe4426-04d4-450d-9733-9e3feebf14bd",
+        "name": "Stairs to Girls canteen",
+        "create": true
+      },
+      "Chemical Room (G.F)": {
+        "id": "b63d7121-c20d-4231-9cbb-267aa78f7a6d",
+        "name": "Chemical Room Ground Floor",
+        "create": false
+      },
+      "Girls Prayer Room": {
+        "id": "742ab2db-55b0-4850-977a-81a452e196b1",
+        "name": "Girls Prayer Room",
+        "create": true
+      },
+      "Check Post": {
+        "id": "dfa01f8f-6dbf-4fd7-9358-a273f7e5a973",
+        "name": "Check Post",
+        "create": true
+      },
+      "Factory Outer Area": {
+        "id": "03c40dce-4d7f-4b53-9a8d-172f2a068611",
+        "name": "Factory Outer Area",
+        "create": true
+      },
+      "Biscuits Scrap Room": {
+        "id": "9bf41e7e-3357-404a-ae8e-822f4bfa052d",
+        "name": "Biscuits Scrap Room",
+        "create": true
+      },
+      "Colony": {
+        "id": "7143edbc-b2d0-4f1d-835f-9f8ea699d44f",
+        "name": "Colony",
+        "create": true
+      },
+      "Canteen": {
+        "id": "1d6564cf-ba74-473d-93ef-13e72cc059e4",
+        "name": "Canteen",
+        "create": true
+      },
+      "Parking": {
+        "id": "4ea7b39f-f52c-4db2-abe3-da7f30d79939",
+        "name": "Parking",
+        "create": true
+      },
+      "ESD Workshop": {
+        "id": "e5a5ec16-af80-47c0-ac90-f9f9773a64ef",
+        "name": "ESD Workshop",
+        "create": true
+      },
+      "Admin Block": {
+        "id": "22fa8fcf-eb7b-4184-b449-629f8013f28a",
+        "name": "Admin Block",
+        "create": false
+      },
+      "Sugar Exhauster": {
+        "id": "b14b6c85-8df5-438b-9214-0c604a6cc4c8",
+        "name": "Sugar Exhauster",
+        "create": true
+      },
+      "HT Transformer Room": {
+        "id": "4354781b-9280-486b-86e7-ad0a5c00432b",
+        "name": "HT Transformer Room",
+        "create": true
+      },
+      "oven": {
+        "id": "39271ba5-ed52-419b-ad94-28a93072ca3e",
+        "name": "Oven",
+        "create": true
+      }
+    }
+  },
+  "issues": {
+    "normalized": [
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 35,
+        "serial": 34,
+        "field": "date",
+        "from": "Sat Jun 01 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-01-06"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 44,
+        "serial": 43,
+        "field": "date",
+        "from": "Mon May 06 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-06-05"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 45,
+        "serial": 44,
+        "field": "date",
+        "from": "Wed Nov 06 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-06-11"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 47,
+        "serial": 46,
+        "field": "date",
+        "from": "Sun Jul 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-07"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 51,
+        "serial": 50,
+        "field": "date",
+        "from": "Fri Mar 08 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-08-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 52,
+        "serial": 51,
+        "field": "date",
+        "from": "Tue Oct 08 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-08-10"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 56,
+        "serial": 55,
+        "field": "date",
+        "from": "Sat Aug 10 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-10-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 58,
+        "serial": 57,
+        "field": "date",
+        "from": "Sun Feb 11 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-11-02"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 59,
+        "serial": 58,
+        "field": "date",
+        "from": "Mon Nov 11 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-11-11"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 62,
+        "serial": 61,
+        "field": "date",
+        "from": "7/12/12024",
+        "to": "2024-12-07"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 63,
+        "serial": 62,
+        "field": "date",
+        "from": "Thu Sep 12 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-12-09"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 68,
+        "serial": 67,
+        "field": "date",
+        "from": "Tue Apr 01 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-01-04"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 69,
+        "serial": 68,
+        "field": "date",
+        "from": "Fri Aug 01 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-01-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 70,
+        "serial": 69,
+        "field": "date",
+        "from": "Mon Sep 01 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-01-09"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 72,
+        "serial": 71,
+        "field": "date",
+        "from": "Wed Jul 02 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-02-07"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 73,
+        "serial": 72,
+        "field": "date",
+        "from": "Tue Sep 02 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-02-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 74,
+        "serial": 73,
+        "field": "date",
+        "from": "Tue Dec 02 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-02-12"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 76,
+        "serial": 75,
+        "field": "date",
+        "from": "Mon Mar 03 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-03-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 77,
+        "serial": 76,
+        "field": "date",
+        "from": "Thu Apr 03 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-03-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 78,
+        "serial": 77,
+        "field": "date",
+        "from": "Sat Mar 08 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-03-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 81,
+        "serial": 80,
+        "field": "date",
+        "from": "Thu Apr 17 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-04-17"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 82,
+        "serial": 81,
+        "field": "date",
+        "from": "Wed Mar 05 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-05-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 87,
+        "serial": 86,
+        "field": "date",
+        "from": "Fri Jun 06 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-06-06"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 88,
+        "serial": 87,
+        "field": "date",
+        "from": "Tue Jul 08 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-07-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 89,
+        "serial": 88,
+        "field": "date",
+        "from": "Sun Jul 20 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-07-20"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 90,
+        "serial": 89,
+        "field": "date",
+        "from": "Sun Aug 10 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-10"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 91,
+        "serial": 90,
+        "field": "date",
+        "from": "Thu Aug 21 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-21"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 92,
+        "serial": 91,
+        "field": "date",
+        "from": "Wed Aug 27 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-27"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 93,
+        "serial": 92,
+        "field": "date",
+        "from": "Sat Aug 30 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-30"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 97,
+        "serial": 96,
+        "field": "date",
+        "from": "Tue Nov 11 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-11-11"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 100,
+        "serial": 99,
+        "field": "date",
+        "from": "Wed Mar 12 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-12-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 101,
+        "serial": 100,
+        "field": "date",
+        "from": "Fri Sep 12 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-12-09"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 102,
+        "serial": 101,
+        "field": "date",
+        "from": "Mon Jun 01 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-01-06"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 103,
+        "serial": 102,
+        "field": "date",
+        "from": "Sat Aug 01 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-01-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 104,
+        "serial": 103,
+        "field": "date",
+        "from": "Sat Aug 01 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-01-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 105,
+        "serial": 104,
+        "field": "date",
+        "from": "Sat May 02 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-02-05"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 106,
+        "serial": 105,
+        "field": "date",
+        "from": "Thu Jul 02 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-02-07"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 109,
+        "serial": 108,
+        "field": "date",
+        "from": "Tue Mar 03 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-03-03"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 26,
+        "serial": 24,
+        "field": "date",
+        "from": "Tue Jan 02 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-02-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 31,
+        "serial": 29,
+        "field": "date",
+        "from": "Fri Jul 05 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-05-07"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 34,
+        "serial": 32,
+        "field": "date",
+        "from": "Sun Jan 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 35,
+        "serial": 33,
+        "field": "date",
+        "from": "Sun Jan 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 36,
+        "serial": 34,
+        "field": "date",
+        "from": "Thu Mar 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-03"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 37,
+        "serial": 35,
+        "field": "date",
+        "from": "Mon Oct 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-10"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 40,
+        "serial": 38,
+        "field": "date",
+        "from": "Mon Jan 08 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-08-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 41,
+        "serial": 39,
+        "field": "date",
+        "from": "Wed May 08 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-08-05"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 44,
+        "serial": 42,
+        "field": "date",
+        "from": "Tue Jul 09 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-09-07"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 47,
+        "serial": 45,
+        "field": "date",
+        "from": "Wed Jul 10 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-10-07"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 49,
+        "serial": 47,
+        "field": "date",
+        "from": "Wed Dec 11 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-11-12"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 51,
+        "serial": 49,
+        "field": "date",
+        "from": "Sat Mar 01 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-01-03"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 57,
+        "serial": 55,
+        "field": "date",
+        "from": "Wed Jan 08 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 58,
+        "serial": 56,
+        "field": "date",
+        "from": "Sat Nov 08 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-11"
+      }
+    ],
+    "ambiguous": [
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 60,
+        "serial": 58,
+        "reason": "date_description_mismatch",
+        "resolution": "Kept authoritative Date column (18-Nov-2025); description says 19-Nov-2025 and is preserved verbatim."
+      }
+    ],
+    "invalid": []
+  },
+  "duplicateCandidates": [],
+  "alreadyExisting": []
+}

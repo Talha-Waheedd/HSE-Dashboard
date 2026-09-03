@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Edit2, Plus, RefreshCw, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { useAuthStore } from '@cbl/auth';
 import { CenterModal } from '../../components/CenterModal';
+import { PaginationControls } from '../../components/PaginationControls';
 import { adminService, apiErrorMessage, notifyMasterDataChanged, type MasterRecord } from '../../services/api/adminService';
 
 const CARD = 'overflow-hidden rounded-xl border border-[#E0E0E0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06)]';
@@ -134,7 +135,7 @@ export const MasterDataManagement = ({ kind }: { kind: Kind }) => {
             <td className="px-5 py-3 text-[13px] font-semibold text-[#1C1C1E]">{record.name}</td><td className="px-5 py-3 text-[13px] text-[#6B7280]">{record.code || '—'}</td><td className="px-5 py-3 text-[13px] text-[#6B7280]">{plants.find(plant => plant.id === record.plantId)?.name || '—'}</td><td className="px-5 py-3"><span className={`rounded px-2 py-1 text-[11px] font-semibold ${record.isActive ? 'bg-[#ECFDF5] text-[#047857]' : 'bg-[#F3F4F6] text-[#6B7280]'}`}>{record.isActive ? 'Active' : 'Inactive'}</span></td>
             <td className="px-5 py-3"><div className="flex justify-end gap-1">{canUpdate && <button type="button" title={`Edit ${singular}`} onClick={() => openEdit(record)} className="rounded p-2 text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]"><Edit2 className="h-4 w-4" /></button>}{record.isActive ? canDelete && <button type="button" title={`Deactivate ${singular}`} onClick={() => void setActive(record, false)} className="rounded p-2 text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#CB0017]"><Trash2 className="h-4 w-4" /></button> : canUpdate && <button type="button" onClick={() => void setActive(record, true)} className="rounded px-2 py-1 text-[11px] font-semibold text-[#047857] hover:bg-[#ECFDF5]">Activate</button>}</div></td>
           </tr>) : <tr><td colSpan={5} className="px-5 py-12 text-center text-[13px] text-[#6B7280]">No {kind} found.</td></tr>}</tbody></table></div>
-        <div className="flex items-center justify-between border-t border-[#F0F0F0] px-5 py-3 text-[12px] text-[#6B7280]"><span>{total} records</span><div className="flex items-center gap-2"><button disabled={page <= 1} onClick={() => setPage(value => value - 1)} className="rounded border px-3 py-1.5 disabled:opacity-40">Previous</button><span>Page {page} of {totalPages}</span><button disabled={page >= totalPages} onClick={() => setPage(value => value + 1)} className="rounded border px-3 py-1.5 disabled:opacity-40">Next</button></div></div>
+        <PaginationControls currentPage={page} totalPages={totalPages} totalRecords={total} pageSize={PAGE_SIZE} onPageChange={setPage} disabled={loading} />
       </div>
 
       <CenterModal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={`${form.id ? 'Edit' : 'Add'} ${singular}`}>

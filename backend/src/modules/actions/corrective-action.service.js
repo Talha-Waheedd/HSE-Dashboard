@@ -7,6 +7,7 @@ const CorrectiveActionSource = require('../../shared/enums/CorrectiveActionSourc
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { col, fn, literal } = require('sequelize');
+const crypto = require('crypto');
 
 class CorrectiveActionService {
   /**
@@ -25,6 +26,9 @@ class CorrectiveActionService {
 
     data.assignedBy = userId;
     data.createdBy = userId;
+    data.sourceItemKey = data.sourceItemKey || (data.sourceItemId ? `item:${data.sourceItemId}` : 'manual');
+    data.incidentCategory = data.incidentCategory || ({ hazard: 'Hazard', near_miss: 'Near Miss', incident: 'Incident', audit: 'Audit Finding' }[data.sourceType] || 'Inspection');
+    data.capaNumber = data.capaNumber || `CAPA-${new Date().getFullYear()}-${crypto.createHash('sha256').update(`${data.sourceType}:${data.sourceId}:${data.sourceItemKey}`).digest('hex').slice(0, 12).toUpperCase()}`;
     
     if (!data.status || data.status === '') {
       data.status = CorrectiveActionStatus.OPEN;
@@ -49,7 +53,7 @@ class CorrectiveActionService {
       raw: true,
       attributes: [
         [fn('COUNT', col('id')), 'totalRecords'],
-        [fn('SUM', literal("status IN ('completed','verified')")), 'completedRecords'],
+        [fn('SUM', literal("status IN ('completed','verified','cancelled')")), 'completedRecords'],
       ],
     });
     const totalRecords = Number(row?.totalRecords || 0);

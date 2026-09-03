@@ -11,6 +11,7 @@ import { departmentLabel, useDepartments } from '../hooks/useDepartments';
 import { moduleService }   from '../services/api/moduleService';
 import { ALL_SECTIONS }    from '../config/sectionSchemas';
 import { reportClient } from '@cbl/api';
+import { ReportPrint } from '../components/ReportPrint';
 
 // ============================================================
 // Reports — Enterprise Reporting Center
@@ -31,6 +32,15 @@ const inputClass =
 
 const labelClass = 'block text-[11px] font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5';
 
+type ReportFilterSnapshot = {
+  department: string;
+  fromDate: string;
+  toDate: string;
+  status: string;
+  riskRating: string;
+  incidentCategory: string;
+};
+
 export const Reports = () => {
   const { departments } = useDepartments();
   const { canExportCSV, isDepartmentRestricted, userDepartment } = usePermissions();
@@ -50,6 +60,9 @@ export const Reports = () => {
   const [previewData,   setPreviewData]   = useState<any[]>([]);
   const [previewSchema, setPreviewSchema] = useState<any>(null);
   const [hasGenerated,  setHasGenerated]  = useState(false);
+  const [previewFilters, setPreviewFilters] = useState<ReportFilterSnapshot | null>(null);
+  const [generatedAt, setGeneratedAt] = useState('');
+  const [exporting, setExporting] = useState(false);
   const [savedTemplates, setSavedTemplates] = useState<any[]>([]);
 
   useEffect(() => {
@@ -59,30 +72,31 @@ export const Reports = () => {
     }).catch((error) => console.error('Saved reports load failed', error));
   }, []);
 
+  useEffect(() => () => document.body.classList.remove('printing-report'), []);
+
   const currentSchema = ALL_SECTIONS.find(s => s.id === currentReportId);
   const showRiskFilter     = ['incident-log', 'hazard-reporting'].includes(currentReportId);
   const showCategoryFilter = currentReportId === 'incident-log';
   const showStatusFilter   = currentReportId !== 'training-records';
 
-  const fetchAndFilterData = async () => {
+  const selectedFilters = (): ReportFilterSnapshot => ({ department, fromDate, toDate, status, riskRating, incidentCategory });
+  const apiFilters = (snapshot: ReportFilterSnapshot) => ({
+    department: snapshot.department !== 'All' ? snapshot.department : undefined,
+    status: snapshot.status !== 'All' ? snapshot.status : undefined,
+    riskRating: snapshot.riskRating !== 'All' ? snapshot.riskRating : undefined,
+    incidentCategory: snapshot.incidentCategory !== 'All' ? snapshot.incidentCategory : undefined,
+    fromDate: snapshot.fromDate || undefined,
+    toDate: snapshot.toDate || undefined,
+  });
+
+  const fetchAndFilterData = async (snapshot: ReportFilterSnapshot) => {
     try {
       const res = await moduleService.getAll(currentReportId, {
         page: 1,
         limit: 20,
-        department: department !== 'All' ? department : undefined,
-        status: status !== 'All' ? status : undefined,
-        risk: riskRating !== 'All' ? riskRating : undefined,
-        fromDate: fromDate || undefined,
-        toDate: toDate || undefined,
+        ...apiFilters(snapshot),
       });
-      let data: any[] = res.data || [];
-      if (department !== 'All') data = data.filter(d => d.department_id === department);
-      if (status !== 'All' && showStatusFilter)   data = data.filter(d => d.status_id === status);
-      if (riskRating !== 'All' && showRiskFilter) data = data.filter(d => d.risk_rating_id === riskRating);
-      if (incidentCategory !== 'All' && showCategoryFilter) data = data.filter(d => d.incident_category_id === incidentCategory);
-      if (fromDate) data = data.filter(d => { const rd = d.date || d.target_date || d.due_date; return rd && rd >= fromDate; });
-      if (toDate)   data = data.filter(d => { const rd = d.date || d.target_date || d.due_date; return rd && rd <= toDate;   });
-      return data;
+      return res.data || [];
     } catch (err) {
       console.error('Report data fetch error', err);
       alert('Failed to load report data.');
@@ -92,9 +106,12 @@ export const Reports = () => {
 
   const handleGeneratePreview = async () => {
     setGenerating(true);
-    const data = await fetchAndFilterData();
+    const snapshot = selectedFilters();
+    const data = await fetchAndFilterData(snapshot);
     setPreviewData(data);
     setPreviewSchema(currentSchema);
+    setPreviewFilters(snapshot);
+    setGeneratedAt(new Date().toLocaleString());
     setHasGenerated(true);
     setGenerating(false);
   };
@@ -107,12 +124,43 @@ export const Reports = () => {
   };
 
   const handleExportCSV = async () => {
-    const response = await reportClient.exportPerformance({ exportType: 'CSV', filters: { department, status, riskRating, incidentCategory, fromDate, toDate } });
-    const filePath = response.data?.data?.filePath || response.data?.filePath;
-    if (filePath) window.open(filePath, '_blank', 'noopener,noreferrer');
+    if (!previewFilters) return;
+    setExporting(true);
+    try {
+      const blob = await moduleService.export(currentReportId, apiFilters(previewFilters));
+      const url = URL.createObjectURL(blob);
+      const anchor = Object.assign(document.createElement('a'), {
+        href: url,
+        download: `${currentReportId}-report-${new Date().toISOString().slice(0, 10)}.csv`,
+      });
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Report CSV export failed', error);
+      alert('Failed to export the filtered report.');
+    } finally {
+      setExporting(false);
+    }
   };
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    const cleanup = () => document.body.classList.remove('printing-report');
+    document.body.classList.add('printing-report');
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.print();
+  };
+
+  const previewColumns = previewSchema?.columns?.filter((column: any) => !column.hideFromForm) || [];
+  const printFilterSummary = previewFilters ? [
+    previewFilters.department !== 'All' ? `Department: ${previewFilters.department}` : '',
+    previewFilters.status !== 'All' ? `Status: ${previewFilters.status}` : '',
+    previewFilters.riskRating !== 'All' ? `Risk: ${previewFilters.riskRating}` : '',
+    previewFilters.incidentCategory !== 'All' ? `Category: ${previewFilters.incidentCategory}` : '',
+    previewFilters.fromDate ? `From: ${previewFilters.fromDate}` : '',
+    previewFilters.toDate ? `To: ${previewFilters.toDate}` : '',
+  ].filter(Boolean) : [];
 
   return (
     <Layout>
@@ -127,11 +175,12 @@ export const Reports = () => {
             onClick: handlePrint,
             variant: 'outlined' as const,
           }] : []),
-          ...(canExportCSV() ? [{
-            label: 'Export CSV',
+          ...(canExportCSV() && hasGenerated ? [{
+            label: exporting ? 'Exporting…' : 'Export CSV',
             icon: <Download />,
             onClick: handleExportCSV,
             variant: 'primary' as const,
+            disabled: exporting,
           }] : []),
         ]}
       />
@@ -317,7 +366,7 @@ export const Reports = () => {
                 <thead>
                   <tr>
                     <th className="w-10 text-center">#</th>
-                    {previewSchema.columns.filter((c: any) => !c.hideFromForm).map((col: any) => (
+                    {previewColumns.map((col: any) => (
                       <th key={col.key}>{col.label}</th>
                     ))}
                   </tr>
@@ -340,7 +389,7 @@ export const Reports = () => {
                         <td className="text-center text-[11px] text-[#9CA3AF] font-medium tabular-nums">
                           {rowIdx + 1}
                         </td>
-                        {previewSchema.columns.filter((c: any) => !c.hideFromForm).map((col: any) => (
+                        {previewColumns.map((col: any) => (
                           <td key={col.key}>
                             {col.key === 'status_id' && entry[col.key] ? (
                               <StatusBadge status={entry[col.key]} size="xs" />
@@ -364,14 +413,15 @@ export const Reports = () => {
             {previewData.length > 0 && (
               <div className="px-5 py-3 border-t border-[#F0F0F0] bg-[#FAFAFA] flex items-center justify-between">
                 <p className="text-[11px] text-[#9CA3AF]">
-                  Report generated at {new Date().toLocaleString()}
+                  Report generated at {generatedAt}
                 </p>
                 {canExportCSV() && (
                   <button
                     onClick={handleExportCSV}
+                    disabled={exporting}
                     className="flex items-center gap-1.5 h-8 px-3 text-[12px] font-medium text-white rounded-md bg-[#CB0017] hover:bg-[#A8001A] transition-colors"
                   >
-                    <Download className="h-3 w-3" /> Export CSV
+                    <Download className="h-3 w-3" /> {exporting ? 'Exporting…' : 'Export CSV'}
                   </button>
                 )}
               </div>
@@ -381,44 +431,7 @@ export const Reports = () => {
       </div>
       </div>
 
-      {/* ===== PRINT-ONLY CONTENT ===== */}
-      {hasGenerated && previewSchema && (
-        <div className="print-show hidden p-8">
-          <div className="mb-6 border-b-2 border-[#1A1818] pb-4">
-            <h1 className="text-2xl font-bold text-[#1A1818]">
-              {REPORT_TYPES.find(r => r.id === currentReportId)?.label}
-            </h1>
-            <p className="text-sm text-[#6B7280] mt-1">
-              CBL HSE Management System · LU Sukkur Plant
-            </p>
-            <p className="text-xs text-[#9CA3AF] mt-1">
-              Generated: {new Date().toLocaleString()} · {previewData.length} records
-            </p>
-          </div>
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="border-b-2 border-[#1A1818]">
-                {previewSchema.columns.filter((c: any) => !c.hideFromForm).map((col: any) => (
-                  <th key={col.key} className="text-left py-2 pr-4 text-xs font-bold uppercase tracking-wide">
-                    {col.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {previewData.map((entry: any, i: number) => (
-                <tr key={entry.id} className={i % 2 === 0 ? '' : 'bg-gray-50'}>
-                  {previewSchema.columns.filter((c: any) => !c.hideFromForm).map((col: any) => (
-                    <td key={col.key} className="py-1.5 pr-4 border-b border-gray-200 text-xs">
-                      {entry[col.key] || '—'}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {hasGenerated && previewSchema && <ReportPrint title={`${REPORT_TYPES.find(report => report.id === currentReportId)?.label || 'HSE'} Report`} columns={previewColumns} rows={previewData} generatedAt={generatedAt} filterSummary={printFilterSummary} />}
     </Layout>
   );
 };

@@ -1,12 +1,10 @@
 export const INCIDENT_CATEGORIES = [
   'First Aid',
   'MTC',
-  'LTI',
   'RWC',
+  'LTI',
   'Fatality',
-  'Minor Fire',
-  'Major Fire',
-  'Significant Near Miss'
+  'Fire'
 ];
 
 export const HAZARD_CATEGORIES = [

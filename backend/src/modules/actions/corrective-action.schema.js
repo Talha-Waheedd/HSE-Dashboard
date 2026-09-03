@@ -8,11 +8,17 @@ const createCorrectiveActionSchema = Joi.object({
   plantId: Joi.string().uuid().required(),
   sourceType: Joi.string().valid(...Object.values(CorrectiveActionSource)).required(),
   sourceId: Joi.string().uuid().required(),
+  sourceItemId: Joi.string().uuid().allow(null).optional(),
+  sourceItemKey: Joi.string().max(80).optional(),
+  sourceReference: Joi.string().max(100).allow('', null).optional(),
+  incidentCategory: Joi.string().max(50).allow('', null).optional(),
   title: Joi.string().max(255).required(),
   description: Joi.string().required(),
-  assignedTo: Joi.string().uuid().required(),
-  dueDate: Joi.date().iso().required(),
-  priority: Joi.string().valid('low', 'medium', 'high', 'critical').default('medium').optional(),
+  responsibleDepartmentId: Joi.string().uuid().allow(null).optional(),
+  responsibility: Joi.string().allow('', null).optional(),
+  assignedTo: Joi.string().uuid().allow(null).optional(),
+  dueDate: Joi.date().iso().allow(null).optional(),
+  priority: Joi.string().valid('low', 'medium', 'high', 'critical').allow(null).optional(),
   status: Joi.string().valid(CorrectiveActionStatus.OPEN, CorrectiveActionStatus.IN_PROGRESS).default(CorrectiveActionStatus.OPEN).optional(),
 });
 
@@ -20,9 +26,11 @@ const updateCorrectiveActionSchema = Joi.object({
   plantId: Joi.string().uuid().optional(),
   title: Joi.string().max(255).optional(),
   description: Joi.string().optional(),
-  assignedTo: Joi.string().uuid().optional(),
-  dueDate: Joi.date().iso().optional(),
-  priority: Joi.string().valid('low', 'medium', 'high', 'critical').optional(),
+  responsibleDepartmentId: Joi.string().uuid().allow(null).optional(),
+  responsibility: Joi.string().allow('', null).optional(),
+  assignedTo: Joi.string().uuid().allow(null).optional(),
+  dueDate: Joi.date().iso().allow(null).optional(),
+  priority: Joi.string().valid('low', 'medium', 'high', 'critical').allow(null).optional(),
 }).min(1);
 
 const updateCorrectiveActionStatusSchema = Joi.object({

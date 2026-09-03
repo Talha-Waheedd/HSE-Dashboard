@@ -5,6 +5,7 @@ const SeverityLevel = Object.freeze({
   MEDIUM: 'medium',
   HIGH: 'high',
   CRITICAL: 'critical',
+  UNKNOWN: 'unknown',
 });
 
 module.exports = SeverityLevel;

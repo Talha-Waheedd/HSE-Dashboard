@@ -6,6 +6,7 @@ const IncidentType = Object.freeze({
   LTI: 'lti',               // Lost Time Injury
   RWC: 'rwc',               // Restricted Work Case
   FATALITY: 'fatality',
+  FIRE: 'fire',
   PROPERTY_DAMAGE: 'property_damage',
   ENVIRONMENTAL: 'environmental',
   NEAR_MISS_PROMOTED: 'near_miss_promoted',

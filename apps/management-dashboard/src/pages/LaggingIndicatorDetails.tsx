@@ -7,6 +7,7 @@ import { FilterBar } from '../components/FilterBar';
 import { KpiTile } from '../components/KpiTile';
 import { useFilters } from '../context/FilterContext';
 import { moduleService } from '../services/api/moduleService';
+import { PaginationControls } from '../components/PaginationControls';
 
 type Kind = 'fire' | 'ltir' | 'trir';
 type Row = Record<string, any>;
@@ -38,7 +39,7 @@ export const LaggingIndicatorDetails = ({ kind }: { kind: Kind }) => {
   const previousFilterKey = useRef<string | null>(null);
 
   useEffect(() => {
-    const filterKey = [kind, filters.department, filters.year, filters.fromDate, filters.toDate].join('|');
+    const filterKey = [kind, filters.department, filters.year, filters.status, filters.fromDate, filters.toDate].join('|');
     const filterChanged = previousFilterKey.current !== filterKey;
     previousFilterKey.current = filterKey;
     if (filterChanged && currentPage !== 1) return;
@@ -52,6 +53,7 @@ export const LaggingIndicatorDetails = ({ kind }: { kind: Kind }) => {
           limit: PAGE_SIZE,
           department: filters.department,
           year: filters.year,
+          status: filters.status,
           fromDate: filters.fromDate,
           toDate: filters.toDate,
           incidentType: kind === 'fire' ? 'fire' : 'injury',
@@ -88,11 +90,11 @@ export const LaggingIndicatorDetails = ({ kind }: { kind: Kind }) => {
     window.addEventListener('dashboard-refresh', refresh);
     const interval = window.setInterval(refresh, 30000);
     return () => { cancelled = true; window.removeEventListener('dashboard-refresh', refresh); window.clearInterval(interval); };
-  }, [kind, currentPage, filters.department, filters.year, filters.fromDate, filters.toDate]);
+  }, [kind, currentPage, filters.department, filters.year, filters.status, filters.fromDate, filters.toDate]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [kind, filters.department, filters.year, filters.fromDate, filters.toDate]);
+  }, [kind, filters.department, filters.year, filters.status, filters.fromDate, filters.toDate]);
 
   const rows = useMemo(() => incidents, [incidents]);
   const byType = incidentSummary.byType || {};
@@ -122,16 +124,9 @@ export const LaggingIndicatorDetails = ({ kind }: { kind: Kind }) => {
     setCalculatedRate((formulaInjuries * 200000) / (workerCount * dayCount * hourCount));
   };
 
-  const pageItems = useMemo(() => {
-    if (pagination.totalPages <= 7) return Array.from({ length: pagination.totalPages }, (_, index) => index + 1) as Array<number | 'ellipsis-start' | 'ellipsis-end'>;
-    if (currentPage <= 4) return [1, 2, 3, 4, 5, 'ellipsis-end', pagination.totalPages] as Array<number | 'ellipsis-start' | 'ellipsis-end'>;
-    if (currentPage >= pagination.totalPages - 3) return [1, 'ellipsis-start', pagination.totalPages - 4, pagination.totalPages - 3, pagination.totalPages - 2, pagination.totalPages - 1, pagination.totalPages] as Array<number | 'ellipsis-start' | 'ellipsis-end'>;
-    return [1, 'ellipsis-start', currentPage - 1, currentPage, currentPage + 1, 'ellipsis-end', pagination.totalPages] as Array<number | 'ellipsis-start' | 'ellipsis-end'>;
-  }, [currentPage, pagination.totalPages]);
-
   return <Layout><ContextHeader title={`${titles[kind]}${kind !== 'fire' ? ' — Rate Calculation' : ' Incidents'}`} breadcrumbs={['Lagging Indicators', titles[kind]]} subtitle={kind === 'fire' ? 'Fire-related incidents from the incident database.' : 'Automatically calculated from live incident and workforce records.'}><FilterBar /></ContextHeader><main className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6">
     {loading ? <div className="flex min-h-[300px] items-center justify-center"><RefreshCw className="h-8 w-8 animate-spin text-[#CB0017]" /></div> : errorMessage ? <div className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] p-5 text-sm font-semibold text-[#B91C1C]" role="alert">{errorMessage}</div> : kind === 'fire' ? <><div className="grid grid-cols-2 gap-4 lg:grid-cols-3"><KpiTile label="Total Fire Incidents" value={fireTotal} icon={<Flame />} accent={fireTotal ? 'danger' : 'success'} /><KpiTile label="Major Fire" value={majorFire} icon={<AlertTriangle />} accent="warning" /><KpiTile label="Minor Fire" value={minorFire} icon={<Flame />} accent="info" /></div><Panel title="Fire Incidents — Live Records"><IncidentTable rows={fireRows} /></Panel></> : <><Panel title={`${titles[kind]} Formula`}><div className="rounded-lg bg-[#F8FAFC] p-5 text-center text-lg font-semibold text-[#1F2937]">{titles[kind]} = (Total Injuries × 200,000) ÷ (Total Workers × Working Days × Daily Working Hours)</div><div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['Total Injuries', String(formulaInjuries), false], ['Total Workers', workers, true], ['Working Days', workingDays, true], ['Daily Working Hours', workingHours, true]].map(([label, value, editable]) => <label key={String(label)} className="text-sm font-semibold text-[#374151]">{label}{label === 'Total Injuries' && <span className="ml-1 text-xs font-normal text-[#64748B]">(from backend)</span>}<input type="number" min="0" value={String(value)} readOnly={!editable} onChange={event => editable && (label === 'Total Workers' ? setWorkers(event.target.value) : label === 'Working Days' ? setWorkingDays(event.target.value) : setWorkingHours(event.target.value))} className={`mt-1 w-full rounded-md border px-3 py-2 text-base ${editable ? 'border-[#CBD5E1]' : 'border-[#94A3B8] bg-[#F1F5F9]'}`} /></label>)}</div><div className="mt-5 flex flex-col items-center gap-3"><button type="button" onClick={calculateRate} className="rounded-md bg-[#CB0017] px-8 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#A80013]">Calculate {titles[kind]}</button>{calculationError && <p role="alert" className="text-sm font-semibold text-[#B91C1C]">{calculationError}</p>}</div><div className="mt-5 rounded-xl border-2 border-[#CB0017] p-5 text-center"><p className="text-sm font-semibold uppercase tracking-wide text-[#64748B]">Calculated {titles[kind]}</p><p className="mt-1 text-4xl font-bold text-[#CB0017]">{calculatedRate === null ? '—' : calculatedRate.toFixed(2)}</p>{calculatedRate === null && !calculationError && <p className="mt-2 text-xs text-[#64748B]">Enter valid inputs, then click Calculate.</p>}</div></Panel><Panel title="Included Injury Records"><IncidentTable rows={injuryRows} /></Panel></>}
-    {!loading && !errorMessage && <div className="flex flex-col gap-3 border-t border-[#E5E7EB] pt-4 text-sm sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-[#64748B]">Page {currentPage} of {pagination.totalPages} <span className="mx-1 text-[#CBD5E1]">•</span> {pagination.totalRecords} total records</p><div className="flex items-center gap-1" aria-label={`${titles[kind]} pagination`}><button type="button" onClick={() => setCurrentPage(page => Math.max(1, page - 1))} disabled={currentPage === 1 || loading} className="rounded-md border border-[#D1D5DB] px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#FFF7F8] disabled:cursor-not-allowed disabled:opacity-40">Previous</button>{pageItems.map(item => item === 'ellipsis-start' || item === 'ellipsis-end' ? <span key={item} className="px-1.5 text-[#94A3B8]">…</span> : <button type="button" key={item} onClick={() => setCurrentPage(item)} aria-current={item === currentPage ? 'page' : undefined} disabled={loading} className={`h-8 min-w-8 rounded-md border px-2 text-xs font-semibold ${item === currentPage ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-[#D1D5DB] bg-white text-[#374151] hover:bg-[#FFF7F8]'}`}>{item}</button>)}<button type="button" onClick={() => setCurrentPage(page => Math.min(pagination.totalPages, page + 1))} disabled={currentPage === pagination.totalPages || loading} className="rounded-md border border-[#D1D5DB] px-3 py-1.5 text-xs font-semibold text-[#374151] hover:bg-[#FFF7F8] disabled:cursor-not-allowed disabled:opacity-40">Next</button></div></div>}
+    {!loading && !errorMessage && <PaginationControls currentPage={currentPage} totalPages={pagination.totalPages} totalRecords={pagination.totalRecords} pageSize={PAGE_SIZE} onPageChange={setCurrentPage} disabled={loading} className="rounded-lg border border-[#E5E7EB]" />}
   </main></Layout>;
 };
 

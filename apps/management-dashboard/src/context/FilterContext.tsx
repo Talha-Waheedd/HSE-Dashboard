@@ -8,6 +8,7 @@ export interface Filters {
   riskRating: string;
   status: string;
   month: string;
+  incidentCategory: string;
   fromDate: string;
   toDate: string;
 }
@@ -27,6 +28,7 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
     riskRating: 'All',
     status: 'All',
     month: 'All',
+    incidentCategory: 'All',
     fromDate: '',
     toDate: '',
   });

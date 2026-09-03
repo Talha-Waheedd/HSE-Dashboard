@@ -2,9 +2,7 @@
 
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../../database/connection');
-const IncidentType = require('../../shared/enums/IncidentType');
 const IncidentStatus = require('../../shared/enums/IncidentStatus');
-const SeverityLevel = require('../../shared/enums/SeverityLevel');
 
 /**
  * Incident — Actual safety incidents (Lagging Indicator).
@@ -39,10 +37,41 @@ const Incident = sequelize.define('Incident', {
     allowNull: true,
     comment: 'FK → departments.id',
   },
+  locationId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'FK → locations.id; location text remains as a historical display snapshot',
+  },
   sourceNearMissId: {
     type: DataTypes.UUID,
     allowNull: true,
     comment: 'Near Miss that generated this Incident Investigation record',
+  },
+  sourceType: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+  },
+  sourceHash: {
+    type: DataTypes.STRING(64),
+    allowNull: true,
+    unique: true,
+    comment: 'Deterministic business fingerprint for idempotent historical imports',
+  },
+  sourceWorkbook: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+  sourceSheet: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+  sourceRow: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: true,
+  },
+  importedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
   },
   incidentType: {
     type: DataTypes.STRING,
@@ -149,7 +178,10 @@ const Incident = sequelize.define('Incident', {
     { fields: ['reported_by'], name: 'incidents_reported_by_idx' },
     { fields: ['plant_id'], name: 'incidents_plant_id_idx' },
     { fields: ['department_id'], name: 'incidents_department_id_idx' },
+    { fields: ['location_id'], name: 'incidents_location_id_idx' },
     { fields: ['source_near_miss_id'], unique: true, name: 'incidents_source_near_miss_unique' },
+    { fields: ['source_hash'], unique: true, name: 'incidents_source_hash_unique' },
+    { fields: ['source_type'], name: 'incidents_source_type_idx' },
     { fields: ['incident_type'], name: 'incidents_type_idx' },
     { fields: ['status'], name: 'incidents_status_idx' },
     { fields: ['incident_date'], name: 'incidents_date_idx' },

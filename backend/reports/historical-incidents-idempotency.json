@@ -1,0 +1,2198 @@
+{
+  "mode": "dry-run",
+  "generatedAt": "2026-09-02T18:08:01.224Z",
+  "sourceType": "historical_excel_import",
+  "database": "HSE",
+  "plant": {
+    "id": "5126923e-b77f-4eb6-8b98-d5fc9db8d71b",
+    "name": "CBL Plant Alpha",
+    "code": "PLANT-A"
+  },
+  "importUser": {
+    "id": "8e917f45-e5a4-453e-a926-76f2be994938",
+    "email": "superadmin@cblapp.com"
+  },
+  "workbooks": [
+    {
+      "name": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "worksheets": [
+        {
+          "name": "Master Sheet-V-2-13-March-26",
+          "state": "visible",
+          "rows": 115,
+          "columns": 15,
+          "mergedRanges": 0,
+          "classification": "canonical-record-source"
+        },
+        {
+          "name": "ADM-15-March",
+          "state": "visible",
+          "rows": 8,
+          "columns": 15,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "PRD-15March",
+          "state": "visible",
+          "rows": 82,
+          "columns": 15,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Sheet13",
+          "state": "visible",
+          "rows": 50,
+          "columns": 15,
+          "mergedRanges": 0,
+          "classification": "partial-working-copy"
+        },
+        {
+          "name": "Master Sheet With Action items",
+          "state": "visible",
+          "rows": 381,
+          "columns": 20,
+          "mergedRanges": 1492,
+          "classification": "record-enrichment-source"
+        },
+        {
+          "name": "action plan",
+          "state": "visible",
+          "rows": 23,
+          "columns": 4,
+          "mergedRanges": 1,
+          "classification": "aggregate-summary"
+        },
+        {
+          "name": "only added",
+          "state": "visible",
+          "rows": 52,
+          "columns": 15,
+          "mergedRanges": 120,
+          "classification": "working-copy-with-pivot-summary"
+        },
+        {
+          "name": "Working master Sheet",
+          "state": "visible",
+          "rows": 93,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "older-master-copy"
+        },
+        {
+          "name": "Body Part",
+          "state": "visible",
+          "rows": 73,
+          "columns": 15,
+          "mergedRanges": 4,
+          "classification": "analysis-subset-copy"
+        },
+        {
+          "name": "ADM",
+          "state": "visible",
+          "rows": 8,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "PRJ",
+          "state": "visible",
+          "rows": 4,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "PRD",
+          "state": "visible",
+          "rows": 66,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Q.C",
+          "state": "visible",
+          "rows": 3,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Stores",
+          "state": "visible",
+          "rows": 8,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "ESD",
+          "state": "visible",
+          "rows": 9,
+          "columns": 14,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        }
+      ],
+      "canonicalSheet": "Master Sheet-V-2-13-March-26",
+      "enrichmentSheet": "Master Sheet With Action items",
+      "canonicalCandidates": 108
+    },
+    {
+      "name": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "worksheets": [
+        {
+          "name": "Master Sheet-Final",
+          "state": "visible",
+          "rows": 60,
+          "columns": 11,
+          "mergedRanges": 1,
+          "classification": "canonical-record-source"
+        },
+        {
+          "name": "Master Sheet All",
+          "state": "visible",
+          "rows": 60,
+          "columns": 12,
+          "mergedRanges": 1,
+          "classification": "older-master-copy"
+        },
+        {
+          "name": "Master Sheet",
+          "state": "visible",
+          "rows": 32,
+          "columns": 11,
+          "mergedRanges": 1,
+          "classification": "older-master-copy"
+        },
+        {
+          "name": "HumanProcess-2Ag",
+          "state": "visible",
+          "rows": 174,
+          "columns": 10,
+          "mergedRanges": 5,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "ADM Human Process",
+          "state": "visible",
+          "rows": 10,
+          "columns": 10,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Updated HumanProcess",
+          "state": "visible",
+          "rows": 78,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "New HumanProcess-24jyuly",
+          "state": "visible",
+          "rows": 32,
+          "columns": 11,
+          "mergedRanges": 1,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "ESD Aspect",
+          "state": "visible",
+          "rows": 18,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "Sheet6",
+          "state": "visible",
+          "rows": 20,
+          "columns": 5,
+          "mergedRanges": 0,
+          "classification": "aggregate-summary"
+        },
+        {
+          "name": "repair",
+          "state": "visible",
+          "rows": 25,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "Short Circuit New",
+          "state": "visible",
+          "rows": 22,
+          "columns": 10,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "PRD Human Process",
+          "state": "visible",
+          "rows": 46,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "department-subset-copy"
+        },
+        {
+          "name": "Work2",
+          "state": "visible",
+          "rows": 54,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "Work1",
+          "state": "visible",
+          "rows": 39,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "analysis-working-copy"
+        },
+        {
+          "name": "Short Circuit Updated",
+          "state": "visible",
+          "rows": 22,
+          "columns": 10,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "PRD Aspect",
+          "state": "visible",
+          "rows": 24,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        },
+        {
+          "name": "Store Aspect",
+          "state": "visible",
+          "rows": 5,
+          "columns": 11,
+          "mergedRanges": 0,
+          "classification": "aspect-subset-copy"
+        }
+      ],
+      "canonicalSheet": "Master Sheet-Final",
+      "canonicalCandidates": 58
+    }
+  ],
+  "reconciliation": {
+    "injuryCanonicalCandidates": 108,
+    "fireCanonicalCandidates": 58,
+    "totalCanonicalCandidates": 166,
+    "invalidCandidates": 0,
+    "exactDuplicatesWithinCanonicalSources": 0,
+    "existingDatabaseDuplicates": 166,
+    "recordsToInsert": 0,
+    "locationsToCreate": 0,
+    "incidentInjuriesToInsert": 0,
+    "byClassification": {}
+  },
+  "mappings": {
+    "categories": {
+      "firstaid": {
+        "value": "first_aid",
+        "label": "First Aid"
+      },
+      "firstaidcase": {
+        "value": "first_aid",
+        "label": "First Aid"
+      },
+      "fa": {
+        "value": "first_aid",
+        "label": "First Aid"
+      },
+      "medicaltreatment": {
+        "value": "mtc",
+        "label": "MTC"
+      },
+      "medicaltreatmentcase": {
+        "value": "mtc",
+        "label": "MTC"
+      },
+      "mtc": {
+        "value": "mtc",
+        "label": "MTC"
+      },
+      "restrictedwork": {
+        "value": "rwc",
+        "label": "RWC"
+      },
+      "restrictedworkcase": {
+        "value": "rwc",
+        "label": "RWC"
+      },
+      "rwc": {
+        "value": "rwc",
+        "label": "RWC"
+      },
+      "losttimeinjury": {
+        "value": "lti",
+        "label": "LTI"
+      },
+      "lti": {
+        "value": "lti",
+        "label": "LTI"
+      },
+      "fatality": {
+        "value": "fatality",
+        "label": "Fatality"
+      },
+      "fire": {
+        "value": "fire",
+        "label": "Fire"
+      },
+      "fireincident": {
+        "value": "fire",
+        "label": "Fire"
+      }
+    },
+    "departments": {
+      "PRD": "60f8a755-9597-400a-983a-a4304016c2c7",
+      "Stores": "3cb9aec9-360f-4f80-87ad-9cdda88e176b",
+      "ESD": "a5eed423-4951-4245-a744-47699fad468e",
+      "ADM": "eaa5fb16-d01e-41be-b15f-85f3c4e2ab55",
+      "QC/FS/NPD": "d47f4a27-8ac7-423b-9b48-f242dd23c487",
+      "Projects": "e340a2bd-4962-4e75-b2f1-712c5dceaefa"
+    },
+    "locations": {
+      "Mixing": {
+        "id": "f3606114-6f90-43d4-98c6-d9d4b96390a3",
+        "name": "Mixing",
+        "create": false
+      },
+      "Boys Canteen": {
+        "id": "59eae0a6-b6bd-40ce-888e-14fffb58b74d",
+        "name": "Boys Canteen",
+        "create": false
+      },
+      "Packing": {
+        "id": "5d0e8652-0804-4950-b641-a147ac04236c",
+        "name": "Packing",
+        "create": false
+      },
+      "Stores": {
+        "id": "2139ce31-d934-43d4-8942-ac44d4f34021",
+        "name": "Stores",
+        "create": false
+      },
+      "Oven": {
+        "id": "39271ba5-ed52-419b-ad94-28a93072ca3e",
+        "name": "Oven",
+        "create": false
+      },
+      "Club House": {
+        "id": "d10e23ca-ebc5-42f1-ae4c-2dbf8c4fd640",
+        "name": "Club House",
+        "create": false
+      },
+      "Cutting": {
+        "id": "cc75c324-60dc-419b-b2a9-fb5fd06b0b78",
+        "name": "Cutting",
+        "create": false
+      },
+      "Gate-1": {
+        "id": "6dabea68-1435-4880-a7c0-bee1c5104d06",
+        "name": "Gate-1",
+        "create": false
+      },
+      "Washroom": {
+        "id": "24d7c87b-e501-4e1e-bed4-cf42c9dd8e1d",
+        "name": "Washroom",
+        "create": false
+      },
+      "Creaming": {
+        "id": "85630c50-006f-45e1-ac71-d38cde83eeae",
+        "name": "Creaming",
+        "create": false
+      },
+      "Project Site": {
+        "id": "19737d4f-032f-4bd6-8d7a-958e3ff79482",
+        "name": "Project Site",
+        "create": false
+      },
+      "Cooling Towers": {
+        "id": "7e71580d-1b97-4c69-a9d5-1544bccbeb19",
+        "name": "Cooling Towers",
+        "create": false
+      },
+      "Chemical Room": {
+        "id": "ba896393-6ad7-4d5b-a1e0-f02d2839cb1e",
+        "name": "Chemical Room",
+        "create": false
+      },
+      "Entrance stairs": {
+        "id": "c0e8bb0b-0156-4ab5-b6be-c0bf2d83552d",
+        "name": "Entrance stairs",
+        "create": false
+      },
+      "Washing Area": {
+        "id": "244b8aa9-1ec3-4519-bfa7-8e4a56e520a9",
+        "name": "Washing Area",
+        "create": false
+      },
+      "Girls Canteen": {
+        "id": "a5dedee2-0c4d-4013-b0f6-4caf387c1253",
+        "name": "Girls Canteen",
+        "create": false
+      },
+      "Workshop": {
+        "id": "b25314d9-04cd-4203-b684-1cf518278282",
+        "name": "Workshop",
+        "create": false
+      },
+      "Cooling Conveyor": {
+        "id": "99872946-fa81-4438-9d07-11275559b986",
+        "name": "Cooling Conveyor",
+        "create": false
+      },
+      "Labor Colony": {
+        "id": "21279cd6-871f-49b9-aae3-64df2d6bb68a",
+        "name": "Labor Colony",
+        "create": false
+      },
+      "Cake Plant": {
+        "id": "41308e00-1815-4405-9f70-80aa8f165ff3",
+        "name": "Cake Plant",
+        "create": false
+      },
+      "Near Silo Area": {
+        "id": "2a7fd419-7f0b-4149-9baf-309fbe0bd329",
+        "name": "Near Silo Area",
+        "create": false
+      },
+      "Ishida Hall": {
+        "id": "a072c48c-169e-42ab-9f69-397440e13ef2",
+        "name": "Ishida Hall",
+        "create": false
+      },
+      "Stairs to Girls canteen": {
+        "id": "94fe4426-04d4-450d-9733-9e3feebf14bd",
+        "name": "Stairs to Girls canteen",
+        "create": false
+      },
+      "Chemical Room (G.F)": {
+        "id": "b63d7121-c20d-4231-9cbb-267aa78f7a6d",
+        "name": "Chemical Room Ground Floor",
+        "create": false
+      },
+      "Girls Prayer Room": {
+        "id": "742ab2db-55b0-4850-977a-81a452e196b1",
+        "name": "Girls Prayer Room",
+        "create": false
+      },
+      "Check Post": {
+        "id": "dfa01f8f-6dbf-4fd7-9358-a273f7e5a973",
+        "name": "Check Post",
+        "create": false
+      },
+      "Factory Outer Area": {
+        "id": "03c40dce-4d7f-4b53-9a8d-172f2a068611",
+        "name": "Factory Outer Area",
+        "create": false
+      },
+      "Biscuits Scrap Room": {
+        "id": "9bf41e7e-3357-404a-ae8e-822f4bfa052d",
+        "name": "Biscuits Scrap Room",
+        "create": false
+      },
+      "Colony": {
+        "id": "7143edbc-b2d0-4f1d-835f-9f8ea699d44f",
+        "name": "Colony",
+        "create": false
+      },
+      "Canteen": {
+        "id": "1d6564cf-ba74-473d-93ef-13e72cc059e4",
+        "name": "Canteen",
+        "create": false
+      },
+      "Parking": {
+        "id": "4ea7b39f-f52c-4db2-abe3-da7f30d79939",
+        "name": "Parking",
+        "create": false
+      },
+      "ESD Workshop": {
+        "id": "e5a5ec16-af80-47c0-ac90-f9f9773a64ef",
+        "name": "ESD Workshop",
+        "create": false
+      },
+      "Admin Block": {
+        "id": "22fa8fcf-eb7b-4184-b449-629f8013f28a",
+        "name": "Admin Block",
+        "create": false
+      },
+      "Sugar Exhauster": {
+        "id": "b14b6c85-8df5-438b-9214-0c604a6cc4c8",
+        "name": "Sugar Exhauster",
+        "create": false
+      },
+      "HT Transformer Room": {
+        "id": "4354781b-9280-486b-86e7-ad0a5c00432b",
+        "name": "HT Transformer Room",
+        "create": false
+      },
+      "oven": {
+        "id": "39271ba5-ed52-419b-ad94-28a93072ca3e",
+        "name": "Oven",
+        "create": false
+      }
+    }
+  },
+  "issues": {
+    "normalized": [
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 35,
+        "serial": 34,
+        "field": "date",
+        "from": "Sat Jun 01 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-01-06"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 44,
+        "serial": 43,
+        "field": "date",
+        "from": "Mon May 06 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-06-05"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 45,
+        "serial": 44,
+        "field": "date",
+        "from": "Wed Nov 06 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-06-11"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 47,
+        "serial": 46,
+        "field": "date",
+        "from": "Sun Jul 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-07"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 51,
+        "serial": 50,
+        "field": "date",
+        "from": "Fri Mar 08 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-08-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 52,
+        "serial": 51,
+        "field": "date",
+        "from": "Tue Oct 08 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-08-10"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 56,
+        "serial": 55,
+        "field": "date",
+        "from": "Sat Aug 10 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-10-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 58,
+        "serial": 57,
+        "field": "date",
+        "from": "Sun Feb 11 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-11-02"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 59,
+        "serial": 58,
+        "field": "date",
+        "from": "Mon Nov 11 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-11-11"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 62,
+        "serial": 61,
+        "field": "date",
+        "from": "7/12/12024",
+        "to": "2024-12-07"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 63,
+        "serial": 62,
+        "field": "date",
+        "from": "Thu Sep 12 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-12-09"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 68,
+        "serial": 67,
+        "field": "date",
+        "from": "Tue Apr 01 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-01-04"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 69,
+        "serial": 68,
+        "field": "date",
+        "from": "Fri Aug 01 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-01-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 70,
+        "serial": 69,
+        "field": "date",
+        "from": "Mon Sep 01 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-01-09"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 72,
+        "serial": 71,
+        "field": "date",
+        "from": "Wed Jul 02 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-02-07"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 73,
+        "serial": 72,
+        "field": "date",
+        "from": "Tue Sep 02 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-02-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 74,
+        "serial": 73,
+        "field": "date",
+        "from": "Tue Dec 02 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-02-12"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 76,
+        "serial": 75,
+        "field": "date",
+        "from": "Mon Mar 03 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-03-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 77,
+        "serial": 76,
+        "field": "date",
+        "from": "Thu Apr 03 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-03-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 78,
+        "serial": 77,
+        "field": "date",
+        "from": "Sat Mar 08 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-03-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 81,
+        "serial": 80,
+        "field": "date",
+        "from": "Thu Apr 17 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-04-17"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 82,
+        "serial": 81,
+        "field": "date",
+        "from": "Wed Mar 05 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-05-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 87,
+        "serial": 86,
+        "field": "date",
+        "from": "Fri Jun 06 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-06-06"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 88,
+        "serial": 87,
+        "field": "date",
+        "from": "Tue Jul 08 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-07-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 89,
+        "serial": 88,
+        "field": "date",
+        "from": "Sun Jul 20 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-07-20"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 90,
+        "serial": 89,
+        "field": "date",
+        "from": "Sun Aug 10 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-10"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 91,
+        "serial": 90,
+        "field": "date",
+        "from": "Thu Aug 21 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-21"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 92,
+        "serial": 91,
+        "field": "date",
+        "from": "Wed Aug 27 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-27"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 93,
+        "serial": 92,
+        "field": "date",
+        "from": "Sat Aug 30 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-30"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 97,
+        "serial": 96,
+        "field": "date",
+        "from": "Tue Nov 11 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-11-11"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 100,
+        "serial": 99,
+        "field": "date",
+        "from": "Wed Mar 12 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-12-03"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 101,
+        "serial": 100,
+        "field": "date",
+        "from": "Fri Sep 12 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-12-09"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 102,
+        "serial": 101,
+        "field": "date",
+        "from": "Mon Jun 01 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-01-06"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 103,
+        "serial": 102,
+        "field": "date",
+        "from": "Sat Aug 01 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-01-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 104,
+        "serial": 103,
+        "field": "date",
+        "from": "Sat Aug 01 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-01-08"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 105,
+        "serial": 104,
+        "field": "date",
+        "from": "Sat May 02 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-02-05"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 106,
+        "serial": 105,
+        "field": "date",
+        "from": "Thu Jul 02 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-02-07"
+      },
+      {
+        "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+        "sheet": "Master Sheet-V-2-13-March-26",
+        "row": 109,
+        "serial": 108,
+        "field": "date",
+        "from": "Tue Mar 03 2026 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2026-03-03"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 26,
+        "serial": 24,
+        "field": "date",
+        "from": "Tue Jan 02 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-02-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 31,
+        "serial": 29,
+        "field": "date",
+        "from": "Fri Jul 05 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-05-07"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 34,
+        "serial": 32,
+        "field": "date",
+        "from": "Sun Jan 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 35,
+        "serial": 33,
+        "field": "date",
+        "from": "Sun Jan 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 36,
+        "serial": 34,
+        "field": "date",
+        "from": "Thu Mar 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-03"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 37,
+        "serial": 35,
+        "field": "date",
+        "from": "Mon Oct 07 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-07-10"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 40,
+        "serial": 38,
+        "field": "date",
+        "from": "Mon Jan 08 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-08-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 41,
+        "serial": 39,
+        "field": "date",
+        "from": "Wed May 08 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-08-05"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 44,
+        "serial": 42,
+        "field": "date",
+        "from": "Tue Jul 09 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-09-07"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 47,
+        "serial": 45,
+        "field": "date",
+        "from": "Wed Jul 10 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-10-07"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 49,
+        "serial": 47,
+        "field": "date",
+        "from": "Wed Dec 11 2024 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2024-11-12"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 51,
+        "serial": 49,
+        "field": "date",
+        "from": "Sat Mar 01 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-01-03"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 57,
+        "serial": 55,
+        "field": "date",
+        "from": "Wed Jan 08 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-01"
+      },
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 58,
+        "serial": 56,
+        "field": "date",
+        "from": "Sat Nov 08 2025 05:00:00 GMT+0500 (Pakistan Standard Time)",
+        "to": "2025-08-11"
+      }
+    ],
+    "ambiguous": [
+      {
+        "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+        "sheet": "Master Sheet-Final",
+        "row": 60,
+        "serial": 58,
+        "reason": "date_description_mismatch",
+        "resolution": "Kept authoritative Date column (18-Nov-2025); description says 19-Nov-2025 and is preserved verbatim."
+      }
+    ],
+    "invalid": []
+  },
+  "duplicateCandidates": [],
+  "alreadyExisting": [
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 2,
+      "serial": 1,
+      "hash": "8cc8551d70cd25ce0b0b3f7f49e670ac208561c36d2dee916c3145a4708d1d7e"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 3,
+      "serial": 2,
+      "hash": "b78e2a64fb6caf8fb139c3f144c83dda7ea25aaaf61db82ad982e5da55d06f9f"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 4,
+      "serial": 3,
+      "hash": "6d3d37f8832dcff475a8352f04e585a8ed4db08cd8769ae1040d16e426fdeffb"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 5,
+      "serial": 4,
+      "hash": "bb1e1377166e98478ecf43c192f5d4a032d03efaaf27be73196d1dc573061429"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 6,
+      "serial": 5,
+      "hash": "a806d184d81f5f70481407547e479664b9ce9396796566ddbc3f888ba25ac625"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 7,
+      "serial": 6,
+      "hash": "213f751e1d8c2e1b02e951938abd0153bd8b9932a36f5866f08f9359cc04a7e4"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 8,
+      "serial": 7,
+      "hash": "3def7d450ddabca1e174800ad2b6ea1507645084fdfbb11c25aeb4c9b5fb4cfc"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 9,
+      "serial": 8,
+      "hash": "2af991232b577d20417093c15da4589d081dc0ae407fa39b2ad4e14bb6aadf6a"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 10,
+      "serial": 9,
+      "hash": "847df563f5eb1b6b8536ef3c6abeb8d55606c611ad652bb8f539d8a5f2add019"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 11,
+      "serial": 10,
+      "hash": "12891fb033f42ddd9bac19393f78824ec05cba5e81f40fd1e32123c19e9572fb"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 12,
+      "serial": 11,
+      "hash": "5871a1e771f140813ac38e8631b65d9cb289a1f7facd8816084a3fe2c9b5bb5d"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 13,
+      "serial": 12,
+      "hash": "fcc87ed6b8736ce85778d6aac274206e164339f44f7607f5c7cda4282181bd75"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 14,
+      "serial": 13,
+      "hash": "93254cc2cbdc58e803b3cfa1804d0c51a31f64072ac418602cc5cb8b6a8b3d88"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 15,
+      "serial": 14,
+      "hash": "1bb1e4f815bbe5e77446a11d161e64f777afd3d993b08e636858196e4b63c861"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 16,
+      "serial": 15,
+      "hash": "b34f47da30cf971536966ccb6ea4619b2a14edd944f00761f11023ab830b0f5a"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 17,
+      "serial": 16,
+      "hash": "9e04cf08d929171b53c3218806f6830147e368e96e2e1176f450f9fbc0dd2a79"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 18,
+      "serial": 17,
+      "hash": "098d1e062dc18037e18e334eff1d1cba69263089ba376b4ff6f855dea04e315a"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 19,
+      "serial": 18,
+      "hash": "9792a14d5c40cfc3f1dd0219cbf66b18124863eef02b2daec6545eb833195a44"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 20,
+      "serial": 19,
+      "hash": "6cdfc9c6fd98700f8e361735c4df81799266ace5a3fac4412755cdc87097697b"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 21,
+      "serial": 20,
+      "hash": "4c9da4eda7f7955842881520d4a5f48074b2a731ebc4916cd31e81104735c9fc"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 22,
+      "serial": 21,
+      "hash": "0818db854c23153acf6e338dcc438d99e09d197a55745a1eca347ef49aaf7b1b"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 23,
+      "serial": 22,
+      "hash": "10897ccca67f9e80ad0460edbb1fb354e7117a0a21cc59dca591623f6b9b069f"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 24,
+      "serial": 23,
+      "hash": "46262de5082a9d3a5a6f9c89fafceafc735ee6aa292fccdb2d824b8f37f15c3b"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 25,
+      "serial": 24,
+      "hash": "9232dd7e87ac21d23c2f6fc41f11e6f9759ca85b7dc369fdc5098a110391ceb0"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 26,
+      "serial": 25,
+      "hash": "714ba888dd920a31c68c6447d6e2cdf081e51aa822cb7ca8dcba742b3cc52dc9"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 27,
+      "serial": 26,
+      "hash": "a7d3ca7b8234ae59405cdadbcbb4c6473acbed86aca8156f774ec526173fb385"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 28,
+      "serial": 27,
+      "hash": "7d719c0052c03716719c4fcd2b16b4faa926123f396fd2a34827c7d1867a9020"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 29,
+      "serial": 28,
+      "hash": "ac909a49ad4474d523374fc9dca9f29077dd3bce8cf583b36073fff54c2b644d"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 30,
+      "serial": 29,
+      "hash": "06d0e7fbc35d913609a06f8d7d84dfb1ea6efaa8c0ac3373450781a84167ac72"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 31,
+      "serial": 30,
+      "hash": "24b13554967cb38244d559028f620856ca39e073dd2242640f59cc6a6796f391"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 32,
+      "serial": 31,
+      "hash": "473ceaf34bdaa77372196a9b5a67630be32cbbbb4be3a02f3441c85da26564ad"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 33,
+      "serial": 32,
+      "hash": "7b82a410433e4be5ee9842bc7f03a6810e30c841c8cb26b435d003b5afcead36"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 34,
+      "serial": 33,
+      "hash": "00b144d4210c98bf0af20a76e56e57eb5395a2df87dbcdbc5813cd7a7cb624a7"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 35,
+      "serial": 34,
+      "hash": "7cac1ab7fce1e1faf26b19a922aaf659eb75ce8fde770bcd6d8b3b24f2733ceb"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 36,
+      "serial": 35,
+      "hash": "d18d0a4ebda6f78689166f337048928cd61e1e8ab9555fdc5d69e1af61cdb014"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 37,
+      "serial": 36,
+      "hash": "fdd2d75a61944badd345ca3d56742dddb1b1acfa54d319b1de8313862f932e81"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 38,
+      "serial": 37,
+      "hash": "eb0692964ee6a86166088e432714819578daf07399e713cd9b3bef1a068b9f3e"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 39,
+      "serial": 38,
+      "hash": "c1c3dc060aa21c065a5943be47525aad128899ac63a5eb2caf8f413114463bf1"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 40,
+      "serial": 39,
+      "hash": "f93e15a080dc66128319354929cdd30c4d51ee35f4472711f5a05b3f5265c396"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 41,
+      "serial": 40,
+      "hash": "fa53a9ce15ff0952f6a8b9268cbea6c53553e9461b979c4a2c749e3fdf31764c"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 42,
+      "serial": 41,
+      "hash": "c94c2a3b37cd4593dbf7958c9b3918a8a73112bf4c741819c498b04c692340ad"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 43,
+      "serial": 42,
+      "hash": "d5c4fac34a025f2c39ed3bbd12d587a57eb677bb2174364439f0ebe2c73afb4e"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 44,
+      "serial": 43,
+      "hash": "7d9361a6bf82c150ed75def283aa73833b528296fbfec81df5f0527dab7816e0"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 45,
+      "serial": 44,
+      "hash": "576f65642c044581a4c42e01e863e97d3065fb7d59848d8bc28d20a6a256e51d"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 46,
+      "serial": 45,
+      "hash": "091ea6b375174c27879c5b848ec4c7f831a70fd911b97e3a1903d3c0a892078c"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 47,
+      "serial": 46,
+      "hash": "f8d16acc0e5e14135e0a37bcfcbefd5a5f44489d6ca785130865bd5c1c2163ed"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 48,
+      "serial": 47,
+      "hash": "feaa2652a17b9bee72cd17daeabc0dc46d3b5946befd5e037d282fe8119604e8"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 49,
+      "serial": 48,
+      "hash": "c6e3eef2fce5f19f4b151a664cba655ef10e8f3e6ed326b468f26a89012767f0"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 50,
+      "serial": 49,
+      "hash": "6215268b426c041627a21bb99bdaca43b0f74cc5505cf3606b8cb3a346dd7209"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 51,
+      "serial": 50,
+      "hash": "25ebd3da75ba398c5a6efd8d575c700d5af1df71b7fb10b7d65ad2d31dad2c46"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 52,
+      "serial": 51,
+      "hash": "841a5a7ef009e9eb06856ded7fe6b9df0ee966868bd4d083355fe6ce791393d0"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 53,
+      "serial": 52,
+      "hash": "93afefafc94f5079a8e3f7fbd23bc5e7bb4de7053a4e7af78504eee6a22e4102"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 54,
+      "serial": 53,
+      "hash": "02354f28c26fa1cfa225f0df0357b5984b42f9ad95873c4fa09a25768c5249ef"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 55,
+      "serial": 54,
+      "hash": "46dbab0892b680c7b65fd447017cb54178e56848b3622e9ab53837fe321aa90b"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 56,
+      "serial": 55,
+      "hash": "5a6f9bd7ca422ee1c5552bb8b783858374347e6ec9081ecb21ca4f31006d1658"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 57,
+      "serial": 56,
+      "hash": "91292b6a1b18dc6070a9cdf12b0ae21820ae944330a23097d15745ab3f8d48f6"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 58,
+      "serial": 57,
+      "hash": "750d1e88975ef04305132216ce6bf21f1aee55f167f4ad4b9f55fb8fc73a2551"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 59,
+      "serial": 58,
+      "hash": "c1835bd4ba56a2608a62797778816a00d9257e942298fe255a0b3afa2944a9e2"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 60,
+      "serial": 59,
+      "hash": "5e41b5b2ebbd6609abc92b882e1745d6aa37abc742462fad1cdb1d7cfe8ca9f7"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 61,
+      "serial": 60,
+      "hash": "47fd68c4f250f9f6b51730ac2d22e9dd567a8a01d37c925e453c9be83bda0f81"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 62,
+      "serial": 61,
+      "hash": "e377a4ca0d87f78ead71aebdd16468b2ebeac88fd60cd3101ab99c173ac24272"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 63,
+      "serial": 62,
+      "hash": "cb4835cdb439606c25df4f06df7a1cc66f72a98d14b9b5c766dcba3d0dc8a9ec"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 64,
+      "serial": 63,
+      "hash": "005e7c4fc2cc84f6676ff2ac022602fc6793563992cd0df004954337d7a5a689"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 65,
+      "serial": 64,
+      "hash": "59e61ed54a710153f8f4b46e2e49a6eea134cbc8608f7c525b27a447e8c1ef36"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 66,
+      "serial": 65,
+      "hash": "ddff3904f1e0288a00d7cdd3c00a25e468e73980efb28423699a053e15d97621"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 67,
+      "serial": 66,
+      "hash": "40e46f665819767b827806d3ac4db318535927a5a76a0b57dd23aaabc0cd198d"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 68,
+      "serial": 67,
+      "hash": "582771b8495d599e3b65dd15e083f8257556e356154573700203b5ffbbe3e9ed"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 69,
+      "serial": 68,
+      "hash": "bf74001c99053ad54f445bacb341f2f24d173a50eee0ea4b73f4efdc0e17d31e"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 70,
+      "serial": 69,
+      "hash": "6e30bdeab6ad731ff5b284de6109578fcc01b87e0b83f34c7d617c98c21c53f4"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 71,
+      "serial": 70,
+      "hash": "fd5da59fda284d3f83e3e05b3d3cac20f3c477eb3bcd815e3cc9e58e0202fc85"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 72,
+      "serial": 71,
+      "hash": "841b049ad7fc0db4ff27f12811732846296878ee548e715fd8e546fe45d5ffbe"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 73,
+      "serial": 72,
+      "hash": "157c38bdd636946ba7c18bc9e33dddb62781e8802a54c1a9820437482f82a873"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 74,
+      "serial": 73,
+      "hash": "5799ca701e7b3d7890c88ead7831f420879d43311e3db4f734cad34b1220e5e4"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 75,
+      "serial": 74,
+      "hash": "5c500b90a1fe45cc4df7359d3391caafec2f4ad6791ab35c589cf05a7deb8057"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 76,
+      "serial": 75,
+      "hash": "20e655064c94e4c1742e6c7a2451d59d0f888c3831755cfcb20f26e546e10c56"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 77,
+      "serial": 76,
+      "hash": "007bb2d48f12c126459a615d3b8c7c87eca8b0c3e4b63dc78596f14f1b5c68cc"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 78,
+      "serial": 77,
+      "hash": "a37ee17c6b5c9e0d1f82a0d66285f3348acf0861d9199428e425d3692bad93f8"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 79,
+      "serial": 78,
+      "hash": "22204db33240510f486ceced3d0fd26461bc71ed356b686bba650625dbf8ff47"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 80,
+      "serial": 79,
+      "hash": "968f32fe999b1a0f7dc493d55570080771737e4006d73e1f046fbebe10f16d7a"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 81,
+      "serial": 80,
+      "hash": "2bf549bbe435a534ad7a6639b94884e7b2b6f81897797a13b96e0cbd3d8c8a2a"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 82,
+      "serial": 81,
+      "hash": "a06fddaf5bf13e56bcbf0614bc2180b5423a623e05eb6a7487e7af71255551ae"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 83,
+      "serial": 82,
+      "hash": "96ae476ed09f5a3f5a45fc7cfd9dfee9edf6d5bf245de1d84e9a594202a0050b"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 84,
+      "serial": 83,
+      "hash": "dfa087566decbc6b3a8a6662cd5d5ad89ed1e4d6837257d11bf0923b3998971b"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 85,
+      "serial": 84,
+      "hash": "8011e14f879bf246cc9568439448a302301a4e6df023449537b443279c751a80"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 86,
+      "serial": 85,
+      "hash": "588cb7b30e5489fecdd40ab1f3046a6d085667f9e262362c0fd9981317988841"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 87,
+      "serial": 86,
+      "hash": "9caa6fdc630b9cd689789334bfdfcdd64eda8ba4c02ca80ebc12285580221d81"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 88,
+      "serial": 87,
+      "hash": "23e3358b18642ddfc98afeb27ae3696bf6bc4f1bcb6ef7e10f94fa57d651a108"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 89,
+      "serial": 88,
+      "hash": "6afb707c3cd17ae71ba452e420f72b58cc236793f378c60fc631eced46c6be7b"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 90,
+      "serial": 89,
+      "hash": "4a50359c6db01e511a40aac6fc57a1946fa2bb0a9e2879c5e062a537790e8da5"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 91,
+      "serial": 90,
+      "hash": "e540df26aef4a29ff7067f6d6490c3d8f8e739b3f801eb9b9896045c8a2c461c"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 92,
+      "serial": 91,
+      "hash": "bc8b3c878332c1068143aac5c8a0a12b7776d0d0aecb1f8e8e0d6fc5a5ef42a4"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 93,
+      "serial": 92,
+      "hash": "8b65ccdf583b31083858d715868f0679f0a139441c400a1fbb88cffd7aea6403"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 94,
+      "serial": 93,
+      "hash": "681e2cd247243c5d109577f40d45cde0ae7c65b54774a3397b4f4174bbe66ed3"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 95,
+      "serial": 94,
+      "hash": "b4a5cfe8b6c6a611369f73ae4fb6a96a9e655f52dd1ad8001dd37316cbd65a91"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 96,
+      "serial": 95,
+      "hash": "52c91a1f89492ebb8f9e448947fe65ce3d324a43d3d266b753fe55db6cbbf128"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 97,
+      "serial": 96,
+      "hash": "7111e7f99ba937fe8d4339bc180bebf0a16c197cd78d097c21d19f323459d77d"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 98,
+      "serial": 97,
+      "hash": "6200f80c8977b0b201eb4c6130495a4a5ac219451d571614c2aadf7b789b321a"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 99,
+      "serial": 98,
+      "hash": "ff75c9e22046caa2d885c330d2e6de1a2357b1be9377bc7c0ad14f4a8eedf890"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 100,
+      "serial": 99,
+      "hash": "06c03e3508bb830c409b5ac09b26c7016c63ba7fc915096941f5f3a01b8a1b6b"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 101,
+      "serial": 100,
+      "hash": "9836d806e912f57bf4e147c7b45b6f5b15d7b8135018ed6d02d59c6eccf63aa0"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 102,
+      "serial": 101,
+      "hash": "24114612cdb0de83754e819413da62b911c4e1929307b96c06343c309604c155"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 103,
+      "serial": 102,
+      "hash": "f30def0c8295638ad114b1bf34daa8c5afcaac62644894ede52b32ed491763ec"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 104,
+      "serial": 103,
+      "hash": "c841eba999909289c76792d584db64669b7ad034a4d84c796adf684a6ce684c6"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 105,
+      "serial": 104,
+      "hash": "72b244bd45c052c0be258e6ccff7c48327830d8a73b320106194be155e3368e8"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 106,
+      "serial": 105,
+      "hash": "1077d9318a262270bb9a8ae075e73477403ab23778251bdbdf827d3af19d47c6"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 107,
+      "serial": 106,
+      "hash": "0421f34a218c6d794c566a850283565a35410b7c1efc67769415a9403d74c548"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 108,
+      "serial": 107,
+      "hash": "d2d8211e95b9d8a5bbf88a67841708c438f58d40286d88beda655d5c83e1a2a9"
+    },
+    {
+      "workbook": "Injury Analysis Final Master Sheet-11 Oct.xlsx",
+      "sheet": "Master Sheet-V-2-13-March-26",
+      "row": 109,
+      "serial": 108,
+      "hash": "326f2f9113b0ead14fa19287ba381a89b2fa5ba557a255eb1c91971f4282d8d2"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 3,
+      "serial": 1,
+      "hash": "3ca2739d51650ee2bd0ee6a1268c58370840afc2458287db6c237ddd7af93ea8"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 4,
+      "serial": 2,
+      "hash": "9db283351821aef760c1ff6bda5b601ac6b617d78699102d86d4c3ca65d28165"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 5,
+      "serial": 3,
+      "hash": "245a6c00f081fee48a7f28773a53533206d50abb9574f129b7f58aa12b26b31d"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 6,
+      "serial": 4,
+      "hash": "26561d9c150fdb0eb474b6ef84c89fa9b7b98ea95e14804cb1037bdf0e11b3c1"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 7,
+      "serial": 5,
+      "hash": "1f5fa0497f05f8e1e70b75aa007d8e06a31fe33a14fce7bf1ed47a5025cabffd"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 8,
+      "serial": 6,
+      "hash": "14535beb8432c7e086db65acf251525a866565d694fab30bff0657f630c35953"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 9,
+      "serial": 7,
+      "hash": "0bc32098575f30f519bc90c1b285f826d0a8bb274a062f58325d8a40dd004aae"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 10,
+      "serial": 8,
+      "hash": "f972a24018df48b6d7ccb5bd0c99031bca2f31742c1166c184c59a5423b51d0e"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 11,
+      "serial": 9,
+      "hash": "528d80d9be243ccb4fc021a03db22ee1d8c47a4a17db12f695c95ac7f43ff45d"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 12,
+      "serial": 10,
+      "hash": "92c6271131a827e66df925336a46c22774429b6f0dc44118e149114f587a14e4"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 13,
+      "serial": 11,
+      "hash": "9a33f429d3ae8b645ce794ab623cac1a320628e4cb96589b2d0346d9201c7461"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 14,
+      "serial": 12,
+      "hash": "56d114179d69e073efaf3bcf2c1320b0a49f817f2197a23a464148838cf9f50e"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 15,
+      "serial": 13,
+      "hash": "b0a50d51c4f43b04946105dc509d5e7aaa07e7061f0715292684f89f33801640"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 16,
+      "serial": 14,
+      "hash": "a838105b00776b678022b392586673732dbfbe9e61c5148ee5237f9e8dca5bf1"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 17,
+      "serial": 15,
+      "hash": "a8e5b262e9e97e85ae7aa137310f0e144b88efabbc046312d48b0724b742d696"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 18,
+      "serial": 16,
+      "hash": "d14d0f0d82741c0c1ef61d3caa225974dd6509bfdd6017229e8d53a2798424b5"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 19,
+      "serial": 17,
+      "hash": "a326dc6132b8b054d4f641fe58aa0edb8656e4cb7f22c454e3c4bc451a391ff2"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 20,
+      "serial": 18,
+      "hash": "9f0a135f86a9ce98511f278c8052aea69d56b874509c7ccf3bdd80ddc4b516c7"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 21,
+      "serial": 19,
+      "hash": "db6176ae649732e0e82491432f376c8cbf488e1341dc4112c36674fb523d243b"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 22,
+      "serial": 20,
+      "hash": "0df5ca950113cbd58b20e0857f44068d9cbe83fceb086f8169f2a1e0df020e33"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 23,
+      "serial": 21,
+      "hash": "631ffd75828f9f60402421d353b48e7269525c93d81300080f93b91c9783bdc6"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 24,
+      "serial": 22,
+      "hash": "1f37738753ddb71e4c3edfda56712749de5d005b3e0a2fccab884a42ccf33c35"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 25,
+      "serial": 23,
+      "hash": "2b94348fd62808b306de5874a13b0c31a66adb8872f702809122af5f0496e9a2"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 26,
+      "serial": 24,
+      "hash": "56ddfeaae6f343d30e4462798b80599563728bc1e455a6b454f6dba4f35c5887"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 27,
+      "serial": 25,
+      "hash": "55330f37febc6ddabe528e53e35707725c2c5e86bc1bf0de850a406b274a02ee"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 28,
+      "serial": 26,
+      "hash": "716feb3df3b244e97fb03e466cdb4d8cfb1eaa2ecb69cb80e8f4178823dcc436"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 29,
+      "serial": 27,
+      "hash": "d73972b8ddba8201f335f008fe691590d4d0e8e241ff300f2531b7c258ca163a"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 30,
+      "serial": 28,
+      "hash": "47b00dec1733529f910ce2de987e9c77023aef296d6aabecfc7ebd4d4f310d82"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 31,
+      "serial": 29,
+      "hash": "61fcdd8e93e98d55f2112e04668cd0828e0ae73ae328094e9f46713eab28173c"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 32,
+      "serial": 30,
+      "hash": "e2856039a06e7c1fb07885b92d8599d25ebe6b166e0fe8dc8f462a8030540644"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 33,
+      "serial": 31,
+      "hash": "0c642109e87b5087c0e81ab7e58608f8bffc9dbc7c441a23218fa4cde9a7a8f7"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 34,
+      "serial": 32,
+      "hash": "608b34f9fd1d5fe2938be553076c4802d4a3694d06ce9ecb19aba856af9e1f40"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 35,
+      "serial": 33,
+      "hash": "1166b8568924edb39d33a310f3bbab4573cbe0c2edc6afabc5051c870a385b3c"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 36,
+      "serial": 34,
+      "hash": "492fb692792f64ebf3b165489198939af3053d0de0e19f8aa298558329d71676"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 37,
+      "serial": 35,
+      "hash": "bccff2d60f4a349dbfc33f1f1913d79549175b0213084ba7eff7b27de376270e"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 38,
+      "serial": 36,
+      "hash": "afcbd19d2995c436eceefedbadbe1091d087be72f2ee164c6558b66b891c1c72"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 39,
+      "serial": 37,
+      "hash": "4ec05bea432bd8b911371da5b534c8150b222105a6866c9f373177fb4d953dfe"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 40,
+      "serial": 38,
+      "hash": "7138f3127db3b755dbec1f6cd1ee0c87a6775e442c8eabc8042d3ec95d2c3db7"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 41,
+      "serial": 39,
+      "hash": "8784e2710b768a18054de4b946afd9a292785748ca930733a1df2c4d95453bb1"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 42,
+      "serial": 40,
+      "hash": "a7878d726e572629c27cb5e48ad24bb7df0eaa5642a85fa932ea3b6d44862b60"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 43,
+      "serial": 41,
+      "hash": "2b178dd0117486d5cd7fad2250bef8e4ffd8bc582518c404b1fa6856914b81d3"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 44,
+      "serial": 42,
+      "hash": "1fc1b239328b594f7cfd897f8275216179fe47662ff4f2a7677e5b47eef6951a"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 45,
+      "serial": 43,
+      "hash": "aa91dc04df0bf2070588ba627663c973806a0b4440b9bcc5f50853db082315e5"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 46,
+      "serial": 44,
+      "hash": "b930201ab4c73e6329bc6744b15fa661a6e4f9e9610ca2ab1533240c13e218b9"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 47,
+      "serial": 45,
+      "hash": "fab83c0c0558fe61592902da2e824abf1a8a87a8f0c1806115d4bda5a835762a"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 48,
+      "serial": 46,
+      "hash": "204803b3ca7fb3d689a93397e3d0e638329652dc0802dbeaadaafed39692ebc4"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 49,
+      "serial": 47,
+      "hash": "6f52da4b7ca9c06928cd807dd0d6ace8e1b417fd7b56d969b4f68823f9f96314"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 50,
+      "serial": 48,
+      "hash": "67e4ec5fd838722e8bbd22905a8e680c4e9ba2652d8b2a6cd0b767bbff4ec165"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 51,
+      "serial": 49,
+      "hash": "23bb333cd21415b4a04c5cc0cbe4acdcb7eeabd65827460e13f798b1e749b0c4"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 52,
+      "serial": 50,
+      "hash": "7c4864fa6068d0b8f4f8338b7632fc295b78115f07ba7bf8f7e339154d19c131"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 53,
+      "serial": 51,
+      "hash": "53595426f4e9b3a7e50ab8a54e96e142a1b2f18e87f15604c91cef774e8190b8"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 54,
+      "serial": 52,
+      "hash": "9cada054eeaf2139d2002f1ff64cb77a593f59624d45ca1a1713d01ae4bdcc77"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 55,
+      "serial": 53,
+      "hash": "d0df79ecf483367be6493a5e7922924247928f3e52a3c7258fb568519c883335"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 56,
+      "serial": 54,
+      "hash": "5bad86c563b237528ccffee35ddfdd59e8717d3591705e08c37c474ceb094b16"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 57,
+      "serial": 55,
+      "hash": "d8e5a08acd3f98909a8b1d5703fe7c37f3de2ee01dc86fcb75d92537df71798c"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 58,
+      "serial": 56,
+      "hash": "0f43c1854439f1c626c1480342ee9e30aba9401a6b89965ff50e63de7f70392b"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 59,
+      "serial": 57,
+      "hash": "815a13fa66f70364565f4e53cfc78afd2b5f7fddffa30f12ded6169e170e25cb"
+    },
+    {
+      "workbook": "Master Sheet- Fire Analysis 23-25.xlsx",
+      "sheet": "Master Sheet-Final",
+      "row": 60,
+      "serial": 58,
+      "hash": "69f1401cf11736100ac74720b7da7faa9f8dfafbdf0129d0adb73a44b686fc70"
+    }
+  ]
+}

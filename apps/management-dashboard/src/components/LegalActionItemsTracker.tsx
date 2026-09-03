@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { moduleService } from '../services/api/moduleService';
+import { PaginationControls } from './PaginationControls';
 
 const statusClass = (status: string) => {
   const value = String(status || '').toLowerCase();
@@ -20,6 +21,7 @@ export const LegalActionItemsTracker = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
   const limit = 25;
 
   useEffect(() => {
@@ -30,7 +32,9 @@ export const LegalActionItemsTracker = () => {
         const response = await moduleService.getHseActionItems({ page, limit, sort_by: 'date', sort_order: 'desc' });
         if (active) {
           setItems(response.data || []);
-          setTotalPages(response.meta?.pagination?.totalPages || 1);
+          const pagination = response.meta?.pagination || response.meta || {};
+          setTotalPages(Math.max(1, Number(pagination.totalPages || 1)));
+          setTotalRecords(Number(pagination.totalRecords ?? pagination.total ?? response.data?.length ?? 0));
         }
       } catch (err) {
         console.error('Failed to load action items', err);
@@ -95,29 +99,7 @@ export const LegalActionItemsTracker = () => {
           </table>
         </div>
         
-        {totalPages > 1 && (
-          <div className="mt-4 flex items-center justify-between border-t border-[#E5E7EB] pt-4">
-            <div className="text-sm text-[#64748B]">
-              Page <span className="font-medium text-[#111827]">{page}</span> of <span className="font-medium text-[#111827]">{totalPages}</span>
-            </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1 || loading}
-                className="rounded border border-[#D1D5DB] px-3 py-1 text-sm font-medium hover:bg-[#F3F4F6] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              <button 
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages || loading}
-                className="rounded border border-[#D1D5DB] px-3 py-1 text-sm font-medium hover:bg-[#F3F4F6] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        {totalRecords > 0 && <PaginationControls currentPage={page} totalPages={totalPages} totalRecords={totalRecords} pageSize={limit} onPageChange={setPage} disabled={loading} className="mt-4" itemLabel="action items" />}
       </div>
     </section>
   );

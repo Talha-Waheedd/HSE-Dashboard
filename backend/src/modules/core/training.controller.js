@@ -26,6 +26,26 @@ const serializeTraining = (value) => {
     manhoursWarning: !hasInputs ? 'Participants and duration are required to calculate manhours.' : null,
   };
 };
+const csvDate = (value) => {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toISOString().slice(0, 10);
+};
+const serializeTrainingCsv = (value) => {
+  const row = serializeTraining(value);
+  return {
+    Date: csvDate(row.scheduledDate || row.createdAt),
+    'Training Type': row.trainingTypeLabel || '',
+    Department: row.department?.code || row.departmentName || '',
+    Trainer: row.trainerName || '',
+    Venue: row.venue || '',
+    Topic: row.description || row.title || '',
+    Participants: row.participantCount ?? '',
+    'Duration (Min)': row.durationMinutes ?? '',
+    Manhours: row.manhours ?? '',
+    Status: ({ scheduled: 'Pending', in_progress: 'In Progress', completed: 'Closed', cancelled: 'Cancelled' }[row.status] || row.status || ''),
+  };
+};
 const buildTrainingWhere = async (query = {}) => {
   const where = {};
   const departmentValue = query.departmentId || query.department;
@@ -102,7 +122,7 @@ const getSessionById = asyncHandler(async (req, res) => {
 const exportSessions = asyncHandler(async (req, res) => {
   const where = await buildTrainingWhere(req.query);
   if (!where.status) where.status = { [Op.ne]: TrainingStatus.DRAFT };
-  await sendCsvExport(res, TrainingSession, { where, nest: true, include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }], serializeRow: serializeTraining, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']) }, `trainings-${new Date().toISOString().slice(0, 10)}.csv`);
+  await sendCsvExport(res, TrainingSession, { where, nest: true, include: [{ model: Department, as: 'department', attributes: ['name', 'code'] }], serializeRow: serializeTrainingCsv, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }, ['scheduledDate', 'DESC']) }, `trainings-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 const getSummary = asyncHandler(async (req, res) => {

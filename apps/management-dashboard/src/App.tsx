@@ -19,6 +19,8 @@ import { ALL_SECTIONS } from './config/sectionSchemas';
 import { AuditLogs } from './pages/AuditLogs';
 import { AuditLogDetails } from './pages/AuditLogDetails';
 import { CriticalAuditPlan } from './pages/CriticalAuditPlan';
+import { CapaActions } from './pages/CapaActions';
+import { CapaActionDetails } from './pages/CapaActionDetails';
 import { FilterProvider } from './context/FilterContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Button } from '@cbl/ui';
@@ -118,6 +120,8 @@ function App() {
           <Route path="/audit-management" element={<ProtectedRoute fallback={<Navigate to="/login" />}><AuditLogs /></ProtectedRoute>} />
           <Route path="/audit-management/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><AuditLogDetails /></ProtectedRoute>} />
           <Route path="/critical-audit-plan" element={<ProtectedRoute fallback={<Navigate to="/login" />}><CriticalAuditPlan /></ProtectedRoute>} />
+          <Route path="/action-tracker" element={<ProtectedRoute fallback={<Navigate to="/login" />}><CapaActions /></ProtectedRoute>} />
+          <Route path="/action-tracker/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><CapaActionDetails /></ProtectedRoute>} />
 
           {/* Dynamic Data Entry Sections */}
           {ALL_SECTIONS.map(section => (

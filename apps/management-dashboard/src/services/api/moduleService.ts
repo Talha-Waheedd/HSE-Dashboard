@@ -138,7 +138,7 @@ const severityFromApi = (value: unknown) => {
 };
 const categoryFromApi = (value: unknown) => ({
   first_aid: 'First Aid', mtc: 'MTC', lti: 'LTI', rwc: 'RWC', fatality: 'Fatality',
-  minor_fire: 'Minor Fire', significant_near_miss: 'Significant Near Miss',
+  fire: 'Fire', minor_fire: 'Minor Fire', major_fire: 'Major Fire', significant_near_miss: 'Significant Near Miss',
 }[String(value || '').toLowerCase()] || value);
 const notifyDashboardRefresh = () => {
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('dashboard-refresh'));
@@ -162,6 +162,14 @@ const prepareRequestParams = (params: Record<string, unknown> = {}, schemaId?: s
   }
   if (schemaId === 'audit-management') requestParams.hasPlan = true;
   if (schemaId === 'critical-audit-plan') requestParams.source = schemaId;
+  if (schemaId === 'incident-log' && requestParams.incidentCategory) {
+    requestParams.incidentType = requestParams.incidentCategory;
+    delete requestParams.incidentCategory;
+  }
+  if (schemaId === 'incident-log' && requestParams.riskRating) {
+    requestParams.severityLevel = String(requestParams.riskRating).trim().toLowerCase();
+    delete requestParams.riskRating;
+  }
   return requestParams;
 };
 const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? actions.map((item: any) => ({
@@ -297,7 +305,15 @@ export const moduleService = {
         root_cause: item.metadata?.root_cause || item.rootCause,
         actions: normalizeIncidentActions(item.metadata?.actions || item.actions || []),
         status_id: item.metadata?.status_id || statusFromApi(item.status),
-        department_id: item.metadata?.department_id || item.departmentId || item.department_id,
+        department_id: departmentDisplayValue(
+          item.department?.code,
+          item.department?.name,
+          item.metadata?.department_code,
+          item.metadata?.department_name,
+        ),
+        department_name: item.department?.name || item.metadata?.department_name || '',
+        department_code: item.department?.code || item.metadata?.department_code || '',
+        location: item.locationRecord?.name || item.location || item.metadata?.location_name || '',
       }));
     }
 

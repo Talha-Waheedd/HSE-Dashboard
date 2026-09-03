@@ -143,6 +143,9 @@ Incident.belongsTo(Plant, { foreignKey: 'plantId', as: 'plant' });
 Department.hasMany(Incident, { foreignKey: 'departmentId', as: 'incidents' });
 Incident.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
 
+Location.hasMany(Incident, { foreignKey: 'locationId', as: 'incidents' });
+Incident.belongsTo(Location, { foreignKey: 'locationId', as: 'locationRecord' });
+
 // A finalized Near Miss can generate one Incident Investigation. The unique
 // database index on incidents.source_near_miss_id enforces the one-to-one
 // relationship even if a Near Miss is submitted more than once.
@@ -224,6 +227,9 @@ CorrectiveAction.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignee' });
 
 User.hasMany(CorrectiveAction, { foreignKey: 'assignedBy', as: 'createdCorrectiveActions' });
 CorrectiveAction.belongsTo(User, { foreignKey: 'assignedBy', as: 'assigner' });
+
+Department.hasMany(CorrectiveAction, { foreignKey: 'responsibleDepartmentId', as: 'responsibleCapaActions' });
+CorrectiveAction.belongsTo(Department, { foreignKey: 'responsibleDepartmentId', as: 'responsibleDepartment' });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Associations — Attachments (polymorphic — no Sequelize association on sourceId)

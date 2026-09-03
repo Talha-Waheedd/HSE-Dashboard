@@ -3,7 +3,7 @@
 }
 
 @media print {
-  @page {
+  @page audit-log-page {
     size: A4 landscape;
     margin: 7mm;
   }
@@ -21,6 +21,7 @@
   }
 
   .audit-log-print-root {
+    page: audit-log-page;
     width: 100%;
     color: #000;
     background: #fff;

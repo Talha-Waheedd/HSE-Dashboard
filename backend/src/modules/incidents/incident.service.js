@@ -8,6 +8,7 @@ const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { sequelize } = require('../../database/connection');
 const { col, fn } = require('sequelize');
+const { syncBestEffort } = require('../actions/capa-sync.service');
 
 const normalizeActions = (actions) => (Array.isArray(actions) ? actions.map((item) => ({
   ...item,
@@ -81,7 +82,9 @@ class IncidentService {
       }
 
       await transaction.commit();
-      return this.getIncidentById(incident.id);
+      const persisted = await this.getIncidentById(incident.id);
+      await syncBestEffort('incident', incident.id);
+      return persisted;
     } catch (error) {
       await transaction.rollback();
       throw error;
@@ -147,11 +150,13 @@ class IncidentService {
       ...(metadata || {}),
       ...(actions !== undefined ? { actions: normalizeActions(actions) } : {}),
     };
-    return incidentRepository.updateById(id, {
+    const result = await incidentRepository.updateById(id, {
       ...incidentFields,
       metadata: nextMetadata,
       updatedBy: userId,
     });
+    await syncBestEffort('incident', id);
+    return result;
   }
 
   /**
@@ -175,7 +180,9 @@ class IncidentService {
       updateData.closedBy = userId;
     }
 
-    return incidentRepository.updateById(id, updateData);
+    const result = await incidentRepository.updateById(id, updateData);
+    await syncBestEffort('incident', id);
+    return result;
   }
 
   /**

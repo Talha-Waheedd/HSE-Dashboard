@@ -7,6 +7,7 @@ const { sequelize } = require('../../database/connection');
 const HazardStatus = require('../../shared/enums/HazardStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
+const { syncBestEffort } = require('../actions/capa-sync.service');
 
 const DEFAULT_PLANT_ID = '5126923e-b77f-4eb6-8b98-d5fc9db8d71b';
 const isUuid = (value) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
@@ -92,6 +93,7 @@ class HazardService {
     if (!persisted) {
       throw ApiError.internal('Hazard record could not be read after commit.');
     }
+    await syncBestEffort('hazard', persisted.id);
     return persisted;
   }
 
@@ -129,7 +131,9 @@ class HazardService {
     }
 
     updateData.updatedBy = userId;
-    return hazardRepository.updateById(id, updateData);
+    const result = await hazardRepository.updateById(id, updateData);
+    await syncBestEffort('hazard', id);
+    return result;
   }
 
   /**
@@ -165,7 +169,9 @@ class HazardService {
       updateData.closedBy = userId;
     }
 
-    return hazardRepository.updateById(id, updateData);
+    const result = await hazardRepository.updateById(id, updateData);
+    await syncBestEffort('hazard', id);
+    return result;
   }
 
   /**

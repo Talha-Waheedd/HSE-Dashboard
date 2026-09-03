@@ -120,6 +120,13 @@ export const IncidentInvestigationDetails = () => {
 
   const updateField = (key: string, value: string) => setForm(previous => ({ ...previous, [key]: value }));
 
+  const printInvestigation = () => {
+    const cleanup = () => document.body.classList.remove('printing-incident-investigation');
+    document.body.classList.add('printing-incident-investigation');
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.print();
+  };
+
   const save = async () => {
     if (!id) return;
     setSaving(true); setError(''); setMessage('');
@@ -139,7 +146,7 @@ export const IncidentInvestigationDetails = () => {
   };
 
   return <Layout>
-    <ContextHeader title="Incident Investigation" breadcrumbs={['Leading Indicators', 'Incident Investigation', 'Details']} subtitle="Complete and review the investigation generated from the Near Miss record." actions={[{ label: 'Print', icon: <Printer />, onClick: () => window.print(), variant: 'outlined', disabled: !incident }, { label: 'Back to Investigations', icon: <ArrowLeft />, onClick: () => navigate('/leading-indicators/incident-investigation'), variant: 'outlined' }]} />
+    <ContextHeader title="Incident Investigation" breadcrumbs={['Leading Indicators', 'Incident Investigation', 'Details']} subtitle="Complete and review the investigation generated from the Near Miss record." actions={[{ label: 'Print', icon: <Printer />, onClick: printInvestigation, variant: 'outlined', disabled: !incident }, { label: 'Back to Investigations', icon: <ArrowLeft />, onClick: () => navigate('/leading-indicators/incident-investigation'), variant: 'outlined' }]} />
     <main className="min-h-full bg-[#F7F7F5] px-4 py-5 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-5">
         {loading && <div className="rounded-xl border border-[#E8E0D2] bg-white p-8 text-center text-sm text-[#8A8F98]">Loading investigation...</div>}

@@ -3,21 +3,25 @@
 }
 
 @media print {
-  @page {
+  @page incident-investigation-page {
     size: A4 portrait;
     margin: 7mm;
   }
 
-  body {
+  body.printing-incident-investigation {
     background: #fff !important;
   }
 
-  body > *:not(.incident-print-root) {
+  body.printing-incident-investigation > *:not(.incident-print-root) {
     display: none !important;
   }
 
-  .incident-print-root {
+  body.printing-incident-investigation > .incident-print-root {
     display: block !important;
+  }
+
+  .incident-print-root {
+    page: incident-investigation-page;
     width: 100%;
     color: #000;
     background: #fff;

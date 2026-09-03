@@ -21,6 +21,36 @@ const addAndCondition = (where, condition) => {
   where[Op.and] = [...(where[Op.and] || []), condition];
 };
 
+const nearMissStatusLabel = (value) => ['closed', 'close'].includes(String(value || '').toLowerCase()) ? 'Closed' : 'Open';
+const csvDate = (value) => {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toISOString().slice(0, 10);
+};
+
+const serializeNearMissCsv = (row) => {
+  const metadata = row.metadata || {};
+  return {
+    'Near Miss ID': row.id,
+    'EMP ID': metadata.emp_id || '',
+    Date: csvDate(row.reportedAt || row.createdAt),
+    Department: row.department?.code || row.department?.name || metadata.department || '',
+    'Reported By': metadata.reported_by || '',
+    Designation: metadata.designation || '',
+    'Affected Person Name': metadata.affected_person || '',
+    'Affected Person Designation': metadata.affected_designation || '',
+    Time: metadata.time || '',
+    Location: row.location || metadata.location || '',
+    Details: metadata.details || row.description || '',
+    'Preventive Action Suggestion': metadata.preventive_action || row.immediateAction || '',
+    'Responsible Department': row.responsibleDepartment?.code || row.responsibleDepartment?.name || metadata.responsible_department || '',
+    'Further Investigation Required': row.furtherInvestigationRequired ? 'Yes' : 'No',
+    'Reported in Hazard': row.reportedInHazard ? 'Yes' : 'No',
+    Status: nearMissStatusLabel(row.status),
+    Remarks: row.remarks || metadata.remarks || '',
+  };
+};
+
 const buildNearMissWhere = async (query = {}) => {
   const where = {};
   if (query.plantId && query.plantId !== 'All') where.plantId = query.plantId;
@@ -109,7 +139,16 @@ const getNearMissById = asyncHandler(async (req, res) => {
 });
 const exportNearMisses = asyncHandler(async (req, res) => {
   const where = await buildNearMissWhere(req.query);
-  await sendCsvExport(res, NearMiss, { where, order: parseOrder(req.query, { date: 'reportedAt', createdAt: 'createdAt' }, ['reportedAt', 'DESC']) }, `near-misses-${new Date().toISOString().slice(0, 10)}.csv`);
+  await sendCsvExport(res, NearMiss, {
+    where,
+    include: [
+      { model: Department, as: 'department', attributes: ['name', 'code'], required: false },
+      { model: Department, as: 'responsibleDepartment', attributes: ['name', 'code'], required: false },
+    ],
+    nest: true,
+    serializeRow: serializeNearMissCsv,
+    order: parseOrder(req.query, { date: 'reportedAt', createdAt: 'createdAt' }, ['reportedAt', 'DESC']),
+  }, `near-misses-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 /**

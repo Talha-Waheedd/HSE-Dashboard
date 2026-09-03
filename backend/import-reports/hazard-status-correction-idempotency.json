@@ -1,0 +1,118 @@
+{
+  "mode": "dry-run",
+  "generatedAt": "2026-09-03T04:57:27.956Z",
+  "workbook": "Hazard Log Sheet YTD-June-2026.xlsx",
+  "worksheets": [
+    {
+      "name": "Hazard Spotting 2026",
+      "state": "visible",
+      "rows": 1797,
+      "columns": 13,
+      "classification": "canonical-hazard-record-sheet",
+      "headerRow": 2,
+      "statusHeader": "Status",
+      "candidateRows": 1795,
+      "statusCounts": {
+        "Done": 1411,
+        "Pending": 264,
+        "WIP": 120
+      }
+    },
+    {
+      "name": "PRD",
+      "state": "visible",
+      "rows": 13,
+      "columns": 12,
+      "classification": "different-module-or-subset",
+      "headerRow": null,
+      "statusHeader": null,
+      "candidateRows": 0,
+      "statusCounts": {}
+    },
+    {
+      "name": "Near Miss",
+      "state": "visible",
+      "rows": 125,
+      "columns": 17,
+      "classification": "different-module-or-subset",
+      "headerRow": null,
+      "statusHeader": null,
+      "candidateRows": 0,
+      "statusCounts": {}
+    },
+    {
+      "name": "Hazard Spotting 2025",
+      "state": "visible",
+      "rows": 4013,
+      "columns": 13,
+      "classification": "canonical-hazard-record-sheet",
+      "headerRow": 2,
+      "statusHeader": "Status",
+      "candidateRows": 4010,
+      "statusCounts": {
+        "Done": 2956,
+        "Pending": 1009,
+        "DOne": 26,
+        "DONE": 13,
+        "done": 4,
+        "dONE": 1,
+        "doNE": 1
+      }
+    }
+  ],
+  "mapping": {
+    "sourceColumnAccepted": [
+      "Pending",
+      "Status"
+    ],
+    "Done": "closed",
+    "Pending": "under_review",
+    "WIP": "under_review",
+    "uiLabels": {
+      "closed": "Closed",
+      "under_review": "Pending"
+    }
+  },
+  "source": {
+    "totalHazardRows": 5805,
+    "statusCounts": {
+      "Done": 4412,
+      "Pending": 1273,
+      "WIP": 120
+    },
+    "blankOrUnknownStatuses": 0,
+    "duplicateSerialRows": 0,
+    "duplicateBusinessRows": 100
+  },
+  "reconciliation": {
+    "existingRecordsMatched": 5805,
+    "recordsRequiringUpdate": 0,
+    "recordsAlreadyCorrect": 5805,
+    "ambiguousMatches": 0,
+    "fieldMismatches": 0,
+    "genuinelyNewCandidates": 0,
+    "recordsInserted": 0,
+    "recordsUpdated": 0,
+    "activeHazardsBefore": 5810,
+    "activeHazardsAfter": 5810,
+    "totalCountChanged": false
+  },
+  "databaseStatusCounts": {
+    "before": {
+      "under_review": 1393,
+      "closed": 4412,
+      "submitted": 5
+    },
+    "after": {
+      "under_review": 1393,
+      "closed": 4412,
+      "submitted": 5
+    }
+  },
+  "unresolved": {
+    "unknownStatuses": [],
+    "unmatched": [],
+    "ambiguous": [],
+    "fieldMismatches": []
+  }
+}

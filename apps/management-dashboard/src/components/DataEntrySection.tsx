@@ -14,8 +14,8 @@ import { useFilters } from '../context/FilterContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus, Save, Trash2, Download, Edit2, X, History, ArrowUpDown,
-  ArrowRight, User, AlertTriangle, Search, ChevronLeft, ChevronRight,
-  ChevronsLeft, ChevronsRight, ChevronDown, ChevronUp,
+  ArrowRight, User, AlertTriangle, Search, ChevronRight,
+  ChevronDown, ChevronUp,
   CheckCircle2, LayoutGrid, Filter, PanelRightOpen,
   FileText, CalendarDays, Clock, Check,
 } from 'lucide-react';
@@ -27,6 +27,7 @@ import { uploadClient, type AttachmentRecord } from '../../../../packages/api/sr
 import { LocationCombobox } from './LocationCombobox';
 import { ImageUploadField } from './ImageUploadField';
 import { formatDateOnly, formatDateTimeLocal } from '../utils/dateFormat';
+import { PaginationControls } from './PaginationControls';
 import {
   createNewNearMissFormDefaults,
   nearMissResponsibleDepartmentFormValues,
@@ -75,67 +76,6 @@ const ATTACHMENT_TYPE_BY_FIELD: Record<string, string> = {
 
 const attachmentSourceForSchema = (schemaId: string) => ATTACHMENT_SOURCE_BY_SCHEMA[schemaId];
 const attachmentTypeForField = (fieldKey: string) => ATTACHMENT_TYPE_BY_FIELD[fieldKey] || fieldKey.toUpperCase();
-
-const paginationItems = (currentPage: number, totalPages: number): Array<number | 'ellipsis-start' | 'ellipsis-end'> => {
-  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
-  if (currentPage <= 4) return [1, 2, 3, 4, 5, 'ellipsis-end', totalPages];
-  if (currentPage >= totalPages - 3) return [1, 'ellipsis-start', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-  return [1, 'ellipsis-start', currentPage - 1, currentPage, currentPage + 1, 'ellipsis-end', totalPages];
-};
-
-const PaginationControls = ({
-  currentPage,
-  totalPages,
-  startRecord,
-  endRecord,
-  totalRecords,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  startRecord: number;
-  endRecord: number;
-  totalRecords: number;
-  onPageChange: (page: number) => void;
-}) => {
-  const items = paginationItems(currentPage, totalPages);
-  const buttonClass = 'inline-flex h-8 min-w-8 items-center justify-center rounded-md border px-2 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CB0017]/35 disabled:cursor-not-allowed disabled:opacity-40';
-  const inactiveClass = 'border-[#E2E5E9] bg-white text-[#374151] hover:border-[#CB0017]/50 hover:bg-[#FFF7F8]';
-  const disabled = currentPage === 1;
-  const atEnd = currentPage === totalPages;
-
-  return (
-    <div className="flex flex-col gap-3 border-t border-[#F0F0F0] bg-[#FAFAFA] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-xs text-[#6B7280]" aria-live="polite">
-        Showing <span className="font-semibold text-[#374151]">{startRecord}-{endRecord}</span> of{' '}
-        <span className="font-semibold text-[#374151]">{totalRecords}</span> records
-        <span className="mx-2 hidden text-[#D1D5DB] sm:inline">|</span>
-        <span className="block sm:inline">Page {currentPage} of {totalPages}</span>
-      </p>
-      <nav aria-label="Pagination" className="flex max-w-full items-center gap-1 overflow-x-auto pb-0.5">
-        <button type="button" aria-label="First page" title="First page" onClick={() => onPageChange(1)} disabled={disabled} className={`${buttonClass} ${inactiveClass}`}>
-          <ChevronsLeft className="h-4 w-4" />
-        </button>
-        <button type="button" aria-label="Previous page" title="Previous page" onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={disabled} className={`${buttonClass} ${inactiveClass}`}>
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        {items.map((item) => item === 'ellipsis-start' || item === 'ellipsis-end' ? (
-          <span key={item} aria-hidden="true" className="px-1 text-sm text-[#9CA3AF]">…</span>
-        ) : (
-          <button type="button" key={item} aria-label={`Page ${item}`} aria-current={item === currentPage ? 'page' : undefined} onClick={() => onPageChange(item)} className={`${buttonClass} ${item === currentPage ? 'border-[#CB0017] bg-[#CB0017] text-white shadow-sm' : inactiveClass}`}>
-            {item}
-          </button>
-        ))}
-        <button type="button" aria-label="Next page" title="Next page" onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={atEnd} className={`${buttonClass} ${inactiveClass}`}>
-          <ChevronRight className="h-4 w-4" />
-        </button>
-        <button type="button" aria-label="Last page" title="Last page" onClick={() => onPageChange(totalPages)} disabled={atEnd} className={`${buttonClass} ${inactiveClass}`}>
-          <ChevronsRight className="h-4 w-4" />
-        </button>
-      </nav>
-    </div>
-  );
-};
 
 type IncidentAction = {
   action: string;
@@ -291,23 +231,26 @@ const ActionTrackerWorkspace = ({
 }: {
   schema: SectionConfig;
 }) => {
-  const { data: cards, loading, fetchAll, createRecord, updateStatus, deleteRecord } = useModuleData(schema.id);
+  const { data: cards, loading, fetchAll, createRecord, updateStatus, deleteRecord, pagination } = useModuleData(schema.id);
   const [showAddCard, setShowAddCard] = useState(false);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 15;
 
   const saveAction = async () => {
     const result = await createRecord(formData);
     if (result.success) {
       setFormData({});
       setShowAddCard(false);
-      await fetchAll();
+      setCurrentPage(1);
+      await fetchAll({ page: 1, limit: pageSize });
     }
   };
 
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    fetchAll({ page: currentPage, limit: pageSize });
+  }, [currentPage, fetchAll]);
 
   return (
     <Layout>
@@ -411,7 +354,8 @@ const ActionTrackerWorkspace = ({
               </div>
             </div>
           ))}
-        </div>
+          </div>
+          {cards.length > 0 && <PaginationControls currentPage={currentPage} totalPages={pagination.totalPages} totalRecords={pagination.totalRecords || cards.length} pageSize={pageSize} onPageChange={setCurrentPage} disabled={loading} className={`mt-5 ${CARD}`} itemLabel="actions" />}
 
         <div className={`${CARD} p-5`}>
           <div className="flex items-center gap-2 mb-4">
@@ -637,9 +581,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (schema.id === 'training-records') {
       delete applicableFilters.status;
       delete applicableFilters.riskRating;
+      delete applicableFilters.incidentCategory;
     } else {
-      if (!['hazard-reporting', 'near-miss'].includes(schema.id)) delete applicableFilters.month;
+      if (!['hazard-reporting', 'near-miss', 'incident-log'].includes(schema.id)) delete applicableFilters.month;
       if (schema.id !== 'hazard-reporting') delete applicableFilters.riskRating;
+      if (schema.id !== 'incident-log') delete applicableFilters.incidentCategory;
     }
     return applicableFilters;
   }, [filters, schema.id]);
@@ -650,12 +596,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     search: searchQuery || undefined,
     sortBy: sortConfig?.key || 'createdAt',
     sortOrder: sortConfig?.direction || 'desc',
-  }), [listFilters, currentPage, searchQuery, sortConfig]);
+    ...(schema.id === 'incident-log' && routeCategory ? { incidentCategory: routeCategory } : {}),
+  }), [listFilters, currentPage, searchQuery, sortConfig, schema.id, routeCategory]);
   const listFilterKey = useMemo(() => JSON.stringify({
     schemaId: schema.id,
     filters: listFilters,
     searchQuery,
-  }), [schema.id, listFilters, searchQuery]);
+    routeCategory,
+  }), [schema.id, listFilters, searchQuery, routeCategory]);
   const summaryQuery = useMemo(() => {
     if (!['hazard-reporting', 'training-records'].includes(schema.id)) return null;
     const { page: _page, limit: _limit, sortBy: _sortBy, sortOrder: _sortOrder, ...filtersOnly } = listQuery;
@@ -700,7 +648,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   }, [fetchAll, listQuery, schema.id, summaryQuery]);
   useEffect(() => { setCurrentPage(1); }, [listFilterKey]);
   useEffect(() => {
-    if (schema.id === 'incident-log' && routeCategory) setSearchQuery(routeCategory);
+    if (schema.id === 'incident-log' && routeCategory) setSearchQuery('');
   }, [schema.id, routeCategory]);
   useEffect(() => {
     if (!['hazard-reporting', 'incident-log', 'near-miss'].includes(schema.id) || !isAddModalOpen || editingId || !Object.keys(formData).length) return;
@@ -1089,7 +1037,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const filteredEntries = useMemo(() => {
     // Hazard and Near Miss filters are applied by MySQL before count/limit/offset. Do not
     // re-filter a server page in React or the displayed page can become sparse.
-    if (['hazard-reporting', 'near-miss'].includes(schema.id)) return entries;
+    if (['hazard-reporting', 'near-miss', 'incident-log'].includes(schema.id)) return entries;
     return entries.filter(entry => {
     const normalizedDepartment = (value: unknown) => String(value || '')
       .trim().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -1131,14 +1079,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   }, [entries, filters, routeCategory, schema.id]);
 
   const searchedEntries = useMemo(() => {
-    if (['hazard-reporting', 'near-miss'].includes(schema.id)) return filteredEntries;
+    if (['hazard-reporting', 'near-miss', 'incident-log'].includes(schema.id)) return filteredEntries;
     if (!searchQuery.trim()) return filteredEntries;
     const q = searchQuery.toLowerCase();
     return filteredEntries.filter(entry => JSON.stringify(entry).toLowerCase().includes(q));
   }, [filteredEntries, searchQuery, schema.id]);
 
   const sortedEntries = useMemo(() => {
-    if (['hazard-reporting', 'near-miss'].includes(schema.id)) return searchedEntries;
+    if (['hazard-reporting', 'near-miss', 'incident-log'].includes(schema.id)) return searchedEntries;
     if (!sortConfig) return searchedEntries;
     const valueForSort = (entry: any) => {
       const values: Record<string, unknown> = {
@@ -1192,8 +1140,6 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       return next;
     });
   };
-  const startRecord = pagination.totalRecords === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endRecord = Math.min(currentPage * PAGE_SIZE, pagination.totalRecords || sortedEntries.length);
   const visibleColumns = schema.columns.filter(col => !col.hideFromForm && col.type !== 'file');
   const departmentDisplayValue = (value: unknown) => {
     const text = String(value ?? '').trim();
@@ -2147,9 +2093,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}
-              startRecord={startRecord}
-              endRecord={endRecord}
-              totalRecords={searchedEntries.length}
+              totalRecords={pagination.totalRecords || searchedEntries.length}
+              pageSize={PAGE_SIZE}
               onPageChange={setCurrentPage}
             />
           )}
@@ -2481,9 +2426,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}
-              startRecord={startRecord}
-              endRecord={endRecord}
               totalRecords={pagination.totalRecords || searchedEntries.length}
+              pageSize={PAGE_SIZE}
               onPageChange={setCurrentPage}
             />
           )}
@@ -2614,7 +2558,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F0F0F0] px-4 py-3">
             <div>
               <h2 className="text-[14px] font-bold text-[#1C1C1E]">Incident Records</h2>
-              <p className="mt-0.5 text-[12px] text-[#6B7280]">{searchedEntries.length} records from the latest backend data</p>
+              <p className="mt-0.5 text-[12px] text-[#6B7280]">{pagination.totalRecords} records from the latest backend data</p>
             </div>
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9CA3AF]" />
@@ -2704,17 +2648,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           </div>
 
           {sortedEntries.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#F0F0F0] bg-[#FAFAFA] px-4 py-3">
-              <p className="text-[12px] text-[#6B7280]">Showing <span className="font-semibold text-[#374151]">{startRecord}-{endRecord}</span> of <span className="font-semibold text-[#374151]">{sortedEntries.length}</span> records</p>
-              <div className="flex items-center gap-1">
-                <button type="button" onClick={() => setCurrentPage(page => Math.max(1, page - 1))} disabled={currentPage === 1} className="h-8 w-8 rounded border border-[#DEDEDE] bg-white disabled:opacity-40"><ChevronLeft className="mx-auto h-4 w-4" /></button>
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => {
-                  const page = totalPages <= 5 ? index + 1 : Math.min(totalPages - 4, Math.max(1, currentPage - 2)) + index;
-                  return <button type="button" key={page} onClick={() => setCurrentPage(page)} className={`h-8 w-8 rounded border text-[13px] font-medium ${page === currentPage ? 'border-[#CB0017] bg-[#CB0017] text-white' : 'border-[#DEDEDE] bg-white text-[#374151]'}`}>{page}</button>;
-                })}
-                <button type="button" onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))} disabled={currentPage === totalPages} className="h-8 w-8 rounded border border-[#DEDEDE] bg-white disabled:opacity-40"><ChevronRight className="mx-auto h-4 w-4" /></button>
-              </div>
-            </div>
+            <PaginationControls currentPage={currentPage} totalPages={totalPages} totalRecords={pagination.totalRecords || sortedEntries.length} pageSize={PAGE_SIZE} onPageChange={setCurrentPage} />
           )}
         </div>
       </div>

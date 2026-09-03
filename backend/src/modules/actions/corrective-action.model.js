@@ -17,6 +17,12 @@ const CorrectiveAction = sequelize.define('CorrectiveAction', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
+  capaNumber: {
+    type: DataTypes.STRING(40),
+    allowNull: false,
+    unique: true,
+    comment: 'Readable register reference; the UUID remains the primary key',
+  },
   sourceType: {
     type: DataTypes.ENUM(...Object.values(CorrectiveActionSource)),
     allowNull: false,
@@ -26,6 +32,24 @@ const CorrectiveAction = sequelize.define('CorrectiveAction', {
     type: DataTypes.UUID,
     allowNull: false,
     comment: 'Polymorphic FK — ID of the source record (hazard/incident/audit/inspection)',
+  },
+  sourceItemId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Optional child item ID, such as an Audit Finding',
+  },
+  sourceItemKey: {
+    type: DataTypes.STRING(80),
+    allowNull: false,
+    comment: 'Stable deduplication key within the source record',
+  },
+  sourceReference: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+  },
+  incidentCategory: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
   },
   plantId: {
     type: DataTypes.UUID,
@@ -40,19 +64,29 @@ const CorrectiveAction = sequelize.define('CorrectiveAction', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  responsibleDepartmentId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'FK to the central departments master',
+  },
+  responsibility: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Source-provided person or responsibility text',
+  },
   assignedTo: {
     type: DataTypes.UUID,
-    allowNull: false,
+    allowNull: true,
     comment: 'FK → users.id — who must complete this action',
   },
   assignedBy: {
     type: DataTypes.UUID,
-    allowNull: false,
+    allowNull: true,
     comment: 'FK → users.id — who assigned this action',
   },
   dueDate: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
+    allowNull: true,
   },
   status: {
     type: DataTypes.ENUM(...Object.values(CorrectiveActionStatus)),
@@ -61,8 +95,8 @@ const CorrectiveAction = sequelize.define('CorrectiveAction', {
   },
   priority: {
     type: DataTypes.ENUM(...Object.values(SeverityLevel)),
-    allowNull: false,
-    defaultValue: 'medium',
+    allowNull: true,
+    defaultValue: null,
   },
   completedAt: {
     type: DataTypes.DATE,
@@ -94,11 +128,19 @@ const CorrectiveAction = sequelize.define('CorrectiveAction', {
     type: DataTypes.UUID,
     allowNull: true,
   },
+  lastSyncedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 }, {
   tableName: 'corrective_actions',
   paranoid: true,
   indexes: [
     { fields: ['source_type', 'source_id'], name: 'ca_source_idx' },
+    { fields: ['capa_number'], unique: true, name: 'corrective_actions_capa_number_unique' },
+    { fields: ['source_type', 'source_id', 'source_item_key'], unique: true, name: 'corrective_actions_source_item_unique' },
+    { fields: ['incident_category'], name: 'corrective_actions_incident_category_idx' },
+    { fields: ['responsible_department_id'], name: 'corrective_actions_responsible_department_idx' },
     { fields: ['plant_id'], name: 'ca_plant_id_idx' },
     { fields: ['assigned_to'], name: 'ca_assigned_to_idx' },
     { fields: ['status'], name: 'ca_status_idx' },

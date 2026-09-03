@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Filter, RotateCcw } from 'lucide-react';
+import { Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Filter, RotateCcw, Tags } from 'lucide-react';
 import { useFilters } from '../context/FilterContext';
 import { usePermissions } from '@cbl/auth';
 import { departmentLabel, useDepartments } from '../hooks/useDepartments';
+import { INCIDENT_CATEGORIES } from '../config/constants';
 
 interface FilterBarProps {
   showDepartment?: boolean;
@@ -61,6 +62,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       ? filters.month !== '' && filters.month !== 'All'
       : filters.status !== '' && filters.status !== 'All') ||
     (filters.year !== '' && filters.year !== 'All') ||
+    (isIncident && filters.month !== '' && filters.month !== 'All') ||
+    (isIncident && filters.incidentCategory !== '' && filters.incidentCategory !== 'All') ||
     filters.fromDate !== '' ||
     filters.toDate !== '';
 
@@ -69,6 +72,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     setFilter('riskRating', 'All');
     setFilter('status', 'All');
     setFilter('month', 'All');
+    setFilter('incidentCategory', 'All');
     setFilter('year', 'All');
     setFilter('fromDate', '');
     setFilter('toDate', '');
@@ -88,11 +92,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <button type="button" onClick={clearFilters} className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#7B1010] hover:text-[#5E0C0C]">
-              <RotateCcw className="h-4 w-4" />
-              <span className="hidden sm:inline">Reset All</span>
-            </button>
-            <span className="hidden h-7 w-px bg-[#E5E7EB] sm:block" />
+            {hasActiveFilters && <>
+              <button type="button" onClick={clearFilters} className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#7B1010] hover:text-[#5E0C0C]">
+                <RotateCcw className="h-4 w-4" />
+                <span className="hidden sm:inline">Reset All</span>
+              </button>
+              <span className="hidden h-7 w-px bg-[#E5E7EB] sm:block" />
+            </>}
             <button type="button" onClick={() => setCollapsed(value => !value)} className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#D9DDE4] px-3 text-[12px] font-semibold text-[#4B5563] hover:border-[#B8A5A8] hover:bg-[#FFF9F9]">
               <span className="hidden sm:inline">{collapsed ? 'Expand' : 'Collapse'}</span>
               {collapsed ? <ChevronDown className="h-4 w-4 text-[#7B1010]" /> : <ChevronUp className="h-4 w-4 text-[#7B1010]" />}
@@ -101,7 +107,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {!collapsed && (
-          <div className="grid grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-5">
+          <div className="grid grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:px-5">
             {showYear && (
               <label className="block">
                 <span className="mb-1.5 block text-[11px] font-medium text-[#1C1C1E]">Year</span>
@@ -109,6 +115,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
                   <select value={filters.year} onChange={e => setFilter('year', e.target.value)} className={incidentFieldClass}>
                     <option value="All">All Years</option>
+                    <option value="2023">2023</option>
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
                     <option value="2026">2026</option>
@@ -117,6 +124,18 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 </div>
               </label>
             )}
+
+            <label className="block">
+              <span className="mb-1.5 block text-[11px] font-medium text-[#1C1C1E]">Month</span>
+              <div className="relative">
+                <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
+                <select value={filters.month} onChange={e => setFilter('month', e.target.value)} className={incidentFieldClass}>
+                  <option value="All">All Months</option>
+                  {MONTHS.map((month, index) => <option key={month} value={String(index + 1)}>{month}</option>)}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B1010]" />
+              </div>
+            </label>
 
             {showDepartment && (
               <label className="block">
@@ -131,6 +150,18 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 </div>
               </label>
             )}
+
+            <label className="block">
+              <span className="mb-1.5 block text-[11px] font-medium text-[#1C1C1E]">Category</span>
+              <div className="relative">
+                <Tags className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7B1010]" />
+                <select value={filters.incidentCategory} onChange={e => setFilter('incidentCategory', e.target.value)} className={incidentFieldClass}>
+                  <option value="All">All Categories</option>
+                  {INCIDENT_CATEGORIES.map(category => <option key={category} value={category}>{category}</option>)}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B1010]" />
+              </div>
+            </label>
 
             {showStatus && (
               <label className="block">
@@ -223,7 +254,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         )
       )}
       {showDateRange && <><input type="date" value={filters.fromDate} onChange={e => setFilter('fromDate', e.target.value)} className="h-8 rounded-md border border-[#E0E0E0] bg-white px-2 text-[12px] text-[#1C1C1E] focus:border-[#7B1010] focus:outline-none" /><span className="text-[12px] text-[#9CA3AF]">–</span><input type="date" value={filters.toDate} onChange={e => setFilter('toDate', e.target.value)} className="h-8 rounded-md border border-[#E0E0E0] bg-white px-2 text-[12px] text-[#1C1C1E] focus:border-[#7B1010] focus:outline-none" /></>}
-      {hasActiveFilters && <button type="button" onClick={clearFilters} className="flex h-8 items-center gap-1 rounded-md border border-[#7B1010]/30 px-2 text-[12px] font-medium text-[#7B1010] hover:bg-[rgba(123,16,16,0.04)]"><RotateCcw className="h-3 w-3" /> Clear</button>}
+      {hasActiveFilters && <button type="button" onClick={clearFilters} className="flex h-8 items-center gap-1 rounded-md border border-[#7B1010]/30 px-2 text-[12px] font-medium text-[#7B1010] hover:bg-[rgba(123,16,16,0.04)]"><RotateCcw className="h-3 w-3" /> Reset All</button>}
     </div>
   );
 };

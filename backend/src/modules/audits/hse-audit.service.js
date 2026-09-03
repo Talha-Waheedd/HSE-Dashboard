@@ -8,6 +8,7 @@ const { MESSAGES } = require('../../shared/constants');
 const { sequelize } = require('../../database/connection');
 const { Op } = require('sequelize');
 const { AuditFinding } = require('../../database/models');
+const { syncBestEffort } = require('../actions/capa-sync.service');
 
 const scoringFor = (findings = []) => {
   const scores = findings.map((finding) => Number(finding.score)).filter((score) => Number.isInteger(score) && score >= 1 && score <= 4);
@@ -65,7 +66,9 @@ class HseAuditService {
       }
 
       await transaction.commit();
-      return this.getAuditById(audit.id);
+      const persisted = await this.getAuditById(audit.id);
+      await syncBestEffort('audit', audit.id);
+      return persisted;
     } catch (error) {
       await transaction.rollback();
       throw error;
@@ -148,7 +151,9 @@ class HseAuditService {
       }
       await audit.update(auditUpdates, { transaction });
       await transaction.commit();
-      return this.getAuditById(id);
+      const persisted = await this.getAuditById(id);
+      await syncBestEffort('audit', id);
+      return persisted;
     } catch (error) {
       await transaction.rollback();
       throw error;
@@ -175,7 +180,9 @@ class HseAuditService {
       updateData.completedDate = new Date();
     }
 
-    return auditRepository.updateById(id, updateData);
+    const result = await auditRepository.updateById(id, updateData);
+    await syncBestEffort('audit', id);
+    return result;
   }
 
   /**

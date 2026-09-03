@@ -15,6 +15,33 @@ const addAndCondition = (where, condition) => {
   where[Op.and] = [...(where[Op.and] || []), condition];
 };
 
+const hazardStatusLabel = (value) => ({
+  draft: 'Pending', reported: 'Open', submitted: 'Open', under_review: 'Pending', resolved: 'Close', closed: 'Close',
+}[String(value || '').toLowerCase()] || value || '');
+const csvDate = (value) => {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toISOString().slice(0, 10);
+};
+
+const serializeHazardCsv = (row) => {
+  const metadata = row.metadata || {};
+  return {
+    'Hazard ID': row.id,
+    Date: csvDate(row.reportedAt || row.createdAt),
+    Department: row.department?.code || row.department?.name || metadata.originated_department || metadata.department || '',
+    Location: row.location || metadata.location || '',
+    'Reported By': metadata.originator || metadata.reported_by || '',
+    'Hazard Category': metadata.hazard_category_id || row.category || '',
+    'Hazard Details': metadata.description || row.description || '',
+    'Type of Hazard': metadata.unsafe_type || '',
+    'Responsible Department': metadata.responsible_department || '',
+    'Risk Rating': metadata.risk_rating_id || row.severityLevel || '',
+    Status: hazardStatusLabel(row.status),
+    Remarks: metadata.remarks || '',
+  };
+};
+
 const buildHazardWhere = async (query = {}) => {
   const where = {};
   if (query.plantId && query.plantId !== 'All') where.plantId = query.plantId;
@@ -175,7 +202,13 @@ const getHazardById = asyncHandler(async (req, res) => {
 
 const exportHazards = asyncHandler(async (req, res) => {
   const where = await buildHazardWhere(req.query);
-  await sendCsvExport(res, Hazard, { where, order: parseOrder(req.query, { date: 'reportedAt', createdAt: 'createdAt' }) }, `hazards-${new Date().toISOString().slice(0, 10)}.csv`);
+  await sendCsvExport(res, Hazard, {
+    where,
+    include: [{ model: Department, as: 'department', attributes: ['name', 'code'], required: false }],
+    nest: true,
+    serializeRow: serializeHazardCsv,
+    order: parseOrder(req.query, { date: 'reportedAt', createdAt: 'createdAt' }),
+  }, `hazards-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 /**

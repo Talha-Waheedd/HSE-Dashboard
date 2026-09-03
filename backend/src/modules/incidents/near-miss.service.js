@@ -8,6 +8,7 @@ const IncidentStatus = require('../../shared/enums/IncidentStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { sequelize } = require('../../database/connection');
+const { syncBestEffort } = require('../actions/capa-sync.service');
 
 const yesNoLabel = (value) => {
   if (value === true || ['yes', 'y', 'true', '1'].includes(String(value ?? '').trim().toLowerCase())) return 'Yes';
@@ -158,8 +159,12 @@ class NearMissService {
     const transaction = await sequelize.transaction();
     try {
       const nearMiss = await nearMissRepository.create(persistedData, { transaction });
-      await ensureIncidentInvestigation(nearMiss, userId, transaction);
+      const investigation = await ensureIncidentInvestigation(nearMiss, userId, transaction);
       await transaction.commit();
+      await Promise.all([
+        syncBestEffort('near_miss', nearMiss.id),
+        investigation ? syncBestEffort('incident', investigation.id) : Promise.resolve(null),
+      ]);
       return nearMiss;
     } catch (error) {
       await transaction.rollback();
@@ -219,8 +224,12 @@ class NearMissService {
         ...nearMissFields,
         metadata: nextMetadata,
       };
-      await ensureIncidentInvestigation(updatedNearMiss, userId, transaction);
+      const investigation = await ensureIncidentInvestigation(updatedNearMiss, userId, transaction);
       await transaction.commit();
+      await Promise.all([
+        syncBestEffort('near_miss', id),
+        investigation ? syncBestEffort('incident', investigation.id) : Promise.resolve(null),
+      ]);
       return result;
     } catch (error) {
       await transaction.rollback();
@@ -256,8 +265,12 @@ class NearMissService {
         ...(nearMiss.get ? nearMiss.get({ plain: true }) : nearMiss),
         ...updateData,
       };
-      await ensureIncidentInvestigation(updatedNearMiss, userId, transaction);
+      const investigation = await ensureIncidentInvestigation(updatedNearMiss, userId, transaction);
       await transaction.commit();
+      await Promise.all([
+        syncBestEffort('near_miss', id),
+        investigation ? syncBestEffort('incident', investigation.id) : Promise.resolve(null),
+      ]);
       return result;
     } catch (error) {
       await transaction.rollback();

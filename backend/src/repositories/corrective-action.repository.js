@@ -1,11 +1,23 @@
 'use strict';
 
 const BaseRepository = require('./base.repository');
-const { CorrectiveAction, User, Plant } = require('../database/models');
+const {
+  CorrectiveAction, User, Plant, Department,
+} = require('../database/models');
 
 class CorrectiveActionRepository extends BaseRepository {
   constructor() {
     super(CorrectiveAction);
+  }
+
+  async findAndCountAll(options = {}) {
+    return this.model.findAndCountAll({
+      ...options,
+      distinct: true,
+      include: [
+        { model: Department, as: 'responsibleDepartment', attributes: ['id', 'name', 'code'], required: false },
+      ],
+    });
   }
 
   /**
@@ -19,6 +31,7 @@ class CorrectiveActionRepository extends BaseRepository {
         { model: User, as: 'assignee', attributes: ['id', 'firstName', 'lastName', 'email'] },
         { model: User, as: 'assigner', attributes: ['id', 'firstName', 'lastName', 'email'] },
         { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
+        { model: Department, as: 'responsibleDepartment', attributes: ['id', 'name', 'code'] },
       ],
     });
   }
@@ -33,6 +46,7 @@ class CorrectiveActionRepository extends BaseRepository {
     return this.findMany({ sourceType, sourceId }, {
       include: [
         { model: User, as: 'assignee', attributes: ['id', 'firstName', 'lastName', 'email'] },
+        { model: Department, as: 'responsibleDepartment', attributes: ['id', 'name', 'code'] },
       ],
       order: [['createdAt', 'DESC']],
     });

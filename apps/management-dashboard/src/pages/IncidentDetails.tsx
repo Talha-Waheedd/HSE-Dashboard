@@ -114,7 +114,7 @@ export const IncidentDetails = () => {
                   <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <DetailItem label="Employee ID" value={field('emp_id')} />
                     <DetailItem label="Shift" value={field('shift')} />
-                    <DetailItem label="Department" value={field('departmentId', field('department_id'))} />
+                    <DetailItem label="Department" value={incident.department?.code || incident.department?.name || field('department_code', field('department_name'))} />
                     <DetailItem label="Area manager" value={field('area_manager')} />
                     <DetailItem label="Gender" value={field('gender')} />
                     <DetailItem label="Reported by" value={field('reportedBy', field('reported_by'))} />
@@ -172,7 +172,7 @@ export const IncidentDetails = () => {
                 </div>
                 <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <DetailItem label="Incident number" value={field('incidentNumber', field('incident_number'))} />
-                  <DetailItem label="Plant" value={field('plantId', field('plant_id'))} />
+                  <DetailItem label="Plant" value={incident.plant?.name || field('plantId', field('plant_id'))} />
                   <DetailItem label="Lost days" value={field('lostDays', field('lost_days'))} />
                   <DetailItem label="Restricted days" value={field('restrictedDays', field('restricted_days'))} />
                   <DetailItem label="First aid given" value={field('firstAidGiven', field('first_aid_given'))} />
