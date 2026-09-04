@@ -27,6 +27,7 @@ const csvDate = (value) => {
 const incidentTypeLabel = (value) => ({
   first_aid: 'First Aid', mtc: 'MTC', rwc: 'RWC', lti: 'LTI', fatality: 'Fatality',
   fire: 'Fire', minor_fire: 'Minor Fire', major_fire: 'Major Fire', significant_near_miss: 'Significant Near Miss',
+  hazard_promoted: 'Hazard Investigation', near_miss_promoted: 'Near Miss Investigation',
 }[String(value || '').toLowerCase()] || String(value || '').replaceAll('_', ' '));
 
 const serializeIncidentCsv = (row) => {
@@ -56,12 +57,22 @@ const buildIncidentWhere = async (query = {}) => {
   if (query.severityLevel && query.severityLevel !== 'All') where.severityLevel = query.severityLevel;
 
   // The Incident Investigation leading-indicator page is backed by the
-  // incidents table, but must show only investigations generated from Near
-  // Miss submissions rather than every incident in the lagging register.
-  if (query.sourceType === 'near_miss' || query.investigationOnly === 'true') {
-    where.sourceNearMissId = { [Op.not]: null };
+  // incidents table, but includes only investigations generated from source
+  // reports rather than every accident in the lagging register.
+  if (query.investigationOnly === 'true') {
+    where[Op.or] = [
+      { sourceNearMissId: { [Op.not]: null } },
+      { sourceHazardId: { [Op.not]: null } },
+    ];
   }
+  if (query.excludeInvestigations === 'true') {
+    where.sourceNearMissId = null;
+    where.sourceHazardId = null;
+  }
+  if (query.sourceType === 'near_miss') where.sourceNearMissId = { [Op.not]: null };
+  if (query.sourceType === 'hazard') where.sourceHazardId = { [Op.not]: null };
   if (query.sourceNearMissId) where.sourceNearMissId = query.sourceNearMissId;
+  if (query.sourceHazardId) where.sourceHazardId = query.sourceHazardId;
 
   if (query.incidentType && query.incidentType !== 'All') {
     const requestedTypes = String(query.incidentType).split(',')

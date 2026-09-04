@@ -15,13 +15,18 @@ import { PlantPhotoCard }       from '../components/PlantPhotoCard';
 import { useFilters }           from '../context/FilterContext';
 import {
   CheckCircle2, FileWarning,
-  Users, BookOpen, AlertTriangle, ArrowRight, ShieldAlert,
+  BookOpen, AlertTriangle, ArrowRight, ShieldAlert,
   CheckCircle, XCircle, Info, RefreshCw,
   ChevronUp, ChevronDown,
 } from 'lucide-react';
-import { dashboardClient }      from '@cbl/api';
+import { dashboardClient, type DashboardIndicatorPreferences } from '@cbl/api';
 import { CHART_COLORS, PIE_COLORS } from '../config/constants';
-import { useDashboardMetrics, type DashboardRawData, type MetricItem } from '../hooks/useDashboardMetrics';
+import {
+  DEFAULT_DASHBOARD_INDICATOR_IDS,
+  useDashboardMetrics,
+  type DashboardRawData,
+  type MetricItem,
+} from '../hooks/useDashboardMetrics';
 
 const LOCATION_CARD_CONFIG = [
   {
@@ -62,7 +67,12 @@ const EnterpriseTooltip = ({ active, payload, label }: any) => {
 };
 
 // ===== Metric Detail Row (for leading/lagging modals) =====
-const MetricRow = ({ metric }: { metric: MetricItem }) => {
+const MetricRow = ({ metric, selected, onSelectionChange, selectionDisabled = false }: {
+  metric: MetricItem;
+  selected: boolean;
+  onSelectionChange: (metricId: string) => void;
+  selectionDisabled?: boolean;
+}) => {
   const navigate = useNavigate();
   const isClickable = metric.path && !metric.isPendingModule;
 
@@ -82,10 +92,25 @@ const MetricRow = ({ metric }: { metric: MetricItem }) => {
     <div
       onClick={() => isClickable && navigate(metric.path!)}
       className={`flex items-center justify-between gap-4 py-3 px-4 border-b border-[#F3F4F6] last:border-0 ${
+        selected ? 'bg-[#FFF7F7]' : ''
+      } ${
         isClickable ? 'cursor-pointer hover:bg-[#F9FAFB] transition-colors' : ''
       }`}
     >
       <div className="flex items-center gap-3 min-w-0">
+        <label
+          className="flex shrink-0 cursor-pointer items-center"
+          onClick={event => event.stopPropagation()}
+        >
+          <input
+            type="checkbox"
+            checked={selected}
+            disabled={selectionDisabled}
+            onChange={() => onSelectionChange(metric.id)}
+            aria-label={`Show ${metric.name} on the dashboard`}
+            className="h-4 w-4 rounded border-[#CBD5E1] accent-[#9B111E]"
+          />
+        </label>
         <div className="p-1.5 rounded" style={{ backgroundColor: iconBg.bg, color: iconBg.color }}>
           {iconEl}
         </div>
@@ -106,6 +131,41 @@ const MetricRow = ({ metric }: { metric: MetricItem }) => {
         )}
       </div>
     </div>
+  );
+};
+
+const DashboardMetricCard = ({ metric, onOpen }: { metric: MetricItem; onOpen: () => void }) => {
+  const Icon = metric.status === 'success'
+    ? CheckCircle
+    : metric.status === 'warning'
+      ? AlertTriangle
+      : metric.status === 'danger'
+        ? XCircle
+        : Info;
+  const clickable = Boolean(metric.path && !metric.isPendingModule);
+  const value = typeof metric.value === 'number'
+    ? metric.value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+    : metric.value;
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      disabled={!clickable}
+      className={`flex min-h-[116px] flex-col items-center justify-center rounded-lg border border-[#F0F0F0] p-3 text-center transition-colors ${metric.bgClass || 'bg-white'} ${
+        clickable ? 'cursor-pointer hover:bg-[#F9FAFB]' : 'cursor-default'
+      }`}
+    >
+      <Icon className={`mb-2 h-5 w-5 ${metric.iconClass || 'text-[#6B7280]'}`} />
+      <p className="text-[20px] font-bold text-[#1A1818] tabular-nums">
+        {value}
+        {metric.unit === '%' && <span className="ml-0.5 text-[14px] font-normal">%</span>}
+      </p>
+      <p className="mt-0.5 text-[11px] leading-tight text-[#4B5563]">{metric.name}</p>
+      {metric.unit && metric.unit !== '%' && (
+        <p className="mt-1 text-[10px] text-[#9CA3AF]">{metric.unit}</p>
+      )}
+    </button>
   );
 };
 
@@ -166,6 +226,20 @@ export const Dashboard = () => {
   const [loading,   setLoading]   = useState(true);
   const [isLeadingOpen, setIsLeadingOpen] = useState(false);
   const [isLaggingOpen, setIsLaggingOpen] = useState(false);
+  const [indicatorPreferences, setIndicatorPreferences] = useState<DashboardIndicatorPreferences>({
+    leadingIndicatorIds: [...DEFAULT_DASHBOARD_INDICATOR_IDS.leading],
+    laggingIndicatorIds: [...DEFAULT_DASHBOARD_INDICATOR_IDS.lagging],
+    customized: false,
+  });
+  const [leadingSelection, setLeadingSelection] = useState<string[]>([
+    ...DEFAULT_DASHBOARD_INDICATOR_IDS.leading,
+  ]);
+  const [laggingSelection, setLaggingSelection] = useState<string[]>([
+    ...DEFAULT_DASHBOARD_INDICATOR_IDS.lagging,
+  ]);
+  const [leadingSelectionMessage, setLeadingSelectionMessage] = useState<string | null>(null);
+  const [laggingSelectionMessage, setLaggingSelectionMessage] = useState<string | null>(null);
+  const [savingPreference, setSavingPreference] = useState<'leading' | 'lagging' | null>(null);
 
   const [hazards,    setHazards]    = useState<any[]>([]);
   const [hazardTotal, setHazardTotal] = useState(0);
@@ -183,6 +257,22 @@ export const Dashboard = () => {
   });
 
   useEffect(() => {
+    let active = true;
+    dashboardClient.getIndicatorPreferences()
+      .then(response => {
+        if (!active) return;
+        const preferences = response.data.data;
+        setIndicatorPreferences(preferences);
+        setLeadingSelection([...preferences.leadingIndicatorIds]);
+        setLaggingSelection([...preferences.laggingIndicatorIds]);
+      })
+      .catch(error => {
+        console.error('Unable to load dashboard indicator preferences:', error);
+      });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       const requestId = ++requestSequence.current;
       // Keep the last successful dashboard visible while polling in the
@@ -196,9 +286,9 @@ export const Dashboard = () => {
         if (!overview) throw new Error('Dashboard overview returned no data');
         const summary = overview.summary || {};
         const stats = {
-          hazards: { total: summary.hazards?.total || 0, Open: summary.hazards?.open || 0, Closed: summary.hazards?.closed || 0, severity: summary.hazards?.severity || {} },
+          hazards: { total: summary.hazards?.total || 0, Open: summary.hazards?.open || 0, Closed: summary.hazards?.closed || 0, severity: summary.hazards?.severity || {}, byCategory: overview.charts?.hazards || {} },
           nearMisses: { total: summary.nearMisses?.total || 0 },
-          incidents: { total: summary.incidents?.total || 0, LTI: summary.incidents?.lti || 0, RWC: summary.incidents?.rwc || 0, MTC: summary.incidents?.mtc || 0, 'First Aid': summary.incidents?.firstAid || 0, Fatality: summary.incidents?.fatalities || 0 },
+          incidents: { total: summary.incidents?.total || 0, LTI: summary.incidents?.lti || 0, RWC: summary.incidents?.rwc || 0, MTC: summary.incidents?.mtc || 0, 'First Aid': summary.incidents?.firstAid || 0, Fatality: summary.incidents?.fatalities || 0, Fire: summary.incidents?.fire || 0 },
           training: { total: summary.training?.total || 0, manhours: summary.training?.manhours || 0 },
           correctiveActions: { total: summary.correctiveActions?.total || 0, Open: summary.correctiveActions?.open || 0, Closed: summary.correctiveActions?.closed || 0 },
           audits: { total: summary.assurance?.audits || 0 }, inspections: { total: summary.assurance?.inspections || 0 },
@@ -237,6 +327,81 @@ export const Dashboard = () => {
   }, [filters]);
 
   const { leadingMetricsDetail, laggingMetricsDetail } = useDashboardMetrics(rawData);
+
+  const selectedMetrics = (ids: string[], available: MetricItem[], fallbackIds: readonly string[]) => {
+    const byId = new Map(available.map(metric => [metric.id, metric]));
+    const selected = ids.map(id => byId.get(id)).filter((metric): metric is MetricItem => Boolean(metric));
+    return selected.length > 0
+      ? selected
+      : fallbackIds.map(id => byId.get(id)).filter((metric): metric is MetricItem => Boolean(metric));
+  };
+
+  const selectedLeadingMetrics = selectedMetrics(
+    indicatorPreferences.leadingIndicatorIds,
+    leadingMetricsDetail,
+    DEFAULT_DASHBOARD_INDICATOR_IDS.leading,
+  );
+  const selectedLaggingMetrics = selectedMetrics(
+    indicatorPreferences.laggingIndicatorIds,
+    laggingMetricsDetail,
+    DEFAULT_DASHBOARD_INDICATOR_IDS.lagging,
+  );
+
+  const openLeadingSelection = () => {
+    setLeadingSelection([...indicatorPreferences.leadingIndicatorIds]);
+    setLeadingSelectionMessage(null);
+    setIsLeadingOpen(true);
+  };
+
+  const openLaggingSelection = () => {
+    setLaggingSelection([...indicatorPreferences.laggingIndicatorIds]);
+    setLaggingSelectionMessage(null);
+    setIsLaggingOpen(true);
+  };
+
+  const toggleIndicatorSelection = (kind: 'leading' | 'lagging', metricId: string) => {
+    const selection = kind === 'leading' ? leadingSelection : laggingSelection;
+    const setSelection = kind === 'leading' ? setLeadingSelection : setLaggingSelection;
+    const setMessage = kind === 'leading' ? setLeadingSelectionMessage : setLaggingSelectionMessage;
+
+    if (selection.includes(metricId)) {
+      setSelection(selection.filter(id => id !== metricId));
+      setMessage(null);
+      return;
+    }
+    if (selection.length >= 3) {
+      setMessage('You can select up to 3 indicators.');
+      return;
+    }
+    setSelection([...selection, metricId]);
+    setMessage(null);
+  };
+
+  const saveIndicatorSelection = async (kind: 'leading' | 'lagging') => {
+    const selection = kind === 'leading' ? leadingSelection : laggingSelection;
+    const setMessage = kind === 'leading' ? setLeadingSelectionMessage : setLaggingSelectionMessage;
+    if (selection.length === 0) {
+      setMessage('Select at least one indicator.');
+      return;
+    }
+
+    setSavingPreference(kind);
+    setMessage(null);
+    try {
+      const response = await dashboardClient.updateIndicatorPreferences({
+        leadingIndicatorIds: kind === 'leading' ? selection : indicatorPreferences.leadingIndicatorIds,
+        laggingIndicatorIds: kind === 'lagging' ? selection : indicatorPreferences.laggingIndicatorIds,
+      });
+      setIndicatorPreferences(response.data.data);
+      if (kind === 'leading') setIsLeadingOpen(false);
+      else setIsLaggingOpen(false);
+    } catch (error) {
+      console.error('Unable to save dashboard indicator preferences:', error);
+      setMessage('Unable to save the selection. Please try again.');
+    } finally {
+      setSavingPreference(null);
+    }
+  };
 
   // ===== KPI Computations (unchanged business logic) =====
   // The aggregate endpoint applies the same year, date, department, and
@@ -417,23 +582,15 @@ export const Dashboard = () => {
           <Panel className="p-5">
             <SectionHeader
               title="Leading Indicators"
-              onViewAll={() => setIsLeadingOpen(true)}
+              onViewAll={openLeadingSelection}
             />
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: 'Hazards Reported', value: totalHazards,          icon: FileWarning,   path: '/hazard-reporting' },
-                { label: 'Training Sessions', value: totalTrainingSessions, icon: Users,          path: '/training-records' },
-                { label: 'CAPA Closure',      value: `${closureRateCAPA}%`, icon: CheckCircle2, path: '/action-tracker'   },
-              ].map(({ label, value, icon: Icon, path }) => (
-                <div
-                  key={label}
-                  onClick={() => navigate(path)}
-                  className="flex flex-col items-center text-center cursor-pointer p-3 rounded-lg hover:bg-[#F9FAFB] transition-colors border border-[#F0F0F0]"
-                >
-                  <Icon className="h-5 w-5 text-[#1B7C1B] mb-2" />
-                  <p className="text-[20px] font-bold text-[#1A1818] tabular-nums">{value}</p>
-                  <p className="text-[11px] text-[#6B7280] mt-0.5 leading-tight">{label}</p>
-                </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {selectedLeadingMetrics.map(metric => (
+                <DashboardMetricCard
+                  key={metric.id}
+                  metric={metric}
+                  onOpen={() => metric.path && navigate(metric.path)}
+                />
               ))}
             </div>
           </Panel>
@@ -442,23 +599,15 @@ export const Dashboard = () => {
           <Panel className="p-5">
             <SectionHeader
               title="Lagging Indicators"
-              onViewAll={() => setIsLaggingOpen(true)}
+              onViewAll={openLaggingSelection}
             />
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                { label: 'Total',     value: totalIncidents, color: '#6B7280' },
-                { label: 'First Aid', value: firstAidCases,  color: '#DC8E00' },
-                { label: 'LTI',       value: ltiCases,       color: '#CB0017' },
-                { label: 'Fatality',  value: fatalities,     color: '#7F1D1D' },
-              ].map(({ label, value, color }) => (
-                <div
-                  key={label}
-                  onClick={() => navigate('/incident-log')}
-                  className="flex flex-col items-center text-center cursor-pointer p-3 rounded-lg hover:bg-[#F9FAFB] transition-colors border border-[#F0F0F0]"
-                >
-                  <p className="text-[22px] font-bold tabular-nums" style={{ color }}>{value}</p>
-                  <p className="text-[11px] text-[#6B7280] mt-0.5">{label}</p>
-                </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {selectedLaggingMetrics.map(metric => (
+                <DashboardMetricCard
+                  key={metric.id}
+                  metric={metric}
+                  onOpen={() => metric.path && navigate(metric.path)}
+                />
               ))}
             </div>
           </Panel>
@@ -685,12 +834,32 @@ export const Dashboard = () => {
         isOpen={isLeadingOpen}
         onClose={() => setIsLeadingOpen(false)}
         title="Leading Indicators — Full Breakdown"
-        description="Proactive safety measures and prevention metrics"
+        description="Proactive safety measures and prevention metrics. Select up to 3 for your dashboard."
       >
         <div className="bg-white border border-[#E0E0E0] rounded-lg overflow-hidden">
           {leadingMetricsDetail.map(metric => (
-            <MetricRow key={metric.id} metric={metric} />
+            <MetricRow
+              key={metric.id}
+              metric={metric}
+              selected={leadingSelection.includes(metric.id)}
+              selectionDisabled={savingPreference === 'leading'}
+              onSelectionChange={metricId => toggleIndicatorSelection('leading', metricId)}
+            />
           ))}
+        </div>
+        <div className="mt-4 flex flex-col gap-3 border-t border-[#E5E7EB] pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[12px] font-medium text-[#4B5563]">{leadingSelection.length} of 3 selected</p>
+            {leadingSelectionMessage && <p className="mt-1 text-[12px] text-[#B91C1C]">{leadingSelectionMessage}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={() => saveIndicatorSelection('leading')}
+            disabled={savingPreference !== null}
+            className="rounded-md bg-[#9B111E] px-5 py-2.5 text-[12px] font-semibold text-white hover:bg-[#7B1010] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {savingPreference === 'leading' ? 'Saving…' : 'Save Selection'}
+          </button>
         </div>
       </CenterModal>
 
@@ -698,12 +867,32 @@ export const Dashboard = () => {
         isOpen={isLaggingOpen}
         onClose={() => setIsLaggingOpen(false)}
         title="Lagging Indicators — Full Breakdown"
-        description="Reactive safety measures from past incidents"
+        description="Reactive safety measures from past incidents. Select up to 3 for your dashboard."
       >
         <div className="bg-white border border-[#E0E0E0] rounded-lg overflow-hidden">
           {laggingMetricsDetail.map(metric => (
-            <MetricRow key={metric.id} metric={metric} />
+            <MetricRow
+              key={metric.id}
+              metric={metric}
+              selected={laggingSelection.includes(metric.id)}
+              selectionDisabled={savingPreference === 'lagging'}
+              onSelectionChange={metricId => toggleIndicatorSelection('lagging', metricId)}
+            />
           ))}
+        </div>
+        <div className="mt-4 flex flex-col gap-3 border-t border-[#E5E7EB] pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[12px] font-medium text-[#4B5563]">{laggingSelection.length} of 3 selected</p>
+            {laggingSelectionMessage && <p className="mt-1 text-[12px] text-[#B91C1C]">{laggingSelectionMessage}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={() => saveIndicatorSelection('lagging')}
+            disabled={savingPreference !== null}
+            className="rounded-md bg-[#9B111E] px-5 py-2.5 text-[12px] font-semibold text-white hover:bg-[#7B1010] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {savingPreference === 'lagging' ? 'Saving…' : 'Save Selection'}
+          </button>
         </div>
       </CenterModal>
     </Layout>

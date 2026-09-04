@@ -64,6 +64,7 @@ export const hazardReportingSchema: SectionConfig = {
     { key: 'person_name', label: 'Person Name', type: 'text', section: 'Hazard Details' },
     { key: 'person_category', label: 'Person Type', type: 'select', options: ['Employee', 'Contractor', 'Visitor', 'Other'], section: 'Hazard Details' },
     { key: 'corrective_action', label: 'Corrective Action', type: 'textarea', section: 'Corrective Actions' },
+    { key: 'investigation_required', label: 'Further Investigation Required', type: 'select', options: ['Yes', 'No'], section: 'Corrective Actions' },
     { key: 'responsible_person', label: 'Responsible Person', type: 'text', required: true, section: 'Assignment' },
     { key: 'responsible_department', label: 'Responsible Department', type: 'select', options: [], section: 'Assignment' },
     { key: 'target_date', label: 'Target Date', type: 'date', section: 'Assignment' },
@@ -143,6 +144,16 @@ export const incidentLogSchema: SectionConfig = {
     { key: 'timeline', label: 'Timeline', type: 'date', section: 'Assignment' },
     { key: 'status_id', label: 'Status', type: 'select', options: STATUSES, required: true, section: 'Assignment' }
   ]
+};
+
+// Accident Reporting is the generic entry point for the canonical incidents
+// register. It deliberately reuses the Incident Log fields and category master
+// so Lagging Indicator pages remain filtered views of one physical record.
+export const accidentReportingSchema: SectionConfig = {
+  ...incidentLogSchema,
+  id: 'accident-reporting',
+  title: 'Accident Reporting',
+  path: '/accident-reporting',
 };
 
 export const actionTrackerSchema: SectionConfig = {
@@ -242,6 +253,7 @@ export const inspectionRecordsSchema: SectionConfig = {
 export const ALL_SECTIONS = [
   hazardReportingSchema,
   nearMissSchema,
+  accidentReportingSchema,
   incidentLogSchema,
   trainingRecordsSchema,
   actionTrackerSchema,

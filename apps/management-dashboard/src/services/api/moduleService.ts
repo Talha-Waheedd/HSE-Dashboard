@@ -52,6 +52,7 @@ const normalizeMasterAnalysisRecord = (item: any) => ({
 const schemaToEndpoint: Record<string, string> = {
   'hazard-reporting': '/hazards',
   'near-miss': '/near-misses',
+  'accident-reporting': '/incidents',
   'incident-log': '/incidents',
   'training-records': '/trainings',
   'action-tracker': '/corrective-actions',
@@ -148,7 +149,7 @@ const prepareRequestParams = (params: Record<string, unknown> = {}, schemaId?: s
   Object.entries(requestParams).forEach(([key, value]) => {
     if (value === '' || value === null || value === undefined || value === 'All') delete requestParams[key];
   });
-  if (schemaId && ['hazard-reporting', 'near-miss', 'incident-log', 'training-records', 'action-tracker', 'audit-management', 'critical-audit-plan'].includes(schemaId) && requestParams.status) {
+  if (schemaId && ['hazard-reporting', 'near-miss', 'incident-log', 'accident-reporting', 'training-records', 'action-tracker', 'audit-management', 'critical-audit-plan'].includes(schemaId) && requestParams.status) {
     if (schemaId === 'near-miss') {
       const normalizedStatus = String(requestParams.status).trim().toLowerCase();
       requestParams.status = ['close', 'closed'].includes(normalizedStatus)
@@ -162,14 +163,15 @@ const prepareRequestParams = (params: Record<string, unknown> = {}, schemaId?: s
   }
   if (schemaId === 'audit-management') requestParams.hasPlan = true;
   if (schemaId === 'critical-audit-plan') requestParams.source = schemaId;
-  if (schemaId === 'incident-log' && requestParams.incidentCategory) {
+  if (['incident-log', 'accident-reporting'].includes(schemaId || '') && requestParams.incidentCategory) {
     requestParams.incidentType = requestParams.incidentCategory;
     delete requestParams.incidentCategory;
   }
-  if (schemaId === 'incident-log' && requestParams.riskRating) {
+  if (['incident-log', 'accident-reporting'].includes(schemaId || '') && requestParams.riskRating) {
     requestParams.severityLevel = String(requestParams.riskRating).trim().toLowerCase();
     delete requestParams.riskRating;
   }
+  if (schemaId === 'accident-reporting') requestParams.excludeInvestigations = true;
   return requestParams;
 };
 const normalizeIncidentActions = (actions: unknown) => Array.isArray(actions) ? actions.map((item: any) => ({
@@ -262,6 +264,12 @@ export const moduleService = {
         // metadata can contain legacy display dates and must not override it.
         date: item.reportedAt || item.reported_at || item.metadata?.date || item.createdAt || item.created_at || new Date().toISOString(),
         status_id: item.metadata?.status_id || statusFromApi(item.status),
+        investigation_required: yesNoFromApi(
+          item.furtherInvestigationRequired ??
+          item.further_investigation_required ??
+          item.metadata?.investigation_required ??
+          item.metadata?.further_investigation_required
+        ) || 'No',
         department_id: departmentDisplayValue(
           item.department?.code,
           item.department?.name,
@@ -294,7 +302,7 @@ export const moduleService = {
         status: nearMissStatusFromApi(item.status ?? item.status_id ?? item.metadata?.status_id),
         status_id: nearMissStatusFromApi(item.status ?? item.status_id ?? item.metadata?.status_id),
       }));
-    } else if (schemaId === 'incident-log') {
+    } else if (schemaId === 'incident-log' || schemaId === 'accident-reporting') {
       rawData = rawData.map((item: any) => ({
         ...item,
         description: item.metadata?.description || item.description,
@@ -401,6 +409,7 @@ export const moduleService = {
         // saves reliable when an edit/import supplies `status` instead of
         // `status_id`, while the backend still receives a canonical enum.
         status: statusToApi(payload.status_id ?? payload.status ?? 'Open', schemaId),
+        furtherInvestigationRequired: yesNoToApi(payload.investigation_required) ?? false,
       };
     } else if (schemaId === 'near-miss') {
       payload = {
@@ -418,7 +427,7 @@ export const moduleService = {
         reportedAt: payload.date,
         status: statusToApi(payload.status || 'Open', schemaId)
       };
-    } else if (schemaId === 'incident-log') {
+    } else if (schemaId === 'incident-log' || schemaId === 'accident-reporting') {
       payload = {
         ...payload,
         plantId: payload.plantId || DEFAULT_PLANT_ID,
@@ -426,6 +435,7 @@ export const moduleService = {
         description: payload.description || 'No description provided',
         incidentDate: payload.date || new Date().toISOString(),
         incidentType: String(payload.incident_category_id || 'General').toLowerCase().replaceAll(' ', '_'),
+        departmentId: isUuid(payload.department_id) ? payload.department_id : undefined,
         severityLevel: severityToApi(payload.risk_rating_id || 'Medium'),
         immediateAction: payload.immediate_cause,
         rootCause: payload.root_cause,
@@ -485,6 +495,7 @@ export const moduleService = {
         severityLevel: severityToApi(payload.risk_rating_id || 'low'),
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
         status: statusToApi(payload.status_id, schemaId),
+        furtherInvestigationRequired: yesNoToApi(payload.investigation_required) ?? false,
       };
     } else if (schemaId === 'near-miss') {
       payload = {
@@ -503,13 +514,14 @@ export const moduleService = {
         reportedAt: payload.date,
         status: statusToApi(payload.status, schemaId)
       };
-    } else if (schemaId === 'incident-log') {
+    } else if (schemaId === 'incident-log' || schemaId === 'accident-reporting') {
       payload = {
         ...payload,
         title: payload.description ? payload.description.substring(0, 50) : 'Incident Log',
         description: payload.description,
         incidentDate: payload.date,
         incidentType: payload.incident_category_id ? String(payload.incident_category_id).toLowerCase().replaceAll(' ', '_') : undefined,
+        departmentId: payload.department_id === '' ? null : isUuid(payload.department_id) ? payload.department_id : undefined,
         severityLevel: severityToApi(payload.risk_rating_id),
         immediateAction: payload.immediate_cause,
         rootCause: payload.root_cause,

@@ -1,5 +1,7 @@
 import './incident-investigation-print.css';
 import { createPortal } from 'react-dom';
+import { ClcChartPrint } from './ClcChartPrint';
+import type { ClcAnalysis } from '../config/clcChart';
 
 type RecordData = Record<string, any>;
 
@@ -7,6 +9,7 @@ interface IncidentInvestigationPrintProps {
   incident: RecordData;
   form: Record<string, string>;
   pictureUrls: string[];
+  clcAnalysis: ClcAnalysis;
 }
 
 const text = (value: unknown) => value === undefined || value === null ? '' : String(value);
@@ -26,7 +29,7 @@ const Check = ({ selected }: { selected: boolean }) => (
 
 const Value = ({ children }: { children?: unknown }) => <td className="incident-print-value">{text(children)}</td>;
 
-export const IncidentInvestigationPrint = ({ incident, form, pictureUrls }: IncidentInvestigationPrintProps) => {
+export const IncidentInvestigationPrint = ({ incident, form, pictureUrls, clcAnalysis }: IncidentInvestigationPrintProps) => {
   const metadata = incident.metadata || {};
   const inherited = {
     title: incident.title || metadata.title_of_accident,
@@ -142,7 +145,7 @@ export const IncidentInvestigationPrint = ({ incident, form, pictureUrls }: Inci
         <section className="incident-print-box incident-print-pictures">
           <div className="incident-print-section-title"><strong>Safety Incident Pictures</strong><span>Show the pictures of the event, area and loss</span></div>
           <div className="incident-print-picture-grid">
-            {pictureUrls.map((url, index) => <img key={url} src={url} alt={`Safety incident evidence ${index + 1}`} />)}
+            {pictureUrls.slice(0, 4).map((url, index) => <img key={url} src={url} alt={`Safety incident evidence ${index + 1}`} />)}
           </div>
         </section>
 
@@ -159,6 +162,7 @@ export const IncidentInvestigationPrint = ({ incident, form, pictureUrls }: Inci
           </tbody>
         </table>
       </section>
+      <ClcChartPrint analysis={clcAnalysis} />
     </article>,
     document.body,
   );

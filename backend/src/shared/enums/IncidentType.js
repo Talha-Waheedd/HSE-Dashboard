@@ -9,6 +9,7 @@ const IncidentType = Object.freeze({
   FIRE: 'fire',
   PROPERTY_DAMAGE: 'property_damage',
   ENVIRONMENTAL: 'environmental',
+  HAZARD_PROMOTED: 'hazard_promoted',
   NEAR_MISS_PROMOTED: 'near_miss_promoted',
 });
 

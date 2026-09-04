@@ -38,4 +38,5 @@ export const uploadClient = {
   getFile: async (attachmentId: string) => apiClient.get<Blob>(`/attachments/${encodeURIComponent(attachmentId)}/file`, {
     responseType: "blob",
   }),
+  delete: async (attachmentId: string) => apiClient.delete(`/attachments/${encodeURIComponent(attachmentId)}`),
 };

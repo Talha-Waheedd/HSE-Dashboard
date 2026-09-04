@@ -7,6 +7,8 @@ import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
 import { StatusBadge } from '../components/StatusBadge';
 import { IncidentInvestigationPrint } from '../components/IncidentInvestigationPrint';
+import { ClcChart } from '../components/ClcChart';
+import { createEmptyClcAnalysis, normalizeClcAnalysis } from '../config/clcChart';
 
 type RecordData = Record<string, any>;
 type FormData = Record<string, string>;
@@ -63,6 +65,7 @@ export const IncidentInvestigationDetails = () => {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [pictureUrls, setPictureUrls] = useState<string[]>([]);
+  const [clcAnalysis, setClcAnalysis] = useState(createEmptyClcAnalysis);
 
   const loadIncident = useCallback(async () => {
     if (!id) { setError('Investigation ID is missing.'); setLoading(false); return; }
@@ -72,6 +75,7 @@ export const IncidentInvestigationDetails = () => {
       const metadata = data?.metadata || {};
       setIncident(data);
       setForm(Object.keys(emptyForm).reduce((values, key) => ({ ...values, [key]: String(metadata[key] ?? '') }), { ...emptyForm }));
+      setClcAnalysis(normalizeClcAnalysis(metadata.clc_analysis));
     } catch (requestError: any) {
       setError(requestError.response?.data?.message || 'Unable to load this investigation.');
     } finally {
@@ -90,7 +94,7 @@ export const IncidentInvestigationDetails = () => {
         const attachments = Array.isArray(response.data) ? response.data : [];
         const images = attachments.filter(attachment =>
           String(attachment.mimeType || '').startsWith('image/') || /\.(png|jpe?g)$/i.test(attachment.originalName || ''),
-        );
+        ).slice(0, 4);
         const files = await Promise.all(images.map(attachment => uploadClient.getFile(attachment.id)));
         files.forEach(file => objectUrls.push(URL.createObjectURL(file.data)));
         if (active) setPictureUrls([...objectUrls]);
@@ -104,13 +108,14 @@ export const IncidentInvestigationDetails = () => {
   }, [id]);
 
   const metadata = incident?.metadata || {};
+  const sourceLabel = incident?.sourceHazardId || metadata.source_type === 'hazard' ? 'Hazard' : 'Near Miss';
   const department = incident?.department?.code || incident?.department?.name || metadata.department || '—';
   const inherited = {
     title: incident?.title || metadata.title_of_accident || '',
     date: dateInputValue(incident?.incidentDate || metadata.date_of_accident),
     time: timeInputValue(incident?.incidentTime || metadata.time),
     employeeId: metadata.emp_id || '',
-    reportedBy: metadata.reported_by || '',
+    reportedBy: metadata.reported_by || metadata.source_reported_by || metadata.originator || '',
     place: incident?.location || metadata.place_of_accident || '',
     sufferer: incident?.injuredPersonName || metadata.name_of_sufferer || '',
     designation: metadata.designation || '',
@@ -133,7 +138,7 @@ export const IncidentInvestigationDetails = () => {
     try {
       const immediateAction = form.immediate_action_taken || form.preventive_action_safety_measures || incident?.immediateAction;
       await apiClient.put(`/incidents/${id}`, {
-        metadata: { ...metadata, ...form },
+        metadata: { ...metadata, ...form, clc_analysis: clcAnalysis },
         ...(immediateAction ? { immediateAction } : {}),
       });
       await loadIncident();
@@ -146,15 +151,15 @@ export const IncidentInvestigationDetails = () => {
   };
 
   return <Layout>
-    <ContextHeader title="Incident Investigation" breadcrumbs={['Leading Indicators', 'Incident Investigation', 'Details']} subtitle="Complete and review the investigation generated from the Near Miss record." actions={[{ label: 'Print', icon: <Printer />, onClick: printInvestigation, variant: 'outlined', disabled: !incident }, { label: 'Back to Investigations', icon: <ArrowLeft />, onClick: () => navigate('/leading-indicators/incident-investigation'), variant: 'outlined' }]} />
+    <ContextHeader title="Incident Investigation" breadcrumbs={['Leading Indicators', 'Incident Investigation', 'Details']} subtitle={`Complete and review the investigation generated from the ${sourceLabel} record.`} actions={[{ label: 'Print', icon: <Printer />, onClick: printInvestigation, variant: 'outlined', disabled: !incident }, { label: 'Back to Investigations', icon: <ArrowLeft />, onClick: () => navigate('/leading-indicators/incident-investigation'), variant: 'outlined' }]} />
     <main className="min-h-full bg-[#F7F7F5] px-4 py-5 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-5">
         {loading && <div className="rounded-xl border border-[#E8E0D2] bg-white p-8 text-center text-sm text-[#8A8F98]">Loading investigation...</div>}
         {!loading && error && <div className="rounded-xl border border-[#FECACA] bg-[#FFF7F7] p-5 text-sm text-[#991B1B]" role="alert">{error}</div>}
         {!loading && !error && incident && <>
-          <section className="flex flex-col gap-3 rounded-xl border border-[#D9E1EC] bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF]">Generated from Near Miss</p><h1 className="mt-1 text-xl font-bold text-[#2C1810]">{valueOrDash(incident.incidentNumber || id)}</h1></div><div className="flex gap-2"><StatusBadge status="Significant Near Miss" size="md" /><StatusBadge status={incident.status || 'under_investigation'} size="md" /></div></section>
+          <section className="flex flex-col gap-3 rounded-xl border border-[#D9E1EC] bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF]">Generated from {sourceLabel}</p><h1 className="mt-1 text-xl font-bold text-[#2C1810]">{valueOrDash(incident.incidentNumber || id)}</h1></div><div className="flex gap-2"><StatusBadge status={sourceLabel} size="md" /><StatusBadge status={incident.status || 'under_investigation'} size="md" /></div></section>
           {message && <div className="rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 text-sm font-semibold text-[#166534]" role="status">{message}</div>}
-          <Panel title="Accident Investigation Report — Near Miss Information">
+          <Panel title={`Accident Investigation Report — ${sourceLabel} Information`}>
             <InputField label="Title of Accident" value={inherited.title} readOnly />
             <InputField label="Date of Accident" value={inherited.date} type="date" readOnly />
             <InputField label="Time" value={inherited.time} type="time" readOnly />
@@ -195,10 +200,11 @@ export const IncidentInvestigationDetails = () => {
             <div className="sm:col-span-2 flex items-center gap-2 border-t border-[#F0F0F0] pt-4"><ShieldAlert className="h-4 w-4 text-[#CB0017]" /><p className="text-xs text-[#64748B]">Safety Incident Pictures can be attached through the existing attachment workflow for this Incident Investigation.</p></div>
           </Panel>
           <div className="flex justify-end"><button type="button" onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-md bg-[#CB0017] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#A30012] disabled:cursor-not-allowed disabled:opacity-60"><Save className="h-4 w-4" />{saving ? 'Saving...' : 'Save Investigation'}</button></div>
+          <ClcChart value={clcAnalysis} onChange={setClcAnalysis} onSave={save} saving={saving} />
         </>}
       </div>
     </main>
-      {incident && <IncidentInvestigationPrint incident={incident} form={form} pictureUrls={pictureUrls} />}
+      {incident && <IncidentInvestigationPrint incident={incident} form={form} pictureUrls={pictureUrls} clcAnalysis={clcAnalysis} />}
   </Layout>;
 };
 

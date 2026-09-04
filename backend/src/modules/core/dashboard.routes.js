@@ -6,9 +6,18 @@ const dashboardController = require('./dashboard.controller');
 const overviewController = require('./overview.controller');
 const { authenticate } = require('../../core/middleware/auth.middleware');
 const { requirePermissions } = require('../../core/middleware/rbac.middleware');
+const { validate } = require('../../core/middleware/validate.middleware');
 const { PERMISSIONS } = require('../../shared/constants/permissions');
+const { updateDashboardPreferenceSchema } = require('./dashboard-preference.schema');
 
 router.use(authenticate);
+
+router.get('/preferences', dashboardController.getIndicatorPreferences);
+router.put(
+  '/preferences',
+  validate(updateDashboardPreferenceSchema),
+  dashboardController.updateIndicatorPreferences,
+);
 
 router.get(
   '/stats',

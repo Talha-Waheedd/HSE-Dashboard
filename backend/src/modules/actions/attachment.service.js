@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const path = require('path');
 
 const attachmentRepository = require('../../repositories/attachment.repository');
+const { Incident } = require('../../database/models');
+const { sequelize } = require('../../database/connection');
 const AttachmentSource = require('../../shared/enums/AttachmentSource');
 const storageConfig = require('../../database/config/storage');
 const { ApiError } = require('../../shared/utils/index');
@@ -14,6 +16,7 @@ const attachmentUploadDirectory = path.resolve(
   process.cwd(),
   storageConfig.local.attachmentUploadDir,
 );
+const MAX_INCIDENT_IMAGES = 4;
 
 const toPublicAttachment = (attachment) => {
   const data = attachment?.toJSON ? attachment.toJSON() : { ...attachment };
@@ -51,7 +54,29 @@ class AttachmentService {
     };
 
     try {
-      const attachment = await attachmentRepository.create(data);
+      let attachment;
+      if (sourceData.sourceType === AttachmentSource.INCIDENT) {
+        attachment = await sequelize.transaction(async (transaction) => {
+          // Lock the source incident so simultaneous uploads for the same
+          // record cannot both pass the four-image count check.
+          const incident = await Incident.findByPk(sourceData.sourceId, {
+            attributes: ['id'],
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+          });
+          if (!incident) throw ApiError.notFound(MESSAGES.INCIDENT_NOT_FOUND);
+          const imageCount = await attachmentRepository.model.count({
+            where: { sourceType: AttachmentSource.INCIDENT, sourceId: sourceData.sourceId },
+            transaction,
+          });
+          if (imageCount >= MAX_INCIDENT_IMAGES) {
+            throw ApiError.badRequest('Maximum 4 images can be attached.');
+          }
+          return attachmentRepository.create(data, { transaction });
+        });
+      } else {
+        attachment = await attachmentRepository.create(data);
+      }
       return toPublicAttachment(attachment);
     } catch (error) {
       try {

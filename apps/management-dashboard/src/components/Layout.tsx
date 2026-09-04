@@ -66,6 +66,7 @@ const NAV_GROUPS: NavGroup[] = [
           { title: 'TRIR', href: '/lagging-indicators/trir', Icon: BarChart3 },
         ],
       },
+      { id: 'accident-reporting', title: 'Accident Reporting', href: '/accident-reporting', Icon: FileWarning },
       { id: 'incident-log', title: 'Incident Log', href: '/incident-log', Icon: FileWarning },
     ],
   },

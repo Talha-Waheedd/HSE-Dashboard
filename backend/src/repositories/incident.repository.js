@@ -2,7 +2,7 @@
 
 const BaseRepository = require('./base.repository');
 const {
-  Incident, IncidentInjury, User, Department, Plant, NearMiss, Location,
+  Incident, IncidentInjury, User, Department, Plant, Hazard, NearMiss, Location,
 } = require('../database/models');
 
 class IncidentRepository extends BaseRepository {
@@ -29,6 +29,7 @@ class IncidentRepository extends BaseRepository {
         },
         { model: Plant, as: 'plant', attributes: ['id', 'name', 'code'] },
         { model: NearMiss, as: 'sourceNearMiss', attributes: ['id', 'title', 'description', 'reportedAt'] },
+        { model: Hazard, as: 'sourceHazard', attributes: ['id', 'title', 'description', 'reportedAt'] },
         { model: IncidentInjury, as: 'injuries' },
       ],
     });

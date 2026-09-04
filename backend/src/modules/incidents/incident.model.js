@@ -47,6 +47,11 @@ const Incident = sequelize.define('Incident', {
     allowNull: true,
     comment: 'Near Miss that generated this Incident Investigation record',
   },
+  sourceHazardId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Hazard that generated this Incident Investigation record',
+  },
   sourceType: {
     type: DataTypes.STRING(50),
     allowNull: true,
@@ -168,7 +173,7 @@ const Incident = sequelize.define('Incident', {
   metadata: {
     type: DataTypes.JSON,
     allowNull: true,
-    comment: 'Extensible form data, including incident action rows with responsible_person, responsible_department, timeline, severity, and status',
+    comment: 'Extensible form data, including incident actions and the versioned clc_analysis cause-selection structure',
   },
 }, {
   tableName: 'incidents',
@@ -180,6 +185,7 @@ const Incident = sequelize.define('Incident', {
     { fields: ['department_id'], name: 'incidents_department_id_idx' },
     { fields: ['location_id'], name: 'incidents_location_id_idx' },
     { fields: ['source_near_miss_id'], unique: true, name: 'incidents_source_near_miss_unique' },
+    { fields: ['source_hazard_id'], unique: true, name: 'incidents_source_hazard_unique' },
     { fields: ['source_hash'], unique: true, name: 'incidents_source_hash_unique' },
     { fields: ['source_type'], name: 'incidents_source_type_idx' },
     { fields: ['incident_type'], name: 'incidents_type_idx' },

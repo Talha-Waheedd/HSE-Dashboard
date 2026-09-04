@@ -13,6 +13,7 @@ const createHazardSchema = Joi.object({
   title: Joi.string().max(255).required(),
   description: Joi.string().custom((value, helpers) => value.trim() && value.trim().split(/\s+/).length <= 500 ? value : helpers.error('string.maxWords')).messages({ 'string.maxWords': 'Hazard Details cannot exceed 500 words.' }).required(),
   location: Joi.string().max(255).optional(),
+  furtherInvestigationRequired: Joi.boolean().default(false).optional(),
   status: Joi.string().valid(HazardStatus.DRAFT, HazardStatus.SUBMITTED).default(HazardStatus.DRAFT).optional(),
   reportedAt: Joi.date().iso().max('now').optional(),
   metadata: Joi.object({
@@ -29,6 +30,8 @@ const updateHazardSchema = Joi.object({
   title: Joi.string().max(255).optional(),
   description: Joi.string().custom((value, helpers) => value.trim().split(/\s+/).length <= 500 ? value : helpers.error('string.maxWords')).messages({ 'string.maxWords': 'Hazard Details cannot exceed 500 words.' }).optional(),
   location: Joi.string().max(255).optional(),
+  furtherInvestigationRequired: Joi.boolean().optional(),
+  status: Joi.string().valid(...Object.values(HazardStatus)).optional(),
   assignedTo: Joi.string().uuid().optional().allow(null),
   reportedAt: Joi.date().iso().max('now').optional(),
   metadata: Joi.object({

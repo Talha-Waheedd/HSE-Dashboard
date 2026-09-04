@@ -52,6 +52,12 @@ const Hazard = sequelize.define('Hazard', {
     allowNull: true,
     comment: 'Specific location within the plant',
   },
+  furtherInvestigationRequired: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    comment: 'Whether a finalized Hazard must generate an Incident Investigation',
+  },
   status: {
     type: DataTypes.ENUM(...Object.values(HazardStatus)),
     defaultValue: HazardStatus.DRAFT,

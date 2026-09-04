@@ -8,6 +8,7 @@ const HazardStatus = require('../../shared/enums/HazardStatus');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { syncBestEffort } = require('../actions/capa-sync.service');
+const { ensureHazardInvestigation } = require('../incidents/investigation-sync.service');
 
 const DEFAULT_PLANT_ID = '5126923e-b77f-4eb6-8b98-d5fc9db8d71b';
 const isUuid = (value) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
@@ -26,6 +27,17 @@ const assertWordLimit = (value, label) => {
   const count = String(value || '').trim() ? String(value).trim().split(/\s+/).length : 0;
   if (count > 500) throw ApiError.badRequest(`${label} cannot exceed 500 words (${count}/500 words).`);
 };
+
+const yesNoLabel = (value) => value === true || ['yes', 'y', 'true', '1'].includes(String(value ?? '').trim().toLowerCase())
+  ? 'Yes'
+  : 'No';
+
+const normalizeHazardMetadata = (metadata = {}, data = {}) => ({
+  ...metadata,
+  ...(data.furtherInvestigationRequired !== undefined
+    ? { investigation_required: yesNoLabel(data.furtherInvestigationRequired) }
+    : {}),
+});
 
 class HazardService {
   /**
@@ -59,6 +71,8 @@ class HazardService {
       }
     }
 
+    data.metadata = normalizeHazardMetadata(data.metadata, data);
+
     // Employee ID is stored in metadata rather than as a hazards-table FK.
     // Keep it optional only behind this development flag while the employee
     // master data is unavailable; production always validates the reference.
@@ -81,11 +95,13 @@ class HazardService {
 
     // Do not report success until the insert transaction has committed and the
     // row can be read back with its generated database ID and associations.
+    let investigation = null;
     const created = await sequelize.transaction(async (transaction) => {
       const record = await hazardRepository.create(data, { transaction });
       if (!record?.id) {
         throw ApiError.internal('Hazard record was not persisted.');
       }
+      investigation = await ensureHazardInvestigation(record, userId, transaction);
       return record;
     });
 
@@ -93,7 +109,10 @@ class HazardService {
     if (!persisted) {
       throw ApiError.internal('Hazard record could not be read after commit.');
     }
-    await syncBestEffort('hazard', persisted.id);
+    await Promise.all([
+      syncBestEffort('hazard', persisted.id),
+      investigation ? syncBestEffort('incident', investigation.id) : Promise.resolve(null),
+    ]);
     return persisted;
   }
 
@@ -130,10 +149,31 @@ class HazardService {
       if (!plant) throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
     }
 
-    updateData.updatedBy = userId;
-    const result = await hazardRepository.updateById(id, updateData);
-    await syncBestEffort('hazard', id);
-    return result;
+    const { metadata, ...hazardFields } = updateData;
+    const nextMetadata = normalizeHazardMetadata(
+      { ...(hazard.metadata || {}), ...(metadata || {}) },
+      updateData,
+    );
+    const transaction = await sequelize.transaction();
+    try {
+      const updatePayload = { ...hazardFields, metadata: nextMetadata, updatedBy: userId };
+      const result = await hazardRepository.updateById(id, updatePayload, { transaction });
+      const updatedHazard = {
+        ...(hazard.get ? hazard.get({ plain: true }) : hazard),
+        ...hazardFields,
+        metadata: nextMetadata,
+      };
+      const investigation = await ensureHazardInvestigation(updatedHazard, userId, transaction);
+      await transaction.commit();
+      await Promise.all([
+        syncBestEffort('hazard', id),
+        investigation ? syncBestEffort('incident', investigation.id) : Promise.resolve(null),
+      ]);
+      return result;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   /**
@@ -169,9 +209,24 @@ class HazardService {
       updateData.closedBy = userId;
     }
 
-    const result = await hazardRepository.updateById(id, updateData);
-    await syncBestEffort('hazard', id);
-    return result;
+    const transaction = await sequelize.transaction();
+    try {
+      const result = await hazardRepository.updateById(id, updateData, { transaction });
+      const updatedHazard = {
+        ...(hazard.get ? hazard.get({ plain: true }) : hazard),
+        ...updateData,
+      };
+      const investigation = await ensureHazardInvestigation(updatedHazard, userId, transaction);
+      await transaction.commit();
+      await Promise.all([
+        syncBestEffort('hazard', id),
+        investigation ? syncBestEffort('incident', investigation.id) : Promise.resolve(null),
+      ]);
+      return result;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   /**

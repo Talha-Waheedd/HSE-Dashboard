@@ -65,7 +65,7 @@ export const LeadingIndicatorDetails = ({ kind }: { kind: IndicatorKind }) => {
           page: currentPage,
           limit: PAGE_SIZE,
           ...filtersParams,
-          ...(kind === 'incident-investigation' ? { sourceType: 'near_miss' } : {}),
+          ...(kind === 'incident-investigation' ? { investigationOnly: true } : {}),
         };
         const summaryPromise: Promise<any> = kind === 'hazard-closing'
           ? dashboardClient.getOverview(filtersParams)

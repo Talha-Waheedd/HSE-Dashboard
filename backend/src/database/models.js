@@ -7,6 +7,7 @@ const Permission = require('../modules/users/permission.model');
 const Token = require('../modules/users/token.model');
 const AuditLog = require('../modules/audits/audit-log.model');
 const Notification = require('../modules/core/notification.model');
+const DashboardIndicatorPreference = require('../modules/core/dashboard-preference.model');
 const MasterAnalysis = require('../modules/analysis/master-analysis.model');
 
 // ─── HSE Foundation Models ────────────────────────────────────────────────────
@@ -69,6 +70,9 @@ AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 // User → Notifications
 User.hasMany(Notification, { foreignKey: 'userId', as: 'notifications' });
 Notification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasOne(DashboardIndicatorPreference, { foreignKey: 'userId', as: 'dashboardIndicatorPreference' });
+DashboardIndicatorPreference.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Associations — HSE Foundation
@@ -151,6 +155,11 @@ Incident.belongsTo(Location, { foreignKey: 'locationId', as: 'locationRecord' })
 // relationship even if a Near Miss is submitted more than once.
 NearMiss.hasOne(Incident, { foreignKey: 'sourceNearMissId', as: 'incidentInvestigation' });
 Incident.belongsTo(NearMiss, { foreignKey: 'sourceNearMissId', as: 'sourceNearMiss' });
+
+// A finalized Hazard can generate one Incident Investigation. The unique
+// database index on incidents.source_hazard_id is the duplicate guard.
+Hazard.hasOne(Incident, { foreignKey: 'sourceHazardId', as: 'incidentInvestigation' });
+Incident.belongsTo(Hazard, { foreignKey: 'sourceHazardId', as: 'sourceHazard' });
 
 Incident.hasMany(IncidentInjury, { foreignKey: 'incidentId', as: 'injuries' });
 IncidentInjury.belongsTo(Incident, { foreignKey: 'incidentId', as: 'incident' });
@@ -240,7 +249,7 @@ Attachment.belongsTo(User, { foreignKey: 'uploadedBy', as: 'uploader' });
 
 module.exports = {
   // Core
-  User, Role, Permission, Token, AuditLog, Notification,
+  User, Role, Permission, Token, AuditLog, Notification, DashboardIndicatorPreference,
   // HSE Foundation
   Plant, Department, Employee, Location,
   // HSE Reporting

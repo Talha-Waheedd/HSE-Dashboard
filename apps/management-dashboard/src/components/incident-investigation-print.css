@@ -176,6 +176,8 @@
 
   .incident-print-page-two {
     padding-top: 2mm;
+    break-after: auto;
+    page-break-after: auto;
   }
 
   .incident-print-continued {
@@ -226,4 +228,158 @@
   .incident-print-verification th { text-align: center; }
   .incident-print-verification tr:not(:first-child) th { text-align: left; }
   .incident-print-verification td { min-height: 7mm; }
+
+  .clc-print-root {
+    box-sizing: border-box;
+    width: 100%;
+    color: #000;
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.2;
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .clc-print-header {
+    border: 1px solid #000;
+    padding: 2.5mm;
+    text-align: center;
+  }
+
+  .clc-print-header h2 {
+    margin: 0;
+    font-size: 14pt;
+    font-weight: 700;
+  }
+
+  .clc-print-header p {
+    margin: 1mm 0 0;
+    font-size: 9pt;
+    font-weight: 700;
+  }
+
+  .clc-print-set {
+    border: 1px solid #000;
+    border-top: 0;
+  }
+
+  .clc-print-set > header {
+    display: grid;
+    grid-template-columns: 28% 72%;
+    align-items: center;
+    border-bottom: 1px solid #000;
+    background: #e6ebf1;
+    padding: 1.5mm 2mm;
+  }
+
+  .clc-print-set > header strong {
+    font-size: 8.5pt;
+    font-weight: 700;
+  }
+
+  .clc-print-set > header span {
+    font-size: 6.5pt;
+    font-weight: 400;
+  }
+
+  .clc-print-cause-section {
+    border-bottom: 1px solid #000;
+  }
+
+  .clc-print-cause-section:last-child {
+    border-bottom: 0;
+  }
+
+  .clc-print-cause-section > h3 {
+    margin: 0;
+    border-bottom: 1px solid #000;
+    background: #f1f4f7;
+    padding: 1.5mm 2mm;
+    font-size: 8pt;
+    font-weight: 700;
+  }
+
+  .clc-print-groups {
+    column-count: 2;
+    column-gap: 0;
+    column-rule: 1px solid #000;
+  }
+
+  .clc-print-group {
+    box-sizing: border-box;
+    display: inline-block;
+    width: 100%;
+    padding: 2mm;
+    vertical-align: top;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .clc-print-group h4 {
+    display: flex;
+    margin: 0 0 1.2mm;
+    align-items: flex-start;
+    gap: 1.2mm;
+    font-size: 7.5pt;
+    font-weight: 700;
+  }
+
+  .clc-print-checkbox {
+    display: inline-flex;
+    box-sizing: border-box;
+    width: 3mm;
+    height: 3mm;
+    flex: 0 0 3mm;
+    align-items: center;
+    justify-content: center;
+    border: 0.3mm solid #000;
+    color: #000;
+    background: #fff;
+    font-size: 7pt;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .clc-print-cause {
+    display: grid;
+    grid-template-columns: 3mm 5mm minmax(0, 1fr);
+    gap: 1.1mm;
+    margin: 0 0 0.8mm;
+    align-items: start;
+    font-weight: 400;
+  }
+
+  .clc-print-number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .clc-print-other {
+    grid-column: 2 / 4;
+    margin-top: 0.6mm;
+    border-bottom: 0.2mm solid #666;
+    padding: 0.5mm 0;
+    font-weight: 400;
+    white-space: pre-wrap;
+  }
+
+  .clc-print-other strong {
+    font-weight: 700;
+  }
+
+  .clc-print-other span {
+    font-weight: 400 !important;
+  }
+
+  .clc-print-group-other {
+    margin-left: 4mm;
+  }
+
+  .clc-print-end {
+    padding: 7mm 0 2mm;
+    text-align: center;
+    font-size: 10pt;
+    font-weight: 700;
+  }
 }

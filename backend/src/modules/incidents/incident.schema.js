@@ -12,17 +12,45 @@ const injurySchema = Joi.object({
 });
 
 const actionSchema = Joi.object({
-  action: Joi.string().trim().min(1).max(2000).required(),
+  action: Joi.string().trim().min(1).max(2000)
+    .required(),
   // New action assignments. The fields remain optional at the API boundary so
   // older incidents can still be edited without data loss.
-  responsible_person: Joi.string().trim().max(255).allow('').optional(),
-  responsible_department: Joi.string().trim().max(255).allow('').optional(),
+  responsible_person: Joi.string().trim().max(255).allow('')
+    .optional(),
+  responsible_department: Joi.string().trim().max(255).allow('')
+    .optional(),
   // Backward-compatible alias used by incidents created before the rename.
-  responsibility: Joi.string().trim().max(255).allow('').optional(),
+  responsibility: Joi.string().trim().max(255).allow('')
+    .optional(),
   timeline: Joi.date().iso().allow('', null).optional(),
   severity: Joi.string().valid('Low', 'Medium', 'High', 'low', 'medium', 'high').required(),
   status: Joi.string().valid('Open', 'Planned', 'Closed', 'open', 'planned', 'closed').required(),
 });
+
+const clcIdSchema = Joi.string().trim().max(160).pattern(/^[a-z0-9_:-]+$/);
+const clcSelectionSchema = Joi.object({
+  selected_groups: Joi.array().items(clcIdSchema).max(32).unique()
+    .required(),
+  selected_causes: Joi.array().items(clcIdSchema).max(96).unique()
+    .required(),
+  other_details: Joi.object()
+    .pattern(clcIdSchema, Joi.string().max(2000).allow(''))
+    .max(8)
+    .required(),
+}).required();
+
+const clcAnalysisSchema = Joi.object({
+  version: Joi.number().integer().valid(1).required(),
+  primary_conditions: clcSelectionSchema,
+  primary_actions: clcSelectionSchema,
+  personal_factors: clcSelectionSchema,
+  job_factors: clcSelectionSchema,
+}).unknown(false);
+
+const incidentMetadataSchema = Joi.object({
+  clc_analysis: clcAnalysisSchema.optional(),
+}).unknown(true);
 
 const createIncidentSchema = Joi.object({
   plantId: Joi.string().uuid().required(),
@@ -43,7 +71,7 @@ const createIncidentSchema = Joi.object({
   status: Joi.string().valid(...Object.values(IncidentStatus)).optional(),
   injuries: Joi.array().items(injurySchema).optional(),
   actions: Joi.array().items(actionSchema).max(15).optional(),
-  metadata: Joi.object().optional(),
+  metadata: incidentMetadataSchema.optional(),
 });
 
 const updateIncidentSchema = Joi.object({
@@ -66,7 +94,7 @@ const updateIncidentSchema = Joi.object({
   investigationFindings: Joi.string().optional(),
   rootCause: Joi.string().optional(),
   actions: Joi.array().items(actionSchema).max(15).optional(),
-  metadata: Joi.object().optional(),
+  metadata: incidentMetadataSchema.optional(),
 }).min(1);
 
 const updateIncidentStatusSchema = Joi.object({
@@ -77,4 +105,5 @@ module.exports = {
   createIncidentSchema,
   updateIncidentSchema,
   updateIncidentStatusSchema,
+  clcAnalysisSchema,
 };

@@ -26,6 +26,7 @@ import { MyPendingWidget } from './MyPendingWidget';
 import { uploadClient, type AttachmentRecord } from '../../../../packages/api/src/uploadClient';
 import { LocationCombobox } from './LocationCombobox';
 import { ImageUploadField } from './ImageUploadField';
+import { MultiImageUploadField } from './MultiImageUploadField';
 import { formatDateOnly, formatDateTimeLocal } from '../utils/dateFormat';
 import { PaginationControls } from './PaginationControls';
 import {
@@ -59,6 +60,7 @@ const bypassHazardValidation = import.meta.env.VITE_BYPASS_HAZARD_VALIDATION ===
 const ATTACHMENT_SOURCE_BY_SCHEMA: Record<string, string> = {
   'hazard-reporting': 'hazard',
   'near-miss': 'near_miss',
+  'accident-reporting': 'incident',
   'incident-log': 'incident',
   'training-records': 'training',
   'audit-management': 'audit',
@@ -76,6 +78,7 @@ const ATTACHMENT_TYPE_BY_FIELD: Record<string, string> = {
 
 const attachmentSourceForSchema = (schemaId: string) => ATTACHMENT_SOURCE_BY_SCHEMA[schemaId];
 const attachmentTypeForField = (fieldKey: string) => ATTACHMENT_TYPE_BY_FIELD[fieldKey] || fieldKey.toUpperCase();
+const isIncidentEntrySchema = (schemaId: string) => ['incident-log', 'accident-reporting'].includes(schemaId);
 
 type IncidentAction = {
   action: string;
@@ -421,6 +424,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [isSaving, setIsSaving] = useState(false);
   const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({});
+  const [pendingIncidentImages, setPendingIncidentImages] = useState<File[]>([]);
   const [existingAttachments, setExistingAttachments] = useState<AttachmentRecord[]>([]);
   const [attachmentPreviewUrls, setAttachmentPreviewUrls] = useState<Record<string, string>>({});
   const attachmentPreviewUrlsRef = useRef<Record<string, string>>({});
@@ -583,9 +587,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       delete applicableFilters.riskRating;
       delete applicableFilters.incidentCategory;
     } else {
-      if (!['hazard-reporting', 'near-miss', 'incident-log'].includes(schema.id)) delete applicableFilters.month;
+      if (!['hazard-reporting', 'near-miss', 'incident-log', 'accident-reporting'].includes(schema.id)) delete applicableFilters.month;
       if (schema.id !== 'hazard-reporting') delete applicableFilters.riskRating;
-      if (schema.id !== 'incident-log') delete applicableFilters.incidentCategory;
+      if (!isIncidentEntrySchema(schema.id)) delete applicableFilters.incidentCategory;
     }
     return applicableFilters;
   }, [filters, schema.id]);
@@ -651,7 +655,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (schema.id === 'incident-log' && routeCategory) setSearchQuery('');
   }, [schema.id, routeCategory]);
   useEffect(() => {
-    if (!['hazard-reporting', 'incident-log', 'near-miss'].includes(schema.id) || !isAddModalOpen || editingId || !Object.keys(formData).length) return;
+    if (!['hazard-reporting', 'incident-log', 'accident-reporting', 'near-miss'].includes(schema.id) || !isAddModalOpen || editingId || !Object.keys(formData).length) return;
     const timer = window.setTimeout(() => {
       try {
         sessionStorage.setItem(`hse-${schema.id}-draft`, JSON.stringify(formData));
@@ -693,7 +697,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
 
     const today = new Date().toISOString().split('T')[0];
-    if (['incident-log', 'hazard-reporting', 'near-miss'].includes(schema.id) && data.date && data.date > today) {
+    if (['incident-log', 'accident-reporting', 'hazard-reporting', 'near-miss'].includes(schema.id) && data.date && data.date > today) {
       return 'Report date cannot be in the future.';
     }
     if (schema.id === 'action-tracker') {
@@ -710,8 +714,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       if (data.duration_minutes !== '' && (!Number.isInteger(durationMinutes) || durationMinutes < 1)) return 'Duration (Min) must be a positive whole number.';
       if (departmentId && trainingDepartments.length > 0 && !trainingDepartments.some(department => department.id === departmentId)) return 'Selected department is not active or no longer exists.';
     }
-    if (schema.id === 'near-miss') {
+    if (schema.id === 'near-miss' || schema.id === 'hazard-reporting') {
       if (data.investigation_required && !['Yes', 'No'].includes(data.investigation_required)) return 'Further Investigation Required must be Yes or No.';
+    }
+    if (schema.id === 'near-miss') {
       if (data.reported_in_hazard && !['Yes', 'No'].includes(data.reported_in_hazard)) return 'Reported in Hazard must be Yes or No.';
       if (data.status && !['Open', 'Close'].includes(data.status)) return 'Status must be Open or Close.';
       if (String(data.remarks || '').trim().split(/\s+/).filter(Boolean).length > 500) return 'Remarks cannot exceed 500 words.';
@@ -724,7 +730,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         return 'Selected Responsible Department is not active or no longer exists.';
       }
     }
-    if (schema.id === 'incident-log' && Array.isArray(data.actions)) {
+    if (isIncidentEntrySchema(schema.id) && Array.isArray(data.actions)) {
       for (let index = 0; index < data.actions.length; index += 1) {
         const action = normalizeIncidentAction(data.actions[index]);
         if (!String(action?.action ?? '').trim()) return `Action ${index + 1} text is required.`;
@@ -740,6 +746,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const EMPLOYEE_FIELD_MAP: Record<string, Record<string, string>> = {
     'hazard-reporting': { name: 'originator' }, // Based on the schema
     'near-miss': { name: 'reported_by' },
+    'accident-reporting': { name: 'reported_by' },
     'incident-log': { name: 'reported_by' },
     'training-records': { name: 'trainer_name' },
   };
@@ -751,6 +758,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       ? ['originator', 'department_id']
       : schema.id === 'near-miss'
         ? ['reported_by', 'designation', 'department_id']
+        : isIncidentEntrySchema(schema.id)
+          ? ['department_id', 'gender']
         : [];
     const clearEmployeeFields = () => {
       if (employeeFields.length === 0) return;
@@ -791,7 +800,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         const employeeDepartmentId = employee.departmentId || employee.department?.id || employee.department_id || '';
 
         if (map.name) next[map.name] = employeeName;
-        if (['hazard-reporting', 'near-miss'].includes(schema.id)) next.department_id = employeeDepartmentId;
+        if (['hazard-reporting', 'near-miss', 'incident-log', 'accident-reporting'].includes(schema.id)) next.department_id = employeeDepartmentId;
         if (schema.columns.some(column => column.key === 'gender') && employee.gender) next.gender = employee.gender;
         if (schema.columns.some(column => column.key === 'designation')) next.designation = employee.designation || '';
 
@@ -866,16 +875,21 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const uploadPendingImages = async (sourceId: string): Promise<string[]> => {
-    const pendingEntries = Object.entries(pendingFiles);
+    const pendingEntries: Array<[string, File]> = [
+      ...Object.entries(pendingFiles),
+      ...pendingIncidentImages.map((file, index) => [`evidence_upload:${index}`, file] as [string, File]),
+    ];
     if (pendingEntries.length === 0) return [];
     const sourceType = attachmentSourceForSchema(schema.id);
     if (!sourceType) return pendingEntries.map(([fieldKey]) => fieldKey);
     const results = await Promise.allSettled(pendingEntries.map(([fieldKey, file]) => uploadClient.upload(file, {
       sourceType,
       sourceId,
-      attachmentType: attachmentTypeForField(fieldKey),
+      attachmentType: attachmentTypeForField(fieldKey.split(':')[0]),
     })));
-    return results.flatMap((result, index) => result.status === 'rejected' ? [pendingEntries[index][0]] : []);
+    const failedKeys = results.flatMap((result, index) => result.status === 'rejected' ? [pendingEntries[index][0]] : []);
+    setPendingIncidentImages(previous => previous.filter((_, index) => failedKeys.includes(`evidence_upload:${index}`)));
+    return failedKeys;
   };
 
   const handleSubmit = async (e?: React.FormEvent, statusOverride?: string) => {
@@ -931,6 +945,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         setEditFormData({});
         setEditingId(null);
         setPendingFiles({});
+        setPendingIncidentImages([]);
         try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ }
         setIsAddModalOpen(false);
         setSavedModalOpen(schema.id === 'hazard-reporting');
@@ -952,6 +967,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     setValidationError(null);
     setAttachmentWarning(null);
     setPendingFiles({});
+    setPendingIncidentImages([]);
     setEditingId(entry.id);
     setEditFormData({ ...entry, actions: Array.isArray(entry.actions) ? entry.actions.map(normalizeIncidentAction) : [] });
   };
@@ -975,6 +991,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (result.success) {
       setEditingId(null);
       setPendingFiles({});
+      setPendingIncidentImages([]);
     } else {
       setValidationError(result.message || 'Failed to update record.');
     }
@@ -1229,6 +1246,33 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     const effectiveReadonly = col.readonly || (isMappedEmployeeField && col.key !== 'emp_id');
 
     if (col.type === 'file') {
+      if (isIncidentEntrySchema(schema.id) && col.key === 'evidence_upload') {
+        const incidentAttachments = existingAttachments.filter(attachment =>
+          !attachment.mimeType || ['image/jpeg', 'image/png'].includes(String(attachment.mimeType).toLowerCase()),
+        );
+        return (
+          <MultiImageUploadField
+            label={col.label}
+            files={pendingIncidentImages}
+            existingAttachments={incidentAttachments}
+            existingPreviewUrls={attachmentPreviewUrls}
+            disabled={effectiveReadonly}
+            onFilesChange={setPendingIncidentImages}
+            onRemoveExisting={async attachment => {
+              await uploadClient.delete(attachment.id);
+              const previewUrl = attachmentPreviewUrlsRef.current[attachment.id];
+              if (previewUrl) URL.revokeObjectURL(previewUrl);
+              delete attachmentPreviewUrlsRef.current[attachment.id];
+              setAttachmentPreviewUrls(previous => {
+                const next = { ...previous };
+                delete next[attachment.id];
+                return next;
+              });
+              setExistingAttachments(previous => previous.filter(item => item.id !== attachment.id));
+            }}
+          />
+        );
+      }
       const existingAttachment = attachmentForField(col.key);
       const selectedFile = pendingFiles[col.key] || null;
       return (
@@ -1510,7 +1554,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const renderFormSection = (sectionTitle: string, columns: ColumnSchema[]) => {
     const source = editingId ? editFormData : formData;
     const visible = columns.filter(col => shouldShowConditionalField(schema.id, col.key, source));
-    if (schema.id === 'incident-log' && sectionTitle === 'Actions') {
+    if (isIncidentEntrySchema(schema.id) && sectionTitle === 'Actions') {
       const isEdit = Boolean(editingId);
       const source = isEdit ? editFormData : formData;
       const actions: IncidentAction[] = Array.isArray(source.actions) ? source.actions.map(normalizeIncidentAction) : [];
@@ -1616,7 +1660,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     const formSource = editingId ? editFormData : formData;
     const closeForm = () => {
       setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null);
-      setPendingFiles({}); setFormData({}); setEditFormData({}); setHazardStep(1); setHazardAutosavedAt(null);
+      setPendingFiles({}); setPendingIncidentImages([]); setFormData({}); setEditFormData({}); setHazardStep(1); setHazardAutosavedAt(null);
       try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ }
     };
     const steps = [
@@ -1716,13 +1760,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const renderWorkflowAddEditModal = () => {
     const formSource = editingId ? editFormData : formData;
+    const workflowParent = isIncidentEntrySchema(schema.id) ? 'Lagging Indicators' : 'Leading Indicators';
     const steps = [
       { number: 1, label: 'Basic Information', match: ['Basic Information'] },
       { number: 2, label: schema.id === 'near-miss' ? 'Near Miss Details' : 'Incident Details', match: schema.id === 'near-miss' ? ['Near Miss Details'] : ['Incident Details'] },
       { number: 3, label: schema.id === 'near-miss' ? 'Corrective Action' : 'Investigation & Actions', match: schema.id === 'near-miss' ? ['Corrective Actions', 'Investigation'] : ['Investigation', 'Actions', 'Assignment'] },
       { number: 4, label: 'Review', match: [] },
     ];
-    const closeForm = () => { setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null); setPendingFiles({}); setFormData({}); setEditFormData({}); setHazardStep(1); setHazardAutosavedAt(null); try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ } };
+    const closeForm = () => { setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null); setPendingFiles({}); setPendingIncidentImages([]); setFormData({}); setEditFormData({}); setHazardStep(1); setHazardAutosavedAt(null); try { sessionStorage.removeItem(`hse-${schema.id}-draft`); } catch { /* ignore unavailable storage */ } };
     const scrollToStep = (step: number) => { setHazardStep(step); document.getElementById(`${schema.id}-workflow-step-${step}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     const status = formSource.status_id || formSource.status || 'Open';
     const summaryKeys = schema.id === 'near-miss'
@@ -1754,7 +1799,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     };
 
     return <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F7]" role="dialog" aria-modal="true" aria-labelledby={`${schema.id}-workflow-title`}>
-      <header className="shrink-0 border-b border-[#E5E7EB] bg-white px-5 py-4 sm:px-8"><div className="mx-auto flex max-w-[1500px] items-start justify-between gap-4"><div className="flex min-w-0 items-start gap-4"><div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#FFF4D6] sm:flex"><img src="/image.png" alt="Continental Biscuits" className="h-9 w-9 object-contain" /></div><div><p className="text-[11px] font-semibold text-[#64748B]">Leading Indicators <span className="mx-1 text-[#CBD5E1]">/</span> {schema.title}</p><h2 id={`${schema.id}-workflow-title`} className="mt-1 text-xl font-bold tracking-tight text-[#161616] sm:text-2xl">{schema.title}</h2><p className="mt-1 text-[13px] text-[#64748B]">Capture, review and track workplace safety records</p></div></div><div className="flex items-start gap-4"><div className="hidden items-center gap-2 text-right sm:flex"><CheckCircle2 className="h-5 w-5 text-[#16A34A]" /><div><p className="text-[12px] font-semibold text-[#374151]">Draft autosaved</p><p className="text-[11px] text-[#94A3B8]">{hazardAutosavedAt ? 'Just now' : 'Waiting for changes'}</p></div></div><button type="button" onClick={closeForm} aria-label={`Close ${schema.title}`} className="rounded-md p-1.5 text-[#64748B] hover:bg-[#F1F5F9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CB0017]/30"><X className="h-5 w-5" /></button></div></div></header>
+      <header className="shrink-0 border-b border-[#E5E7EB] bg-white px-5 py-4 sm:px-8"><div className="mx-auto flex max-w-[1500px] items-start justify-between gap-4"><div className="flex min-w-0 items-start gap-4"><div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#FFF4D6] sm:flex"><img src="/image.png" alt="Continental Biscuits" className="h-9 w-9 object-contain" /></div><div><p className="text-[11px] font-semibold text-[#64748B]">{workflowParent} <span className="mx-1 text-[#CBD5E1]">/</span> {schema.title}</p><h2 id={`${schema.id}-workflow-title`} className="mt-1 text-xl font-bold tracking-tight text-[#161616] sm:text-2xl">{schema.title}</h2><p className="mt-1 text-[13px] text-[#64748B]">Capture, review and track workplace safety records</p></div></div><div className="flex items-start gap-4"><div className="hidden items-center gap-2 text-right sm:flex"><CheckCircle2 className="h-5 w-5 text-[#16A34A]" /><div><p className="text-[12px] font-semibold text-[#374151]">Draft autosaved</p><p className="text-[11px] text-[#94A3B8]">{hazardAutosavedAt ? 'Just now' : 'Waiting for changes'}</p></div></div><button type="button" onClick={closeForm} aria-label={`Close ${schema.title}`} className="rounded-md p-1.5 text-[#64748B] hover:bg-[#F1F5F9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CB0017]/30"><X className="h-5 w-5" /></button></div></div></header>
       <nav className="shrink-0 overflow-x-auto border-b border-[#E5E7EB] bg-white px-5 py-3 sm:px-8" aria-label={`${schema.title} steps`}><div className="mx-auto flex min-w-[620px] max-w-[1200px] items-center">{steps.map((step, index) => <React.Fragment key={step.number}><button type="button" onClick={() => scrollToStep(step.number)} aria-current={hazardStep === step.number ? 'step' : undefined} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-left ${hazardStep === step.number || isStepCompleted(step.number) ? 'text-[#CB0017]' : 'text-[#64748B] hover:text-[#374151]'}`}><span className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold ${isStepCompleted(step.number) ? 'border-[#CB0017] bg-[#CB0017] text-white' : hazardStep === step.number ? 'border-[#CB0017] bg-[#FFF1F3] text-[#CB0017]' : 'border-[#CBD5E1] bg-white text-[#475569]'}`}>{isStepCompleted(step.number) ? <Check className="h-4 w-4" /> : step.number}</span><span className="hidden text-[13px] font-semibold sm:block">{step.label}</span></button>{index < steps.length - 1 && <div className="mx-2 h-px min-w-8 flex-1 bg-[#E2E8F0]" />}</React.Fragment>)}</div></nav>
       <div id="modal-scroll-area" className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-8"><div className="mx-auto max-w-[1000px] grid grid-cols-1 items-start gap-5"><main className="space-y-5">{validationError && <div className="flex items-start gap-3 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3" role="alert"><AlertTriangle className="mt-0.5 h-4 w-4 text-[#DC2626]" /><div><p className="text-[13px] font-semibold text-[#991B1B]">{errorTitle}</p><p className="mt-0.5 text-[12px] text-[#B91C1C]">{validationError}</p></div></div>}{attachmentWarning && <div className="rounded-xl border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-[12px] text-[#9A3412]" role="status">{attachmentWarning}</div>}<form id={`${schema.id}-workflow-form`} onSubmit={handleSubmit} className="space-y-5">{sectionGroups.map((section, index) => { const step = steps.find(item => item.match.includes(section.title))?.number || 3; const isFirstForStep = !sectionGroups.slice(0, index).some(previous => (steps.find(item => item.match.includes(previous.title))?.number || 3) === step); const sectionId = isFirstForStep ? `${schema.id}-workflow-step-${step}` : `${schema.id}-workflow-section-${index}`; return <div key={section.title} id={sectionId} className="scroll-mt-5">{renderFormSection(section.title, section.columns)}</div>; })}</form><section id={`${schema.id}-workflow-step-4`} className="scroll-mt-5 rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><div className="h-5 w-1 rounded-full bg-[#CB0017]" /><div><h3 className="text-[15px] font-semibold text-[#161616]">Review</h3><p className="mt-1 text-[12px] text-[#64748B]">Confirm the entered record before saving it.</p></div></div><div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"><div className="rounded-lg bg-[#FAFAFA] px-3 py-2"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">Status</p><p className="mt-1 text-[13px] font-medium text-[#374151]">{status}</p></div>{summaryFields.map(field => <div key={field.key} className="rounded-lg bg-[#FAFAFA] px-3 py-2"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#94A3B8]">{field.label}</p><p className="mt-1 truncate text-[13px] font-medium text-[#374151]">{reviewValue(field) || 'Not selected'}</p></div>)}</div></section></main></div></div>
       <footer className="shrink-0 border-t border-[#E5E7EB] bg-white px-4 py-3 sm:px-8"><div className="mx-auto flex max-w-[1500px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-[11px] text-[#64748B]">Fields marked with <span className="font-semibold text-[#CB0017]">*</span> are required</p><div className="flex flex-col-reverse gap-2 sm:flex-row"><button type="button" onClick={() => handleSubmit(undefined, 'Draft')} disabled={isSaving} className="h-10 rounded-md border border-[#CBD5E1] bg-white px-4 text-[13px] font-semibold text-[#475569] disabled:opacity-50"><Save className="mr-2 inline h-4 w-4" />Save as Draft</button><button type="button" onClick={closeForm} className="h-10 rounded-md border border-[#CBD5E1] bg-white px-5 text-[13px] font-semibold text-[#475569]">Cancel</button><button type="submit" form={`${schema.id}-workflow-form`} disabled={isSaving} className="h-10 rounded-md bg-[#CB0017] px-5 text-[13px] font-semibold text-white hover:bg-[#A8001A] disabled:opacity-60"><Save className="mr-2 inline h-4 w-4" />{isSaving ? 'Saving…' : 'Save & Continue'}<ArrowRight className="ml-2 inline h-4 w-4" /></button></div></div></footer>
@@ -1763,7 +1808,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const renderAddEditModal = () => {
     if (schema.id === 'hazard-reporting') return renderHazardAddEditModal();
-    if (schema.id === 'incident-log' || schema.id === 'near-miss') return renderWorkflowAddEditModal();
+    if (isIncidentEntrySchema(schema.id) || schema.id === 'near-miss') return renderWorkflowAddEditModal();
     if (schema.id === 'hazard-reporting') return renderHazardAddEditModal();
     const formSource = editingId ? editFormData : formData;
     const isEditingTrainingDraft = schema.id === 'training-records' && String(formSource.status_id ?? formSource.status ?? '').toLowerCase() === 'draft';
@@ -1779,7 +1824,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               <p className="text-[12px] text-[#6B7280] mt-1">Scrollable enterprise form with section cards and future-ready placeholders.</p>
             </div>
             <button
-              onClick={() => { setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null); setPendingFiles({}); setFormData({}); setEditFormData({}); }}
+              onClick={() => { setIsAddModalOpen(false); setEditingId(null); setValidationError(null); setAttachmentWarning(null); setPendingFiles({}); setPendingIncidentImages([]); setFormData({}); setEditFormData({}); }}
               className="w-8 h-8 rounded-md text-[#9CA3AF] hover:text-[#1A1818] hover:bg-[#F5F5F5] transition-colors"
             >
               <X className="h-4 w-4 mx-auto" />
@@ -1826,6 +1871,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                   setEditingId(null);
                   setValidationError(null);
                   setPendingFiles({});
+                  setPendingIncidentImages([]);
                   setAttachmentWarning(null);
                   setFormData({});
                   setEditFormData({});
@@ -1886,9 +1932,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             icon: <Plus />,
             onClick: () => {
               const defaultForm = schema.id === 'hazard-reporting'
-                ? { status_id: 'Open', department_id: '' }
+                ? { status_id: 'Open', department_id: '', investigation_required: 'No' }
                 : schema.id === 'near-miss'
                   ? createNewNearMissFormDefaults()
+                  : isIncidentEntrySchema(schema.id)
+                    ? { status_id: 'Open' }
                   : {};
               let recoveredForm: any = defaultForm;
               try {
@@ -1908,6 +1956,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                 }
               } catch { /* ignore malformed or unavailable draft storage */ }
               setPendingFiles({});
+              setPendingIncidentImages([]);
               setExistingAttachments([]);
               clearAttachmentPreviews();
               setAttachmentWarning(null);
@@ -1916,7 +1965,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                 setHazardStep(1);
                 setHazardAutosavedAt(null);
               }
-              if (schema.id === 'incident-log' || schema.id === 'near-miss') {
+              if (isIncidentEntrySchema(schema.id) || schema.id === 'near-miss') {
                 setHazardStep(1);
                 setHazardAutosavedAt(null);
               }
@@ -2547,7 +2596,22 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         subtitle="Log, track, and investigate safety incidents"
         actions={[
           ...(canExportCSV() ? [{ label: 'Export CSV', icon: <Download />, onClick: exportCSV, variant: 'outlined' as const }] : []),
-          { label: 'Report Incident', icon: <Plus />, onClick: () => setIsAddModalOpen(true), variant: 'primary' }
+          {
+            label: schema.id === 'accident-reporting' ? 'Report Accident' : 'Report Incident',
+            icon: <Plus />,
+            onClick: () => {
+              setPendingFiles({});
+              setPendingIncidentImages([]);
+              setExistingAttachments([]);
+              clearAttachmentPreviews();
+              setAttachmentWarning(null);
+              setValidationError(null);
+              setFormData({ status_id: 'Open' });
+              setHazardStep(1);
+              setIsAddModalOpen(true);
+            },
+            variant: 'primary',
+          }
         ]}
       >
         <FilterBar variant="incident" />
@@ -2557,14 +2621,14 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         <div className={`${CARD} overflow-hidden`}>
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F0F0F0] px-4 py-3">
             <div>
-              <h2 className="text-[14px] font-bold text-[#1C1C1E]">Incident Records</h2>
+              <h2 className="text-[14px] font-bold text-[#1C1C1E]">{schema.id === 'accident-reporting' ? 'Accident Records' : 'Incident Records'}</h2>
               <p className="mt-0.5 text-[12px] text-[#6B7280]">{pagination.totalRecords} records from the latest backend data</p>
             </div>
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9CA3AF]" />
               <input
                 type="search"
-                placeholder="Search incidents..."
+                placeholder={schema.id === 'accident-reporting' ? 'Search accidents...' : 'Search incidents...'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full h-9 pl-9 pr-3 text-[13px] border border-[#DEDEDE] rounded-md bg-white focus:outline-none focus:border-[#CB0017] focus:ring-2 focus:ring-[#CB0017]/15"
@@ -2606,7 +2670,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                     <td colSpan={11}>
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <FileText className="mb-3 h-12 w-12 text-[#E0E0E0]" />
-                        <p className="text-[14px] font-semibold text-[#374151]">{searchQuery ? 'No matching incidents' : 'No incident records found'}</p>
+                        <p className="text-[14px] font-semibold text-[#374151]">{searchQuery ? `No matching ${schema.id === 'accident-reporting' ? 'accidents' : 'incidents'}` : `No ${schema.id === 'accident-reporting' ? 'accident' : 'incident'} records found`}</p>
                         <p className="mt-1 text-[12px] text-[#9CA3AF]">Try changing the search or active filters.</p>
                       </div>
                     </td>
@@ -2660,7 +2724,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   if (schema.id === 'action-tracker') return <ActionTrackerRoute schema={schema} />;
   if (schema.id === 'hazard-reporting') return renderHazardWorkspace();
-  if (schema.id === 'incident-log') return renderIncidentWorkspace();
+  if (isIncidentEntrySchema(schema.id)) return renderIncidentWorkspace();
   return renderGenericWorkspace();
 };
 

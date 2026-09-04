@@ -27,6 +27,11 @@ export interface MetricItem {
   bgClass?: string;
 }
 
+export const DEFAULT_DASHBOARD_INDICATOR_IDS = {
+  leading: ['hazard-spotting', 'training-manhours', 'capa-closure'],
+  lagging: ['first-aid', 'lti', 'fatalities'],
+} as const;
+
 export const useDashboardMetrics = (data: DashboardRawData) => {
   return useMemo(() => {
     const { 
@@ -46,11 +51,16 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
     const nearMissCount = aggregate?.nearMisses?.total ?? nearMisses.length;
     
     // Unsafe Acts
-    const unsafeActs = hazards.filter(h => 
-      h.category === 'Behavioral' || 
-      h.root_cause === 'Unsafe Act' ||
-      h.root_cause === 'Human Error'
-    ).length;
+    const aggregateUnsafeActs = Object.entries(aggregate?.hazards?.byCategory || {})
+      .filter(([category]) => ['unsafe act', 'unsafe acts'].includes(category.trim().toLowerCase()))
+      .reduce((sum, [, count]) => sum + Number(count || 0), 0);
+    const unsafeActs = aggregate?.hazards?.byCategory
+      ? aggregateUnsafeActs
+      : hazards.filter(h =>
+        h.category === 'Behavioral' ||
+        h.root_cause === 'Unsafe Act' ||
+        h.root_cause === 'Human Error'
+      ).length;
 
     const closedHazards = aggregate?.hazards
       ? (Number(aggregate.hazards.Closed) || 0) + (Number(aggregate.hazards.closed) || 0) + (Number(aggregate.hazards.Close) || 0)
@@ -59,7 +69,9 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
     const hazardClosureRate = hazardClosureTotal > 0 ? Math.round((closedHazards / hazardClosureTotal) * 100) : 0;
 
     const registeredTraining = training.filter(t => String(t.status_id ?? t.status ?? '').toLowerCase() !== 'draft');
-    const totalTrainingManhours = Math.round(registeredTraining.reduce((sum, t) => sum + (Number(t.manhours || t.total_manhours) || 0), 0));
+    const totalTrainingManhours = aggregate?.training
+      ? Number(aggregate.training.manhours || 0)
+      : Math.round(registeredTraining.reduce((sum, t) => sum + (Number(t.manhours || t.total_manhours) || 0), 0));
     
     // 🚨 No real data sources yet
     // drills.length;
@@ -69,8 +81,11 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
     const closedIncidentCapas = incidentCapas.filter(c => c.status_id === 'Closed' || c.status_id === 'Close').length;
     const incidentCapaClosureRate = incidentCapas.length > 0 ? Math.round((closedIncidentCapas / incidentCapas.length) * 100) : 0;
 
-    const closedCapas = capas.filter(c => c.status_id === 'Closed' || c.status_id === 'Close').length;
-    const capaClosureRate = capas.length > 0 ? Math.round((closedCapas / capas.length) * 100) : 0;
+    const closedCapas = aggregate?.correctiveActions
+      ? Number(aggregate.correctiveActions.Closed || aggregate.correctiveActions.closed || 0)
+      : capas.filter(c => c.status_id === 'Closed' || c.status_id === 'Close').length;
+    const capaTotal = aggregate?.correctiveActions?.total ?? capas.length;
+    const capaClosureRate = capaTotal > 0 ? Math.round((closedCapas / capaTotal) * 100) : 0;
 
     const leadingMetricsDetail: MetricItem[] = [
       { id: 'hazard-spotting', name: 'Hazard Spotting', value: hazardSpotting, unit: 'Count', status: 'neutral', path: '/hazard-reporting', iconClass: 'text-rose-600', bgClass: 'bg-rose-100' },
@@ -92,6 +107,7 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
     const firstAid = aggregate?.incidents ? Number(aggregate.incidents['First Aid']) || 0 : incidents.filter(i => i.incident_category_id === 'First Aid').length;
     const fireMinor = aggregate?.incidents ? Number(aggregate.incidents['Minor Fire']) || 0 : incidents.filter(i => i.incident_category_id === 'Minor Fire').length;
     const fireMajor = aggregate?.incidents ? Number(aggregate.incidents['Major Fire']) || 0 : incidents.filter(i => i.incident_category_id === 'Major Fire').length;
+    const aggregateFire = aggregate?.incidents ? Number(aggregate.incidents.Fire) || 0 : null;
     
     const recordableIncidents = fatalities + lti + rwcMtc;
     const ltir = totalOrgManhours > 0 ? ((lti * 200000) / totalOrgManhours).toFixed(2) : '0.00';
@@ -104,7 +120,7 @@ export const useDashboardMetrics = (data: DashboardRawData) => {
       { id: 'rwc-mtc', name: 'RWC / MTC', value: rwcMtc, unit: 'Count', status: rwcMtc > 0 ? 'warning' : 'success', path: '/incident-log', iconClass: 'text-orange-500', bgClass: 'bg-orange-100' },
       { id: 'trir', name: 'TRIR', value: trir, unit: 'Rate', target: 0, status: Number(trir) > 0 ? 'warning' : 'success', path: '/incident-log', iconClass: 'text-yellow-600', bgClass: 'bg-yellow-100' },
       { id: 'first-aid', name: 'First Aid', value: firstAid, unit: 'Count', status: firstAid > 0 ? 'warning' : 'success', path: '/incident-log', iconClass: 'text-emerald-500', bgClass: 'bg-emerald-100' },
-      { id: 'fire', name: 'Fire Incidents (Major / Minor)', value: `${fireMajor} / ${fireMinor}`, unit: 'Count', target: 0, status: (fireMajor > 0 || fireMinor > 0) ? 'danger' : 'success', path: '/incident-log', iconClass: 'text-red-500', bgClass: 'bg-red-100' },
+      { id: 'fire', name: 'Fire Incidents (Major / Minor)', value: aggregateFire ?? `${fireMajor} / ${fireMinor}`, unit: 'Count', target: 0, status: ((aggregateFire ?? 0) > 0 || fireMajor > 0 || fireMinor > 0) ? 'danger' : 'success', path: '/incident-log', iconClass: 'text-red-500', bgClass: 'bg-red-100' },
     ];
 
     return {
