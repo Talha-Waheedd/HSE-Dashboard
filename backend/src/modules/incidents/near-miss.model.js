@@ -124,6 +124,7 @@ const NearMiss = sequelize.define('NearMiss', {
     { fields: ['status'], name: 'near_misses_status_idx' },
     { fields: ['severity_level'], name: 'near_misses_severity_level_idx' },
     { fields: ['responsible_department_id'], name: 'near_misses_responsible_department_idx' },
+    { fields: ['reported_at', 'department_id'], name: 'near_misses_analytics_date_department_idx' },
     { fields: ['created_at'], name: 'near_misses_created_at_idx' },
   ],
 });

@@ -118,6 +118,7 @@ const Hazard = sequelize.define('Hazard', {
     { fields: ['status'], name: 'hazards_status_idx' },
     { fields: ['severity_level'], name: 'hazards_severity_level_idx' },
     { fields: ['category'], name: 'hazards_category_idx' },
+    { fields: ['reported_at', 'department_id'], name: 'hazards_analytics_date_department_idx' },
     { fields: ['created_at'], name: 'hazards_created_at_idx' },
   ],
 });

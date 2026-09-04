@@ -9,6 +9,10 @@ const { requirePermissions } = require('../../core/middleware/rbac.middleware');
 const { validate } = require('../../core/middleware/validate.middleware');
 const { PERMISSIONS } = require('../../shared/constants/permissions');
 const { updateDashboardPreferenceSchema } = require('./dashboard-preference.schema');
+const {
+  dashboardAnalyticsParamsSchema,
+  dashboardAnalyticsQuerySchema,
+} = require('./dashboard-analytics.schema');
 
 router.use(authenticate);
 
@@ -20,16 +24,29 @@ router.put(
 );
 
 router.get(
+  '/analytics',
+  requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
+  dashboardController.getAnalyticsCatalog,
+);
+
+router.get(
+  '/analytics/:dataset',
+  requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
+  validate(dashboardAnalyticsParamsSchema, 'params'),
+  validate(dashboardAnalyticsQuerySchema, 'query'),
+  dashboardController.getAnalytics,
+);
+
+router.get(
   '/stats',
   requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
-  dashboardController.getHseStats
+  dashboardController.getHseStats,
 );
 
 router.get(
   '/overview',
   requirePermissions([PERMISSIONS.HSE_VIEW_DASHBOARD]),
-  overviewController.getDashboardOverview
+  overviewController.getDashboardOverview,
 );
-
 
 module.exports = router;

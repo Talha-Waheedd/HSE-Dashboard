@@ -55,6 +55,7 @@ class OverviewService {
     return cacheService.remember(key, 30, async () => {
       const hazard = filtersFor(query, 'reported_at');
       const incident = filtersFor(query, 'incident_date', 'department_id', false);
+      incident.where += ' AND source_near_miss_id IS NULL AND source_hazard_id IS NULL';
       const nearMiss = filtersFor(query, 'reported_at');
       const training = filtersFor(query, 'scheduled_date', 'department_id', false, null, null);
       const actions = filtersFor(query, 'due_date', null, false, 'priority', null);
@@ -91,12 +92,15 @@ class OverviewService {
           UNION ALL SELECT 'incidents' source, YEAR(incident_date) year, MONTH(incident_date) month, COUNT(*) total FROM incidents WHERE ${incident.where} GROUP BY YEAR(incident_date), MONTH(incident_date)
           UNION ALL SELECT 'nearMisses' source, YEAR(reported_at) year, MONTH(reported_at) month, COUNT(*) total FROM near_misses WHERE ${nearMiss.where} GROUP BY YEAR(reported_at), MONTH(reported_at)`, { ...hazard.replacements, ...incident.replacements, ...nearMiss.replacements }),
         rows(`SELECT LOWER(category) category, LOWER(severity_level) severity, COUNT(*) total FROM hazards WHERE ${hazard.where} GROUP BY category, severity`, hazard.replacements),
-        rows(`SELECT id, description, incident_date date, department_id, status FROM incidents WHERE ${incident.where} ORDER BY created_at DESC LIMIT 5`, incident.replacements),
-        rows(`SELECT COALESCE(d.code, d.name, CAST(i.department_id AS CHAR), 'Unassigned') department, COUNT(*) total
+        rows(`SELECT i.id, i.description, i.incident_date date, COALESCE(d.code, d.name, 'Unassigned') department, i.status
           FROM incidents i LEFT JOIN departments d ON d.id = i.department_id
-          WHERE ${qualifyWhere(incident.where, 'i', ['department_id', 'incident_date', 'deleted_at', 'status', 'severity_level'])}
+          WHERE ${qualifyWhere(incident.where, 'i', ['department_id', 'incident_date', 'deleted_at', 'status', 'severity_level', 'source_near_miss_id', 'source_hazard_id'])}
+          ORDER BY i.created_at DESC LIMIT 5`, incident.replacements),
+        rows(`SELECT COALESCE(d.code, d.name, 'Unassigned') department, COUNT(*) total
+          FROM incidents i LEFT JOIN departments d ON d.id = i.department_id
+          WHERE ${qualifyWhere(incident.where, 'i', ['department_id', 'incident_date', 'deleted_at', 'status', 'severity_level', 'source_near_miss_id', 'source_hazard_id'])}
           GROUP BY department ORDER BY total DESC LIMIT 10`, incident.replacements),
-        rows(`SELECT COALESCE(d.code, d.name, CAST(t.department_id AS CHAR), 'Unassigned') department,
+        rows(`SELECT COALESCE(d.code, d.name, 'All Departments') department,
           COALESCE(SUM(COALESCE(t.manhours, t.participant_count * t.duration_minutes / 60, 0)), 0) manhours
           FROM training_sessions t LEFT JOIN departments d ON d.id = t.department_id
           WHERE ${qualifyWhere(training.where, 't', ['department_id', 'scheduled_date', 'deleted_at', 'status'])} AND t.status <> 'draft'
@@ -135,6 +139,7 @@ class OverviewService {
     const key = cacheKey('analytics:overview', query);
     return cacheService.remember(key, 30, async () => {
       const hazard = filtersFor(query, 'reported_at'); const incident = filtersFor(query, 'incident_date', 'department_id', false); const nearMiss = filtersFor(query, 'reported_at');
+      incident.where += ' AND source_near_miss_id IS NULL AND source_hazard_id IS NULL';
       const training = filtersFor(query, 'scheduled_date', 'department_id', false, null, null); const action = filtersFor(query, 'due_date', null, false, 'priority', null); const assurance = filtersFor(query, 'scheduled_date', 'department_id', false, null, null);
       const [hazards, incidents, nearMisses, trainings, actions, audits, inspections] = await Promise.all([
         rows(`SELECT LOWER(category) category, LOWER(severity_level) severity, LOWER(status) status, MONTH(reported_at) month, COUNT(*) total FROM hazards WHERE ${hazard.where} GROUP BY category, severity, status, month`, hazard.replacements),

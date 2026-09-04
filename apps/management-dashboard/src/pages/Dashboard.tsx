@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  XAxis, YAxis, CartesianGrid,
   Tooltip as RechartsTooltip, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell,
+  LineChart, Line,
 } from 'recharts';
 import { Layout }               from '../components/Layout';
 import { CenterModal }          from '../components/CenterModal';
@@ -12,6 +12,7 @@ import { FilterBar }            from '../components/FilterBar';
 import { ContextHeader }        from '../components/ContextHeader';
 import { StatusBadge }          from '../components/StatusBadge';
 import { PlantPhotoCard }       from '../components/PlantPhotoCard';
+import { ConfigurableAnalyticsChart } from '../components/ConfigurableAnalyticsChart';
 import { useFilters }           from '../context/FilterContext';
 import {
   CheckCircle2, FileWarning,
@@ -20,7 +21,8 @@ import {
   ChevronUp, ChevronDown,
 } from 'lucide-react';
 import { dashboardClient, type DashboardIndicatorPreferences } from '@cbl/api';
-import { CHART_COLORS, PIE_COLORS } from '../config/constants';
+import { CHART_COLORS } from '../config/constants';
+import { DASHBOARD_CHARTS } from '../config/dashboardAnalytics';
 import {
   DEFAULT_DASHBOARD_INDICATOR_IDS,
   useDashboardMetrics,
@@ -170,8 +172,8 @@ const DashboardMetricCard = ({ metric, onOpen }: { metric: MetricItem; onOpen: (
 };
 
 // ===== Section Header =====
-const SectionHeader = ({ title, onViewAll, onToggle, expanded }: {
-  title: string; onViewAll?: () => void; onToggle?: () => void; expanded?: boolean;
+const SectionHeader = ({ title, onViewAll, onToggle, expanded, control }: {
+  title: string; onViewAll?: () => void; onToggle?: () => void; expanded?: boolean; control?: React.ReactNode;
 }) => (
   <div className="flex items-center justify-between mb-4">
     <div className="flex items-center gap-2">
@@ -179,6 +181,7 @@ const SectionHeader = ({ title, onViewAll, onToggle, expanded }: {
       <h2 className="text-[13px] font-bold text-[#374151] uppercase tracking-wider">{title}</h2>
     </div>
     <div className="flex items-center gap-2">
+      {control}
       {onViewAll && (
         <button
           onClick={onViewAll}
@@ -205,21 +208,6 @@ const Panel = ({ children, className = '' }: { children: React.ReactNode; classN
   </div>
 );
 
-// ===== Stitch Design Brand Colors for charts =====
-const STITCH_CHART = {
-  maroon:   '#7B1010',
-  maroonMid:'#A01515',
-  olive:    '#6B5A1E',
-  oliveLight:'#A08C3A',
-  amber:    '#D97706',
-  grey:     '#6B7280',
-};
-
-const PIE_COLORS_RISK_STITCH  = [STITCH_CHART.maroon, '#B91C1C', STITCH_CHART.amber, STITCH_CHART.grey];
-const PIE_COLORS_STATUS_STITCH = [STITCH_CHART.amber, '#16A34A', '#B91C1C'];
-const PIE_COLORS_STATUS = PIE_COLORS_STATUS_STITCH;
-const PIE_COLORS_RISK   = PIE_COLORS_RISK_STITCH;
-
 export const Dashboard = () => {
   const navigate    = useNavigate();
   const { filters } = useFilters();
@@ -240,6 +228,7 @@ export const Dashboard = () => {
   const [leadingSelectionMessage, setLeadingSelectionMessage] = useState<string | null>(null);
   const [laggingSelectionMessage, setLaggingSelectionMessage] = useState<string | null>(null);
   const [savingPreference, setSavingPreference] = useState<'leading' | 'lagging' | null>(null);
+  const [safetyTrendSelection, setSafetyTrendSelection] = useState('all');
 
   const [hazards,    setHazards]    = useState<any[]>([]);
   const [hazardTotal, setHazardTotal] = useState(0);
@@ -422,13 +411,9 @@ export const Dashboard = () => {
   const totalTrainingSessions  = useAggregateStats ? dashboardStats.training?.total ?? 0 : training.length;
   const totalTrainingManhours  = useAggregateStats ? Number(dashboardStats.training?.manhours || 0) : Math.round(training.reduce((sum, t) => sum + (Number(t.manhours) || 0), 0));
 
-  const totalOpenCapas   = useAggregateStats && dashboardStats.correctiveActions
-    ? ['Open', 'Pending', 'Work in Progress'].reduce((sum, status) => sum + (Number(dashboardStats.correctiveActions[status]) || 0), 0)
-    : capas.filter(c => ['Open', 'Pending', 'Work in Progress'].includes(c.status_id)).length;
   const totalClosedCapas = useAggregateStats && dashboardStats.correctiveActions
     ? (Number(dashboardStats.correctiveActions.Closed) || 0) + (Number(dashboardStats.correctiveActions.Close) || 0)
     : capas.filter(c => c.status_id === 'Close' || c.status_id === 'Closed').length;
-  const overdueCapas     = Number(dashboardOverview?.summary?.correctiveActions?.overdue || 0);
   const totalCapas       = useAggregateStats ? dashboardStats.correctiveActions?.total ?? 0 : capas.length;
   const closureRateCAPA  = totalCapas > 0 ? Math.round((totalClosedCapas / totalCapas) * 100) : 0;
 
@@ -453,27 +438,20 @@ export const Dashboard = () => {
     });
   }
 
-  const capaStatusData = [
-    { name: 'Open (In Time)', value: totalOpenCapas - overdueCapas },
-    { name: 'Closed',         value: totalClosedCapas },
-    { name: 'Overdue',        value: overdueCapas },
-  ];
+  const safetyTrendSeries = [
+    { key: 'Incidents', color: CHART_COLORS.danger },
+    { key: 'Hazards', color: CHART_COLORS.amber },
+    { key: 'Near Misses', color: CHART_COLORS.info },
+  ].filter(series => safetyTrendSelection === 'all' || series.key === safetyTrendSelection);
 
-  const incDeptData = (dashboardOverview?.departmentStatistics?.incidents || []).map((row: any) => ({
-    name: row.department || row.departmentName || 'Unassigned',
-    count: Number(row.total || row.count || 0),
-  })).sort((a: any, b: any) => b.count - a.count).slice(0, 7);
-
-  const hazCatData = Object.entries(dashboardOverview?.charts?.hazards || {}).map(([name, count]) => ({ name, count: Number(count) })).sort((a,b)=>b.count-a.count).slice(0,6);
-
-  const trDeptData = (dashboardOverview?.departmentStatistics?.training || []).map((row: any) => ({
-    name: row.department || row.departmentName || 'Unassigned',
-    count: Math.round(Number(row.manhours || row.count || 0)),
-  })).sort((a: any, b: any) => b.count - a.count).slice(0, 7);
-
-  const incCatData = Object.entries(dashboardOverview?.summary?.incidents?.byType || {}).map(([name, value]) => ({ name, value }));
-
-  const riskData = Object.entries(dashboardOverview?.charts?.hazardSeverity || {}).map(([name, value]) => ({ name, value }));
+  const analyticsFilters = useMemo(() => ({
+    year: filters.year,
+    department: filters.department,
+    status: filters.status,
+    severity: filters.riskRating,
+    fromDate: filters.fromDate || undefined,
+    toDate: filters.toDate || undefined,
+  }), [filters.department, filters.fromDate, filters.riskRating, filters.status, filters.toDate, filters.year]);
 
   if (loading) {
     return (
@@ -617,17 +595,31 @@ export const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           {/* Safety Trends (60%) */}
           <Panel className="lg:col-span-3 p-5">
-            <SectionHeader title="Safety Trends — Last 6 Months" />
+            <SectionHeader
+              title="Safety Trends — Last 6 Months"
+              control={(
+                <>
+                  <label className="sr-only" htmlFor="safety-trend-series">Safety trend series</label>
+                  <select
+                    id="safety-trend-series"
+                    value={safetyTrendSelection}
+                    onChange={event => setSafetyTrendSelection(event.target.value)}
+                    className="max-w-[150px] rounded-md border border-[#D8DCE3] bg-white px-2 py-1.5 text-[11px] font-medium text-[#374151] outline-none focus:border-[#9B111E] focus:ring-1 focus:ring-[#9B111E]"
+                  >
+                    <option value="all">All Sources</option>
+                    <option value="Incidents">Incidents</option>
+                    <option value="Hazards">Hazards</option>
+                    <option value="Near Misses">Near Misses</option>
+                  </select>
+                </>
+              )}
+            />
             {/* Legend */}
             <div className="flex items-center gap-4 mb-4">
-              {[
-                { label: 'Incidents',   color: CHART_COLORS.danger },
-                { label: 'Hazards',     color: CHART_COLORS.amber  },
-                { label: 'Near Misses', color: CHART_COLORS.info   },
-              ].map(({ label, color }) => (
-                <div key={label} className="flex items-center gap-1.5">
+              {safetyTrendSeries.map(({ key, color }) => (
+                <div key={key} className="flex items-center gap-1.5">
                   <span className="inline-block w-3 h-0.5 rounded" style={{ backgroundColor: color }} />
-                  <span className="text-[11px] text-[#6B7280]">{label}</span>
+                  <span className="text-[11px] text-[#6B7280]">{key}</span>
                 </div>
               ))}
             </div>
@@ -638,143 +630,33 @@ export const Dashboard = () => {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisStyle} />
                   <YAxis axisLine={false} tickLine={false} tick={axisStyle} />
                   <RechartsTooltip content={<EnterpriseTooltip />} />
-                  <Line type="monotone" dataKey="Incidents"   stroke={CHART_COLORS.danger} strokeWidth={2.5} dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
-                  <Line type="monotone" dataKey="Hazards"     stroke={CHART_COLORS.amber}  strokeWidth={2.5} dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
-                  <Line type="monotone" dataKey="Near Misses" stroke={CHART_COLORS.info}   strokeWidth={2.5} dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
+                  {safetyTrendSeries.map(({ key, color }) => (
+                    <Line key={key} type="monotone" dataKey={key} stroke={color} strokeWidth={2.5} dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
+                  ))}
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </Panel>
 
-          {/* CAPA Status Donut (40%) */}
-          <Panel className="lg:col-span-2 p-5">
-            <SectionHeader title="CAPA Status Distribution" onViewAll={() => navigate('/action-tracker')} />
-            <div className="h-[240px] flex items-center justify-center">
-              {totalCapas > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={capaStatusData}
-                      cx="50%" cy="50%"
-                      innerRadius={65} outerRadius={95}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {capaStatusData.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS_STATUS[i % PIE_COLORS_STATUS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip content={<EnterpriseTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="text-center">
-                  <CheckCircle2 className="h-12 w-12 text-[#E0E0E0] mx-auto mb-2" />
-                  <p className="text-[13px] text-[#9CA3AF]">No CAPA data</p>
-                </div>
-              )}
-            </div>
-            {/* Donut Legend */}
-            <div className="flex flex-col gap-1.5 mt-2">
-              {capaStatusData.map((entry, i) => (
-                <div key={entry.name} className="flex items-center justify-between text-[12px]">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: PIE_COLORS_STATUS[i % PIE_COLORS_STATUS.length] }} />
-                    <span className="text-[#374151]">{entry.name}</span>
-                  </div>
-                  <span className="font-semibold text-[#1A1818] tabular-nums">{entry.value}</span>
-                </div>
-              ))}
-            </div>
-          </Panel>
+          <ConfigurableAnalyticsChart
+            definition={DASHBOARD_CHARTS.capa}
+            filters={analyticsFilters}
+            className="lg:col-span-2"
+            chartHeight={240}
+          />
         </div>
 
-        {/* ============ ROW 4 — BAR CHARTS ============ */}
+        {/* ============ ROW 4 — CONFIGURABLE ANALYTICS ============ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Department Incidents */}
-          <Panel className="p-5">
-            <SectionHeader title="Incidents by Department" onViewAll={() => navigate('/incident-log')} />
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incDeptData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
-                  <CartesianGrid vertical={false} {...gridStyle} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ ...axisStyle, fontSize: 10 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={axisStyle} />
-                  <RechartsTooltip content={<EnterpriseTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
-                  <Bar dataKey="count" name="Incidents" fill={CHART_COLORS.danger} radius={[3,3,0,0]} barSize={22} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-
-          {/* Top Hazard Categories */}
-          <Panel className="p-5">
-            <SectionHeader title="Top Hazard Categories" onViewAll={() => navigate('/hazard-reporting')} />
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={hazCatData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
-                  <CartesianGrid vertical={false} {...gridStyle} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ ...axisStyle, fontSize: 10 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={axisStyle} />
-                  <RechartsTooltip content={<EnterpriseTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
-                  <Bar dataKey="count" name="Hazards" fill={CHART_COLORS.amber} radius={[3,3,0,0]} barSize={22} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-
-          {/* Training Hours by Dept */}
-          <Panel className="p-5">
-            <SectionHeader title="Training Manhours by Dept" onViewAll={() => navigate('/training-records')} />
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={trDeptData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
-                  <CartesianGrid vertical={false} {...gridStyle} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ ...axisStyle, fontSize: 10 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={axisStyle} />
-                  <RechartsTooltip content={<EnterpriseTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
-                  <Bar dataKey="count" name="Hours" fill={CHART_COLORS.success} radius={[3,3,0,0]} barSize={22} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
+          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.incidentDepartment} filters={analyticsFilters} />
+          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.hazardCategory} filters={analyticsFilters} />
+          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.training} filters={analyticsFilters} />
         </div>
 
-        {/* ============ ROW 5 — DISTRIBUTION PIE CHARTS ============ */}
+        {/* ============ ROW 5 — CONFIGURABLE DISTRIBUTIONS ============ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {[
-            { title: 'Incident Categories', data: incCatData,    colors: PIE_COLORS,        path: '/incident-log'      },
-            { title: 'Hazard Risk Ratings', data: riskData,      colors: PIE_COLORS_RISK,   path: '/hazard-reporting'  },
-          ].map(({ title, data, colors, path }) => (
-            <Panel key={title} className="p-5">
-              <SectionHeader title={title} onViewAll={() => navigate(path)} />
-              <div className="h-[200px]">
-                {data.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={data} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={2} dataKey="value">
-                        {data.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)}
-                      </Pie>
-                      <RechartsTooltip content={<EnterpriseTooltip />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <p className="text-[13px] text-[#9CA3AF]">No data available</p>
-                  </div>
-                )}
-              </div>
-              {/* Compact legend */}
-              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-                {(data as Array<{ name: string; value: number }>).slice(0,5).map((entry, i) => (
-                  <div key={entry.name} className="flex items-center gap-1.5 text-[11px] text-[#6B7280]">
-                    <span className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
-                    {entry.name} ({entry.value})
-                  </div>
-                ))}
-              </div>
-            </Panel>
-          ))}
+          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.incidentCategory} filters={analyticsFilters} chartHeight={200} />
+          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.hazardRisk} filters={analyticsFilters} chartHeight={200} />
 
           {/* Recent Incidents Quick View */}
           <Panel className="p-5">
@@ -795,9 +677,9 @@ export const Dashboard = () => {
                   >
                     <div className="min-w-0">
                       <p className="text-[12px] font-medium text-[#1A1818] truncate">{inc.description || '—'}</p>
-                      <p className="text-[11px] text-[#9CA3AF]">{inc.date} · {inc.department_id}</p>
+                      <p className="text-[11px] text-[#9CA3AF]">{inc.date} · {inc.department || 'Unassigned'}</p>
                     </div>
-                    <StatusBadge status={inc.status_id || 'Open'} size="xs" />
+                    <StatusBadge status={inc.status || inc.status_id || 'Open'} size="xs" />
                   </div>
                 ))}
               </div>
@@ -805,7 +687,14 @@ export const Dashboard = () => {
           </Panel>
         </div>
 
-        {/* ============ ROW 6 — PLANT PHOTO CARDS (Stitch Dashboard) ============ */}
+        {/* ============ ROW 6 — ADDITIONAL HSE ANALYTICS ============ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.nearMiss} filters={analyticsFilters} />
+          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.fire} filters={analyticsFilters} />
+          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.audits} filters={analyticsFilters} />
+        </div>
+
+        {/* ============ ROW 7 — PLANT PHOTO CARDS (Stitch Dashboard) ============ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <PlantPhotoCard
             imageUrl={LOCATION_CARD_CONFIG.find(card => card.id === 'lu-sukkur-plant')!.imageUrl}
