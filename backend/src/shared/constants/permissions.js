@@ -51,6 +51,8 @@ const PERMISSIONS = Object.freeze({
   HAZARD_UPDATE: 'hazard:update',
   HAZARD_DELETE: 'hazard:delete',
   HAZARD_MANAGE: 'hazard:manage',
+  HAZARD_SUBMIT_CLOSURE: 'hazard:submit_closure',
+  HAZARD_REVIEW_CLOSURE: 'hazard:review_closure',
 
   // ─── HSE: Near Miss ───────────────────────────────────────────────────────
   NEAR_MISS_VIEW: 'near_miss:view',

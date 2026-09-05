@@ -1,54 +1,28 @@
-version: '3.8'
-
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=mysql
-      - DB_USER=root
-      - DB_PASSWORD=secret
-      - DB_NAME=cbl_db
-      - REDIS_HOST=redis
-    depends_on:
-      - mysql
-      - redis
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:5000/api/v1
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-
-  mysql:
+  db:
     image: mysql:8.0
+    restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=cbl_db
+      MYSQL_DATABASE: ${DB_NAME:-cbl_db}
+      MYSQL_USER: ${DB_USER:-cbl_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in docker-compose.env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in docker-compose.env}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     volumes:
       - mysql_data:/var/lib/mysql
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
 

@@ -31,6 +31,15 @@ class UserRepository extends BaseRepository {
   }
 
   /**
+   * Resolve the immutable Microsoft Entra object identifier with the same
+   * role/department graph used by normal authenticated requests.
+   */
+  async findByMicrosoftOid(microsoftOid) {
+    if (!microsoftOid) return null;
+    return User.findOne({ where: { microsoftOid }, include: userIncludes });
+  }
+
+  /**
    * Find a user by ID with their role and permissions eager-loaded.
    */
   async findByIdWithRole(id) {

@@ -19,6 +19,12 @@ export interface BackendUser {
   departmentId?: string;
   plant_id?: string;
   plantId?: string;
+  employeeProfile?: {
+    departmentId?: string;
+    plantId?: string;
+    department?: { id?: string };
+    plant?: { id?: string };
+  };
   [key: string]: unknown;
 }
 

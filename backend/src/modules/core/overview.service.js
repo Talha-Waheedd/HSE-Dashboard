@@ -48,6 +48,42 @@ const filtersFor = (query, dateColumn, departmentColumn = 'department_id', inclu
 const rows = async (sql, replacements) => sequelize.query(sql, { replacements, type: QueryTypes.SELECT });
 const qualifyWhere = (where, alias, columns) => columns.reduce((sql, column) => sql.replace(new RegExp(`\\b${column}\\b(?![0-9])`, 'g'), `${alias}.${column}`), where);
 const number = value => Number(value || 0);
+const dateOnly = date => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+const referenceDateFor = (query) => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(query.toDate || ''))) {
+    const parsed = new Date(`${query.toDate}T12:00:00`);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+  const year = /^\d{4}$/.test(String(query.year || '')) ? Number(query.year) : null;
+  const today = new Date();
+  if (year && year !== today.getFullYear()) return new Date(year, 11, 31, 12);
+  return today;
+};
+const comparisonPeriods = (query) => {
+  const reference = referenceDateFor(query);
+  const currentMonthStart = new Date(reference.getFullYear(), reference.getMonth(), 1, 12);
+  const currentMonthEnd = new Date(reference.getFullYear(), reference.getMonth() + 1, 0, 12);
+  const previousMonthStart = new Date(reference.getFullYear(), reference.getMonth() - 1, 1, 12);
+  const previousMonthEnd = new Date(reference.getFullYear(), reference.getMonth(), 0, 12);
+  const currentYear = reference.getFullYear();
+  return {
+    hazardCurrent: { fromDate: dateOnly(currentMonthStart), toDate: dateOnly(currentMonthEnd) },
+    hazardPrevious: { fromDate: dateOnly(previousMonthStart), toDate: dateOnly(previousMonthEnd) },
+    incidentCurrent: { fromDate: `${currentYear}-01-01`, toDate: `${currentYear}-12-31` },
+    incidentPrevious: { fromDate: `${currentYear - 1}-01-01`, toDate: `${currentYear - 1}-12-31` },
+    hazardLabels: {
+      current: `${currentMonthStart.getFullYear()}-${String(currentMonthStart.getMonth() + 1).padStart(2, '0')}`,
+      previous: `${previousMonthStart.getFullYear()}-${String(previousMonthStart.getMonth() + 1).padStart(2, '0')}`,
+    },
+    incidentLabels: { current: String(currentYear), previous: String(currentYear - 1) },
+  };
+};
+const filtersForPeriod = (query, period, dateColumn, departmentColumn = 'department_id', includeMetadata = true) => filtersFor({
+  ...query,
+  year: undefined,
+  fromDate: period.fromDate,
+  toDate: period.toDate,
+}, dateColumn, departmentColumn, includeMetadata);
 
 class OverviewService {
   async dashboard(query = {}) {
@@ -60,8 +96,15 @@ class OverviewService {
       const training = filtersFor(query, 'scheduled_date', 'department_id', false, null, null);
       const actions = filtersFor(query, 'due_date', null, false, 'priority', null);
       const assurance = filtersFor(query, 'scheduled_date', 'department_id', false, null, null);
+      const periods = comparisonPeriods(query);
+      const hazardCurrent = filtersForPeriod(query, periods.hazardCurrent, 'reported_at');
+      const hazardPrevious = filtersForPeriod(query, periods.hazardPrevious, 'reported_at');
+      const incidentCurrent = filtersForPeriod(query, periods.incidentCurrent, 'incident_date', 'department_id', false);
+      const incidentPrevious = filtersForPeriod(query, periods.incidentPrevious, 'incident_date', 'department_id', false);
+      incidentCurrent.where += ' AND source_near_miss_id IS NULL AND source_hazard_id IS NULL';
+      incidentPrevious.where += ' AND source_near_miss_id IS NULL AND source_hazard_id IS NULL';
 
-      const [hazardRows, incidentRows, nearMissRows, trainingRows, actionRows, assuranceRows, trendRows, hazardDimensionRows, recentIncidentRows, incidentDepartmentRows, trainingDepartmentRows] = await Promise.all([
+      const [hazardRows, incidentRows, nearMissRows, trainingRows, actionRows, assuranceRows, trendRows, hazardDimensionRows, recentIncidentRows, incidentDepartmentRows, trainingDepartmentRows, hazardCurrentRows, hazardPreviousRows, incidentCurrentRows, incidentPreviousRows] = await Promise.all([
         rows(`SELECT COUNT(*) total,
           SUM(status IN ('draft','reported','submitted','under_review','corrective_action')) open_count,
           SUM(status IN ('closed','resolved')) closed_count,
@@ -79,7 +122,9 @@ class OverviewService {
           FROM incidents WHERE ${incident.where}`, incident.replacements),
         rows(`SELECT COUNT(*) total, SUM(status IN ('closed','resolved')) closed_count
           FROM near_misses WHERE ${nearMiss.where}`, nearMiss.replacements),
-        rows(`SELECT COUNT(*) total, COALESCE(SUM(COALESCE(manhours, participant_count * duration_minutes / 60, 0)), 0) manhours
+        rows(`SELECT COUNT(*) total,
+          COALESCE(SUM(participant_count), 0) participants,
+          COALESCE(SUM(COALESCE(manhours, participant_count * duration_minutes / 60, 0)), 0) manhours
           FROM training_sessions WHERE ${training.where} AND status <> 'draft'`, training.replacements),
         rows(`SELECT COUNT(*) total,
           SUM(status IN ('open','in_progress','pending','planned')) open_count,
@@ -105,12 +150,32 @@ class OverviewService {
           FROM training_sessions t LEFT JOIN departments d ON d.id = t.department_id
           WHERE ${qualifyWhere(training.where, 't', ['department_id', 'scheduled_date', 'deleted_at', 'status'])} AND t.status <> 'draft'
           GROUP BY department ORDER BY manhours DESC LIMIT 10`, training.replacements),
+        rows(`SELECT COUNT(*) total FROM hazards WHERE ${hazardCurrent.where}`, hazardCurrent.replacements),
+        rows(`SELECT COUNT(*) total FROM hazards WHERE ${hazardPrevious.where}`, hazardPrevious.replacements),
+        rows(`SELECT COUNT(*) total FROM incidents WHERE ${incidentCurrent.where}`, incidentCurrent.replacements),
+        rows(`SELECT COUNT(*) total FROM incidents WHERE ${incidentPrevious.where}`, incidentPrevious.replacements),
       ]);
 
       const h = hazardRows[0] || {}; const i = incidentRows[0] || {}; const n = nearMissRows[0] || {};
       const t = trainingRows[0] || {}; const a = actionRows[0] || {};
       const audits = assuranceRows.find(row => row.source === 'audits')?.total || 0;
       const inspections = assuranceRows.find(row => row.source === 'inspections')?.total || 0;
+      const hazardComparison = {
+        current: number(hazardCurrentRows[0]?.total),
+        previous: number(hazardPreviousRows[0]?.total),
+        currentPeriod: periods.hazardLabels.current,
+        previousPeriod: periods.hazardLabels.previous,
+        label: 'vs previous month',
+      };
+      hazardComparison.delta = hazardComparison.current - hazardComparison.previous;
+      const incidentComparison = {
+        current: number(incidentCurrentRows[0]?.total),
+        previous: number(incidentPreviousRows[0]?.total),
+        currentPeriod: periods.incidentLabels.current,
+        previousPeriod: periods.incidentLabels.previous,
+        label: 'vs previous year',
+      };
+      incidentComparison.delta = incidentComparison.current - incidentComparison.previous;
       const trend = trendRows.reduce((out, row) => {
         out[row.source] ||= {};
         out[row.source][`${row.year}-${String(row.month).padStart(2, '0')}`] = number(row.total);
@@ -122,7 +187,7 @@ class OverviewService {
           hazards: { total: number(h.total), open: number(h.open_count), closed: number(h.closed_count), highRisk: number(h.high_risk), severity: { Low: number(h.low_risk), Medium: number(h.medium_risk), High: number(h.high_risk) } },
           nearMisses: { total: number(n.total), closed: number(n.closed_count) },
           incidents: { total: number(i.total), fatalities: number(i.fatalities), lti: number(i.lti), rwc: number(i.rwc), mtc: number(i.mtc), firstAid: number(i.first_aid), fire: number(i.fire), byType: { fatality: number(i.fatalities), lti: number(i.lti), rwc: number(i.rwc), mtc: number(i.mtc), first_aid: number(i.first_aid), fire: number(i.fire) } },
-          training: { total: number(t.total), manhours: number(t.manhours) },
+          training: { total: number(t.total), participants: number(t.participants), manhours: number(t.manhours) },
           correctiveActions: { total: number(a.total), open: number(a.open_count), closed: number(a.closed_count), overdue: number(a.overdue_count) },
           assurance: { audits: number(audits), inspections: number(inspections) },
         },
@@ -130,6 +195,7 @@ class OverviewService {
         laggingIndicators: { fatalities: number(i.fatalities), lti: number(i.lti), rwc: number(i.rwc), mtc: number(i.mtc), firstAid: number(i.first_aid), fire: number(i.fire) },
         departmentStatistics: { incidents: incidentDepartmentRows.map(row => ({ department: row.department, total: number(row.total) })), training: trainingDepartmentRows.map(row => ({ department: row.department, manhours: Math.round(number(row.manhours)) })) },
         charts: { hazards: dimensions.byCategory, hazardSeverity: dimensions.bySeverity, monthly: trend },
+        comparisons: { hazards: hazardComparison, incidents: incidentComparison },
         recent: { incidents: recentIncidentRows, hazards: [], nearMisses: [] },
       };
     });

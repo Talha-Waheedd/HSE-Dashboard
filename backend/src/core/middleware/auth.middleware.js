@@ -6,6 +6,7 @@ const ApiError = require('../../shared/utils/ApiError');
 const { MESSAGES } = require('../../shared/constants/messages');
 const TokenType = require('../../shared/enums/TokenType');
 const { ROLES } = require('../../shared/constants/roles');
+const config = require('../../database/config');
 
 /**
  * JWT Authentication Middleware.
@@ -19,8 +20,9 @@ const authenticate = async (req, res, next) => {
     // explicit header. Using === 'development' (not !== 'production') ensures
     // the bypass never activates when NODE_ENV is unset or set to 'staging'.
     if (
-      req.headers['x-preview-auth'] === 'true' &&
-      process.env.NODE_ENV === 'development'
+      config.previewAuth === true
+      && req.headers['x-preview-auth'] === 'true'
+      && config.env === 'development'
     ) {
       const previewUser = await userRepository.findByIdWithRole(process.env.PREVIEW_USER_ID);
       // Keep read-only dashboard/module requests available even if the local
@@ -43,11 +45,14 @@ const authenticate = async (req, res, next) => {
         // The previous `super_admin` fallback was not in SUPERUSER_ROLES and
         // caused every preview request to return 403 when the user row was
         // unavailable.
-        role: { name: ROLES.SYSTEM_ADMINISTRATOR, displayName: ROLES.SYSTEM_ADMINISTRATOR, permissions: [] },
+        role: {
+          name: ROLES.SYSTEM_ADMINISTRATOR,
+          displayName: ROLES.SYSTEM_ADMINISTRATOR,
+          permissions: [],
+        },
       };
       return next();
     }
-
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

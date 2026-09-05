@@ -1,5 +1,7 @@
 'use strict';
 
+const jwt = require('jsonwebtoken');
+const jwksRsa = require('jwks-rsa');
 const { sequelize } = require('../../database/connection');
 const userRepository = require('../../repositories/user.repository');
 const tokenRepository = require('../../repositories/token.repository');
@@ -11,8 +13,6 @@ const TokenType = require('../../shared/enums/TokenType');
 const { MESSAGES } = require('../../shared/constants/messages');
 const { emitter, EVENTS } = require('../../core/events/emitter');
 const logger = require('../../shared/utils/logger');
-const jwt = require('jsonwebtoken');
-const jwksRsa = require('jwks-rsa');
 const config = require('../../database/config');
 
 class AuthService {
@@ -45,6 +45,12 @@ class AuthService {
     const tokenEmail = String(payload.preferred_username || payload.email || payload.upn || '').toLowerCase();
     if (!tokenEmail || tokenEmail !== String(email).toLowerCase()) {
       throw ApiError.unauthorized('Microsoft identity does not match the requested account');
+    }
+    if (String(payload.tid || '') !== String(config.msal.tenantId)) {
+      throw ApiError.unauthorized('Microsoft identity belongs to a different tenant');
+    }
+    if (!payload.oid && !payload.sub) {
+      throw ApiError.unauthorized('Microsoft identity does not contain an object identifier');
     }
     return payload;
   }
@@ -82,7 +88,7 @@ class AuthService {
 
       return user;
     } catch (err) {
-      await transaction.rollback();
+      if (!transaction.finished) await transaction.rollback();
       throw err;
     }
   }
@@ -126,7 +132,7 @@ class AuthService {
       delete userJson.password;
       return { user: userJson, tokens };
     } catch (err) {
-      await transaction.rollback();
+      if (!transaction.finished) await transaction.rollback();
       throw err;
     }
   }
@@ -170,16 +176,9 @@ class AuthService {
       await tokenRepository.revokeAllUserTokens(user.id, TokenType.EMAIL_VERIFY, transaction);
       await transaction.commit();
     } catch (err) {
-      await transaction.rollback();
+      if (!transaction.finished) await transaction.rollback();
       throw err;
     }
-  }
-
-  /**
-   * Verify if a user exists by email (for SSO flows)
-   */
-  async verifyEmailExists(email) {
-    return userRepository.findOne({ email });
   }
 
   /**
@@ -215,7 +214,7 @@ class AuthService {
       await tokenRepository.revokeAllUserTokens(payload.sub, TokenType.PASSWORD_RESET, transaction);
       await transaction.commit();
     } catch (err) {
-      await transaction.rollback();
+      if (!transaction.finished) await transaction.rollback();
       throw err;
     }
   }
@@ -245,16 +244,29 @@ class AuthService {
    * @param {object} meta  - { ip, userAgent }
    * @returns {{ user: object, tokens: { accessToken, refreshToken } }}
    */
-  async ssoLogin(email, meta = {}) {
-    const user = await this.verifyEmailExists(email);
+  async ssoLogin(email, meta = {}, microsoftIdentity = {}) {
+    const microsoftOid = String(microsoftIdentity.oid || microsoftIdentity.sub || '').trim();
+    let user = microsoftOid ? await userRepository.findByMicrosoftOid(microsoftOid) : null;
+    if (!user) user = await this.verifyEmailExists(email);
     if (!user || !user.status) {
       return null; // Caller decides how to respond (404 / 401)
     }
 
-    const tokens = generateTokenPair(user);
+    // A local account is bound to its immutable Entra object id on the first
+    // verified SSO login. Once bound, a different Entra identity cannot claim
+    // the account merely by presenting the same mutable email/UPN.
+    if (user.microsoftOid && user.microsoftOid !== microsoftOid) {
+      throw ApiError.unauthorized('Microsoft identity does not match the registered account');
+    }
 
     const transaction = await sequelize.transaction();
     try {
+      if (!user.microsoftOid && microsoftOid) {
+        await userRepository.update({ microsoftOid }, { id: user.id }, { transaction });
+      }
+
+      const userWithRole = await userRepository.findByIdWithRole(user.id);
+      const tokens = generateTokenPair(userWithRole);
       await tokenRepository.revokeAllUserTokens(user.id, TokenType.REFRESH, transaction);
       await tokenRepository.createRefreshToken(
         {
@@ -268,16 +280,14 @@ class AuthService {
       );
       await userRepository.updateLastLogin(user.id, transaction);
       await transaction.commit();
+
+      emitter.emit(EVENTS.USER_LOGGED_IN, { userId: user.id, ...meta });
+      return { user: userWithRole.toJSON(), tokens };
     } catch (err) {
-      await transaction.rollback();
+      if (!transaction.finished) await transaction.rollback();
       logger.error('SSO login transaction failed', { email, err: err.message });
       throw err;
     }
-
-    emitter.emit(EVENTS.USER_LOGGED_IN, { userId: user.id, ...meta });
-
-    const userWithRole = await userRepository.findByIdWithRole(user.id);
-    return { user: userWithRole.toJSON(), tokens };
   }
 }
 

@@ -49,11 +49,11 @@ module.exports = {
       idle: 20000,
     },
     define: { underscored: true, timestamps: true, paranoid: true },
-    dialectOptions: {
+    dialectOptions: config.db.ssl ? {
       ssl: {
         require: true,
-        rejectUnauthorized: false,
+        rejectUnauthorized: config.db.sslRejectUnauthorized,
       },
-    },
+    } : {},
   },
 };

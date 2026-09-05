@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Eye, Search } from 'lucide-react';
+import { Eye, Plus, Search } from 'lucide-react';
+import { useAuth } from '@cbl/auth';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
 import { auditService, auditStatusLabel, type AuditLog, type PageMeta } from '../services/api/auditService';
@@ -22,6 +23,7 @@ const statusStyle = (status: string) => ({
 
 export const AuditLogs = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const planId = searchParams.get('planId') || '';
   const [rows, setRows] = useState<AuditLog[]>([]);
@@ -33,6 +35,8 @@ export const AuditLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const requestId = useRef(0);
+  const roles = [user?.role, ...(user?.roles || [])].filter(Boolean);
+  const canManageAudits = roles.some(role => ['System Administrator', 'Administrator', 'HSE Manager', 'HSE Officer'].includes(String(role)));
 
   useEffect(() => {
     const id = ++requestId.current;
@@ -66,7 +70,13 @@ export const AuditLogs = () => {
     <ContextHeader
       title="Audit Logs"
       breadcrumbs={['Leading Indicators', 'Audit Logs']}
-      subtitle="Scheduled audit occurrences generated from the Critical Audit Plan"
+      subtitle="Scheduled and manually created audits in one consolidated register"
+      actions={canManageAudits ? [{
+        label: 'Add Audit',
+        icon: <Plus />,
+        onClick: () => navigate('/audit-management/new'),
+        variant: 'primary',
+      }] : []}
     />
     <main className="mx-auto max-w-[1800px] space-y-4 p-5 sm:p-6">
       <section className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
@@ -92,14 +102,15 @@ export const AuditLogs = () => {
         <div className={`min-h-[420px] overflow-x-auto ${loading ? 'opacity-60' : ''}`}>
           <table className="w-full min-w-[1450px] border-collapse text-left">
             <thead><tr className="border-b border-[#E5E7EB] bg-white">
-              {['Audit Log ID', 'Area Name', 'Area Owner', 'Audit Objective', 'Risk Rating', 'Auditor', 'Frequency', 'Scheduled Date', 'Status', 'Actions'].map(label => <th key={label} className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">{label}</th>)}
+              {['Audit Log ID', 'Source', 'Area Name', 'Area Owner', 'Audit Objective', 'Risk Rating', 'Auditor', 'Frequency', 'Scheduled Date', 'Status', 'Actions'].map(label => <th key={label} className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">{label}</th>)}
             </tr></thead>
             <tbody className="text-[13px]">
-              {!loading && rows.length === 0 && <tr><td colSpan={10} className="px-5 py-12 text-center text-[#6B7280]">No scheduled Audit Logs found.</td></tr>}
+              {!loading && rows.length === 0 && <tr><td colSpan={11} className="px-5 py-12 text-center text-[#6B7280]">No Audit Logs found.</td></tr>}
               {rows.map(row => {
                 const label = auditStatusLabel(row.status);
                 return <tr key={row.id} className="border-b border-[#E5E7EB] align-top hover:bg-[#FFF9F9]">
                   <td className="px-4 py-3 font-semibold text-[#111827]">{row.auditNumber || row.id.slice(0, 8)}</td>
+                  <td className="px-4 py-3"><span className="whitespace-nowrap rounded bg-[#F3F4F6] px-2 py-1 text-[11px] font-semibold text-[#475569]">{row.criticalAuditPlan ? 'Critical Audit Plan' : 'Manual'}</span></td>
                   <td className="max-w-60 whitespace-pre-wrap px-4 py-3 font-semibold text-[#374151]">{row.title}</td>
                   <td className="max-w-52 whitespace-pre-wrap px-4 py-3 text-[#4B5563]">{row.areaOwner || '—'}</td>
                   <td className="max-w-72 whitespace-pre-wrap px-4 py-3 text-[#4B5563]">{row.auditObjective || row.criticalAuditPlan?.auditObjective || '—'}</td>

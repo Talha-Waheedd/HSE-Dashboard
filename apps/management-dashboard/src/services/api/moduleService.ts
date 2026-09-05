@@ -118,7 +118,7 @@ const trainingTypeToApi = (value: unknown) => ({
 const statusFromApi = (value: unknown) => ({
   draft: 'Draft', reported: 'Open', submitted: 'Open', under_review: 'Pending',
   under_investigation: 'Pending', corrective_action: 'Work in Progress', resolved: 'Closed', closed: 'Closed',
-  scheduled: 'Pending', in_progress: 'Work in Progress', completed: 'Closed', cancelled: 'Cancelled',
+  planned: 'Pending', scheduled: 'Pending', in_progress: 'Work in Progress', completed: 'Closed', cancelled: 'Cancelled',
 }[String(value || '').toLowerCase()] || value);
 const nearMissStatusFromApi = (value: unknown) => ({
   draft: 'Open', reported: 'Open', submitted: 'Open', under_review: 'Open', open: 'Open', closed: 'Close', close: 'Close',
@@ -161,7 +161,6 @@ const prepareRequestParams = (params: Record<string, unknown> = {}, schemaId?: s
       requestParams.status = statusToApi(requestParams.status, schemaId);
     }
   }
-  if (schemaId === 'audit-management') requestParams.hasPlan = true;
   if (schemaId === 'critical-audit-plan') requestParams.source = schemaId;
   if (['incident-log', 'accident-reporting'].includes(schemaId || '') && requestParams.incidentCategory) {
     requestParams.incidentType = requestParams.incidentCategory;
@@ -263,13 +262,15 @@ export const moduleService = {
         // `reportedAt` is the authoritative hazard observation date. Imported
         // metadata can contain legacy display dates and must not override it.
         date: item.reportedAt || item.reported_at || item.metadata?.date || item.createdAt || item.created_at || new Date().toISOString(),
-        status_id: item.metadata?.status_id || statusFromApi(item.status),
+        status_id: statusFromApi(item.status) || item.metadata?.status_id,
         investigation_required: yesNoFromApi(
           item.furtherInvestigationRequired ??
           item.further_investigation_required ??
           item.metadata?.investigation_required ??
           item.metadata?.further_investigation_required
         ) || 'No',
+        responsible_department_id: item.responsibleDepartmentId || item.responsible_department_id || item.metadata?.responsible_department_id || '',
+        responsible_department: item.responsibleDepartment?.code || item.responsibleDepartment?.name || item.metadata?.responsible_department || item.metadata?.responsible || '',
         department_id: departmentDisplayValue(
           item.department?.code,
           item.department?.name,
@@ -337,7 +338,11 @@ export const moduleService = {
           department_name: item.metadata?.department_name || item.departmentName || item.department?.name,
           department_code: item.metadata?.department_code || item.department?.code,
           status_id: item.metadata?.status_id || statusFromApi(item.status),
-          source: item.metadata?.source || item.sourceType || item.source_type,
+          source: item.metadata?.source || item.source || item.sourceType || item.source_type,
+          source_label: schemaId === 'audit-management'
+            ? (item.criticalAuditPlan?.id || item.criticalAuditPlanId || item.critical_audit_plan_id ? 'Critical Audit Plan' : 'Manual')
+            : (item.metadata?.source || item.source || item.sourceType || item.source_type),
+          risk_rating_id: item.metadata?.risk_rating_id || item.riskRating || item.risk_rating,
           training_type: customTrainingType ? 'Other' : (item.metadata?.training_type || item.trainingType || item.training_type),
           training_type_other: customTrainingType,
           training_type_label: customTrainingType || item.trainingTypeLabel || String(item.trainingType || item.training_type || '').split('_').map((part: string) => part ? part.charAt(0).toUpperCase() + part.slice(1) : '').join(' '),
@@ -362,6 +367,23 @@ export const moduleService = {
   getHazardSummary: async (params?: Record<string, unknown>): Promise<ApiResponse<{ totalRecords: number; assigned: number; submittedForReview: number; closedThisMonth: number }>> => {
     const requestParams = prepareRequestParams(params, 'hazard-reporting');
     const response = await apiClient.get('/hazards/summary', { params: requestParams });
+    return response.data;
+  },
+
+  submitHazardClosure: async (id: string, remarks: string): Promise<ApiResponse<any>> => {
+    const response = await apiClient.post(`/hazards/${id}/closure-submission`, { remarks });
+    notifyDashboardRefresh();
+    return response.data;
+  },
+
+  reviewHazardClosure: async (
+    id: string,
+    decision: 'approved' | 'rejected',
+    remarks: string,
+    reason?: string,
+  ): Promise<ApiResponse<any>> => {
+    const response = await apiClient.post(`/hazards/${id}/hse-review`, { decision, remarks, reason });
+    notifyDashboardRefresh();
     return response.data;
   },
 
@@ -409,6 +431,7 @@ export const moduleService = {
         // saves reliable when an edit/import supplies `status` instead of
         // `status_id`, while the backend still receives a canonical enum.
         status: statusToApi(payload.status_id ?? payload.status ?? 'Open', schemaId),
+        responsibleDepartmentId: isUuid(payload.responsible_department_id) ? payload.responsible_department_id : undefined,
         furtherInvestigationRequired: yesNoToApi(payload.investigation_required) ?? false,
       };
     } else if (schemaId === 'near-miss') {
@@ -472,7 +495,7 @@ export const moduleService = {
         ...payload,
         plantId: payload.plantId || DEFAULT_PLANT_ID,
         status: statusToApi(payload.status_id ?? payload.status ?? 'planned', schemaId),
-        source: schemaId,
+        source: schemaId === 'audit-management' ? 'manual' : 'critical-audit-plan',
       };
     }
 
@@ -494,9 +517,12 @@ export const moduleService = {
         category: categoryToApi(payload.hazard_category_id === 'Other' ? payload.hazard_category_id_other : payload.hazard_category_id),
         severityLevel: severityToApi(payload.risk_rating_id || 'low'),
         title: payload.description ? payload.description.substring(0, 50) : 'Hazard Report',
-        status: statusToApi(payload.status_id, schemaId),
+        responsibleDepartmentId: payload.responsible_department_id === ''
+          ? null
+          : isUuid(payload.responsible_department_id) ? payload.responsible_department_id : undefined,
         furtherInvestigationRequired: yesNoToApi(payload.investigation_required) ?? false,
       };
+      delete payload.status;
     } else if (schemaId === 'near-miss') {
       payload = {
         ...payload,
@@ -551,7 +577,7 @@ export const moduleService = {
       payload = {
         ...payload,
         status: payload.status_id ? statusToApi(payload.status_id, schemaId) : undefined,
-        source: schemaId,
+        source: schemaId === 'audit-management' ? 'manual' : 'critical-audit-plan',
       };
     }
 

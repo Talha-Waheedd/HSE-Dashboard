@@ -112,6 +112,8 @@ Hazard.belongsTo(Plant, { foreignKey: 'plantId', as: 'plant' });
 
 Department.hasMany(Hazard, { foreignKey: 'departmentId', as: 'hazards' });
 Hazard.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
+Department.hasMany(Hazard, { foreignKey: 'responsibleDepartmentId', as: 'responsibleHazards' });
+Hazard.belongsTo(Department, { foreignKey: 'responsibleDepartmentId', as: 'responsibleDepartment' });
 
 User.hasMany(Hazard, { foreignKey: 'assignedTo', as: 'assignedHazards' });
 Hazard.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignee' });

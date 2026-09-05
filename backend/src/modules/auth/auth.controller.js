@@ -92,10 +92,10 @@ class AuthController {
     const meta = { ip: req.ip, userAgent: req.headers['user-agent'] };
 
     // 1. Cryptographically verify the MSAL id-token matches the claimed email.
-    await authService.verifyMicrosoftToken(msalToken, email);
+    const microsoftIdentity = await authService.verifyMicrosoftToken(msalToken, email);
 
     // 2. Delegate all session-creation logic to the service layer.
-    const result = await authService.ssoLogin(email, meta);
+    const result = await authService.ssoLogin(email, meta, microsoftIdentity);
 
     if (!result) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
@@ -106,11 +106,11 @@ class AuthController {
     }
 
     return res.status(HTTP_STATUS.OK).json(ApiResponse.success({
-        authorized: true,
-        email,
-        user: result.user,
-        tokens: result.tokens,
-      }, 'User authorized and logged in via SSO'));
+      authorized: true,
+      email,
+      user: result.user,
+      tokens: result.tokens,
+    }, 'User authorized and logged in via SSO'));
   });
 
   forgotPassword = asyncHandler(async (req, res) => {

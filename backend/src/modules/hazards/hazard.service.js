@@ -9,6 +9,13 @@ const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
 const { syncBestEffort } = require('../actions/capa-sync.service');
 const { ensureHazardInvestigation } = require('../incidents/investigation-sync.service');
+const { Department, Attachment, Hazard } = require('../../database/models');
+const AttachmentSource = require('../../shared/enums/AttachmentSource');
+const { isAdministratorRole } = require('../../shared/constants/roles');
+const {
+  assertCanSubmitHazardClosure,
+  assertCanReviewHazardClosure,
+} = require('./hazard-authorization.service');
 
 const DEFAULT_PLANT_ID = '5126923e-b77f-4eb6-8b98-d5fc9db8d71b';
 const isUuid = (value) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
@@ -37,6 +44,31 @@ const normalizeHazardMetadata = (metadata = {}, data = {}) => ({
   ...(data.furtherInvestigationRequired !== undefined
     ? { investigation_required: yesNoLabel(data.furtherInvestigationRequired) }
     : {}),
+});
+
+const departmentLabel = (department) => department?.code || department?.name || '';
+const normalizeDepartmentReference = (value) => String(value || '').trim().toLowerCase();
+
+const resolveResponsibleDepartment = async (data = {}) => {
+  const metadata = data.metadata || {};
+  const explicitId = data.responsibleDepartmentId || metadata.responsible_department_id;
+  if (explicitId && isUuid(explicitId)) {
+    const department = await Department.findOne({ where: { id: explicitId, isActive: true } });
+    if (!department) throw ApiError.badRequest('Responsible Department must be an active department.');
+    return department;
+  }
+
+  const label = metadata.responsible_department || metadata.responsible || data.responsible_department;
+  if (!label || isUuid(label)) return null;
+  const normalized = normalizeDepartmentReference(label);
+  const departments = await Department.findAll({ where: { isActive: true } });
+  return departments.find((department) => [department.name, department.code]
+    .some((candidate) => normalizeDepartmentReference(candidate) === normalized)) || null;
+};
+
+const appendClosureHistory = (metadata, event) => ({
+  ...(metadata || {}),
+  closure_history: [...(Array.isArray(metadata?.closure_history) ? metadata.closure_history : []), event],
 });
 
 class HazardService {
@@ -72,6 +104,19 @@ class HazardService {
     }
 
     data.metadata = normalizeHazardMetadata(data.metadata, data);
+    const responsibleReference = data.responsibleDepartmentId || data.metadata?.responsible_department_id || data.metadata?.responsible_department;
+    const responsibleDepartment = await resolveResponsibleDepartment(data);
+    if (responsibleReference && !responsibleDepartment) {
+      throw ApiError.badRequest('Responsible Department must match an active department.');
+    }
+    if (responsibleDepartment) {
+      data.responsibleDepartmentId = responsibleDepartment.id;
+      data.metadata = {
+        ...data.metadata,
+        responsible_department_id: responsibleDepartment.id,
+        responsible_department: departmentLabel(responsibleDepartment),
+      };
+    }
 
     // Employee ID is stored in metadata rather than as a hazards-table FK.
     // Keep it optional only behind this development flag while the employee
@@ -149,11 +194,34 @@ class HazardService {
       if (!plant) throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
     }
 
-    const { metadata, ...hazardFields } = updateData;
-    const nextMetadata = normalizeHazardMetadata(
+    const { metadata, status: _forbiddenStatus, ...hazardFields } = updateData;
+    const hasResponsibleUpdate = Object.prototype.hasOwnProperty.call(updateData, 'responsibleDepartmentId')
+      || Object.prototype.hasOwnProperty.call(metadata || {}, 'responsible_department_id')
+      || Object.prototype.hasOwnProperty.call(metadata || {}, 'responsible_department');
+    let responsibleDepartment = null;
+    if (hasResponsibleUpdate) {
+      const responsibleReference = updateData.responsibleDepartmentId
+        || metadata?.responsible_department_id
+        || metadata?.responsible_department;
+      if (responsibleReference) {
+        responsibleDepartment = await resolveResponsibleDepartment(updateData);
+        if (!responsibleDepartment) {
+          throw ApiError.badRequest('Responsible Department must match an active department.');
+        }
+      }
+      hazardFields.responsibleDepartmentId = responsibleDepartment?.id || null;
+    }
+    let nextMetadata = normalizeHazardMetadata(
       { ...(hazard.metadata || {}), ...(metadata || {}) },
       updateData,
     );
+    if (hasResponsibleUpdate) {
+      nextMetadata = {
+        ...nextMetadata,
+        responsible_department_id: responsibleDepartment?.id || null,
+        responsible_department: responsibleDepartment ? departmentLabel(responsibleDepartment) : '',
+      };
+    }
     const transaction = await sequelize.transaction();
     try {
       const updatePayload = { ...hazardFields, metadata: nextMetadata, updatedBy: userId };
@@ -171,7 +239,7 @@ class HazardService {
       ]);
       return result;
     } catch (error) {
-      await transaction.rollback();
+      if (!transaction.finished) await transaction.rollback();
       throw error;
     }
   }
@@ -179,8 +247,13 @@ class HazardService {
   /**
    * Update hazard status
    */
-  async updateStatus(id, newStatus, userId, actionTaken = null) {
+  async updateStatus(id, newStatus, user, actionTaken = null) {
     const hazard = await this.getHazardById(id);
+
+    if (!isAdministratorRole(user?.role?.name)) {
+      throw ApiError.forbidden('Only an administrator can use the generic hazard status endpoint.');
+    }
+    const userId = user.id;
 
     const validStatuses = Object.values(HazardStatus);
     if (!validStatuses.includes(newStatus)) {
@@ -224,7 +297,124 @@ class HazardService {
       ]);
       return result;
     } catch (error) {
-      await transaction.rollback();
+      if (!transaction.finished) await transaction.rollback();
+      throw error;
+    }
+  }
+
+  /**
+   * Department-side closure submission. This transition never closes the
+   * hazard; it moves the record into the existing under_review state.
+   */
+  async submitClosure(id, user, remarks = '') {
+    const transaction = await sequelize.transaction();
+    try {
+      const hazard = await Hazard.findByPk(id, {
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      if (!hazard) throw ApiError.notFound(MESSAGES.HAZARD_NOT_FOUND);
+
+      assertCanSubmitHazardClosure(hazard, user);
+      if (hazard.status !== HazardStatus.SUBMITTED) {
+        throw ApiError.conflict('Only an open hazard can be submitted for HSE review.');
+      }
+
+      const proofCount = await Attachment.count({
+        where: {
+          sourceType: AttachmentSource.HAZARD,
+          sourceId: hazard.id,
+          attachmentType: 'CLOSING_PROOF_PHOTO',
+          uploadedBy: user.id,
+        },
+        transaction,
+      });
+      if (proofCount < 1) {
+        throw ApiError.badRequest('A closing proof image uploaded by the responsible Department Manager is required.');
+      }
+
+      const submittedAt = new Date();
+      let metadata = appendClosureHistory(hazard.metadata, {
+        event: 'submitted_for_hse_review',
+        user_id: user.id,
+        at: submittedAt.toISOString(),
+        remarks: String(remarks || '').trim(),
+      });
+      metadata = {
+        ...metadata,
+        closure_submission: {
+          submitted_by: user.id,
+          submitted_at: submittedAt.toISOString(),
+          closing_remarks: String(remarks || '').trim(),
+          responsible_department_id: hazard.responsibleDepartmentId,
+        },
+        hse_review: null,
+      };
+
+      await hazard.update({
+        status: HazardStatus.UNDER_REVIEW,
+        actionTaken: String(remarks || '').trim() || hazard.actionTaken,
+        metadata,
+        updatedBy: user.id,
+      }, { transaction });
+      await transaction.commit();
+      await syncBestEffort('hazard', id);
+      return this.getHazardById(id);
+    } catch (error) {
+      if (!transaction.finished) await transaction.rollback();
+      throw error;
+    }
+  }
+
+  /**
+   * HSE-side decision. Approval is the only workflow path that sets Closed;
+   * rejection returns the same record to the responsible department.
+   */
+  async reviewClosure(id, user, { decision, remarks = '', reason = '' }) {
+    assertCanReviewHazardClosure(user);
+    const transaction = await sequelize.transaction();
+    try {
+      const hazard = await Hazard.findByPk(id, {
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      if (!hazard) throw ApiError.notFound(MESSAGES.HAZARD_NOT_FOUND);
+      if (hazard.status !== HazardStatus.UNDER_REVIEW || !hazard.metadata?.closure_submission?.submitted_by) {
+        throw ApiError.conflict('Hazard closure is not awaiting HSE review.');
+      }
+
+      const reviewedAt = new Date();
+      const approved = decision === 'approved';
+      let metadata = appendClosureHistory(hazard.metadata, {
+        event: approved ? 'hse_approved' : 'hse_rejected',
+        user_id: user.id,
+        at: reviewedAt.toISOString(),
+        remarks: String(remarks || '').trim(),
+        reason: String(reason || '').trim(),
+      });
+      metadata = {
+        ...metadata,
+        hse_review: {
+          decision,
+          reviewed_by: user.id,
+          reviewed_at: reviewedAt.toISOString(),
+          remarks: String(remarks || '').trim(),
+          reason: String(reason || '').trim(),
+        },
+      };
+
+      await hazard.update({
+        status: approved ? HazardStatus.CLOSED : HazardStatus.SUBMITTED,
+        closedAt: approved ? reviewedAt : null,
+        closedBy: approved ? user.id : null,
+        metadata,
+        updatedBy: user.id,
+      }, { transaction });
+      await transaction.commit();
+      await syncBestEffort('hazard', id);
+      return this.getHazardById(id);
+    } catch (error) {
+      if (!transaction.finished) await transaction.rollback();
       throw error;
     }
   }

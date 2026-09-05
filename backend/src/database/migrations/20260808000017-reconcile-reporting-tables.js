@@ -39,6 +39,27 @@ module.exports = {
       metadata: { type: Sequelize.JSON, allowNull: true },
     }, ['date']);
 
+    // The original legacy Near Miss table was omitted from this
+    // reconciliation. Fresh deployments therefore reached the following
+    // index migration without plant_id/reported_at/status and failed. Keep
+    // the legacy form columns for historical compatibility while adding the
+    // canonical model columns used by the API.
+    await reconcile('near_misses', {
+      reported_by: { type: Sequelize.UUID, allowNull: true },
+      plant_id: { type: Sequelize.UUID, allowNull: true },
+      title: { type: Sequelize.STRING(255), allowNull: true },
+      description: { type: Sequelize.TEXT, allowNull: true },
+      severity_level: { type: Sequelize.STRING, allowNull: true },
+      status: { type: Sequelize.STRING, allowNull: true },
+      immediate_action: { type: Sequelize.TEXT, allowNull: true },
+      root_cause: { type: Sequelize.TEXT, allowNull: true },
+      assigned_to: { type: Sequelize.UUID, allowNull: true },
+      closed_at: { type: Sequelize.DATE, allowNull: true },
+      closed_by: { type: Sequelize.UUID, allowNull: true },
+      reported_at: { type: Sequelize.DATE, allowNull: true },
+      metadata: { type: Sequelize.JSON, allowNull: true },
+    }, ['date']);
+
     await reconcile('incidents', {
       incident_number: { type: Sequelize.STRING(30), allowNull: true, unique: true },
       reported_by: { type: Sequelize.UUID, allowNull: true },
@@ -60,6 +81,39 @@ module.exports = {
       closed_at: { type: Sequelize.DATE, allowNull: true },
       closed_by: { type: Sequelize.UUID, allowNull: true },
       metadata: { type: Sequelize.JSON, allowNull: true },
+    }, ['date']);
+
+    // The original corrective_actions table was an imported spreadsheet
+    // shape. Current CAPA services use the canonical columns below, and the
+    // list-index migration that follows this reconciliation expects status
+    // and due_date to exist. Add them here so a database can be built from an
+    // empty schema instead of depending on model sync or a pre-existing dump.
+    await reconcile('corrective_actions', {
+      source_type: {
+        type: Sequelize.ENUM('hazard', 'near_miss', 'incident', 'audit', 'inspection'),
+        allowNull: true,
+      },
+      source_id: { type: Sequelize.UUID, allowNull: true },
+      plant_id: { type: Sequelize.UUID, allowNull: true },
+      title: { type: Sequelize.STRING(255), allowNull: true },
+      description: { type: Sequelize.TEXT, allowNull: true },
+      assigned_to: { type: Sequelize.UUID, allowNull: true },
+      assigned_by: { type: Sequelize.UUID, allowNull: true },
+      due_date: { type: Sequelize.DATEONLY, allowNull: true },
+      status: {
+        type: Sequelize.ENUM('open', 'in_progress', 'completed', 'verified', 'overdue', 'cancelled'),
+        allowNull: true,
+        defaultValue: 'open',
+      },
+      priority: {
+        type: Sequelize.ENUM('low', 'medium', 'high', 'critical'),
+        allowNull: true,
+      },
+      completed_at: { type: Sequelize.DATE, allowNull: true },
+      completed_by: { type: Sequelize.UUID, allowNull: true },
+      verified_at: { type: Sequelize.DATE, allowNull: true },
+      verified_by: { type: Sequelize.UUID, allowNull: true },
+      verification_notes: { type: Sequelize.TEXT, allowNull: true },
     }, ['date']);
   },
 

@@ -9,6 +9,7 @@ const User = sequelize.define('User', {
   firstName: { type: DataTypes.STRING(100), allowNull: false, field: 'first_name' },
   lastName: { type: DataTypes.STRING(100), allowNull: false, field: 'last_name' },
   email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
+  microsoftOid: { type: DataTypes.STRING(64), allowNull: true, unique: true, field: 'microsoft_oid' },
   password: { type: DataTypes.STRING(255), allowNull: true },
   phone: { type: DataTypes.STRING(20), allowNull: true },
   avatar: { type: DataTypes.STRING(500), allowNull: true },

@@ -9,7 +9,7 @@ import {
 import { STATUSES, RISK_RATINGS, INCIDENT_CATEGORIES } from '../config/constants';
 import { departmentLabel, useDepartments } from '../hooks/useDepartments';
 import { moduleService }   from '../services/api/moduleService';
-import { ALL_SECTIONS }    from '../config/sectionSchemas';
+import { ALL_SECTIONS, type SectionConfig } from '../config/sectionSchemas';
 import { reportClient } from '@cbl/api';
 import { ReportPrint } from '../components/ReportPrint';
 
@@ -24,7 +24,31 @@ const REPORT_TYPES = [
   { id: 'near-miss',          label: 'Near Miss',           icon: '🎯' },
   { id: 'training-records',   label: 'Training Records',    icon: '👥' },
   { id: 'action-tracker',     label: 'Actions / CAPA',      icon: '✅' },
+  { id: 'audit-management',   label: 'Audit Logs',          icon: 'A' },
 ];
+
+const AUDIT_REPORT_SCHEMA: SectionConfig = {
+  id: 'audit-management',
+  title: 'Audit Logs',
+  path: '/audit-logs',
+  accentColor: '#8C1D2B',
+  icon: 'ClipboardCheck',
+  columns: [
+    { key: 'auditNumber', label: 'Audit Number', type: 'text' },
+    { key: 'date', label: 'Date', type: 'date' },
+    { key: 'source_label', label: 'Source', type: 'text' },
+    { key: 'title', label: 'Audit / Area', type: 'text' },
+    { key: 'department_code', label: 'Department', type: 'text' },
+    { key: 'areaOwner', label: 'Area Owner', type: 'text' },
+    { key: 'auditObjective', label: 'Audit Objective', type: 'text' },
+    { key: 'risk_rating_id', label: 'Risk Rating', type: 'text' },
+    { key: 'auditors', label: 'Auditors', type: 'text' },
+    { key: 'status_id', label: 'Status', type: 'text' },
+    { key: 'score', label: 'Compliance %', type: 'number' },
+  ],
+};
+
+const REPORT_SCHEMAS = [...ALL_SECTIONS, AUDIT_REPORT_SCHEMA];
 
 const inputClass =
   'h-8 text-[12px] border border-[#E0E0E0] rounded-md bg-white text-[#1A1818] px-2 ' +
@@ -74,8 +98,8 @@ export const Reports = () => {
 
   useEffect(() => () => document.body.classList.remove('printing-report'), []);
 
-  const currentSchema = ALL_SECTIONS.find(s => s.id === currentReportId);
-  const showRiskFilter     = ['incident-log', 'hazard-reporting'].includes(currentReportId);
+  const currentSchema = REPORT_SCHEMAS.find(s => s.id === currentReportId);
+  const showRiskFilter     = ['incident-log', 'hazard-reporting', 'audit-management'].includes(currentReportId);
   const showCategoryFilter = currentReportId === 'incident-log';
   const showStatusFilter   = currentReportId !== 'training-records';
 

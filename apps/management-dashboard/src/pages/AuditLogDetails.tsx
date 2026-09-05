@@ -34,12 +34,23 @@ export const AuditLogDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { departments } = useDepartments();
+  const isNew = id === 'new';
   const [audit, setAudit] = useState<AuditLog | null>(null);
+  const [manualFields, setManualFields] = useState({
+    title: '',
+    areaOwner: '',
+    auditObjective: '',
+    riskRating: '',
+    frequency: '',
+    scheduledDate: '',
+    departmentId: '',
+    auditType: 'internal' as 'internal' | 'external' | 'regulatory',
+  });
   const [auditors, setAuditors] = useState('');
   const [personsInterviewed, setPersonsInterviewed] = useState('');
   const [status, setStatus] = useState<AuditStatus>('planned');
   const [items, setItems] = useState<AuditItem[]>([emptyItem(0)]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -47,12 +58,25 @@ export const AuditLogDetails = () => {
   const departmentNames = useMemo(() => Object.fromEntries(departments.map(department => [department.id, departmentLabel(department)])), [departments]);
 
   const load = useCallback(async () => {
-    if (!id) return;
+    if (!id || isNew) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError('');
     try {
       const data = await auditService.getLog(id);
       setAudit(data);
+      setManualFields({
+        title: data.title || '',
+        areaOwner: data.areaOwner || '',
+        auditObjective: data.auditObjective || '',
+        riskRating: data.riskRating || '',
+        frequency: data.frequency || '',
+        scheduledDate: String(data.scheduledDate || '').slice(0, 10),
+        departmentId: data.departmentId || '',
+        auditType: data.auditType || 'internal',
+      });
       setAuditors(data.auditors || '');
       setPersonsInterviewed(data.personsInterviewed || '');
       setStatus(['planned', 'in_progress', 'completed'].includes(data.status) ? data.status : 'planned');
@@ -74,7 +98,7 @@ export const AuditLogDetails = () => {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, isNew]);
 
   useEffect(() => { void load(); }, [load]);
   useEffect(() => () => document.body.classList.remove('printing-audit-log'), []);
@@ -84,10 +108,20 @@ export const AuditLogDetails = () => {
   const pointsScored = scoredItems.reduce((sum, item) => sum + Number(item.score), 0);
   const pointsAvailable = scoredItems.length * 4;
   const compliance = pointsAvailable ? (pointsScored / pointsAvailable) * 100 : 0;
+  const isManual = isNew || audit?.source === 'manual' || audit?.source === 'audit-management' || !audit?.criticalAuditPlanId;
+  const updateManualField = (key: keyof typeof manualFields, value: string) => setManualFields(current => ({ ...current, [key]: value }));
 
   const save = async () => {
     if (!id) return;
     const meaningfulItems = items.filter(hasContent);
+    if (isManual && !manualFields.title.trim()) {
+      setError('Area / Audit Title is required.');
+      return;
+    }
+    if (isManual && !manualFields.scheduledDate) {
+      setError('Audit Date is required.');
+      return;
+    }
     if (meaningfulItems.some(item => !item.description.trim())) {
       setError('Audit Point is required for every populated Audit Item row.');
       return;
@@ -96,7 +130,18 @@ export const AuditLogDetails = () => {
     setError('');
     setMessage('');
     try {
-      await auditService.updateLog(id, {
+      const payload = {
+        ...(isManual ? {
+          title: manualFields.title.trim(),
+          areaOwner: manualFields.areaOwner.trim() || null,
+          auditObjective: manualFields.auditObjective.trim() || null,
+          riskRating: manualFields.riskRating || null,
+          frequency: manualFields.frequency.trim() || null,
+          scheduledDate: manualFields.scheduledDate,
+          departmentId: manualFields.departmentId || null,
+          auditType: manualFields.auditType,
+          source: 'manual',
+        } : {}),
         auditors: auditors.trim() || null,
         personsInterviewed: personsInterviewed.trim() || null,
         status,
@@ -113,7 +158,13 @@ export const AuditLogDetails = () => {
           status: item.status,
           sortOrder: index,
         })),
-      });
+      };
+      if (isNew) {
+        const created = await auditService.createLog(payload);
+        navigate(`/audit-management/${created.id}`, { replace: true });
+        return;
+      }
+      await auditService.updateLog(id, payload);
       await load();
       setMessage('Audit Log saved successfully.');
     } catch (requestError: any) {
@@ -132,11 +183,11 @@ export const AuditLogDetails = () => {
 
   return <Layout>
     <ContextHeader
-      title="Audit Log"
-      breadcrumbs={['Leading Indicators', 'Audit Logs', 'View']}
-      subtitle="Perform and record the scheduled audit occurrence"
+      title={isNew ? 'Add Audit' : 'Audit Log'}
+      breadcrumbs={['Leading Indicators', 'Audit Logs', isNew ? 'Add' : 'View']}
+      subtitle={isNew ? 'Create a manual audit in the consolidated Audit Log' : 'Perform, review, and update this audit'}
       actions={[
-        { label: 'Print', icon: <Printer />, onClick: print, variant: 'outlined', disabled: !audit },
+        ...(!isNew ? [{ label: 'Print', icon: <Printer />, onClick: print, variant: 'outlined' as const, disabled: !audit }] : []),
         { label: 'Back to Audit Logs', icon: <ArrowLeft />, onClick: () => navigate('/audit-management'), variant: 'outlined' },
       ]}
     />
@@ -144,17 +195,30 @@ export const AuditLogDetails = () => {
       {loading && <div className="rounded-xl border bg-white p-10 text-center text-sm text-[#6B7280]">Loading Audit Log...</div>}
       {error && <div className="rounded-md border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]" role="alert">{error}</div>}
       {message && <div className="rounded-md border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 text-sm text-[#166534]" role="status">{message}</div>}
-      {!loading && audit && <>
+      {!loading && (audit || isNew) && <>
         <section className="rounded-xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-[11px] font-bold uppercase tracking-wider text-[#9CA3AF]">Audit Log ID</p><h2 className="text-xl font-bold text-[#2C1810]">{audit.auditNumber || audit.id}</h2></div><span className="rounded bg-[#F3F4F6] px-3 py-1.5 text-xs font-bold">{auditStatusLabel(status)}</span></div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <ReadOnlyField label="Area / Audit Title" value={audit.title} />
-            <ReadOnlyField label="Area Owner" value={audit.areaOwner || audit.criticalAuditPlan?.areaOwners} />
-            <ReadOnlyField label="Scheduled Date" value={String(audit.scheduledDate || '').slice(0, 10)} />
-            <ReadOnlyField label="Risk Rating" value={audit.riskRating || audit.criticalAuditPlan?.riskRating} />
-            <ReadOnlyField label="Frequency" value={audit.frequency || audit.criticalAuditPlan?.frequency} />
-            <div className="md:col-span-2 xl:col-span-3"><ReadOnlyField label="Audit Objective" value={audit.auditObjective || audit.criticalAuditPlan?.auditObjective} /></div>
-          </div>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-[11px] font-bold uppercase tracking-wider text-[#9CA3AF]">Audit Log ID</p><h2 className="text-xl font-bold text-[#2C1810]">{audit?.auditNumber || (isNew ? 'Assigned after save' : audit?.id)}</h2></div><div className="flex items-center gap-2"><span className="rounded bg-[#F3F4F6] px-3 py-1.5 text-xs font-bold">{isManual ? 'Manual' : 'Critical Audit Plan'}</span><span className="rounded bg-[#F3F4F6] px-3 py-1.5 text-xs font-bold">{auditStatusLabel(status)}</span></div></div>
+          {isManual ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <label><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Area / Audit Title *</span><input value={manualFields.title} onChange={event => updateManualField('title', event.target.value)} className={fieldClass} /></label>
+              <label><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Area Owner</span><input value={manualFields.areaOwner} onChange={event => updateManualField('areaOwner', event.target.value)} className={fieldClass} /></label>
+              <label><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Audit Date *</span><input type="date" value={manualFields.scheduledDate} onChange={event => updateManualField('scheduledDate', event.target.value)} className={fieldClass} /></label>
+              <label><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Risk Rating</span><select value={manualFields.riskRating} onChange={event => updateManualField('riskRating', event.target.value)} className={fieldClass}><option value="">Select risk rating...</option><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option></select></label>
+              <label><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Department</span><select value={manualFields.departmentId} onChange={event => updateManualField('departmentId', event.target.value)} className={fieldClass}><option value="">Select department...</option>{manualFields.departmentId && !departments.some(department => department.id === manualFields.departmentId) && <option value={manualFields.departmentId}>Historical department</option>}{departments.map(department => <option key={department.id} value={department.id}>{departmentLabel(department)}</option>)}</select></label>
+              <label><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Audit Type</span><select value={manualFields.auditType} onChange={event => updateManualField('auditType', event.target.value)} className={fieldClass}><option value="internal">Internal</option><option value="external">External</option><option value="regulatory">Regulatory</option></select></label>
+              <label><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Frequency</span><input value={manualFields.frequency} onChange={event => updateManualField('frequency', event.target.value)} placeholder="Ad hoc, monthly, annual..." className={fieldClass} /></label>
+              <label className="md:col-span-2 xl:col-span-4"><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Audit Objective</span><textarea rows={3} value={manualFields.auditObjective} onChange={event => updateManualField('auditObjective', event.target.value)} className={areaClass} /></label>
+            </div>
+          ) : audit ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <ReadOnlyField label="Area / Audit Title" value={audit.title} />
+              <ReadOnlyField label="Area Owner" value={audit.areaOwner || audit.criticalAuditPlan?.areaOwners} />
+              <ReadOnlyField label="Scheduled Date" value={String(audit.scheduledDate || '').slice(0, 10)} />
+              <ReadOnlyField label="Risk Rating" value={audit.riskRating || audit.criticalAuditPlan?.riskRating} />
+              <ReadOnlyField label="Frequency" value={audit.frequency || audit.criticalAuditPlan?.frequency} />
+              <div className="md:col-span-2 xl:col-span-3"><ReadOnlyField label="Audit Objective" value={audit.auditObjective || audit.criticalAuditPlan?.auditObjective} /></div>
+            </div>
+          ) : null}
         </section>
 
         <section className="rounded-xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
@@ -193,8 +257,8 @@ export const AuditLogDetails = () => {
           <ReadOnlyField label="Points Available" value={pointsAvailable} />
           <ReadOnlyField label="Overall % Compliance" value={`${compliance.toFixed(2)}%`} />
         </section>
-        <div className="flex justify-end"><button type="button" disabled={saving} onClick={() => void save()} className="inline-flex h-10 items-center gap-2 rounded-md bg-[#CB0017] px-5 text-sm font-bold text-white disabled:opacity-50"><Save className="h-4 w-4" />{saving ? 'Saving...' : 'Save Audit Log'}</button></div>
-        <AuditLogPrint audit={audit} items={items} auditors={auditors} personsInterviewed={personsInterviewed} departmentNames={departmentNames} />
+        <div className="flex justify-end"><button type="button" disabled={saving} onClick={() => void save()} className="inline-flex h-10 items-center gap-2 rounded-md bg-[#CB0017] px-5 text-sm font-bold text-white disabled:opacity-50"><Save className="h-4 w-4" />{saving ? 'Saving...' : isNew ? 'Create Audit' : 'Save Audit Log'}</button></div>
+        {audit && <AuditLogPrint audit={audit} items={items} auditors={auditors} personsInterviewed={personsInterviewed} departmentNames={departmentNames} />}
       </>}
     </main>
   </Layout>;

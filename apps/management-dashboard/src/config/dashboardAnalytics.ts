@@ -42,16 +42,8 @@ export const DASHBOARD_CHARTS: Record<string, DashboardChartDefinition> = {
   incidentDepartment: {
     dataset: 'incidents', path: '/incident-log', color: '#CB0017', defaultOption: 'department', options: incidentOptions,
   },
-  incidentCategory: {
-    dataset: 'incidents', path: '/incident-log', color: '#7B1010', defaultOption: 'category',
-    options: incidentOptions.map(option => option.value === 'category' ? { ...option, title: 'Incident Categories' } : option),
-  },
   hazardCategory: {
     dataset: 'hazards', path: '/hazard-reporting', color: '#D97706', defaultOption: 'category', options: hazardOptions,
-  },
-  hazardRisk: {
-    dataset: 'hazards', path: '/hazard-reporting', color: '#B91C1C', defaultOption: 'riskRating',
-    options: hazardOptions.map(option => option.value === 'riskRating' ? { ...option, title: 'Hazard Risk Ratings' } : option),
   },
   training: {
     dataset: 'training', path: '/training-records', color: '#16811B', defaultOption: 'manhoursDepartment',

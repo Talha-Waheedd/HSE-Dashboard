@@ -14,7 +14,11 @@ module.exports = {
       );
       const departmentIds = Object.fromEntries(departments.map(department => [department.name, department.id]));
       const missing = ['ADM', 'ESD', 'IT'].filter(name => !departmentIds[name]);
-      if (missing.length > 0) throw new Error(`Required departments not found: ${missing.join(', ')}`);
+      // A clean deployment runs every migration before master-data seeding.
+      // This migration only repairs optional legacy development accounts, so
+      // an empty departments table is a valid no-op rather than a schema
+      // migration failure.
+      if (missing.length > 0) return;
 
       const employees = await queryInterface.sequelize.query(
         `SELECT e.employee_id, u.email

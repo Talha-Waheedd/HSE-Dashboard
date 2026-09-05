@@ -32,11 +32,13 @@ class HseAuditService {
    * Create a new HSE audit
    */
   async createAudit(data, userId) {
+    if (!data.plantId) throw ApiError.badRequest('The authenticated user is not assigned to a plant.');
     const plant = await plantRepository.findById(data.plantId);
     if (!plant) {
       throw ApiError.notFound(MESSAGES.PLANT_NOT_FOUND);
     }
 
+    data.source = data.source === 'audit-management' ? 'manual' : (data.source || 'manual');
     data.auditedBy = userId;
     data.createdBy = userId;
     

@@ -4,16 +4,71 @@ const hseAuditService = require('./hse-audit.service');
 const { ApiResponse, asyncHandler } = require('../../shared/utils/index');
 const { Op } = require('sequelize');
 const { parsePagination, parseOrder, paginationMeta, addTextSearch, sendCsvExport } = require('../../shared/utils/pagination');
-const { HseAudit } = require('../../database/models');
+const { HseAudit, Department, CriticalAuditPlan } = require('../../database/models');
 const criticalAuditPlanService = require('./critical-audit-plan.service');
-const { CriticalAuditPlan } = require('../../database/models');
 const ApiError = require('../../shared/utils/ApiError');
+
+const buildAuditWhere = async (query = {}) => {
+  const where = {};
+  const departmentValue = query.departmentId || query.department;
+  if (query.plantId && query.plantId !== 'All') where.plantId = query.plantId;
+  if (query.status && query.status !== 'All') where.status = query.status;
+  if (query.auditType && query.auditType !== 'All') where.auditType = query.auditType;
+  if (query.source && query.source !== 'All') where.source = query.source;
+  if (query.riskRating && query.riskRating !== 'All') where.riskRating = query.riskRating;
+  if (query.hasPlan === 'true') where.criticalAuditPlanId = { [Op.not]: null };
+  if (query.planId) where.criticalAuditPlanId = query.planId;
+  if (departmentValue && departmentValue !== 'All') {
+    const department = await Department.findOne({
+      where: { [Op.or]: [{ id: departmentValue }, { code: departmentValue }, { name: departmentValue }] },
+      attributes: ['id'],
+    });
+    where.departmentId = department ? department.id : '__no_matching_department__';
+  }
+
+  const auditFrom = query.fromDate || (query.year && /^\d{4}$/.test(query.year) ? `${query.year}-01-01` : null);
+  const auditTo = query.toDate || (query.year && /^\d{4}$/.test(query.year) ? `${query.year}-12-31` : null);
+  if (auditFrom || auditTo) {
+    where.scheduledDate = {
+      ...(auditFrom ? { [Op.gte]: auditFrom } : {}),
+      ...(auditTo ? { [Op.lte]: auditTo } : {}),
+    };
+  }
+  addTextSearch(where, query.search, ['audit_number', 'title', 'area_owner', 'audit_objective', 'auditors'], HseAudit);
+  return where;
+};
+
+const csvDate = (value) => {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toISOString().slice(0, 10);
+};
+
+const serializeAuditCsv = (row) => ({
+  'Audit Number': row.auditNumber || row.audit_number || '',
+  Date: csvDate(row.scheduledDate || row.scheduled_date),
+  Source: row.criticalAuditPlan?.id || row.critical_audit_plan_id ? 'Critical Audit Plan' : 'Manual',
+  Title: row.title || '',
+  Department: row.department?.code || row.department?.name || '',
+  'Area Owner': row.areaOwner || row.area_owner || '',
+  Objective: row.auditObjective || row.audit_objective || '',
+  'Risk Rating': row.riskRating || row.risk_rating || '',
+  Auditors: row.auditors || '',
+  Frequency: row.frequency || '',
+  Type: row.auditType || row.audit_type || '',
+  Status: ({ planned: 'Pending', in_progress: 'In Progress', completed: 'Closed', cancelled: 'Cancelled' }[row.status] || row.status || ''),
+  'Compliance %': row.score ?? '',
+});
 
 /**
  * Create a new audit
  */
 const createAudit = asyncHandler(async (req, res) => {
-  const audit = await hseAuditService.createAudit(req.body, req.user.id);
+  const audit = await hseAuditService.createAudit({
+    ...req.body,
+    plantId: req.body.plantId || req.user.plantId || process.env.DEFAULT_PLANT_ID || '5126923e-b77f-4eb6-8b98-d5fc9db8d71b',
+    source: req.body.source || 'manual',
+  }, req.user.id);
   res.status(201).json(ApiResponse.success(audit, 'Audit created successfully', 201));
 });
 
@@ -24,19 +79,8 @@ const getAllAudits = asyncHandler(async (req, res) => {
   const pagination = parsePagination(req.query);
   const options = {
     ...pagination,
-    where: {},
+    where: await buildAuditWhere(req.query),
   };
-  
-  if (req.query.plantId) options.where.plantId = req.query.plantId;
-  if (req.query.status) options.where.status = req.query.status;
-  if (req.query.auditType) options.where.auditType = req.query.auditType;
-  if (req.query.source) options.where.source = req.query.source;
-  if (req.query.hasPlan === 'true') options.where.criticalAuditPlanId = { [Op.not]: null };
-  if (req.query.planId) options.where.criticalAuditPlanId = req.query.planId;
-  const auditFrom = req.query.fromDate || (req.query.year && /^\d{4}$/.test(req.query.year) ? `${req.query.year}-01-01` : null);
-  const auditTo = req.query.toDate || (req.query.year && /^\d{4}$/.test(req.query.year) ? `${req.query.year}-12-31 23:59:59` : null);
-  if (auditFrom || auditTo) options.where.scheduledDate = { ...(auditFrom ? { [Op.gte]: auditFrom } : {}), ...(auditTo ? { [Op.lte]: auditTo } : {}) };
-  addTextSearch(options.where, req.query.search, ['audit_number', 'title', 'area_owner', 'audit_objective', 'auditors'], HseAudit);
   options.order = parseOrder(req.query, { date: 'scheduledDate', scheduledDate: 'scheduledDate', createdAt: 'createdAt' });
 
   const result = await hseAuditService.getAllAudits(options);
@@ -51,13 +95,17 @@ const getAuditById = asyncHandler(async (req, res) => {
   res.status(200).json(ApiResponse.success(audit, 'Audit retrieved successfully'));
 });
 const exportAudits = asyncHandler(async (req, res) => {
-  const where = {};
-  if (req.query.plantId) where.plantId = req.query.plantId;
-  if (req.query.status && req.query.status !== 'All') where.status = req.query.status;
-  if (req.query.auditType) where.auditType = req.query.auditType;
-  if (req.query.source) where.source = req.query.source;
-  addTextSearch(where, req.query.search, ['audit_number', 'title', 'description'], HseAudit);
-  await sendCsvExport(res, HseAudit, { where, order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }) }, `audits-${new Date().toISOString().slice(0, 10)}.csv`);
+  const where = await buildAuditWhere(req.query);
+  await sendCsvExport(res, HseAudit, {
+    where,
+    include: [
+      { model: Department, as: 'department', attributes: ['name', 'code'], required: false },
+      { model: CriticalAuditPlan, as: 'criticalAuditPlan', attributes: ['id'], required: false },
+    ],
+    nest: true,
+    serializeRow: serializeAuditCsv,
+    order: parseOrder(req.query, { date: 'scheduledDate', createdAt: 'createdAt' }),
+  }, `audits-${new Date().toISOString().slice(0, 10)}.csv`);
 });
 
 /**

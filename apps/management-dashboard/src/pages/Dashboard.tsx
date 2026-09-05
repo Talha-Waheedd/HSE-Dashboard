@@ -278,7 +278,11 @@ export const Dashboard = () => {
           hazards: { total: summary.hazards?.total || 0, Open: summary.hazards?.open || 0, Closed: summary.hazards?.closed || 0, severity: summary.hazards?.severity || {}, byCategory: overview.charts?.hazards || {} },
           nearMisses: { total: summary.nearMisses?.total || 0 },
           incidents: { total: summary.incidents?.total || 0, LTI: summary.incidents?.lti || 0, RWC: summary.incidents?.rwc || 0, MTC: summary.incidents?.mtc || 0, 'First Aid': summary.incidents?.firstAid || 0, Fatality: summary.incidents?.fatalities || 0, Fire: summary.incidents?.fire || 0 },
-          training: { total: summary.training?.total || 0, manhours: summary.training?.manhours || 0 },
+          training: {
+            total: summary.training?.total || 0,
+            participants: summary.training?.participants || 0,
+            manhours: summary.training?.manhours || 0,
+          },
           correctiveActions: { total: summary.correctiveActions?.total || 0, Open: summary.correctiveActions?.open || 0, Closed: summary.correctiveActions?.closed || 0 },
           audits: { total: summary.assurance?.audits || 0 }, inspections: { total: summary.assurance?.inspections || 0 },
         };
@@ -408,8 +412,10 @@ export const Dashboard = () => {
     ? (Number(dashboardStats.hazards.severity.High) || 0) + (Number(dashboardStats.hazards.severity.Critical) || 0)
     : hazards.filter(h => ['High', 'Critical'].includes(h.risk_rating_id)).length;
 
-  const totalTrainingSessions  = useAggregateStats ? dashboardStats.training?.total ?? 0 : training.length;
+  const totalTrainingParticipants = useAggregateStats ? dashboardStats.training?.participants ?? 0 : 0;
   const totalTrainingManhours  = useAggregateStats ? Number(dashboardStats.training?.manhours || 0) : Math.round(training.reduce((sum, t) => sum + (Number(t.manhours) || 0), 0));
+  const hazardComparison = dashboardOverview?.comparisons?.hazards;
+  const incidentComparison = dashboardOverview?.comparisons?.incidents;
 
   const totalClosedCapas = useAggregateStats && dashboardStats.correctiveActions
     ? (Number(dashboardStats.correctiveActions.Closed) || 0) + (Number(dashboardStats.correctiveActions.Close) || 0)
@@ -488,9 +494,9 @@ export const Dashboard = () => {
             value={totalHazards}
             accent="warning"
             icon={<AlertTriangle />}
-            trend={12}
-            trendLabel="vs last month"
-            subtleLine="Reports vs Prev Year"
+            trend={Number(hazardComparison?.delta || 0)}
+            trendLabel={`vs ${hazardComparison?.previousPeriod || 'previous month'}`}
+            subtleLine="Reports in selected scope"
             onClick={() => navigate('/hazard-reporting')}
           />
           <KpiTile
@@ -498,8 +504,8 @@ export const Dashboard = () => {
             value={totalIncidents}
             accent="danger"
             icon={<FileWarning />}
-            trend={-5}
-            trendLabel="vs last year"
+            trend={Number(incidentComparison?.delta || 0)}
+            trendLabel={`vs ${incidentComparison?.previousPeriod || 'previous year'}`}
             subtleLine="Safety events logged"
             onClick={() => navigate('/incident-log')}
           />
@@ -508,7 +514,7 @@ export const Dashboard = () => {
             value={totalTrainingManhours.toLocaleString()}
             accent="success"
             icon={<BookOpen />}
-            subtleLine={`${totalTrainingSessions} participants`}
+            subtleLine={`${totalTrainingParticipants.toLocaleString()} participant attendances`}
             onClick={() => navigate('/training-records')}
           />
           <KpiTile
@@ -654,9 +660,7 @@ export const Dashboard = () => {
         </div>
 
         {/* ============ ROW 5 — CONFIGURABLE DISTRIBUTIONS ============ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.incidentCategory} filters={analyticsFilters} chartHeight={200} />
-          <ConfigurableAnalyticsChart definition={DASHBOARD_CHARTS.hazardRisk} filters={analyticsFilters} chartHeight={200} />
+        <div>
 
           {/* Recent Incidents Quick View */}
           <Panel className="p-5">

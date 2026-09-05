@@ -16,6 +16,8 @@ const envSchema = Joi.object({
   DB_NAME: Joi.string().required(),
   DB_USER: Joi.string().required(),
   DB_PASSWORD: Joi.string().allow('').default(''),
+  DB_SSL: Joi.boolean().truthy('true').falsy('false').default(false),
+  DB_SSL_REJECT_UNAUTHORIZED: Joi.boolean().truthy('true').falsy('false').default(true),
 
   JWT_ACCESS_SECRET: Joi.string().min(16).required(),
   JWT_REFRESH_SECRET: Joi.string().min(16).required(),
@@ -30,10 +32,10 @@ const envSchema = Joi.object({
   REDIS_PORT: Joi.number().default(6379),
   REDIS_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
 
-  MAIL_HOST: Joi.string().required(),
+  MAIL_HOST: Joi.string().allow('').default(''),
   MAIL_PORT: Joi.number().default(587),
-  MAIL_USER: Joi.string().required(),
-  MAIL_PASSWORD: Joi.string().required(),
+  MAIL_USER: Joi.string().allow('').default(''),
+  MAIL_PASSWORD: Joi.string().allow('').default(''),
 
   LOG_LEVEL: Joi.string().valid('error', 'warn', 'info', 'http', 'debug').default('info'),
   ALLOWED_ORIGINS: Joi.string().default('http://localhost:3000'),
@@ -76,6 +78,8 @@ const config = Object.freeze({
     name: envVars.DB_NAME,
     user: envVars.DB_USER,
     password: envVars.DB_PASSWORD,
+    ssl: envVars.DB_SSL,
+    sslRejectUnauthorized: envVars.DB_SSL_REJECT_UNAUTHORIZED,
     poolMin: parseInt(envVars.DB_POOL_MIN, 10) || 2,
     poolMax: parseInt(envVars.DB_POOL_MAX, 10) || 10,
   },
@@ -141,6 +145,9 @@ const config = Object.freeze({
   ],
   storageDriver: envVars.STORAGE_DRIVER,
   encryptionKey: envVars.ENCRYPTION_KEY,
+  // Development-only authentication bypass. It is false by default and the
+  // production guard above refuses to start if it is ever enabled there.
+  previewAuth: envVars.PREVIEW_AUTH,
   msal: {
     clientId: envVars.MSAL_CLIENT_ID,
     tenantId: envVars.MSAL_TENANT_ID,

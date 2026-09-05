@@ -717,6 +717,15 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     if (schema.id === 'near-miss' || schema.id === 'hazard-reporting') {
       if (data.investigation_required && !['Yes', 'No'].includes(data.investigation_required)) return 'Further Investigation Required must be Yes or No.';
     }
+    if (schema.id === 'hazard-reporting') {
+      const responsibleDepartmentId = String(data.responsible_department_id || '').trim();
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(responsibleDepartmentId)) {
+        return 'Responsible Department must be selected from the active department list.';
+      }
+      if (trainingDepartments.length > 0 && !trainingDepartments.some(department => department.id === responsibleDepartmentId)) {
+        return 'Selected Responsible Department is not active or no longer exists.';
+      }
+    }
     if (schema.id === 'near-miss') {
       if (data.reported_in_hazard && !['Yes', 'No'].includes(data.reported_in_hazard)) return 'Reported in Hazard must be Yes or No.';
       if (data.status && !['Open', 'Close'].includes(data.status)) return 'Status must be Open or Close.';
@@ -1016,8 +1025,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         sourceId: selectedIds[0],
         attachmentType: 'CLOSING_PROOF_PHOTO',
       });
+      await moduleService.submitHazardClosure(selectedIds[0], closeHazardData.closingRemarks);
       setShowCloseHazard(false);
       setCloseHazardData({ closingProof: null, closingRemarks: '' });
+      setSelectedRows({});
       await fetchAll(listQuery);
     } catch (error: any) {
       setAttachmentWarning(error?.response?.data?.message || 'Image upload failed. Please try again.');
@@ -1026,29 +1037,28 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     }
   };
 
-  const handleReviewAction = async (action: 'Approved' | 'Rejected' | 'Open') => {
+  const handleReviewAction = async (decision: 'approved' | 'rejected') => {
     const selectedIds = Object.keys(selectedRows).filter(id => selectedRows[id]);
     if (selectedIds.length === 0) {
-      alert('Please select at least one record from the table first.');
+      setAttachmentWarning('Please select at least one hazard awaiting HSE review.');
       return;
     }
-    
-    for (const id of selectedIds) {
-      const originalRecord = entries.find(e => e.id === id);
-      if (!originalRecord) continue;
-      
-      const updatedData = { ...originalRecord, status_id: action, status: action, reviewRemarks: reviewData.remarks, reviewReason: reviewData.reason };
-      updatedData.statusHistory = [
-        ...(originalRecord.statusHistory ?? []),
-        { user: user?.name ?? 'System', oldStatus: originalRecord.status_id ?? originalRecord.status ?? 'None', newStatus: action, timestamp: new Date().toISOString() }
-      ];
-      
-      await updateRecord(id, updatedData);
+
+    setIsSaving(true);
+    setAttachmentWarning(null);
+    try {
+      for (const id of selectedIds) {
+        await moduleService.reviewHazardClosure(id, decision, reviewData.remarks, reviewData.reason);
+      }
+      setSelectedRows({});
+      setReviewData({ remarks: '', reason: '' });
+      setShowReviewPanel(false);
+      await fetchAll(listQuery);
+    } catch (error: any) {
+      setAttachmentWarning(error?.response?.data?.message || 'HSE review could not be saved.');
+    } finally {
+      setIsSaving(false);
     }
-    
-    setSelectedRows({});
-    setReviewData({ remarks: '', reason: '' });
-    setShowReviewPanel(false);
   };
 
   const filteredEntries = useMemo(() => {
@@ -1130,6 +1140,11 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const visibleEntryIds = pagedEntries.map(entry => String(entry.id)).filter(Boolean);
   const visibleSelectedCount = visibleEntryIds.filter(id => selectedRows[id]).length;
   const selectedCount = Object.values(selectedRows).filter(Boolean).length;
+  const selectedHazardRecords = entries.filter(entry => selectedRows[String(entry.id)]);
+  const canSubmitSelectedHazard = selectedHazardRecords.length === 1
+    && permissions.canSubmitHazardClosure(selectedHazardRecords[0]);
+  const canReviewSelectedHazards = selectedHazardRecords.length > 0
+    && selectedHazardRecords.every(entry => permissions.canReviewHazardClosure(entry));
   const allVisibleSelected = visibleEntryIds.length > 0 && visibleSelectedCount === visibleEntryIds.length;
 
   useEffect(() => {
@@ -1200,6 +1215,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         entry.responsible_department,
         entry.metadata?.responsible_department,
         entry.metadata?.responsibleDepartment,
+        entry.metadata?.responsible,
         entry.metadata?.resp,
       ];
       return candidates.find(candidate => {
@@ -1212,7 +1228,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       if (column.key === 'responsible_department_id') return responsibleDepartmentLabel(entry);
       return entry[column.key];
     }
-    if (schema.id === 'hazard-reporting' && column.key === 'department_id') return departmentLabel(entry);
+    if (schema.id === 'hazard-reporting') {
+      if (column.key === 'department_id') return departmentLabel(entry);
+      if (column.key === 'responsible_department_id') return responsibleDepartmentLabel(entry);
+    }
     if (schema.id !== 'training-records') return entry[column.key];
     if (column.key === 'department_id') return entry.department_name || entry.departmentName || entry.department_code || entry.department_id || entry.departmentId;
     if (column.key === 'training_type') return entry.training_type_label || entry.trainingTypeLabel || String(entry.training_type || entry.trainingType || '').split('_').map((part: string) => part ? part[0].toUpperCase() + part.slice(1) : '').join(' ');
@@ -1242,7 +1261,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   };
 
   const renderField = (col: ColumnSchema, value: any, isEdit = false) => {
-    const isMappedEmployeeField = Object.values(EMPLOYEE_FIELD_MAP[schema.id] || {}).includes(col.key) || ['department_id', 'gender', 'designation'].includes(col.key);
+    const employeeDerivedModules = ['hazard-reporting', 'near-miss', 'incident-log', 'accident-reporting'];
+    const isMappedEmployeeField = Object.values(EMPLOYEE_FIELD_MAP[schema.id] || {}).includes(col.key)
+      || (employeeDerivedModules.includes(schema.id) && ['department_id', 'gender', 'designation'].includes(col.key));
     const effectiveReadonly = col.readonly || (isMappedEmployeeField && col.key !== 'emp_id');
 
     if (col.type === 'file') {
@@ -1977,12 +1998,16 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
       >
         <div className="flex flex-wrap items-center gap-3">
           <FilterBar variant="hazard" />
-          <button onClick={() => setShowReviewPanel(true)} disabled={selectedCount === 0} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] hover:bg-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
-            <PanelRightOpen className="h-3.5 w-3.5" /> HSE Review{selectedCount > 0 ? ` (${selectedCount})` : ''}
-          </button>
-          <button onClick={() => { setAttachmentWarning(null); setCloseHazardData({ closingProof: null, closingRemarks: '' }); setShowCloseHazard(true); }} disabled={selectedCount === 0} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#CB0017]/30 bg-[#FFF7F7] text-[#CB0017] hover:bg-[#FDECEC] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Close {entityName}{selectedCount > 0 ? ` (${selectedCount})` : ''}
-          </button>
+          {permissions.canReviewHazardClosure()
+            && (selectedCount === 0 || canReviewSelectedHazards)
+            && <button onClick={() => { setAttachmentWarning(null); setShowReviewPanel(true); }} disabled={!canReviewSelectedHazards} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] hover:bg-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
+              <PanelRightOpen className="h-3.5 w-3.5" /> HSE Review{selectedCount > 0 ? ` (${selectedCount})` : ''}
+            </button>}
+          {permissions.canSubmitHazardClosure()
+            && (selectedCount === 0 || canSubmitSelectedHazard)
+            && <button onClick={() => { setAttachmentWarning(null); setCloseHazardData({ closingProof: null, closingRemarks: '' }); setShowCloseHazard(true); }} disabled={!canSubmitSelectedHazard} className="h-8 px-3 text-[12px] font-medium rounded-md border border-[#CB0017]/30 bg-[#FFF7F7] text-[#CB0017] hover:bg-[#FDECEC] disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" /> Close {entityName}{selectedCount > 0 ? ` (${selectedCount})` : ''}
+            </button>}
           <button onClick={() => setShowMobileFilters(true)} className="md:hidden h-8 px-3 text-[12px] font-medium rounded-md border border-[#DEDEDE] bg-white text-[#374151] inline-flex items-center gap-1.5">
             <Filter className="h-3.5 w-3.5" /> Filters
           </button>
@@ -2222,10 +2247,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             />
           </div>
           <div className="flex gap-2 pt-2">
-            <button onClick={() => handleReviewAction('Approved')} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">Approve</button>
-            <button onClick={() => handleReviewAction('Rejected')} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]">Reject</button>
-            <button onClick={() => handleReviewAction('Open')} className="h-9 px-4 text-[13px] font-medium rounded-md bg-white text-[#374151] border border-[#DEDEDE]">Reopen</button>
+            <button disabled={isSaving} onClick={() => handleReviewAction('approved')} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] disabled:opacity-50">Approve</button>
+            <button disabled={isSaving} onClick={() => handleReviewAction('rejected')} className="h-9 px-4 text-[13px] font-medium rounded-md bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] disabled:opacity-50">Return to Department</button>
           </div>
+          {attachmentWarning && <p className="rounded-md bg-[#FFF7ED] px-3 py-2 text-[12px] text-[#9A3412]" role="alert">{attachmentWarning}</p>}
         </div>
       </SlideOverPanel>
 
@@ -2233,7 +2258,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         isOpen={showCloseHazard}
         onClose={() => { setShowCloseHazard(false); setCloseHazardData({ closingProof: null, closingRemarks: '' }); setAttachmentWarning(null); }}
         title="Close Hazard"
-        description="Submit closing proof for review. No permanent close action is performed."
+        description="Submit closing proof to HSE for final review. This does not close the hazard."
       >
         <div className="space-y-5">
           <div className="rounded-xl border border-dashed border-[#D6D6D6] bg-[#FAFAFA] p-4">
@@ -2287,7 +2312,12 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                 : {};
               let recoveredForm: any = defaultForm;
               try {
-                const savedDraft = sessionStorage.getItem(`hse-${schema.id}-draft`);
+                // Only modules that actively autosave drafts may restore one.
+                // Training/CAPA/Inspection previously read stale browser data
+                // despite never writing drafts, which could resurrect ADM as a
+                // hidden department default on a genuinely new record.
+                const supportsSessionDraft = ['near-miss', 'incident-log', 'accident-reporting'].includes(schema.id);
+                const savedDraft = supportsSessionDraft ? sessionStorage.getItem(`hse-${schema.id}-draft`) : null;
                 if (savedDraft) {
                   recoveredForm = { ...defaultForm, ...JSON.parse(savedDraft) };
                   if (schema.id === 'near-miss') {

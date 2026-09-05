@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { authClient, configureTokenRefresh, tokenStore } from "@cbl/api";
 import { InteractionStatus } from "@azure/msal-browser";
 
-const PREVIEW_BYPASS = import.meta.env.VITE_BYPASS_AUTH === "true";
+// Local emergency/development access is deliberately impossible in a
+// production Vite build, even if a workstation accidentally carries the flag.
+const PREVIEW_BYPASS = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true";
 const PREVIEW_USER = {
   id: "preview-user",
   email: "preview@cbl-lu-sukkur.local",
@@ -87,17 +89,24 @@ export const useAuth = () => {
             role: roleName || backendUser.roles?.[0] || 'Viewer',
             roles: backendUser.roles,
             permissions: backendUser.permissions || rolePermissions || [],
-            department_id: backendUser.department_id?.toString() || backendUser.departmentId?.toString(),
-            plant_id: backendUser.plant_id?.toString() || backendUser.plantId?.toString(),
+            department_id: backendUser.employeeProfile?.departmentId?.toString()
+              || backendUser.employeeProfile?.department?.id?.toString()
+              || backendUser.department_id?.toString()
+              || backendUser.departmentId?.toString(),
+            plant_id: backendUser.employeeProfile?.plantId?.toString()
+              || backendUser.employeeProfile?.plant?.id?.toString()
+              || backendUser.plant_id?.toString()
+              || backendUser.plantId?.toString(),
           };
 
           loginUser(authUser, verifyResponse.tokens.accessToken);
         } catch (e: any) {
           console.error("Backend Verification Error:", e);
-          if (e.message?.includes("User not authorized")) {
+          const backendMessage = e.response?.data?.message;
+          if (e.response?.status === 404 || backendMessage === "User not authorized") {
             setError("Your Microsoft email is not registered in the system. Please contact the administrator.");
           } else {
-            setError(e.message || "Failed to verify user with CBL system");
+            setError(backendMessage || e.message || "Failed to verify user with CBL system");
           }
         } finally {
           setIsLoggingIn(false);

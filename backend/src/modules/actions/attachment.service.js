@@ -5,12 +5,14 @@ const crypto = require('crypto');
 const path = require('path');
 
 const attachmentRepository = require('../../repositories/attachment.repository');
-const { Incident } = require('../../database/models');
+const { Incident, Hazard } = require('../../database/models');
+const userRepository = require('../../repositories/user.repository');
 const { sequelize } = require('../../database/connection');
 const AttachmentSource = require('../../shared/enums/AttachmentSource');
 const storageConfig = require('../../database/config/storage');
 const { ApiError } = require('../../shared/utils/index');
 const { MESSAGES } = require('../../shared/constants');
+const { assertCanSubmitHazardClosure } = require('../hazards/hazard-authorization.service');
 
 const attachmentUploadDirectory = path.resolve(
   process.cwd(),
@@ -54,6 +56,18 @@ class AttachmentService {
     };
 
     try {
+      if (
+        sourceData.sourceType === AttachmentSource.HAZARD &&
+        sourceData.attachmentType === 'CLOSING_PROOF_PHOTO'
+      ) {
+        const [hazard, user] = await Promise.all([
+          Hazard.findByPk(sourceData.sourceId),
+          userRepository.findByIdWithRole(userId),
+        ]);
+        if (!hazard) throw ApiError.notFound(MESSAGES.HAZARD_NOT_FOUND);
+        assertCanSubmitHazardClosure(hazard, user);
+      }
+
       let attachment;
       if (sourceData.sourceType === AttachmentSource.INCIDENT) {
         attachment = await sequelize.transaction(async (transaction) => {

@@ -66,7 +66,7 @@ export const hazardReportingSchema: SectionConfig = {
     { key: 'corrective_action', label: 'Corrective Action', type: 'textarea', section: 'Corrective Actions' },
     { key: 'investigation_required', label: 'Further Investigation Required', type: 'select', options: ['Yes', 'No'], section: 'Corrective Actions' },
     { key: 'responsible_person', label: 'Responsible Person', type: 'text', required: true, section: 'Assignment' },
-    { key: 'responsible_department', label: 'Responsible Department', type: 'select', options: [], section: 'Assignment' },
+    { key: 'responsible_department_id', label: 'Responsible Department', type: 'select', options: [], required: true, section: 'Assignment' },
     { key: 'target_date', label: 'Target Date', type: 'date', section: 'Assignment' },
     { key: 'risk_rating_id', label: 'Risk Rating', type: 'select', options: RISK_RATINGS, required: true, section: 'Assignment' },
     { key: 'contractor_name', label: 'Contractor Name', type: 'text', section: 'Assignment' },

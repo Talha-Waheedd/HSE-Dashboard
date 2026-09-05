@@ -31,6 +31,11 @@ const Hazard = sequelize.define('Hazard', {
     allowNull: true,
     comment: 'FK → departments.id',
   },
+  responsibleDepartmentId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Department responsible for closure action',
+  },
   category: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -115,6 +120,7 @@ const Hazard = sequelize.define('Hazard', {
     { fields: ['reported_by'], name: 'hazards_reported_by_idx' },
     { fields: ['plant_id'], name: 'hazards_plant_id_idx' },
     { fields: ['department_id'], name: 'hazards_department_id_idx' },
+    { fields: ['responsible_department_id'], name: 'hazards_responsible_department_id_idx' },
     { fields: ['status'], name: 'hazards_status_idx' },
     { fields: ['severity_level'], name: 'hazards_severity_level_idx' },
     { fields: ['category'], name: 'hazards_category_idx' },

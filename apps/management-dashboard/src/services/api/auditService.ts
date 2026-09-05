@@ -44,6 +44,10 @@ export type AuditLog = {
   plantId: string;
   auditNumber?: string | null;
   title: string;
+  source?: 'manual' | 'audit-management' | 'critical-audit-plan' | string | null;
+  departmentId?: string | null;
+  criticalAuditPlanId?: string | null;
+  auditType?: 'internal' | 'external' | 'regulatory';
   areaOwner?: string | null;
   auditObjective?: string | null;
   riskRating?: string | null;
@@ -83,8 +87,13 @@ export const auditStatusLabel = (status: string): PlanStatus => ({
 
 export const auditService = {
   listLogs: async (params: Record<string, unknown>): Promise<PageResponse<AuditLog>> => {
-    const response = await apiClient.get('/audits', { params: { ...params, hasPlan: true } });
+    const response = await apiClient.get('/audits', { params });
     return pageData<AuditLog>(response.data);
+  },
+
+  createLog: async (payload: Record<string, unknown>): Promise<AuditLog> => {
+    const response = await apiClient.post('/audits', payload);
+    return (response.data?.data ?? response.data) as AuditLog;
   },
 
   getLog: async (id: string): Promise<AuditLog> => {

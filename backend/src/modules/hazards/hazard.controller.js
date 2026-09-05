@@ -35,7 +35,7 @@ const serializeHazardCsv = (row) => {
     'Hazard Category': metadata.hazard_category_id || row.category || '',
     'Hazard Details': metadata.description || row.description || '',
     'Type of Hazard': metadata.unsafe_type || '',
-    'Responsible Department': metadata.responsible_department || '',
+    'Responsible Department': row.responsibleDepartment?.code || row.responsibleDepartment?.name || metadata.responsible_department || metadata.responsible || '',
     'Risk Rating': metadata.risk_rating_id || row.severityLevel || '',
     Status: hazardStatusLabel(row.status),
     Remarks: metadata.remarks || '',
@@ -161,7 +161,10 @@ const getAllHazards = asyncHandler(async (req, res) => {
     limit,
     offset,
     where: await buildHazardWhere(req.query),
-    include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }],
+    include: [
+      { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
+      { model: Department, as: 'responsibleDepartment', attributes: ['id', 'name', 'code'] },
+    ],
     order: parseOrder(req.query, { date: 'reportedAt', reportedAt: 'reportedAt', createdAt: 'createdAt' }),
   };
 
@@ -184,7 +187,7 @@ const getHazardSummary = asyncHandler(async (req, res) => {
     attributes: [
       [Hazard.sequelize.fn('COUNT', Hazard.sequelize.col('id')), 'totalRecords'],
       [Hazard.sequelize.literal('SUM(CASE WHEN `assigned_to` IS NOT NULL THEN 1 ELSE 0 END)'), 'assigned'],
-      [Hazard.sequelize.literal("SUM(CASE WHEN `status` IN ('submitted','under_review') THEN 1 ELSE 0 END)"), 'submittedForReview'],
+      [Hazard.sequelize.literal("SUM(CASE WHEN `status` = 'under_review' AND JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.closure_submission.submitted_by')) IS NOT NULL THEN 1 ELSE 0 END)"), 'submittedForReview'],
       [Hazard.sequelize.literal("SUM(CASE WHEN `status` IN ('closed','resolved') AND `closed_at` IS NOT NULL AND `closed_at` >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND `closed_at` < DATE_ADD(DATE_FORMAT(CURRENT_DATE, '%Y-%m-01'), INTERVAL 1 MONTH) THEN 1 ELSE 0 END)"), 'closedThisMonth'],
     ],
   });
@@ -204,7 +207,10 @@ const exportHazards = asyncHandler(async (req, res) => {
   const where = await buildHazardWhere(req.query);
   await sendCsvExport(res, Hazard, {
     where,
-    include: [{ model: Department, as: 'department', attributes: ['name', 'code'], required: false }],
+    include: [
+      { model: Department, as: 'department', attributes: ['name', 'code'], required: false },
+      { model: Department, as: 'responsibleDepartment', attributes: ['name', 'code'], required: false },
+    ],
     nest: true,
     serializeRow: serializeHazardCsv,
     order: parseOrder(req.query, { date: 'reportedAt', createdAt: 'createdAt' }),
@@ -224,8 +230,21 @@ const updateHazard = asyncHandler(async (req, res) => {
  */
 const updateStatus = asyncHandler(async (req, res) => {
   const { status, actionTaken } = req.body;
-  const count = await hazardService.updateStatus(req.params.id, status, req.user.id, actionTaken);
+  const count = await hazardService.updateStatus(req.params.id, status, req.user, actionTaken);
   res.status(200).json(ApiResponse.success({ updated: count }, 'Hazard status updated successfully'));
+});
+
+const submitClosure = asyncHandler(async (req, res) => {
+  const hazard = await hazardService.submitClosure(req.params.id, req.user, req.body.remarks || '');
+  res.status(200).json(ApiResponse.success(hazard, 'Hazard closure submitted for HSE review'));
+});
+
+const reviewClosure = asyncHandler(async (req, res) => {
+  const hazard = await hazardService.reviewClosure(req.params.id, req.user, req.body);
+  const message = req.body.decision === 'approved'
+    ? 'Hazard closure approved'
+    : 'Hazard closure returned to the responsible department';
+  res.status(200).json(ApiResponse.success(hazard, message));
 });
 
 /**
@@ -244,5 +263,7 @@ module.exports = {
   exportHazards,
   updateHazard,
   updateStatus,
+  submitClosure,
+  reviewClosure,
   deleteHazard,
 };

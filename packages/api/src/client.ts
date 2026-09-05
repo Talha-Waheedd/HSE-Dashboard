@@ -2,6 +2,7 @@ import axios, { type InternalAxiosRequestConfig, type AxiosError } from "axios";
 import { tokenStore } from "./tokenStore";
 
 const API_BASE_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:5000/api/v1";
+const PREVIEW_BYPASS = import.meta.env.DEV && import.meta.env?.VITE_BYPASS_AUTH === "true";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -25,7 +26,7 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    if (import.meta.env?.VITE_BYPASS_AUTH === "true") {
+    if (PREVIEW_BYPASS) {
       config.headers["X-Preview-Auth"] = "true";
     }
     return config;

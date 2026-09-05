@@ -35,6 +35,28 @@ export const usePermissions = () => {
     return permissionOrRole('records.approve', isSysAdmin || isHseManager);
   };
 
+  const canSubmitHazardClosure = (hazard?: any) => {
+    if (isSysAdmin) return true;
+    if (!isDeptManager || !hasPermission('hazard:submit_closure')) return false;
+    if (!hazard) return true;
+    const responsibleDepartmentId = hazard.responsibleDepartmentId
+      || hazard.responsible_department_id
+      || hazard.metadata?.responsible_department_id;
+    const status = String(hazard.status || '').toLowerCase();
+    const currentDepartmentId = user?.department_id;
+    return Boolean(currentDepartmentId)
+      && currentDepartmentId === responsibleDepartmentId
+      && ['submitted', 'open'].includes(status);
+  };
+
+  const canReviewHazardClosure = (hazard?: any) => {
+    if (isSysAdmin) return true;
+    if (!isHseManager || !hasPermission('hazard:review_closure')) return false;
+    if (!hazard) return true;
+    return String(hazard.status || '').toLowerCase() === 'under_review'
+      && Boolean(hazard.metadata?.closure_submission?.submitted_by);
+  };
+
   const isDepartmentRestricted = () => {
     return isDeptManager;
   };
@@ -46,6 +68,8 @@ export const usePermissions = () => {
     canExportCSV,
     canViewReports,
     canApproveRecords,
+    canSubmitHazardClosure,
+    canReviewHazardClosure,
     isDepartmentRestricted,
     userRole: user?.role || 'Unknown',
     userDepartment: user?.department_id || 'None'

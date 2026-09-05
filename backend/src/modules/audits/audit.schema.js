@@ -20,7 +20,7 @@ const auditFindingSchema = Joi.object({
 });
 
 const createAuditSchema = Joi.object({
-  plantId: Joi.string().uuid().required(),
+  plantId: Joi.string().uuid().optional(),
   departmentId: Joi.string().uuid().optional().allow(null),
   title: Joi.string().max(255).required(),
   auditType: Joi.string().valid('internal', 'external', 'regulatory').default('internal').optional(),
@@ -35,7 +35,7 @@ const createAuditSchema = Joi.object({
   auditors: Joi.string().allow('', null).optional(),
   frequency: Joi.string().allow('', null).optional(),
   personsInterviewed: Joi.string().allow('', null).optional(),
-  source: Joi.string().valid('audit-management', 'critical-audit-plan').default('audit-management').optional(),
+  source: Joi.string().valid('manual', 'audit-management', 'critical-audit-plan').default('manual').optional(),
   findings: Joi.array().items(auditFindingSchema).optional(),
 });
 
@@ -56,7 +56,7 @@ const updateAuditSchema = Joi.object({
   score: Joi.number().precision(2).min(0).max(100).optional(),
   status: Joi.string().valid(...Object.values(AuditStatus)).optional(),
   completedDate: Joi.date().iso().optional(),
-  source: Joi.string().valid('audit-management', 'critical-audit-plan').optional(),
+  source: Joi.string().valid('manual', 'audit-management', 'critical-audit-plan').optional(),
   findings: Joi.array().items(auditFindingSchema).optional(),
 }).min(1);
 

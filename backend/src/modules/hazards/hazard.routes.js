@@ -5,9 +5,16 @@ const router = express.Router();
 const hazardController = require('./hazard.controller');
 const { validate } = require('../../core/middleware/validate.middleware');
 const { authenticate } = require('../../core/middleware/auth.middleware');
-const { requirePermissions } = require('../../core/middleware/rbac.middleware');
-const { createHazardSchema, updateHazardSchema, updateHazardStatusSchema } = require('./hazard.schema');
+const { requirePermissions, requireRoles } = require('../../core/middleware/rbac.middleware');
+const {
+  createHazardSchema,
+  updateHazardSchema,
+  updateHazardStatusSchema,
+  submitHazardClosureSchema,
+  reviewHazardClosureSchema,
+} = require('./hazard.schema');
 const { PERMISSIONS } = require('../../shared/constants/permissions');
+const { ROLES } = require('../../shared/constants/roles');
 
 // Local-only escape hatch for form development. It is deliberately disabled
 // in production even if an environment variable is accidentally set.
@@ -60,9 +67,23 @@ router.put(
 
 router.patch(
   '/:id/status',
-  requirePermissions([PERMISSIONS.HSE_MANAGE_INCIDENTS]),
+  requireRoles([ROLES.ADMINISTRATOR, ROLES.SYSTEM_ADMINISTRATOR, ROLES.SUPER_ADMIN]),
   validate(updateHazardStatusSchema),
   hazardController.updateStatus
+);
+
+router.post(
+  '/:id/closure-submission',
+  requirePermissions([PERMISSIONS.HAZARD_SUBMIT_CLOSURE]),
+  validate(submitHazardClosureSchema),
+  hazardController.submitClosure,
+);
+
+router.post(
+  '/:id/hse-review',
+  requirePermissions([PERMISSIONS.HAZARD_REVIEW_CLOSURE]),
+  validate(reviewHazardClosureSchema),
+  hazardController.reviewClosure,
 );
 
 router.delete(
