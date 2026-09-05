@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const path = require('path');
 
 const attachmentRepository = require('../../repositories/attachment.repository');
-const { Incident, Hazard } = require('../../database/models');
+const { Incident, Hazard, TrainingSession } = require('../../database/models');
 const userRepository = require('../../repositories/user.repository');
 const { sequelize } = require('../../database/connection');
 const AttachmentSource = require('../../shared/enums/AttachmentSource');
@@ -86,6 +86,16 @@ class AttachmentService {
           if (imageCount >= MAX_INCIDENT_IMAGES) {
             throw ApiError.badRequest('Maximum 4 images can be attached.');
           }
+          return attachmentRepository.create(data, { transaction });
+        });
+      } else if (sourceData.sourceType === AttachmentSource.TRAINING) {
+        attachment = await sequelize.transaction(async (transaction) => {
+          const training = await TrainingSession.findByPk(sourceData.sourceId, {
+            attributes: ['id'],
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+          });
+          if (!training) throw ApiError.notFound(MESSAGES.TRAINING_NOT_FOUND);
           return attachmentRepository.create(data, { transaction });
         });
       } else {

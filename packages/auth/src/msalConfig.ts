@@ -1,13 +1,16 @@
 import { type Configuration, LogLevel } from "@azure/msal-browser";
 
+const configuredRedirectUri = import.meta.env?.VITE_MSAL_REDIRECT_URI?.trim();
+const redirectUri = configuredRedirectUri || window.location.origin;
+
 export const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env?.VITE_MSAL_CLIENT_ID || "PLACEHOLDER_CLIENT_ID",
     authority: `https://login.microsoftonline.com/${
       import.meta.env?.VITE_MSAL_TENANT_ID || "PLACEHOLDER_TENANT_ID"
     }`,
-    redirectUri: "/",
-    postLogoutRedirectUri: "/",
+    redirectUri,
+    postLogoutRedirectUri: redirectUri,
   },
   cache: {
     cacheLocation: "sessionStorage", // This configures where your cache will be stored

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Plus, Printer, Save, Trash2 } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { ContextHeader } from '../components/ContextHeader';
 import { AuditLogPrint } from '../components/AuditLogPrint';
@@ -33,6 +33,7 @@ const ReadOnlyField = ({ label, value }: { label: string; value?: unknown }) => 
 export const AuditLogDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { departments } = useDepartments();
   const isNew = id === 'new';
   const [audit, setAudit] = useState<AuditLog | null>(null);
@@ -53,7 +54,10 @@ export const AuditLogDetails = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(() => {
+    const state = location.state as { message?: string } | null;
+    return state?.message || '';
+  });
 
   const departmentNames = useMemo(() => Object.fromEntries(departments.map(department => [department.id, departmentLabel(department)])), [departments]);
 
@@ -161,7 +165,11 @@ export const AuditLogDetails = () => {
       };
       if (isNew) {
         const created = await auditService.createLog(payload);
-        navigate(`/audit-management/${created.id}`, { replace: true });
+        setMessage('Audit Log created and saved successfully.');
+        navigate(`/audit-management/${created.id}`, {
+          replace: true,
+          state: { message: 'Audit Log created and saved successfully.' },
+        });
         return;
       }
       await auditService.updateLog(id, payload);

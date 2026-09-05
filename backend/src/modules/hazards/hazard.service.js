@@ -424,7 +424,9 @@ class HazardService {
    */
   async deleteHazard(id) {
     await this.getHazardById(id);
-    return hazardRepository.deleteById(id);
+    const result = await hazardRepository.deleteById(id);
+    await syncBestEffort('hazard', id);
+    return result;
   }
 }
 

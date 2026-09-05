@@ -1,8 +1,8 @@
 'use strict';
 
-// Local project settings must take precedence over inherited shell values.
-// In particular, the dashboard preview API relies on PREVIEW_AUTH from .env.
-require('dotenv').config({ override: true });
+// Load local defaults without overwriting environment variables supplied by
+// IIS, a process supervisor, a container, or the deployment shell.
+require('dotenv').config();
 
 const http = require('http');
 const app = require('./src/app');

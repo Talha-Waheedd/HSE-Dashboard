@@ -196,6 +196,7 @@ export const trainingRecordsSchema: SectionConfig = {
     { key: 'topic', label: 'Topics Delivered', type: 'textarea', required: true, section: 'Training Details' },
     { key: 'participants', label: 'Total Participants', type: 'number', required: true, section: 'Training Details' },
     { key: 'duration_minutes', label: 'Duration (Min)', type: 'number', required: true, section: 'Training Details' },
+    { key: 'attendance_proof', label: 'Attendance Proof', type: 'file', section: 'Attendance Proof' },
     {
       key: 'manhours',
       label: 'Manhours',

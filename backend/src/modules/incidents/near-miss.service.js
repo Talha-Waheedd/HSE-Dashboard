@@ -188,7 +188,9 @@ class NearMissService {
    */
   async deleteNearMiss(id) {
     await this.getNearMissById(id);
-    return nearMissRepository.deleteById(id);
+    const result = await nearMissRepository.deleteById(id);
+    await syncBestEffort('near_miss', id);
+    return result;
   }
 }
 

@@ -158,7 +158,7 @@ const buildIncidentCandidates = async (input, transaction) => {
   const record = plain(input);
   // CAPA v1 integrates the Incident Investigation workflow only. Generic
   // lagging incidents remain available for a later, confirmed business rule.
-  if (!record.sourceNearMissId) return [];
+  if (!record.sourceNearMissId && !record.sourceHazardId) return [];
   const metadata = metadataFor(record);
   const action = text(metadata.preventive_action_safety_measures);
   if (!action) return [];
@@ -299,7 +299,16 @@ const synchronizeRecord = async (sourceType, input, options = {}) => {
 
 const synchronizeSource = async (sourceType, sourceId) => sequelize.transaction(async (transaction) => {
   const source = await loadSource(sourceType, sourceId, transaction);
-  if (!source) return { candidates: 0, created: 0, updated: 0, unchanged: 0, deactivated: 0 };
+  if (!source) {
+    const where = {
+      sourceType,
+      sourceId,
+      sourceItemKey: { [Op.ne]: 'legacy' },
+    };
+    const deactivated = await CorrectiveAction.count({ where, transaction });
+    if (deactivated) await CorrectiveAction.destroy({ where, transaction });
+    return { candidates: 0, created: 0, updated: 0, unchanged: 0, deactivated };
+  }
   return synchronizeRecord(sourceType, source, { transaction });
 });
 
@@ -324,7 +333,15 @@ const backfillAll = async ({ dryRun = true } = {}) => {
       nearMisses: { type: SOURCE_TYPES.NEAR_MISS, rows: await NearMiss.findAll({ transaction }) },
       incidentInvestigations: {
         type: SOURCE_TYPES.INCIDENT,
-        rows: await Incident.findAll({ where: { sourceNearMissId: { [Op.ne]: null } }, transaction }),
+        rows: await Incident.findAll({
+          where: {
+            [Op.or]: [
+              { sourceNearMissId: { [Op.ne]: null } },
+              { sourceHazardId: { [Op.ne]: null } },
+            ],
+          },
+          transaction,
+        }),
       },
       auditFindings: { type: SOURCE_TYPES.AUDIT, rows: await HseAudit.findAll({ transaction }) },
     };
@@ -332,6 +349,22 @@ const backfillAll = async ({ dryRun = true } = {}) => {
     for (const [name, source] of Object.entries(sources)) {
       const stats = { candidates: 0, created: 0, updated: 0, unchanged: 0, deactivated: 0 };
       for (const row of source.rows) addStats(stats, await synchronizeRecord(source.type, row, { transaction, dryRun }));
+
+      // A source record can be permanently removed after it generated CAPA.
+      // Those generated actions must not remain active forever. Legacy CAPA
+      // imports deliberately use source_item_key = "legacy" and are excluded.
+      const sourceIds = source.rows.map((row) => row.id);
+      const orphanWhere = {
+        sourceType: source.type,
+        sourceItemKey: { [Op.ne]: 'legacy' },
+        ...(sourceIds.length ? { sourceId: { [Op.notIn]: sourceIds } } : {}),
+      };
+      const orphanedGenerated = await CorrectiveAction.count({ where: orphanWhere, transaction });
+      stats.deactivated += orphanedGenerated;
+      if (!dryRun && orphanedGenerated) {
+        await CorrectiveAction.destroy({ where: orphanWhere, transaction });
+      }
+
       result.bySource[name] = stats;
       addStats(result.totals, stats);
     }

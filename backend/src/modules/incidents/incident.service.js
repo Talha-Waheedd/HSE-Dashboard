@@ -190,7 +190,9 @@ class IncidentService {
    */
   async deleteIncident(id) {
     await this.getIncidentById(id);
-    return incidentRepository.deleteById(id);
+    const result = await incidentRepository.deleteById(id);
+    await syncBestEffort('incident', id);
+    return result;
   }
 }
 

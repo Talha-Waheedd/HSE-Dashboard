@@ -74,11 +74,25 @@ const ATTACHMENT_TYPE_BY_FIELD: Record<string, string> = {
   closing_proof_photo: 'CLOSING_PROOF_PHOTO',
   evidence_upload: 'EVIDENCE_PHOTO',
   pictorial: 'PICTORIAL',
+  attendance_proof: 'ATTENDANCE_PROOF',
 };
 
 const attachmentSourceForSchema = (schemaId: string) => ATTACHMENT_SOURCE_BY_SCHEMA[schemaId];
 const attachmentTypeForField = (fieldKey: string) => ATTACHMENT_TYPE_BY_FIELD[fieldKey] || fieldKey.toUpperCase();
 const isIncidentEntrySchema = (schemaId: string) => ['incident-log', 'accident-reporting'].includes(schemaId);
+const SESSION_DRAFT_SCHEMAS = new Set(['hazard-reporting', 'near-miss', 'incident-log', 'accident-reporting']);
+
+/**
+ * Department fields must have an explicit empty value on every genuinely new
+ * form. This prevents an old browser draft or the first master-data option
+ * (historically ADM) from becoming an implicit selection. Employee-derived
+ * departments are populated later, after a successful employee lookup.
+ */
+const emptyDepartmentDefaults = (schema: SectionConfig) => Object.fromEntries(
+  schema.columns
+    .filter(column => ['department_id', 'responsible_department_id', 'responsible_department'].includes(column.key))
+    .map(column => [column.key, '']),
+);
 
 type IncidentAction = {
   action: string;
@@ -1952,16 +1966,19 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             label: `Add ${entityName}`,
             icon: <Plus />,
             onClick: () => {
+              const departmentDefaults = emptyDepartmentDefaults(schema);
               const defaultForm = schema.id === 'hazard-reporting'
-                ? { status_id: 'Open', department_id: '', investigation_required: 'No' }
+                ? { ...departmentDefaults, status_id: 'Open', investigation_required: 'No' }
                 : schema.id === 'near-miss'
-                  ? createNewNearMissFormDefaults()
+                  ? { ...departmentDefaults, ...createNewNearMissFormDefaults() }
                   : isIncidentEntrySchema(schema.id)
-                    ? { status_id: 'Open' }
-                  : {};
+                    ? { ...departmentDefaults, status_id: 'Open' }
+                  : departmentDefaults;
               let recoveredForm: any = defaultForm;
               try {
-                const savedDraft = sessionStorage.getItem(`hse-${schema.id}-draft`);
+                const savedDraft = SESSION_DRAFT_SCHEMAS.has(schema.id)
+                  ? sessionStorage.getItem(`hse-${schema.id}-draft`)
+                  : null;
                 if (savedDraft) {
                   recoveredForm = { ...defaultForm, ...JSON.parse(savedDraft) };
                   if (['hazard-reporting', 'near-miss'].includes(schema.id)) recoveredForm.department_id = '';
@@ -2307,17 +2324,23 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             label: `Add ${schema.title.replace(/s$/, '')}`,
             icon: <Plus />,
             onClick: () => {
+              setPendingFiles({});
+              setPendingIncidentImages([]);
+              setExistingAttachments([]);
+              clearAttachmentPreviews();
+              const departmentDefaults = emptyDepartmentDefaults(schema);
               const defaultForm = schema.id === 'near-miss'
-                ? createNewNearMissFormDefaults()
-                : {};
+                ? { ...departmentDefaults, ...createNewNearMissFormDefaults() }
+                : departmentDefaults;
               let recoveredForm: any = defaultForm;
               try {
                 // Only modules that actively autosave drafts may restore one.
                 // Training/CAPA/Inspection previously read stale browser data
                 // despite never writing drafts, which could resurrect ADM as a
                 // hidden department default on a genuinely new record.
-                const supportsSessionDraft = ['near-miss', 'incident-log', 'accident-reporting'].includes(schema.id);
-                const savedDraft = supportsSessionDraft ? sessionStorage.getItem(`hse-${schema.id}-draft`) : null;
+                const savedDraft = SESSION_DRAFT_SCHEMAS.has(schema.id)
+                  ? sessionStorage.getItem(`hse-${schema.id}-draft`)
+                  : null;
                 if (savedDraft) {
                   recoveredForm = { ...defaultForm, ...JSON.parse(savedDraft) };
                   if (schema.id === 'near-miss') {

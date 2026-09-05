@@ -8,6 +8,45 @@ const { MESSAGES } = require('../../shared/constants');
 const { sequelize } = require('../../database/connection');
 const { Department } = require('../../database/models');
 
+const dateOnly = (value) => {
+  if (!value) return null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  const match = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : null;
+};
+
+const todayDateOnly = () => {
+  const now = new Date();
+  return [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+  ].join('-');
+};
+
+/**
+ * A manually registered training is evidence of an event on its stated date:
+ * today/past records are completed, while future records remain scheduled.
+ * Explicit workflow states that cannot be inferred from a date are preserved.
+ */
+const statusForTrainingDate = (scheduledDate, requestedStatus) => {
+  const preservedStatuses = [
+    TrainingStatus.DRAFT,
+    TrainingStatus.CANCELLED,
+    TrainingStatus.IN_PROGRESS,
+  ];
+  if (preservedStatuses.includes(requestedStatus)) {
+    return requestedStatus;
+  }
+  const scheduledDateOnly = dateOnly(scheduledDate);
+  if (!scheduledDateOnly) return requestedStatus || TrainingStatus.SCHEDULED;
+  return scheduledDateOnly <= todayDateOnly()
+    ? TrainingStatus.COMPLETED
+    : TrainingStatus.SCHEDULED;
+};
+
 class TrainingService {
   assertRegisteredTrainingIsComplete(data) {
     if (!String(data.title || '').trim()) throw ApiError.badRequest('title is required before a training draft can be registered.');
@@ -29,6 +68,7 @@ class TrainingService {
         if (!department) throw ApiError.badRequest('departmentId must reference an active department.');
       }
       if (!Object.values(TrainingStatus).includes(data.status)) data.status = TrainingStatus.SCHEDULED;
+      data.status = statusForTrainingDate(data.scheduledDate, data.status);
       if (data.status !== TrainingStatus.DRAFT) this.assertRegisteredTrainingIsComplete(data);
       const participants = Number(data.participantCount);
       const durationMinutes = Number(data.durationMinutes);
@@ -95,7 +135,11 @@ class TrainingService {
       ...session.toJSON(),
       ...updateData,
     };
-    const nextStatus = updateData.status ?? session.status;
+    const nextStatus = statusForTrainingDate(
+      mergedData.scheduledDate,
+      updateData.status ?? session.status,
+    );
+    updateData.status = nextStatus;
     if (nextStatus !== TrainingStatus.DRAFT) this.assertRegisteredTrainingIsComplete(mergedData);
     const participants = mergedData.participantCount;
     const durationMinutes = mergedData.durationMinutes;
@@ -163,3 +207,4 @@ class TrainingService {
 }
 
 module.exports = new TrainingService();
+module.exports.statusForTrainingDate = statusForTrainingDate;

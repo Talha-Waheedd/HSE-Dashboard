@@ -483,10 +483,9 @@ export const moduleService = {
         participantCount: participants,
         durationMinutes,
         manhours: Number(payload.manhours) || (participants && durationMinutes ? participants * durationMinutes / 60 : undefined),
-        // Use the form's status value; default to 'scheduled' (not 'completed')
-        // because most manually-entered training sessions are upcoming/planned,
-        // not already completed. The user can explicitly set Closed if done.
-        status: statusToApi(payload.status_id ?? payload.status ?? 'Pending', schemaId),
+        // Draft is explicit. Registered records are classified by scheduledDate
+        // in the backend: today/past = completed, future = scheduled.
+        status: isDraft ? 'draft' : statusToApi(payload.status_id ?? payload.status, schemaId),
       };
       // Manhours are server-derived from participantCount and durationMinutes.
       delete payload.manhours;

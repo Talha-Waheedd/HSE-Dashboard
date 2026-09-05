@@ -51,8 +51,11 @@ export const AuditLogs = () => {
           status: status || undefined,
           year: year || undefined,
           planId: planId || undefined,
-          sortBy: 'scheduledDate',
-          sortOrder: 'asc',
+          // Newly saved manual audits must be visible immediately. Sorting by
+          // the audit date ascending buried them behind hundreds of old plan
+          // occurrences and made a successful save look unsuccessful.
+          sortBy: 'createdAt',
+          sortOrder: 'desc',
         });
         if (id !== requestId.current) return;
         setRows(response.data);

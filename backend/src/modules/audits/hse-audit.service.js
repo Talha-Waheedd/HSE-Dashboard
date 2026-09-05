@@ -192,7 +192,9 @@ class HseAuditService {
    */
   async deleteAudit(id) {
     await this.getAuditById(id);
-    return auditRepository.deleteById(id);
+    const result = await auditRepository.deleteById(id);
+    await syncBestEffort('audit', id);
+    return result;
   }
 }
 
