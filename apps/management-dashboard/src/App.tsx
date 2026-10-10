@@ -81,10 +81,21 @@ const LoginPage = () => {
   );
 };
 
+
+const ProtectedRouteWithFilters = ({ children, fallback }: any) => {
+  return (
+    <ProtectedRoute fallback={fallback}>
+      <FilterProvider>
+        {children}
+      </FilterProvider>
+    </ProtectedRoute>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider>
-      <FilterProvider>
+      
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           
@@ -92,36 +103,36 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute fallback={<Navigate to="/login" />}>
+              <ProtectedRouteWithFilters fallback={<Navigate to="/login" />}>
                 <Dashboard />
-              </ProtectedRoute>
+              </ProtectedRouteWithFilters>
             }
           />
 
           {/* New Sidebar Routes */}
-          <Route path="/analytics" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Analytics /></ProtectedRoute>} />
-          <Route path="/leading-lagging-indicators" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingLaggingIndicators /></ProtectedRoute>} />
-          <Route path="/leading-indicators/hazard-closing" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="hazard-closing" /></ProtectedRoute>} />
-          <Route path="/leading-indicators/incident-investigation" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="incident-investigation" /></ProtectedRoute>} />
-          <Route path="/leading-indicators/incident-investigation/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><IncidentInvestigationDetails /></ProtectedRoute>} />
-          <Route path="/leading-indicators/emergency-drills" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="emergency-drills" /></ProtectedRoute>} />
-          <Route path="/leading-indicators/action-plan-closure" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="action-plan-closure" /></ProtectedRoute>} />
-          <Route path="/leading-indicators/legal-compliance" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Analytics focus="legal-compliance" /></ProtectedRoute>} />
-          <Route path="/lagging-indicators/fire" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="fire" /></ProtectedRoute>} />
-          <Route path="/lagging-indicators/ltir" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="ltir" /></ProtectedRoute>} />
-          <Route path="/lagging-indicators/trir" element={<ProtectedRoute fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="trir" /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Settings /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Reports /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute fallback={<Navigate to="/login" />}><Profile /></ProtectedRoute>} />
-          <Route path="/master-management" element={<ProtectedRoute fallback={<Navigate to="/login" />}><MasterManagement /></ProtectedRoute>} />
-          <Route path="/master-analysis" element={<ProtectedRoute fallback={<Navigate to="/login" />}><MasterAnalysisDashboard /></ProtectedRoute>} />
-          <Route path="/master-analysis/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><MasterAnalysisDetail /></ProtectedRoute>} />
-          <Route path="/incident-log/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><IncidentDetails /></ProtectedRoute>} />
-          <Route path="/audit-management" element={<ProtectedRoute fallback={<Navigate to="/login" />}><AuditLogs /></ProtectedRoute>} />
-          <Route path="/audit-management/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><AuditLogDetails /></ProtectedRoute>} />
-          <Route path="/critical-audit-plan" element={<ProtectedRoute fallback={<Navigate to="/login" />}><CriticalAuditPlan /></ProtectedRoute>} />
-          <Route path="/action-tracker" element={<ProtectedRoute fallback={<Navigate to="/login" />}><CapaActions /></ProtectedRoute>} />
-          <Route path="/action-tracker/:id" element={<ProtectedRoute fallback={<Navigate to="/login" />}><CapaActionDetails /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><Analytics /></ProtectedRouteWithFilters>} />
+          <Route path="/leading-lagging-indicators" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><LeadingLaggingIndicators /></ProtectedRouteWithFilters>} />
+          <Route path="/leading-indicators/hazard-closing" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="hazard-closing" /></ProtectedRouteWithFilters>} />
+          <Route path="/leading-indicators/incident-investigation" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="incident-investigation" /></ProtectedRouteWithFilters>} />
+          <Route path="/leading-indicators/incident-investigation/:id" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><IncidentInvestigationDetails /></ProtectedRouteWithFilters>} />
+          <Route path="/leading-indicators/emergency-drills" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="emergency-drills" /></ProtectedRouteWithFilters>} />
+          <Route path="/leading-indicators/action-plan-closure" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><LeadingIndicatorDetails kind="action-plan-closure" /></ProtectedRouteWithFilters>} />
+          <Route path="/leading-indicators/legal-compliance" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><Analytics focus="legal-compliance" /></ProtectedRouteWithFilters>} />
+          <Route path="/lagging-indicators/fire" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="fire" /></ProtectedRouteWithFilters>} />
+          <Route path="/lagging-indicators/ltir" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="ltir" /></ProtectedRouteWithFilters>} />
+          <Route path="/lagging-indicators/trir" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><LaggingIndicatorDetails kind="trir" /></ProtectedRouteWithFilters>} />
+          <Route path="/settings" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><Settings /></ProtectedRouteWithFilters>} />
+          <Route path="/reports" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><Reports /></ProtectedRouteWithFilters>} />
+          <Route path="/profile" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><Profile /></ProtectedRouteWithFilters>} />
+          <Route path="/master-management" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><MasterManagement /></ProtectedRouteWithFilters>} />
+          <Route path="/master-analysis" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><MasterAnalysisDashboard /></ProtectedRouteWithFilters>} />
+          <Route path="/master-analysis/:id" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><MasterAnalysisDetail /></ProtectedRouteWithFilters>} />
+          <Route path="/incident-log/:id" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><IncidentDetails /></ProtectedRouteWithFilters>} />
+          <Route path="/audit-management" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><AuditLogs /></ProtectedRouteWithFilters>} />
+          <Route path="/audit-management/:id" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><AuditLogDetails /></ProtectedRouteWithFilters>} />
+          <Route path="/critical-audit-plan" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><CriticalAuditPlan /></ProtectedRouteWithFilters>} />
+          <Route path="/action-tracker" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><CapaActions /></ProtectedRouteWithFilters>} />
+          <Route path="/action-tracker/:id" element={<ProtectedRouteWithFilters fallback={<Navigate to="/login" />}><CapaActionDetails /></ProtectedRouteWithFilters>} />
 
           {/* Dynamic Data Entry Sections */}
           {ALL_SECTIONS.map(section => (
@@ -129,9 +140,9 @@ function App() {
               key={section.id} 
               path={section.path} 
               element={
-                <ProtectedRoute fallback={<Navigate to="/login" />}>
+                <ProtectedRouteWithFilters fallback={<Navigate to="/login" />}>
                   <DataEntrySection schema={section} />
-                </ProtectedRoute>
+                </ProtectedRouteWithFilters>
               } 
             />
           ))}
@@ -139,7 +150,7 @@ function App() {
         {/* Default route */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-      </FilterProvider>
+      
     </ThemeProvider>
   );
 }

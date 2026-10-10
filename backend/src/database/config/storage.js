@@ -18,8 +18,8 @@ module.exports = {
     bucket: config.aws.s3Bucket,
   },
   maxFileSize: 5 * 1024 * 1024, // Legacy default for non-evidence uploads
-  maxImageFileSize: 10 * 1024 * 1024,
-  maxDocumentFileSize: 10 * 1024 * 1024,
+  maxImageFileSize: 50 * 1024 * 1024,
+  maxDocumentFileSize: 50 * 1024 * 1024,
   allowedMimeTypes: {
     images: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
     evidenceImages: ['image/jpeg', 'image/png'],

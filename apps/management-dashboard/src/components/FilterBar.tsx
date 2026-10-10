@@ -3,7 +3,9 @@ import { Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Filter, 
 import { useFilters } from '../context/FilterContext';
 import { usePermissions } from '@cbl/auth';
 import { departmentLabel, useDepartments } from '../hooks/useDepartments';
-import { INCIDENT_CATEGORIES } from '../config/constants';
+import { INCIDENT_CATEGORIES, HAZARD_CATEGORIES } from '../config/constants';
+import { Search } from 'lucide-react';
+
 
 interface FilterBarProps {
   showDepartment?: boolean;
@@ -13,6 +15,7 @@ interface FilterBarProps {
   showDateRange?: boolean;
   className?: string;
   variant?: 'default' | 'incident' | 'hazard' | 'near-miss';
+  showSearch?: boolean;
 }
 
 const selectClass =
@@ -36,6 +39,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   showDateRange = true,
   className = '',
   variant = 'default',
+  showSearch = true,
 }) => {
   const { filters, setFilter } = useFilters();
   const { isDepartmentRestricted } = usePermissions();
@@ -57,6 +61,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     (isHazard || isNearMiss
       ? (filters.month !== '' && filters.month !== 'All') ||
         (isHazard && filters.riskRating !== '' && filters.riskRating !== 'All') ||
+        (isHazard && filters.hazardCategory !== '' && filters.hazardCategory !== 'All') ||
         (filters.status !== '' && filters.status !== 'All')
       : showMonthInsteadOfStatus
       ? filters.month !== '' && filters.month !== 'All'
@@ -64,6 +69,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     (filters.year !== '' && filters.year !== 'All') ||
     (isIncident && filters.month !== '' && filters.month !== 'All') ||
     (isIncident && filters.incidentCategory !== '' && filters.incidentCategory !== 'All') ||
+    (filters.search !== '' && filters.search !== undefined) ||
     filters.fromDate !== '' ||
     filters.toDate !== '';
 
@@ -73,9 +79,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     setFilter('status', 'All');
     setFilter('month', 'All');
     setFilter('incidentCategory', 'All');
+    setFilter('hazardCategory', 'All');
     setFilter('year', 'All');
     setFilter('fromDate', '');
     setFilter('toDate', '');
+    setFilter('search', '');
   };
 
   if (isIncident) {
@@ -213,6 +221,18 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <option value="All">All Years</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
         </select>
       )}
+      {showSearch && (
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF]" />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={filters.search}
+            onChange={e => setFilter('search', e.target.value)}
+            className="h-8 w-48 rounded-md border border-[#E0E0E0] bg-white pl-8 pr-2 text-[12px] text-[#1C1C1E] focus:border-[#7B1010] focus:outline-none focus:ring-1 focus:ring-[#7B1010]/20"
+          />
+        </div>
+      )}
       {(isHazard || isNearMiss) && (
         <select aria-label="Month" value={filters.month} onChange={e => setFilter('month', e.target.value)} className={selectClass}>
           <option value="All">All Months</option>
@@ -222,6 +242,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       {showDepartment && (
         <select aria-label="Department" value={filters.department} onChange={e => setFilter('department', e.target.value)} disabled={isRestricted} className={`${selectClass} ${isRestricted ? 'opacity-60 cursor-not-allowed' : ''}`}>
           <option value="All">All Departments</option>{departments.map(department => <option key={department.id} value={departmentLabel(department)}>{departmentLabel(department)}</option>)}
+        </select>
+      )}
+      {isHazard && (
+        <select aria-label="Hazard Category" value={filters.hazardCategory} onChange={e => setFilter('hazardCategory', e.target.value)} className={selectClass}>
+          <option value="All">All Categories</option>
+          {HAZARD_CATEGORIES.map(category => <option key={category} value={category}>{category}</option>)}
         </select>
       )}
       {isHazard && (

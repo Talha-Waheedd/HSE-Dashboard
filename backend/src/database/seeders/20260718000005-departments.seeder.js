@@ -59,9 +59,29 @@ module.exports = {
         created_at: new Date(),
         updated_at: new Date(),
       },
+      {
+        id: uuidv4(),
+        plant_id: plantId,
+        name: 'Other Department',
+        code: 'DEPT-OTHER',
+        is_active: true,
+        created_by: adminId,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        id: uuidv4(),
+        plant_id: plantId,
+        name: 'Other',
+        code: 'DEPT-OTHER2',
+        is_active: true,
+        created_by: adminId,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }
     ];
 
-    await queryInterface.bulkInsert('departments', departments, {});
+    await queryInterface.bulkInsert('departments', departments, { ignoreDuplicates: true });
   },
 
   async down(queryInterface, Sequelize) {

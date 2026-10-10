@@ -21,7 +21,7 @@ const locations = [
   'Line-8C Creaming', 'Line-8C Cooling Tunnel', 'Line-10A Creaming', 'Line-10A Cooling Tunnel', 'Line-10B Creaming',
   'Line-10B Cooling Tunnel', 'Line-8 Multiplexer', 'Line-10 Multiplexer', 'Chocolate Plant', 'Chemical Room Ground Floor',
   'Chemical Room First Floor', 'Chemical Room L-11', 'RMS Line-11', 'Pessenger Lift Admin Block', 'Pessenger Lift Prince Club House',
-  'Pessenger Lift 3 Bed Appartment', 'Export Room', 'QR Printer Workshop', 'Date/Time Printer Workshop'
+  'Pessenger Lift 3 Bed Appartment', 'Export Room', 'QR Printer Workshop', 'Date/Time Printer Workshop', 'Other', 'Other Department'
 ];
 
 /** @type {import('sequelize-cli').Migration} */

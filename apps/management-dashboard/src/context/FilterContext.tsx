@@ -9,6 +9,8 @@ export interface Filters {
   status: string;
   month: string;
   incidentCategory: string;
+  hazardCategory: string;
+  search: string;
   fromDate: string;
   toDate: string;
 }
@@ -29,6 +31,8 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
     status: 'All',
     month: 'All',
     incidentCategory: 'All',
+    hazardCategory: 'All',
+    search: '',
     fromDate: '',
     toDate: '',
   });

@@ -426,7 +426,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const { data: entries, loading, fetchAll, createRecord, updateRecord, deleteRecord, pagination } = useModuleData(schema.id);
   const { user } = useAuth();
   const permissions = usePermissions();
-  const { filters } = useFilters();
+  const { filters, setFilter } = useFilters();
   const { lookupEmployee, error: employeeError, setError: setEmployeeError } = useEmployeeLookup();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -446,7 +446,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [attachmentWarning, setAttachmentWarning] = useState<string | null>(null);
   const [statusHistoryModal, setStatusHistoryModal] = useState<{ isOpen: boolean; record: any | null }>({ isOpen: false, record: null });
-  const [searchQuery, setSearchQuery] = useState('');
+  
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [density, setDensity] = useState<'comfortable' | 'compact' | 'spacious'>('comfortable');
@@ -611,17 +611,17 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     ...listFilters,
     page: currentPage,
     limit: PAGE_SIZE,
-    search: searchQuery || undefined,
+    search: filters.search || undefined,
     sortBy: sortConfig?.key || 'createdAt',
     sortOrder: sortConfig?.direction || 'desc',
     ...(schema.id === 'incident-log' && routeCategory ? { incidentCategory: routeCategory } : {}),
-  }), [listFilters, currentPage, searchQuery, sortConfig, schema.id, routeCategory]);
+  }), [listFilters, currentPage, filters.search, sortConfig, schema.id, routeCategory]);
   const listFilterKey = useMemo(() => JSON.stringify({
     schemaId: schema.id,
     filters: listFilters,
-    searchQuery,
+    search: filters.search,
     routeCategory,
-  }), [schema.id, listFilters, searchQuery, routeCategory]);
+  }), [schema.id, listFilters, filters.search, routeCategory]);
   const summaryQuery = useMemo(() => {
     if (!['hazard-reporting', 'training-records'].includes(schema.id)) return null;
     const { page: _page, limit: _limit, sortBy: _sortBy, sortOrder: _sortOrder, ...filtersOnly } = listQuery;
@@ -666,7 +666,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
   }, [fetchAll, listQuery, schema.id, summaryQuery]);
   useEffect(() => { setCurrentPage(1); }, [listFilterKey]);
   useEffect(() => {
-    if (schema.id === 'incident-log' && routeCategory) setSearchQuery('');
+    if (schema.id === 'incident-log' && routeCategory) setFilter('search', '');
   }, [schema.id, routeCategory]);
   useEffect(() => {
     if (!['hazard-reporting', 'incident-log', 'accident-reporting', 'near-miss'].includes(schema.id) || !isAddModalOpen || editingId || !Object.keys(formData).length) return;
@@ -1121,10 +1121,10 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
 
   const searchedEntries = useMemo(() => {
     if (['hazard-reporting', 'near-miss', 'incident-log'].includes(schema.id)) return filteredEntries;
-    if (!searchQuery.trim()) return filteredEntries;
-    const q = searchQuery.toLowerCase();
+    if (!filters.search.trim()) return filteredEntries;
+    const q = filters.search.toLowerCase();
     return filteredEntries.filter(entry => JSON.stringify(entry).toLowerCase().includes(q));
-  }, [filteredEntries, searchQuery, schema.id]);
+  }, [filteredEntries, filters.search, schema.id]);
 
   const sortedEntries = useMemo(() => {
     if (['hazard-reporting', 'near-miss', 'incident-log'].includes(schema.id)) return searchedEntries;
@@ -1259,7 +1259,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     try {
       const blob = await moduleService.export(schema.id, {
         ...listFilters,
-        search: searchQuery || undefined,
+        search: filters.search || undefined,
         sortBy: sortConfig?.key || 'createdAt',
         sortOrder: sortConfig?.direction || 'desc',
       });
@@ -1455,11 +1455,15 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
           : [normalizedValue];
         const rawHistoricalId = historicalCandidates.find(candidate => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate)) || '';
         const selectedDepartment = trainingDepartments.find(department =>
-          department.id === normalizedValue ||
-          String(department.name || '').trim().toLowerCase() === normalizedValue.toLowerCase() ||
-          String(department.code || '').trim().toLowerCase() === normalizedValue.toLowerCase() ||
-          (isEdit && String(department.name || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase()) ||
-          (isEdit && String(department.code || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase()),
+          (normalizedValue && (
+            department.id === normalizedValue ||
+            String(department.name || '').trim().toLowerCase() === normalizedValue.toLowerCase() ||
+            String(department.code || '').trim().toLowerCase() === normalizedValue.toLowerCase()
+          )) ||
+          (isEdit && legacyDisplayValue && (
+            String(department.name || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase() ||
+            String(department.code || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase()
+          ))
         );
         const isEmployeeReportingDepartment = ['hazard-reporting', 'near-miss'].includes(schema.id) && col.key === 'department_id';
         const currentEmployeeId = String(source.emp_id ?? '').trim();
@@ -2311,8 +2315,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         title={schema.title}
         breadcrumbs={[schema.title]}
         subtitle={schema.id === 'training-records'
-          ? `${trainingSummary.totalRecords.toLocaleString()} registered trainings${trainingSummary.draftRecords ? ` • ${trainingSummary.draftRecords.toLocaleString()} draft${trainingSummary.draftRecords === 1 ? '' : 's'}` : ''}${searchQuery ? ` filtered by "${searchQuery}"` : ''}`
-          : `${pagination.totalRecords.toLocaleString()} records${searchQuery ? ` filtered by "${searchQuery}"` : ''}`}
+          ? `${trainingSummary.totalRecords.toLocaleString()} registered trainings${trainingSummary.draftRecords ? ` • ${trainingSummary.draftRecords.toLocaleString()} draft${trainingSummary.draftRecords === 1 ? '' : 's'}` : ''}${filters.search ? ` filtered by "${filters.search}"` : ''}`
+          : `${pagination.totalRecords.toLocaleString()} records${filters.search ? ` filtered by "${filters.search}"` : ''}`}
         actions={[
           ...(canExportCSV() ? [{
             label: 'Export CSV',
@@ -2402,8 +2406,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               <input
                 type="search"
                 placeholder={`Search ${schema.title.toLowerCase()}...`}
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                value={filters.search}
+                onChange={e => setFilter('search', e.target.value)}
                 className="w-full h-9 pl-9 pr-3 text-[13px] border border-[#DEDEDE] rounded-md bg-white focus:outline-none focus:border-[#CB0017] focus:ring-2 focus:ring-[#CB0017]/15"
               />
             </div>
@@ -2448,9 +2452,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                     <td colSpan={visibleColumns.length + 3}>
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <FileText className="h-12 w-12 mb-3 text-[#E0E0E0]" />
-                        <p className="text-[14px] font-semibold text-[#374151]">{searchQuery ? 'No matching records' : 'No records found'}</p>
+                        <p className="text-[14px] font-semibold text-[#374151]">{filters.search ? 'No matching records' : 'No records found'}</p>
                         <p className="text-[12px] text-[#9CA3AF] mt-1">
-                          {searchQuery ? `No results for "${searchQuery}".` : 'No records match the active filters.'}
+                          {filters.search ? `No results for "${filters.search}".` : 'No records match the active filters.'}
                         </p>
                       </div>
                     </td>
@@ -2682,8 +2686,8 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
               <input
                 type="search"
                 placeholder={schema.id === 'accident-reporting' ? 'Search accidents...' : 'Search incidents...'}
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                value={filters.search}
+                onChange={e => setFilter('search', e.target.value)}
                 className="w-full h-9 pl-9 pr-3 text-[13px] border border-[#DEDEDE] rounded-md bg-white focus:outline-none focus:border-[#CB0017] focus:ring-2 focus:ring-[#CB0017]/15"
               />
             </div>
@@ -2723,7 +2727,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
                     <td colSpan={11}>
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <FileText className="mb-3 h-12 w-12 text-[#E0E0E0]" />
-                        <p className="text-[14px] font-semibold text-[#374151]">{searchQuery ? `No matching ${schema.id === 'accident-reporting' ? 'accidents' : 'incidents'}` : `No ${schema.id === 'accident-reporting' ? 'accident' : 'incident'} records found`}</p>
+                        <p className="text-[14px] font-semibold text-[#374151]">{filters.search ? `No matching ${schema.id === 'accident-reporting' ? 'accidents' : 'incidents'}` : `No ${schema.id === 'accident-reporting' ? 'accident' : 'incident'} records found`}</p>
                         <p className="mt-1 text-[12px] text-[#9CA3AF]">Try changing the search or active filters.</p>
                       </div>
                     </td>

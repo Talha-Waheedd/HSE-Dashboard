@@ -45,7 +45,7 @@ module.exports = {
       },
     ];
 
-    await queryInterface.bulkInsert('plants', plants, {});
+    await queryInterface.bulkInsert('plants', plants, { ignoreDuplicates: true });
   },
 
   async down(queryInterface, Sequelize) {
