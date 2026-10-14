@@ -799,9 +799,9 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
     previousEmployeeInput.current = { form: formKey, employeeId: currentEmpId };
     const requestId = ++employeeLookupRequest.current;
 
-    if (!currentEmpId || currentEmpId.length < 3) {
+    if (!currentEmpId || currentEmpId.trim() === '') {
       // A new form must never retain a department from a previous employee or
-      // an autosaved form while the EMP ID is empty/partial. Existing records
+      // an autosaved form while the EMP ID is empty. Existing records
       // are allowed to keep their saved values until the user changes EMP ID.
       if (!editingId || employeeChanged) clearEmployeeFields();
       setEmployeeError(null);
@@ -823,7 +823,7 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
         const employeeDepartmentId = employee.departmentId || employee.department?.id || employee.department_id || '';
 
         if (map.name) next[map.name] = employeeName;
-        if (['hazard-reporting', 'near-miss', 'incident-log', 'accident-reporting'].includes(schema.id)) next.department_id = employeeDepartmentId;
+        if (schema.columns.some(column => column.key === 'department_id') && employeeDepartmentId) next.department_id = employeeDepartmentId;
         if (schema.columns.some(column => column.key === 'gender') && employee.gender) next.gender = employee.gender;
         if (schema.columns.some(column => column.key === 'designation')) next.designation = employee.designation || '';
 
@@ -1465,13 +1465,13 @@ export const DataEntrySection: React.FC<DataEntrySectionProps> = ({ schema }) =>
             String(department.code || '').trim().toLowerCase() === legacyDisplayValue.toLowerCase()
           ))
         );
-        const isEmployeeReportingDepartment = ['hazard-reporting', 'near-miss'].includes(schema.id) && col.key === 'department_id';
+        const isEmployeeReportingDepartment = col.key === 'department_id';
         const currentEmployeeId = String(source.emp_id ?? '').trim();
         const storesDepartmentId = col.key.endsWith('_id');
         const matchedValue = storesDepartmentId
           ? selectedDepartment?.id
           : selectedDepartment ? (selectedDepartment.code || selectedDepartment.name) : '';
-        const selectedValue = isEmployeeReportingDepartment && currentEmployeeId.length < 3
+        const selectedValue = isEmployeeReportingDepartment && !currentEmployeeId
           ? ''
           : matchedValue || (isEdit && (rawHistoricalId || legacyDisplayValue) ? (rawHistoricalId || legacyDisplayValue) : '');
         const hasLegacyOption = isEdit && Boolean(legacyDisplayValue || rawHistoricalId) && !selectedDepartment;
